@@ -49,11 +49,10 @@ public class GitHubPRCommentPublisher extends GitHubPRAbstractPublisher {
         // Only post the build's custom message if it has been set.
         if (message != null && !message.isEmpty()) {
             try {
-                populate(build, launcher, listener);
-                getGhPullRequest().comment(message);
+                getGhPullRequest(build).comment(message);
             } catch (IOException ex) {
                 LOGGER.log(Level.SEVERE, "Couldn't add comment to pull request #"
-                        + getNumber() + ": '" + message + "'", ex);
+                        + getNumber(build) + ": '" + message + "'", ex);
                 handlePublisherError(build);
             }
             listener.getLogger().println(message);

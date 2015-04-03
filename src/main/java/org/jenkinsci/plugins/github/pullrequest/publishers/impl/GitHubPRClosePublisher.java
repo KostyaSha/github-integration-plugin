@@ -40,12 +40,11 @@ public class GitHubPRClosePublisher extends GitHubPRAbstractPublisher {
         String publishedURL = getTriggerDescriptor().getPublishedURL();
         if (publishedURL != null && !publishedURL.isEmpty()) {
             try {
-                populate(build, launcher, listener);
-                if (getGhIssue().getState().equals(GHIssueState.OPEN)) {
+                if (getGhIssue(build).getState().equals(GHIssueState.OPEN)) {
                     try {
-                        getGhPullRequest().close();
+                        getGhPullRequest(build).close();
                     } catch (IOException ex) {
-                        LOGGER.log(Level.SEVERE, "Couldn't close the pull request #" + getNumber() + ": '", ex);
+                        LOGGER.log(Level.SEVERE, "Couldn't close the pull request #" + getNumber(build) + ": '", ex);
                     }
                 }
             } catch (IOException ex) {
