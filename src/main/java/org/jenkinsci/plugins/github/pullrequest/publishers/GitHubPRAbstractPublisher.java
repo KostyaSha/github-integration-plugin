@@ -72,21 +72,40 @@ public abstract class GitHubPRAbstractPublisher extends Recorder {
         return errorHandler;
     }
 
-    public void populate(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener) throws InterruptedException, IOException {
+    protected void handlePublisherError(AbstractBuild<?, ?> build) {
+        if (errorHandler != null) {
+            errorHandler.markBuildAfterError(build);
+        }
+    }
+
+    public GHRepository getGhRepository(final AbstractBuild<?, ?> build) throws IOException {
+        if (ghRepository == null) {
+            ghRepository = build.getProject().getTrigger(GitHubPRTrigger.class).getRemoteRepo();
+        }
+        return ghRepository;
+    }
+
+    public int getNumber(final AbstractBuild<?, ?> build) throws AbortException {
         GitHubPRCause cause = build.getCause(GitHubPRCause.class);
         if (cause == null) {
             throw new AbortException("Can't get cause from build");
         }
         number = cause.getNumber();
-        ghRepository = build.getProject().getTrigger(GitHubPRTrigger.class).getRemoteRepo();
-        ghIssue = ghRepository.getIssue(number);
-        ghPullRequest = ghRepository.getPullRequest(number);
+        return number;
     }
 
-    protected void handlePublisherError(AbstractBuild<?, ?> build) {
-        if (errorHandler != null) {
-            errorHandler.markBuildAfterError(build);
+    public GHIssue getGhIssue(final AbstractBuild<?, ?> build) throws IOException {
+        if (ghIssue == null) {
+            ghIssue = getGhRepository(build).getIssue(getNumber(build));
         }
+        return ghIssue;
+    }
+
+    public GHIssue getGhPullRequest(final AbstractBuild<?, ?> build) throws IOException {
+        if (ghPullRequest == null) {
+            ghPullRequest = getGhRepository(build).getPullRequest(getNumber(build));
+        }
+        return ghPullRequest;
     }
 
     public static void addComment(final int id, final String comment, final AbstractBuild<?, ?> build, final TaskListener listener) {

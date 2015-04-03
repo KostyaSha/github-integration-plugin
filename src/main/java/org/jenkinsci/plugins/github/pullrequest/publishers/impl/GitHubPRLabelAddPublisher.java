@@ -41,15 +41,14 @@ public class GitHubPRLabelAddPublisher extends GitHubPRAbstractPublisher {
             return true;
         }
         try {
-            populate(build, launcher, listener);
             HashSet<String> remoteLabels = new HashSet<String>();
-            for (GHLabel label : getGhIssue().getLabels()) { //remote labels List -> Set
+            for (GHLabel label : getGhIssue(build).getLabels()) { //remote labels List -> Set
                 remoteLabels.add(label.getName());
             }
             remoteLabels.addAll(getLabelProperty().getLabelsSet());
-            getGhIssue().setLabels(remoteLabels.toArray(new String[remoteLabels.size()]));
+            getGhIssue(build).setLabels(remoteLabels.toArray(new String[remoteLabels.size()]));
         } catch (IOException ex) {
-            listener.getLogger().println("Couldn't add label for PR #" + getNumber() + " " + ex.getMessage());
+            listener.getLogger().println("Couldn't add label for PR #" + getNumber(build) + " " + ex.getMessage());
             LOGGER.log(Level.SEVERE, "Couldn't add label for PR #" + getNumber(), ex);
             handlePublisherError(build);
         }
