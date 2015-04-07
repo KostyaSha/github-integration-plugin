@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
+import hudson.Functions;
 import org.kohsuke.github.*;
 
 import javax.annotation.CheckForNull;
@@ -155,6 +156,10 @@ public class GitHubPRPullRequest {
         for (GHLabel label : labels) {
             this.labels.add(label.getName());
         }
+    }
+
+    public String getIconFileName() {
+        return Functions.getResourcePath() + "/plugin/github-pullrequest/git-pull-request.svg";
     }
 
     @Override

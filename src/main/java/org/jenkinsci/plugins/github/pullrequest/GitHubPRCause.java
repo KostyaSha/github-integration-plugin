@@ -92,8 +92,7 @@ public class GitHubPRCause extends Cause {
 
     @Override
     public String getShortDescription() {
-        return "GitHub PR #" + number + " of commit " + headSha +
-                (mergeable ? " automatically mergeable." : "") + "(" + reason + ")";
+        return "GitHub PR #<a href=\"" + htmlUrl + "\">" + number + "</a>, " + reason;
     }
 
     public String getHeadSha() {

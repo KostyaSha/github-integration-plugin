@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository
 
 import jenkins.model.Jenkins
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause
 
 def f = namespace(lib.FormTagLib);
 def l = namespace(lib.LayoutTagLib);
@@ -14,7 +15,8 @@ def makeBuildItem(def builds) {
         a(href: rootUrl + build.url + "console/") {
             img(src: rootUrl + "/images/16x16/" + build.buildStatusUrl)
         }
-        a(href: rootUrl + build.url, build.displayName)
+        a(href: rootUrl + build.url, build.displayName, title:build.getCause(GitHubPRCause.class).reason)
+        text(" ")
     }
     br()
     br()
@@ -37,6 +39,5 @@ l.layout(title: "GitHub Pull Requests statuses") {
                 }
             }
         }
-
     }
 }

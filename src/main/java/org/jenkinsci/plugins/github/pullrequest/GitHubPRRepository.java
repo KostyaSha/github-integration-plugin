@@ -106,7 +106,7 @@ public class GitHubPRRepository implements Action, Saveable {
     }
 
     public String getIconFileName() {
-        return Functions.getResourcePath() + "/plugin/github-pullrequest/git-pull-request.png";
+        return Functions.getResourcePath() + "/plugin/github-pullrequest/git-pull-request.svg";
     }
 
     public String getDisplayName() {
