@@ -117,7 +117,7 @@ public class GitHubPRRepository implements Action, Saveable {
         return "github-pullrequest";
     }
 
-    public void save() throws IOException {
+    public synchronized void save() throws IOException {
 //        Caused double trigger
 //        if (BulkChange.contains(this)) {
 //            return;
