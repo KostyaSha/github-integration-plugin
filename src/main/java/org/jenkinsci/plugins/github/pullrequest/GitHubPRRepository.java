@@ -118,9 +118,10 @@ public class GitHubPRRepository implements Action, Saveable {
     }
 
     public void save() throws IOException {
-        if (BulkChange.contains(this)) {
-            return;
-        }
+//        Caused double trigger
+//        if (BulkChange.contains(this)) {
+//            return;
+//        }
 
         configFile.write(this);
         SaveableListener.fireOnChange(this, configFile);
