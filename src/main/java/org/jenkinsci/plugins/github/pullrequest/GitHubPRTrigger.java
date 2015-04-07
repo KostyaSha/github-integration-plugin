@@ -296,7 +296,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             }
 
             if (skipFirstRun) {
-                LOGGER.log(Level.INFO, "Skipping first run for \"'{0}'\" and PR #'{1}'",
+                LOGGER.log(Level.INFO, "Skipping first run for {0} and PR #{1}",
                         new Object[]{job.getFullName(), remotePR.getNumber()});
                 continue;
             }
@@ -307,7 +307,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             }
 
             if (userRestriction != null && !userRestriction.isWhitelisted(remotePR.getUser())) {
-                LOGGER.log(Level.WARNING, "Skipping user {}", remotePR.getUser());
+                LOGGER.log(Level.WARNING, "Skipping user {0}", remotePR.getUser());
                 continue;
             }
 
@@ -339,6 +339,8 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
                 }
 
                 if (cause != null) {
+                    LOGGER.log(Level.FINE, "Triggering build for {0}, because {1}",
+                            new Object[]{remotePR.getNumber(), cause.getReason()});
                     build(cause);
                     break; // don't check other events
                 }
@@ -346,7 +348,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         }
 
         if (skipFirstRun) {
-            LOGGER.log(Level.INFO, "Skipping first run for \"{0}\"", job.getFullName());
+            LOGGER.log(Level.INFO, "Skipping first run for {0}", job.getFullName());
             skipFirstRun = false;
             trySave(); //TODO or better fail with IOException?
         }
@@ -392,6 +394,8 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             LOGGER.log(Level.SEVERE, "Job didn't start");
         }
 
+        LOGGER.log(Level.INFO, sb.toString());
+
         GitHub connection = getGitHub();    // remote connection
         if (connection != null && preStatus) {
             GHRepository repository = connection.getRepository(repoFullName);
@@ -402,7 +406,6 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
                     job.getFullName());
         }
 
-        LOGGER.log(Level.INFO, sb.toString());
     }
 
     /**
