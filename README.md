@@ -54,10 +54,9 @@ TODO:
 
  - [ ] review injected variables in Cause and String parameters
  - [ ] integrate with git-plugin by providing patch for BuildData get through BuildChooser
- - [ ] test hooks triggering
+ - [ ] implement hooks triggering
  - [ ] help files
  - [ ] tests
- - [ ] split pre-status: to pre (in trigger), Builder and Publisher.
 
 Configuration:
  - Set GitHub project property with link to your GH repository
