@@ -9,8 +9,10 @@ def l = namespace(lib.LayoutTagLib);
 def t = namespace("/lib/hudson")
 def st = namespace("jelly:stapler");
 
-img(src: Jenkins.instance.rootUrl + my.iconFileName, width:"16", height:"16")
-a(href:my.htmlUrl, "#" + my.number + ": " + my.title)
+a(href:my.htmlUrl) {
+    img(src: rootURL + my.iconFileName, width:"16", height:"16")
+    text(" #" + my.number + ": " + my.title)
+}
 
 table(width:"1000px") {
     tr() {

@@ -200,7 +200,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     @Override
     public void run() {
         if (job.isDisabled()) {
-            LOGGER.log(Level.SEVERE, "Job {0} is disabled, but trigger run!", job.getFullName());
+            LOGGER.log(Level.FINE, "Job {0} is disabled, but trigger run!", job.getFullName());
             return;
         }
 

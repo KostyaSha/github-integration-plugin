@@ -1,10 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import hudson.BulkChange;
-import hudson.Functions;
-import hudson.XmlFile;
+import com.coravy.hudson.plugins.github.GithubProjectProperty;
+import hudson.*;
 import hudson.model.*;
 import hudson.model.listeners.SaveableListener;
 import hudson.util.RunList;
@@ -16,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -24,7 +22,7 @@ import java.util.logging.Logger;
  *
  * @author Kanstantsin Shautsou
  */
-public class GitHubPRRepository implements Action, Saveable {
+public class GitHubPRRepository extends AbstractDescribableImpl<GitHubPRRepository> implements Action, Saveable {
     /**
      * Store constantly changing information in project directory with .runtime.xml tail
      */
@@ -34,6 +32,7 @@ public class GitHubPRRepository implements Action, Saveable {
     private transient AbstractProject<?, ?> project;  // for UI
 
     private final String fullName;
+    private final String githubUrl;
 
     private final HashMap<Integer, GitHubPRPullRequest> pulls;
 
@@ -43,9 +42,10 @@ public class GitHubPRRepository implements Action, Saveable {
      * @param fullName repository full name. for case of changed jobs url
      * @param pulls    previous pull request state
      */
-    public GitHubPRRepository(String fullName, HashMap<Integer, GitHubPRPullRequest> pulls) {
+    public GitHubPRRepository(String fullName, String githubUrl, HashMap<Integer, GitHubPRPullRequest> pulls) {
         this.pulls = pulls;
         this.fullName = fullName;
+        this.githubUrl = githubUrl;
     }
 
     public HashMap<Integer, GitHubPRPullRequest> getPulls() {
@@ -60,7 +60,9 @@ public class GitHubPRRepository implements Action, Saveable {
     public Map<Integer, List<AbstractBuild<?, ?>>> getAllPrBuilds() {
 
         Map<Integer, List<AbstractBuild<?, ?>>> map = new HashMap<Integer, List<AbstractBuild<?, ?>>>();
-        RunList<? extends AbstractBuild<?, ?>> builds = project.getBuilds();
+        final RunList<? extends AbstractBuild<?, ?>> builds = project.getBuilds();
+        LOGGER.log(Level.FINE, "Got {0} builds for project {1}", new Object[]{builds.size(), project.getFullName()});
+
         for (AbstractBuild build : builds) {
             GitHubPRCause cause = (GitHubPRCause) build.getCause(GitHubPRCause.class);
             if (cause != null) {
@@ -72,8 +74,8 @@ public class GitHubPRRepository implements Action, Saveable {
                 }
                 buildsByNumber.add(build);
             }
-
         }
+
         return map;
     }
 
@@ -84,16 +86,18 @@ public class GitHubPRRepository implements Action, Saveable {
         GitHubPRTrigger trigger = job.getTrigger(GitHubPRTrigger.class);
         String repoFullName = trigger.getRepoFullName(job);
 
+        GithubProjectProperty property = job.getProperty(GithubProjectProperty.class);
+        String githubUrl = property.getProjectUrl().toString();
         GitHubPRRepository localRepository;
         if (configFile.exists()) {
             GitHubPRRepository rep = (GitHubPRRepository) configFile.read();
             if (rep != null) {
                 localRepository = rep;
             } else { // loaded bad data
-                localRepository = new GitHubPRRepository(repoFullName, new HashMap<Integer, GitHubPRPullRequest>());
+                localRepository = new GitHubPRRepository(repoFullName, githubUrl, new HashMap<Integer, GitHubPRPullRequest>());
             }
         } else {
-            localRepository = new GitHubPRRepository(repoFullName, new HashMap<Integer, GitHubPRPullRequest>());
+            localRepository = new GitHubPRRepository(repoFullName, githubUrl, new HashMap<Integer, GitHubPRPullRequest>());
         }
 
         localRepository.project = job;
@@ -117,6 +121,10 @@ public class GitHubPRRepository implements Action, Saveable {
         return "github-pullrequest";
     }
 
+    public String getGithubUrl() {
+        return githubUrl;
+    }
+
     public synchronized void save() throws IOException {
         if (BulkChange.contains(this)) {
             return;
@@ -124,5 +132,18 @@ public class GitHubPRRepository implements Action, Saveable {
 
         configFile.write(this);
         SaveableListener.fireOnChange(this, configFile);
+    }
+
+    @Override
+    public DescriptorImpl getDescriptor() {
+        return (DescriptorImpl) super.getDescriptor();
+    }
+
+    @Extension
+    public static class DescriptorImpl extends Descriptor<GitHubPRRepository> {
+        @Override
+        public String getDisplayName() {
+            return "GitHub PR local repository";
+        }
     }
 }
