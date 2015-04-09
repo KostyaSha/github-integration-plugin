@@ -4,15 +4,14 @@ import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import hudson.*;
 import hudson.model.*;
 import hudson.model.listeners.SaveableListener;
+import hudson.util.FormValidation;
 import hudson.util.RunList;
-import jenkins.model.Jenkins;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,7 +21,7 @@ import java.util.logging.Logger;
  *
  * @author Kanstantsin Shautsou
  */
-public class GitHubPRRepository extends AbstractDescribableImpl<GitHubPRRepository> implements Action, Saveable {
+public class GitHubPRRepository implements Action, Saveable {
     /**
      * Store constantly changing information in project directory with .runtime.xml tail
      */
@@ -34,7 +33,7 @@ public class GitHubPRRepository extends AbstractDescribableImpl<GitHubPRReposito
     private final String fullName;
     private final String githubUrl;
 
-    private final HashMap<Integer, GitHubPRPullRequest> pulls;
+    private HashMap<Integer, GitHubPRPullRequest> pulls;
 
     /**
      * Object that represent GitHub repository to work with
@@ -134,16 +133,81 @@ public class GitHubPRRepository extends AbstractDescribableImpl<GitHubPRReposito
         SaveableListener.fireOnChange(this, configFile);
     }
 
-    @Override
-    public DescriptorImpl getDescriptor() {
-        return (DescriptorImpl) super.getDescriptor();
+    @RequirePOST
+    public FormValidation doClearRepo() throws IOException {
+        FormValidation result;
+        try {
+            pulls = null;
+            save();
+            result = FormValidation.ok("Pulls deleted");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Can\'t delete repository file '{0}', '{1}'",
+                    new Object[] {configFile.getFile().getAbsolutePath(), e.getMessage()});
+            result = FormValidation.error("Can't delete: " + e.getMessage());
+        }
+        return result;
     }
 
-    @Extension
-    public static class DescriptorImpl extends Descriptor<GitHubPRRepository> {
-        @Override
-        public String getDisplayName() {
-            return "GitHub PR local repository";
+    @RequirePOST
+    public FormValidation doRebuildFailed() throws IOException {
+        FormValidation result;
+        try {
+            Map<Integer, List<AbstractBuild<?, ?>>> builds = getAllPrBuilds();
+            for (List<AbstractBuild<?, ?>> buildList : builds.values()) {
+                if (!buildList.isEmpty() && Result.FAILURE.equals(buildList.get(0).getResult())) {
+                    AbstractBuild<?, ?> lastBuild = buildList.get(0);
+                    rebuild(lastBuild);
+                }
+            }
+            result = FormValidation.ok("Rebuild scheduled");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Can't start rebuild", e.getMessage());
+            result = FormValidation.error("Can't start rebuild: " + e.getMessage());
         }
+        return result;
+    }
+
+    @RequirePOST
+    public FormValidation doRebuild(StaplerRequest req) throws IOException {
+        FormValidation result;
+
+        try {
+            final String prNumberParam = "prNumber";
+            int prId = 0;
+            if (req.hasParameter(prNumberParam)) {
+                prId = Integer.valueOf(req.getParameter(prNumberParam));
+            }
+
+            Map<Integer, List<AbstractBuild<?, ?>>> builds = getAllPrBuilds();
+            List<AbstractBuild<?, ?>> prBuilds = builds.get(prId);
+            if (prBuilds != null && !prBuilds.isEmpty()) {
+                if (rebuild(prBuilds.get(0))) {
+                    result = FormValidation.ok("Rebuild scheduled");
+                } else {
+                    result = FormValidation.warning("Rebuild not scheduled");
+                }
+            } else {
+                result = FormValidation.warning("Build not found");
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Can't start rebuild", e.getMessage());
+            result = FormValidation.error("Can't start rebuild: " + e.getMessage());
+        }
+        return result;
+    }
+
+    private static boolean rebuild(AbstractBuild<?, ?> build) {
+        final List<Action> actions = new ArrayList<Action>();
+//
+//        List<Cause> causeList = new ArrayList<>(build.getCauses());
+//        causeList.add(new Cause.UserIdCause());
+//
+//        actions.add(build.getAction(ParametersAction.class));
+//        actions.add(new CauseAction(causeList));
+
+        actions.add(build.getAction(ParametersAction.class));
+        actions.add(build.getAction(CauseAction.class));
+
+        return build.getProject().scheduleBuild(0, new Cause.UserIdCause(), actions.toArray(new Action[actions.size()]));
     }
 }

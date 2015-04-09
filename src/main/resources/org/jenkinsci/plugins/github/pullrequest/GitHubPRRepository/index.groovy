@@ -1,5 +1,7 @@
+
 package org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository
 
+import hudson.Functions
 import jenkins.model.Jenkins
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause
 
@@ -7,37 +9,67 @@ def f = namespace(lib.FormTagLib);
 def l = namespace(lib.LayoutTagLib);
 def t = namespace("/lib/hudson")
 def st = namespace("jelly:stapler");
-
 def makeBuildItem(def builds) {
     a("Related builds: ")
     for (build in builds) {
-        def rootUrl = Jenkins.instance.rootUrl
-        a(href: rootUrl + build.url + "console/") {
-            img(src: rootUrl + "/images/16x16/" + build.buildStatusUrl)
+        a(href: rootURL + "/" + build.url + "console/") {
+            img(src: rootURL + "/images/16x16/" + build.buildStatusUrl)
         }
-        a(href: rootUrl + build.url, build.displayName, title:build.getCause(GitHubPRCause.class).reason)
+        a(href: rootURL + "/" + build.url, build.displayName, title:build.getCause(GitHubPRCause.class).reason)
         text(" ")
     }
-    br()
-    br()
 }
+
 
 l.layout(title: "GitHub Pull Requests statuses") {
     st.include(page: "sidepanel", it: my.project)
+    script(src:"${rootURL}/${Functions.getResourcePath()}/plugin/github-pullrequest/scripts/featureButton.js")
     l.main_panel() {
         h1("GitHub Pull Requests statuses");
-        p("Repository: " + my.fullName)
+        text("Repository: ")
+        a(href:my.githubUrl, my.fullName)
 
         def buildMap = my.getAllPrBuilds()
         table() {
             for (pr in my.pulls.values()) {
                 tr() {
-                    td() { st.include(page: "index", it: pr) }
+                    td() {
+                        br()
+                        st.include(page: "index", it: pr)
+                    }
                 }
                 tr() {
                     td() { makeBuildItem(buildMap.get(pr.number)) }
                 }
+                tr() {
+                    td() {
+                        def rebuildId = "rebuildResult" + pr.number;
+                        form(method:"post",action:"rebuild",
+                                onsubmit:"callFeature(this, ${rebuildId}, {'prNumber' : ${pr.number} })") {
+                            f.submit(value:_("Rebuild"))
+                            div(id:rebuildId)
+                        }
+                    }
+                }
             }
         }
+        br()
+
+        div(style: "display: inline-block") {
+            def rebuildFailedId = "rebuildFailedResult";
+            form(method: "post", action: "rebuildFailed", onsubmit: "callFeature(this, ${rebuildFailedId})",
+                    style: "float: right; margin-right: 100px") {
+                f.submit(value: _("Rebuild all failed builds"))
+                div(id: rebuildFailedId)
+            }
+
+            def clearRepoId = "clearRepoResult";
+            form(method: "post", action: "clearRepo", onsubmit: "callFeature(this, ${clearRepoId})",
+                    style: "float: left") {
+                f.submit(value: _("Remove all repo data"))
+                div(id: clearRepoId)
+            }
+        }
+        br()
     }
 }
