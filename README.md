@@ -8,8 +8,8 @@ Description:
 - By design it extensible and new features can be added easily
 - Restriction features are not bundled into main code and can be extended separately. Available as API for doing checks from other plugin parts
 - Trigger events are splitted to separate classes and can do:
-  - label: added, removed, exists
-  - PR states: closed, opened
+  - Label: added, removed, exists
+  - PR states: closed, opened, commit changed
   - Comment triggering
 - UI/configuration changes:
   - No tones of checkboxes
