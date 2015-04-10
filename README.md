@@ -53,7 +53,8 @@ Can supersede?
 TODO:
 
  - [ ] review injected variables in Cause and String parameters
- - [ ] integrate with git-plugin by providing patch for BuildData get through BuildChooser
+ - [ ] integrate with git-plugin by providing patch for BuildData get through BuildChooser?
+ - [ ] introduce enum/class for triggering modes
  - [ ] implement hooks triggering
  - [ ] help files
  - [ ] tests
