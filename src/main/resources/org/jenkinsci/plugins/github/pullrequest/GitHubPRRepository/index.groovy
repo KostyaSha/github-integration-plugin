@@ -1,8 +1,7 @@
 
 package org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository
 
-import hudson.Functions
-import jenkins.model.Jenkins
+import hudson.model.Item
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause
 
 def f = namespace(lib.FormTagLib);
@@ -23,7 +22,7 @@ def makeBuildItem(def builds) {
 
 l.layout(title: "GitHub Pull Requests statuses") {
     st.include(page: "sidepanel", it: my.project)
-    script(src:"${rootURL}/${Functions.getResourcePath()}/plugin/github-pullrequest/scripts/featureButton.js")
+    script(src:"${rootURL}${h.getResourcePath()}/plugin/github-pullrequest/scripts/featureButton.js")
     l.main_panel() {
         h1("GitHub Pull Requests statuses");
         text("Repository: ")
@@ -41,13 +40,15 @@ l.layout(title: "GitHub Pull Requests statuses") {
                 tr() {
                     td() { makeBuildItem(buildMap.get(pr.number)) }
                 }
-                tr() {
-                    td() {
-                        def rebuildId = "rebuildResult" + pr.number;
-                        form(method:"post",action:"rebuild",
-                                onsubmit:"callFeature(this, ${rebuildId}, {'prNumber' : ${pr.number} })") {
-                            f.submit(value:_("Rebuild"))
-                            div(id:rebuildId)
+                if (h.hasPermission(Item.BUILD)) {
+                    tr() {
+                        td() {
+                            def rebuildId = "rebuildResult" + pr.number;
+                            form(method: "post", action: "rebuild",
+                                    onsubmit: "callFeature(this, ${rebuildId}, {'prNumber' : ${pr.number} })") {
+                                f.submit(value: _("Rebuild"))
+                                div(id: rebuildId)
+                            }
                         }
                     }
                 }
@@ -56,18 +57,22 @@ l.layout(title: "GitHub Pull Requests statuses") {
         br()
 
         div(style: "display: inline-block") {
-            def rebuildFailedId = "rebuildFailedResult";
-            form(method: "post", action: "rebuildFailed", onsubmit: "callFeature(this, ${rebuildFailedId})",
-                    style: "float: right; margin-right: 100px") {
-                f.submit(value: _("Rebuild all failed builds"))
-                div(id: rebuildFailedId)
+            if (h.hasPermission(Item.BUILD)) {
+                def rebuildFailedId = "rebuildFailedResult";
+                form(method: "post", action: "rebuildFailed", onsubmit: "callFeature(this, ${rebuildFailedId})",
+                        style: "float: right; margin-right: 100px") {
+                    f.submit(value: _("Rebuild all failed builds"))
+                    div(id: rebuildFailedId)
+                }
             }
 
-            def clearRepoId = "clearRepoResult";
-            form(method: "post", action: "clearRepo", onsubmit: "callFeature(this, ${clearRepoId})",
-                    style: "float: left") {
-                f.submit(value: _("Remove all repo data"))
-                div(id: clearRepoId)
+            if (h.hasPermission(Item.DELETE)) {
+                def clearRepoId = "clearRepoResult";
+                form(method: "post", action: "clearRepo", onsubmit: "callFeature(this, ${clearRepoId})",
+                        style: "float: left") {
+                    f.submit(value: _("Remove all repo data"))
+                    div(id: clearRepoId)
+                }
             }
         }
         br()

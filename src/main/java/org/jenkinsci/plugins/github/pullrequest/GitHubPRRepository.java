@@ -6,6 +6,7 @@ import hudson.model.*;
 import hudson.model.listeners.SaveableListener;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
+import jenkins.model.Jenkins;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
@@ -137,9 +138,14 @@ public class GitHubPRRepository implements Action, Saveable {
     public FormValidation doClearRepo() throws IOException {
         FormValidation result;
         try {
-            pulls = null;
-            save();
-            result = FormValidation.ok("Pulls deleted");
+            Jenkins instance = GitHubPRTrigger.DescriptorImpl.getJenkinsInstance();
+            if (instance.hasPermission(Item.DELETE)) {
+                pulls = null;
+                save();
+                result = FormValidation.ok("Pulls deleted");
+            } else {
+                result = FormValidation.error("Forbidden");
+            }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Can\'t delete repository file '{0}', '{1}'",
                     new Object[] {configFile.getFile().getAbsolutePath(), e.getMessage()});
@@ -152,14 +158,19 @@ public class GitHubPRRepository implements Action, Saveable {
     public FormValidation doRebuildFailed() throws IOException {
         FormValidation result;
         try {
-            Map<Integer, List<AbstractBuild<?, ?>>> builds = getAllPrBuilds();
-            for (List<AbstractBuild<?, ?>> buildList : builds.values()) {
-                if (!buildList.isEmpty() && Result.FAILURE.equals(buildList.get(0).getResult())) {
-                    AbstractBuild<?, ?> lastBuild = buildList.get(0);
-                    rebuild(lastBuild);
+            Jenkins instance = GitHubPRTrigger.DescriptorImpl.getJenkinsInstance();
+            if (instance.hasPermission(Item.BUILD)) {
+                Map<Integer, List<AbstractBuild<?, ?>>> builds = getAllPrBuilds();
+                for (List<AbstractBuild<?, ?>> buildList : builds.values()) {
+                    if (!buildList.isEmpty() && Result.FAILURE.equals(buildList.get(0).getResult())) {
+                        AbstractBuild<?, ?> lastBuild = buildList.get(0);
+                        rebuild(lastBuild);
+                    }
                 }
+                result = FormValidation.ok("Rebuild scheduled");
+            } else {
+                result = FormValidation.error("Forbidden");
             }
-            result = FormValidation.ok("Rebuild scheduled");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Can't start rebuild", e.getMessage());
             result = FormValidation.error("Can't start rebuild: " + e.getMessage());
@@ -172,6 +183,11 @@ public class GitHubPRRepository implements Action, Saveable {
         FormValidation result;
 
         try {
+            Jenkins instance = GitHubPRTrigger.DescriptorImpl.getJenkinsInstance();
+            if (!instance.hasPermission(Item.BUILD)) {
+                return FormValidation.error("Forbidden");
+            }
+
             final String prNumberParam = "prNumber";
             int prId = 0;
             if (req.hasParameter(prNumberParam)) {
