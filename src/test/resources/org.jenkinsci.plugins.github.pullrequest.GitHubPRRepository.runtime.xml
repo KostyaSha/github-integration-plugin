@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository plugin="github-pullrequest@0.0.1-SNAPSHOT">
+  <fullName>user/repo</fullName>
+  <githubUrl>https://github.com/user/repo/</githubUrl>
+  <pulls>
+    <entry>
+      <int>8</int>
+      <org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest>
+        <number>8</number>
+        <issueUpdatedAt>2015-01-01 11:31:48.0 UTC</issueUpdatedAt>
+        <title>PR title</title>
+        <prUpdatedAt>2015-01-01 11:31:48.0 UTC</prUpdatedAt>
+        <headSha>167f686ad1167f686ad1167f686ad1167f686ad1</headSha>
+        <headRef>branch_name</headRef>
+        <mergeable>true</mergeable>
+        <baseRef>master</baseRef>
+        <userLogin>user</userLogin>
+        <htmlUrl>https://github.com/user/repo/pull/8</htmlUrl>
+        <labels>
+          <string>label1</string>
+          <string>label2</string>
+        </labels>
+        <lastCommentCreatedAt>2015-01-02 13:11:21.0 UTC</lastCommentCreatedAt>
+        <sourceRepoOwner>user</sourceRepoOwner>
+      </org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest>
+    </entry>
+    <entry>
+      <int>10</int>
+      <org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest>
+        <number>10</number>
+        <issueUpdatedAt>2015-01-02 18:26:54.0 UTC</issueUpdatedAt>
+        <title>PR</title>
+        <prUpdatedAt>2015-01-02 18:26:54.0 UTC</prUpdatedAt>
+        <headSha>07c565d7d07c565d7d07c565d7d07c565d7d07c565d7d</headSha>
+        <headRef>master</headRef>
+        <mergeable>true</mergeable>
+        <baseRef>another_branch</baseRef>
+        <userLogin>user</userLogin>
+        <htmlUrl>https://github.com/user/repo/pull/10</htmlUrl>
+        <labels>
+          <string>label3</string>
+        </labels>
+        <lastCommentCreatedAt>2015-01-31 19:21:01.0 UTC</lastCommentCreatedAt>
+        <sourceRepoOwner>user</sourceRepoOwner>
+      </org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest>
+    </entry>
+  </pulls>
+</org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository>

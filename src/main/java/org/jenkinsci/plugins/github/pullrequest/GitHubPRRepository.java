@@ -10,6 +10,7 @@ import jenkins.model.Jenkins;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -80,7 +81,8 @@ public class GitHubPRRepository implements Action, Saveable {
     }
 
     //TODO move to transient factory
-    public static GitHubPRRepository forProject(AbstractProject<?, ?> job) throws IOException {
+    @Nonnull
+    public static GitHubPRRepository forProject(AbstractProject<?, ?> job) {
         XmlFile configFile = new XmlFile(new File(job.getRootDir(), FILE));
 
         GitHubPRTrigger trigger = job.getTrigger(GitHubPRTrigger.class);
@@ -90,10 +92,10 @@ public class GitHubPRRepository implements Action, Saveable {
         String githubUrl = property.getProjectUrl().toString();
         GitHubPRRepository localRepository;
         if (configFile.exists()) {
-            GitHubPRRepository rep = (GitHubPRRepository) configFile.read();
-            if (rep != null) {
-                localRepository = rep;
-            } else { // loaded bad data
+            try {
+                localRepository = (GitHubPRRepository) configFile.read();
+            } catch (IOException e) {
+                LOGGER.log(Level.INFO, "Can't read saved repository, creating new one", e);
                 localRepository = new GitHubPRRepository(repoFullName, githubUrl, new HashMap<Integer, GitHubPRPullRequest>());
             }
         } else {

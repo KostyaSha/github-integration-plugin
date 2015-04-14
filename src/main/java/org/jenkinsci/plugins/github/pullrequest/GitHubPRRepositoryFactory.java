@@ -21,11 +21,7 @@ public class GitHubPRRepositoryFactory extends TransientProjectActionFactory {
     @Override
     public Collection<? extends Action> createFor(AbstractProject project) {
         if (project.getTrigger(GitHubPRTrigger.class) != null) {
-            try {
-                return Collections.singleton(GitHubPRRepository.forProject(project));
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Can't save create GitHubPRRepository Action", e);
-            }
+            return Collections.singleton(GitHubPRRepository.forProject(project));
         }
 
         return Collections.emptyList();
