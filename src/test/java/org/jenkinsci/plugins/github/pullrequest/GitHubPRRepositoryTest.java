@@ -6,8 +6,11 @@ import hudson.BulkChange;
 import hudson.Functions;
 import hudson.XmlFile;
 import hudson.model.*;
+import hudson.security.Permission;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
+import jenkins.model.Jenkins;
+import org.acegisecurity.Authentication;
 import org.jenkinsci.plugins.github.pullrequest.util.TestUtil;
 import org.junit.Assert;
 import org.junit.Test;
@@ -19,9 +22,7 @@ import org.mockito.stubbing.OngoingStubbing;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import sun.org.mozilla.javascript.internal.Function;
 
-import javax.management.RuntimeErrorException;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -36,7 +37,8 @@ import static org.mockito.Mockito.when;
  * Unit tests for GitHubPRRepository.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({GithubProjectProperty.class, GithubUrl.class, BulkChange.class, Functions.class})
+@PrepareForTest({GithubProjectProperty.class, GithubUrl.class, BulkChange.class,
+        Functions.class, Jenkins.class, User.class})
 public class GitHubPRRepositoryTest {
     private static final String CONFIG_PATH = "src/test/resources";
     private static final int PR_REBUILD_ID = 1;
@@ -52,10 +54,12 @@ public class GitHubPRRepositoryTest {
     @Mock private AbstractBuild build;
     @Mock private GitHubPRCause cause;
     @Mock private StaplerRequest request;
+    @Mock private User user;
 
     //mocked final classes
     @Mock private GithubProjectProperty projectProperty;
     @Mock private GithubUrl githubUrl;
+    @Mock private Jenkins instance;
 
     @Test
     public void forProjectConfigFileExists() throws IOException, NoSuchFieldException, IllegalAccessException {
@@ -102,10 +106,12 @@ public class GitHubPRRepositoryTest {
     @Test
     public void doClearRepoPullsDeleted() throws IOException {
         forProjectCommonExpectations(CONFIG_PATH);
+        hasPermissionExpectation(Item.DELETE, true);
 
         GitHubPRRepository repo = GitHubPRRepository.forProject(job);
 
-        saveOkExpectations(repo);
+        PowerMockito.mockStatic(BulkChange.class);
+        when(BulkChange.contains(repo)).thenReturn(true);
 
         FormValidation formValidation = repo.doClearRepo();
 
@@ -116,10 +122,12 @@ public class GitHubPRRepositoryTest {
     @Test
     public void doClearRepoWithException() throws IOException {
         forProjectCommonExpectations(CONFIG_PATH);
+        hasPermissionExpectation(Item.DELETE, true);
 
         GitHubPRRepository repo = GitHubPRRepository.forProject(job);
 
-        saveExceptionExpectations(repo);
+        PowerMockito.mockStatic(BulkChange.class);
+        when(BulkChange.contains(repo)).thenThrow(new RuntimeException("bad save() for test"));
 
         FormValidation formValidation = repo.doClearRepo();
 
@@ -128,8 +136,21 @@ public class GitHubPRRepositoryTest {
     }
 
     @Test
-    public void doRebuildFaliedNoRebuildNeeded() throws IOException {
+    public void doClearRepoForbidden() throws IOException {
         forProjectCommonExpectations(CONFIG_PATH);
+        hasPermissionExpectation(Item.DELETE, false);
+
+        GitHubPRRepository repo = GitHubPRRepository.forProject(job);
+        FormValidation formValidation = repo.doClearRepo();
+
+        Assert.assertEquals(FormValidation.Kind.ERROR, formValidation.kind);
+        Assert.assertNotEquals(null, repo.getPulls());
+    }
+
+    @Test
+    public void doRebuildFailedNoRebuildNeeded() throws IOException {
+        forProjectCommonExpectations(CONFIG_PATH);
+        hasPermissionExpectation(Item.BUILD, true);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
 
         GitHubPRRepository repo = GitHubPRRepository.forProject(job);
@@ -139,8 +160,9 @@ public class GitHubPRRepositoryTest {
     }
 
     @Test
-    public void doRebuildFaliedWithRebuildPerformed() throws IOException {
+    public void doRebuildFailedWithRebuildPerformed() throws IOException {
         forProjectCommonExpectations(CONFIG_PATH);
+        hasPermissionExpectation(Item.BUILD, true);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
         getAllPrBuildsNonNullCauseExpectations(BUILD_MAP_SIZE);
 
@@ -154,8 +176,9 @@ public class GitHubPRRepositoryTest {
     }
 
     @Test
-    public void doRebuildFaliedWithException() throws IOException {
+    public void doRebuildFailedWithException() throws IOException {
         forProjectCommonExpectations(CONFIG_PATH);
+        hasPermissionExpectation(Item.BUILD, true);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
         getAllPrBuildsNonNullCauseExpectations(BUILD_MAP_SIZE);
 
@@ -168,9 +191,20 @@ public class GitHubPRRepositoryTest {
     }
 
     @Test
+    public void doRebuildFailedForbidden() throws IOException {
+        forProjectCommonExpectations(CONFIG_PATH);
+        hasPermissionExpectation(Item.BUILD, false);
+
+        GitHubPRRepository repo = GitHubPRRepository.forProject(job);
+        FormValidation formValidation = repo.doRebuildFailed();
+
+        Assert.assertEquals(FormValidation.Kind.ERROR, formValidation.kind);
+    }
+
+    @Test
     public void doRebuildWithRebuildPerformed() throws IOException {
         forProjectCommonExpectations(CONFIG_PATH);
-        doRebuildCommonExpectations(true);
+        doRebuildCommonExpectations(true, true);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
         getAllPrBuildsNonNullCauseExpectations(BUILD_MAP_SIZE);
 
@@ -187,7 +221,7 @@ public class GitHubPRRepositoryTest {
     @Test
     public void doRebuildWarnNotScheduled() throws IOException {
         forProjectCommonExpectations(CONFIG_PATH);
-        doRebuildCommonExpectations(false);
+        doRebuildCommonExpectations(false, true);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
         getAllPrBuildsNonNullCauseExpectations(BUILD_MAP_SIZE);
 
@@ -202,9 +236,11 @@ public class GitHubPRRepositoryTest {
     @Test
     public void doRebuildWarnNotFound() throws IOException {
         forProjectCommonExpectations(CONFIG_PATH);
-        doRebuildCommonExpectations(true);
+        doRebuildCommonExpectations(true, true);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
         getAllPrBuildsNonNullCauseExpectations(0);
+
+        when(build.getProject()).thenReturn(job);
 
         GitHubPRRepository repo = GitHubPRRepository.forProject(job);
         FormValidation formValidation = repo.doRebuild(request);
@@ -215,11 +251,22 @@ public class GitHubPRRepositoryTest {
     @Test
     public void doRebuildWithException() throws IOException {
         forProjectCommonExpectations(CONFIG_PATH);
-        doRebuildCommonExpectations(true);
+        doRebuildCommonExpectations(true, true);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
         getAllPrBuildsNonNullCauseExpectations(BUILD_MAP_SIZE);
 
         when(build.getProject()).thenThrow(new RuntimeException("rebuild() test exception"));
+
+        GitHubPRRepository repo = GitHubPRRepository.forProject(job);
+        FormValidation formValidation = repo.doRebuild(request);
+
+        Assert.assertEquals(FormValidation.Kind.ERROR, formValidation.kind);
+    }
+
+    @Test
+    public void doRebuildForbidden() throws IOException {
+        forProjectCommonExpectations(CONFIG_PATH);
+        doRebuildCommonExpectations(true, false);
 
         GitHubPRRepository repo = GitHubPRRepository.forProject(job);
         FormValidation formValidation = repo.doRebuild(request);
@@ -246,21 +293,20 @@ public class GitHubPRRepositoryTest {
         Assert.assertEquals(prefix + "/plugin/github-pullrequest/git-pull-request.svg", repo.getIconFileName());
     }
 
-    private void doRebuildCommonExpectations(boolean hasParameter) {
+    private void doRebuildCommonExpectations(boolean hasParameter, boolean isAllowed) {
+        hasPermissionExpectation(Item.BUILD, isAllowed);
         when(request.hasParameter(anyString())).thenReturn(hasParameter);
         if(hasParameter) {
             when(request.getParameter(anyString())).thenReturn(Integer.toString(PR_REBUILD_ID));
         }
     }
 
-    private void saveOkExpectations(GitHubPRRepository repo) {
-        PowerMockito.mockStatic(BulkChange.class);
-        when(BulkChange.contains(repo)).thenReturn(true);
-    }
-
-    private void saveExceptionExpectations(GitHubPRRepository repo) {
-        PowerMockito.mockStatic(BulkChange.class);
-        when(BulkChange.contains(repo)).thenThrow(new RuntimeException("bad save() for test"));
+    private void hasPermissionExpectation(Permission permission, boolean isAllowed) {
+        PowerMockito.mockStatic(Jenkins.class);
+        when(Jenkins.getInstance()).thenReturn(instance);
+        when(instance.hasPermission(permission)).thenReturn(isAllowed);
+        PowerMockito.mockStatic(User.class);
+        when(User.current()).thenReturn(user);
     }
 
     private void forProjectCommonTest(String filePath) throws IOException, NoSuchFieldException, IllegalAccessException {
