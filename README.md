@@ -56,6 +56,7 @@ TODO:
  - [ ] integrate with git-plugin by providing patch for BuildData get through BuildChooser?
  - [ ] introduce enum/class for triggering modes
  - [ ] implement hooks triggering
+ - [ ] polling log Action for project/build
  - [ ] help files
  - [ ] tests
 
