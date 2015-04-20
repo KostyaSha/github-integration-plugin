@@ -361,7 +361,6 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
     /**
      * lightweight check that comments and time were changed
-     * TODO store PR and Issue updatedAt times either check is broken
      */
     public boolean isUpdated(GHPullRequest pr, GitHubPRPullRequest localPR) throws IOException {
         if (localPR == null) {
