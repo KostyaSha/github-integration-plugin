@@ -20,8 +20,13 @@ public class GitHubPRRepositoryFactory extends TransientProjectActionFactory {
 
     @Override
     public Collection<? extends Action> createFor(AbstractProject project) {
-        if (project.getTrigger(GitHubPRTrigger.class) != null) {
-            return Collections.singleton(GitHubPRRepository.forProject(project));
+        try {
+            if (project.getTrigger(GitHubPRTrigger.class) != null) {
+                return Collections.singleton(GitHubPRRepository.forProject(project));
+            }
+        } catch (Throwable t) {
+            // bad configured project i.e. github project property wrong
+            return Collections.emptyList();
         }
 
         return Collections.emptyList();
