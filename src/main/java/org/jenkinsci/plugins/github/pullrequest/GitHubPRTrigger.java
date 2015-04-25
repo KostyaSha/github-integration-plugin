@@ -60,14 +60,10 @@ import javax.servlet.ServletException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectStreamException;
 import java.net.Proxy;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -98,18 +94,22 @@ import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.Descripto
 public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     private static final Logger LOGGER = Logger.getLogger(GitHubPRTrigger.class.getName());
 
+    //TODO replace with {@link GitHubRepositoryName.class} ?
     private static final Pattern ghFullRepoName = Pattern.compile("^(http[s]?://[^/]*)/([^/]*/[^/]*).*");
 
-    private final boolean useGitHubHooks;
-    private final DescribableList<GitHubPREvent, GitHubPREventDescriptor> events;
+    private GitHubPRTriggerMode triggerMode = GitHubPRTriggerMode.CRON;
+    @CheckForNull
+    private final List<GitHubPREvent> events;
     /**
      * Set PR(commit) status before build. No configurable message for it.
      */
     private boolean preStatus = false;
     private boolean cancelPrev = false;
     private boolean skipFirstRun = false;
-    @CheckForNull private GitHubPRUserRestriction userRestriction;
-    @CheckForNull private GitHubPRBranchRestriction branchRestriction;
+    @CheckForNull
+    private GitHubPRUserRestriction userRestriction;
+    @CheckForNull
+    private GitHubPRBranchRestriction branchRestriction;
 
     // for performance
     private transient String repoFullName;
@@ -118,11 +118,11 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
     @DataBoundConstructor
     public GitHubPRTrigger(String spec,
-                           boolean useGitHubHooks,
+                           GitHubPRTriggerMode triggerMode,
                            List<GitHubPREvent> events) throws ANTLRException {
         super(spec);
-        this.useGitHubHooks = useGitHubHooks;
-        this.events = new DescribableList<GitHubPREvent, GitHubPREventDescriptor>(Saveable.NOOP, Util.fixNull(events));
+        this.triggerMode = triggerMode;
+        this.events = Util.fixNull(events);
     }
 
     @DataBoundSetter
@@ -154,8 +154,9 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     public void start(AbstractProject<?, ?> project, boolean newInstance) {
         LOGGER.log(Level.INFO, "Starting GitHub Pull Request trigger for project {0}", project.getName());
 
-        if (isUseGitHubHooks()) {
-            //TODO manage hooks
+        if (getTriggerMode() != GitHubPRTriggerMode.CRON) {
+            //TODO implement
+            return;
         }
 
         super.start(project, newInstance);
@@ -199,8 +200,8 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
     @Override
     public void run() {
-        if (job.isDisabled()) {
-            LOGGER.log(Level.FINE, "Job {0} is disabled, but trigger run!", job.getFullName());
+        if (job == null || job.isDisabled()) {
+            LOGGER.log(Level.FINE, "Job {0} is disabled, but trigger run!", job == null ? "no job" :job.getFullName());
             return;
         }
 
@@ -208,7 +209,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         LOGGER.log(Level.FINE, "Running GitHub Pull Request trigger check.");
 
         // triggers are always triggered on the cron, but we just no-op if we are using GitHub hooks.
-        if (isUseGitHubHooks()) {
+        if (getTriggerMode() != GitHubPRTriggerMode.CRON) {
             return;
         }
 
@@ -534,11 +535,11 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         return skipFirstRun;
     }
 
-    public boolean isUseGitHubHooks() {
-        return useGitHubHooks;
+    public GitHubPRTriggerMode getTriggerMode() {
+        return triggerMode;
     }
 
-    public DescribableList<GitHubPREvent, GitHubPREventDescriptor> getEvents() {
+    public List<GitHubPREvent> getEvents() {
         return events;
     }
 
@@ -557,17 +558,24 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     public GitHub getGitHub() throws IOException {
-        GitHub gh = null;
+        GitHub gh;
         try {
             gh = getDescriptor().getGitHub();
         } catch (FileNotFoundException ex) {
-            LOGGER.log(Level.INFO, ex.getMessage());
+            LOGGER.log(Level.INFO, "Can't connect to GitHub {0}. Bad Global plugin configuration.", ex.getMessage());
+            throw new IOException("Can't connect to GitHub: " + ex.getMessage() + ". Bad Global plugin configuration.");
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Can't connect to GitHub {0}. Bad Global plugin configuration.", ex.getMessage());
+            throw ex;
+        } catch (Throwable t) {
+            LOGGER.log(Level.FINE, "Can't connect to GitHub {0}. Bad Global plugin configuration.", t.getMessage());
+            throw new IOException("Can''t connect to GitHub: " + t.getMessage() + ". Bad Global plugin configuration.");
         }
+
         if (gh == null) {
             throw new IOException("Can't connect to GitHub");
         }
+
         return gh;
     }
 
@@ -586,7 +594,6 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     public GitHubPRBranchRestriction getBranchRestriction() {
         return branchRestriction;
     }
-
 
     @Override
     public DescriptorImpl getDescriptor() {
@@ -699,17 +706,19 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
                 throw new IllegalStateException("GitHub api url is not defined");
             }
 
+            if (accessToken == null || accessToken.isEmpty()) {
+                throw new IllegalStateException("Wrong argument accessToken");
+            }
+
             Cache cache = new Cache(new File(instance.getRootDir(), GitHubPRTrigger.class.getName() + ".cache"), getCacheSize() * 1024 * 1024);
             OkHttpConnector okHttpConnector = new OkHttpConnector(new OkUrlFactory(new OkHttpClient().setCache(cache).setProxy(getProxy())));
 
-            if (accessToken != null && !accessToken.isEmpty()) {
-                gh = new GitHubBuilder()
-                        .withEndpoint(apiUrl)
-                        .withRateLimitHandler(RateLimitHandler.FAIL)
-                        .withOAuthToken(accessToken)
-                        .withConnector(okHttpConnector)
-                        .build();
-            }
+            gh = new GitHubBuilder()
+                    .withEndpoint(apiUrl)
+                    .withRateLimitHandler(RateLimitHandler.FAIL)
+                    .withOAuthToken(accessToken)
+                    .withConnector(okHttpConnector)
+                    .build();
 
             // don't allow to use connection with bad rate limit or token
             GHRateLimit rateLimit = gh.getRateLimit();

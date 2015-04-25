@@ -88,6 +88,14 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- blocked queue -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>block-queued-job</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <optional>true</optional>
+        </dependency>
+
         <!--for tests-->
         <!-- Using 4.11, because 4.12 conflicts with PowerMock -->
         <!-- https://code.google.com/p/powermock/issues/detail?id=531 -->

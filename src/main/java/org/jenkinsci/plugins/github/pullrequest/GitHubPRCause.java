@@ -10,6 +10,9 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,6 +31,7 @@ public class GitHubPRCause extends Cause {
     private final String sourceRepoOwner;
     private String triggerSenderName = "";
     private String triggerSenderEmail = "";
+    private Set<String> labels;
     private final String reason;
     /**
      * In case triggered because of commit.
@@ -53,12 +57,14 @@ public class GitHubPRCause extends Cause {
         this(pr.getHeadSha(), pr.getNumber(),
                 pr.isMergeable(), pr.getBaseRef(), pr.getHeadRef(),
                 pr.getUserEmail(), pr.getTitle(), pr.getHtmlUrl(), pr.getSourceRepoOwner(),
+                pr.getLabels(),
                 triggerSender, reason, commitAuthorName, commitAuthorEmail);
     }
 
     public GitHubPRCause(String headSha, int number, boolean mergeable,
                          String targetBranch, String sourceBranch, String prAuthorEmail,
-                         String title, URL htmlUrl, String sourceRepoOwner, GHUser triggerSender, String reason,
+                         String title, URL htmlUrl, String sourceRepoOwner, Set<String> labels,
+                         GHUser triggerSender, String reason,
                          String commitAuthorName, String commitAuthorEmail) {
 
         this.headSha = headSha;
@@ -70,6 +76,7 @@ public class GitHubPRCause extends Cause {
         this.title = title;
         this.htmlUrl = htmlUrl;
         this.sourceRepoOwner = sourceRepoOwner;
+        this.labels = labels;
         this.reason = reason;
         this.commitAuthorName = commitAuthorName;
         this.commitAuthorEmail = commitAuthorEmail;
@@ -126,6 +133,11 @@ public class GitHubPRCause extends Cause {
 
     public String getSourceRepoOwner() {
         return sourceRepoOwner;
+    }
+
+    @Nonnull
+    public Set<String> getLabels() {
+        return labels == null ? Collections.<String>emptySet() : labels;
     }
 
     public String getTriggerSenderName() {

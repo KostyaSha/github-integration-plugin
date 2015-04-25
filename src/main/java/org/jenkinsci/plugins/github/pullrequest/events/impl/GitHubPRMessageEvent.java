@@ -54,7 +54,7 @@ public class GitHubPRMessageEvent extends GitHubPREvent {
                 }
             }
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Couldn't obtain comments.", e);
+            LOGGER.log(Level.SEVERE, "Couldn''t obtain comments: {0}", e.getMessage());
         }
         return cause;
     }
@@ -68,7 +68,7 @@ public class GitHubPRMessageEvent extends GitHubPREvent {
 
             if ((userRestriction == null || userRestriction.isWhitelisted(comment.getUser()))
                     && Pattern.compile(runMsg).matcher(body).matches()) {
-                LOGGER.log(Level.FINEST, "Triggering by phrase '{0}'", body);
+                LOGGER.log(Level.FINEST, "Triggering by comment '{0}'", body);
                 cause = new GitHubPRCause(remotePR, remotePR.getUser(), "PR was triggered by comment", null, null);
             }
         } catch (IOException ex) {
@@ -81,7 +81,7 @@ public class GitHubPRMessageEvent extends GitHubPREvent {
     public static class DescriptorImpl extends GitHubPREventDescriptor {
         @Override
         public String getDisplayName() {
-            return "Comment";
+            return "Comment message";
         }
     }
 }

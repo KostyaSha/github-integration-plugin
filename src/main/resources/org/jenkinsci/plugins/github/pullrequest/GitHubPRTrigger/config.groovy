@@ -3,8 +3,13 @@ package org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger
 def f = namespace(lib.FormTagLib);
 
 def events = (instance == null ? [] : instance.events)
-f.entry(title:_("Github hooks"), field:"useGitHubHooks") {
-    f.checkbox()
+//f.entry(title:_("Github hooks"), field:"useGitHubHooks") {
+//    f.checkbox()
+//}
+f.entry(title: "Trigger Mode", field: "triggerMode") {
+    f.enum() {
+        text(my.description)
+    }
 }
 
 f.entry(title:_("Crontab line"), field: "spec", help:"/descriptor/hudson.triggers.TimerTrigger/help/spec")  {
@@ -23,7 +28,7 @@ f.entry(title: "Skip first run", field: "skipFirstRun") {
     f.checkbox()
 }
 
-f.entry(title:_("Trigger Events")) {
+f.entry(title:_("Trigger Events"), help: descriptor.getHelpFile('events')) {
     f.hetero_list(name: "events",
             items: events,
             descriptors: descriptor.getEventDescriptors(),

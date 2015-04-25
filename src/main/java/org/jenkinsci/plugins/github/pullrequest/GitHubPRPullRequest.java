@@ -6,10 +6,7 @@ import org.kohsuke.github.*;
 import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,7 +29,7 @@ public class GitHubPRPullRequest {
     private String userEmail;
     private String userLogin;
     private URL htmlUrl;
-    private List<String> labels;
+    private Set<String> labels;
     @CheckForNull
     private Date lastCommentCreatedAt;
     private String sourceRepoOwner;
@@ -119,7 +116,7 @@ public class GitHubPRPullRequest {
         return title;
     }
 
-    public List<String> getLabels() {
+    public Set<String> getLabels() {
         return labels;
     }
 
@@ -152,7 +149,7 @@ public class GitHubPRPullRequest {
     }
 
     private void updateLabels(Collection<GHLabel> labels) {
-        this.labels = new ArrayList<String>();
+        this.labels = new HashSet<>();
         for (GHLabel label : labels) {
             this.labels.add(label.getName());
         }
