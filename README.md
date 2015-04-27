@@ -22,7 +22,6 @@ Description:
     - Remove labels
     - Close PR
     - Post comment with TokenMacro and Groovy Templates from [email-ext-plugin](https://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin) support
-  - no basic conditionals for build status checks. Use [flexible-publish-plugin](https://wiki.jenkins-ci.org/display/JENKINS/Flexible+Publish+Plugin) that is really powerful for configuring ANY conditions
 - Trigger check modes (planned):
   - Lightweight using GH hooks without persisting state (penalty: lost events)
   - Hooks with persisting state
