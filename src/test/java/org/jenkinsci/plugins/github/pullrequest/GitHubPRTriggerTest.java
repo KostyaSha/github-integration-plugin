@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashSet;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertTrue;
@@ -62,11 +63,12 @@ public class GitHubPRTriggerTest {
     public void checkBuildDataAbsenceAfterBuild() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject("test-job");
         p.addProperty(new GithubProjectProperty("https://github.com/KostyaSha/test-repo"));
-        p.addTrigger(new GitHubPRTrigger("", true, null));
+        p.addTrigger(new GitHubPRTrigger("", GitHubPRTriggerMode.CRON, null));
         p.getBuildersList().add(new BuildDataBuilder());
 
         GitHubPRCause cause = new GitHubPRCause("headSha", 1, true, "targetBranch", "srcBranch","mail@mail.com",
-                "title", new URL("http://www.example.com"), "repoOwner", null, "nice reason", "author name", "anotherMait@mail.com");
+                "title", new URL("http://www.example.com"), "repoOwner", new HashSet<String>(),
+                null, "nice reason", "author name", "anotherMait@mail.com");
         FreeStyleBuild build = p.scheduleBuild2(0, cause).get();
         j.waitUntilNoActivity();
 

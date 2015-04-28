@@ -439,7 +439,9 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     @Override
     public void stop() {
         //TODO clean hooks?
-        LOGGER.log(Level.INFO, "Stopping the GitHub PR trigger for project {0}", job.getFullName());
+        if (job != null) {
+            LOGGER.log(Level.INFO, "Stopping the GitHub PR trigger for project {0}", job.getFullName());
+        }
         super.stop();
     }
 

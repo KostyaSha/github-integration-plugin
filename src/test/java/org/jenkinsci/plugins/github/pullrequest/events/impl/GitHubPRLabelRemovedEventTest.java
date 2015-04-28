@@ -47,7 +47,7 @@ public class GitHubPRLabelRemovedEventTest {
      */
     @Test
     public void twoOfThreeLabelsWasRemoved() throws IOException {
-        List<String> localLabels = new ArrayList<String>();
+        Set<String> localLabels = new HashSet<>();
         localLabels.add(TESTS_FAILURE);   
         
         List<GHLabel> remoteLabels = new ArrayList<GHLabel>();
@@ -67,7 +67,7 @@ public class GitHubPRLabelRemovedEventTest {
      */
     @Test
     public void threeOfThreeLabelsWasRemoved() throws IOException {
-        List<String> localLabels = new ArrayList<String>();
+        Set<String> localLabels = new HashSet<>();
         localLabels.add(TESTS_FAILURE);
 
         commonExpectations(localLabels);
@@ -85,7 +85,7 @@ public class GitHubPRLabelRemovedEventTest {
      */
     @Test
     public void noLabelsWasRemoved() throws IOException {
-        List<String> localLabels = new ArrayList<String>();
+        Set<String> localLabels = new HashSet<>();
         localLabels.add(NOT_READY_FOR_MERGE);
         localLabels.add(NOT_REVIEWED);
         localLabels.add(TESTS_FAILURE);
@@ -106,7 +106,7 @@ public class GitHubPRLabelRemovedEventTest {
         Assert.assertNull(cause);
     }
     
-    private void commonExpectations(List<String> localLabels) throws IOException {
+    private void commonExpectations(Set<String> localLabels) throws IOException {
         when(labels.getLabelsSet()).thenReturn(checkedLabels);
         when(localPR.getLabels()).thenReturn(localLabels);
         when(remotePr.getState()).thenReturn(GHIssueState.OPEN);

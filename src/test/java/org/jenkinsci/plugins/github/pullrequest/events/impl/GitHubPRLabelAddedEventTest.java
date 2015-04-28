@@ -52,7 +52,7 @@ public class GitHubPRLabelAddedEventTest {
      */
     @Test
     public void secondOfThreeLabelsWasAdded() throws IOException {
-        List<String> localLabels = new ArrayList<String>();
+        Set<String> localLabels = new HashSet<>();
         localLabels.add(LOCALLY_TESTED);
         
         List<GHLabel> remoteLabels = new ArrayList<GHLabel>();
@@ -74,7 +74,7 @@ public class GitHubPRLabelAddedEventTest {
      */
     @Test
     public void thirdOfThreeLabelsWasAdded() throws IOException {
-        List<String> localLabels = new ArrayList<String>();
+        Set<String> localLabels = new HashSet<>();
         localLabels.add(LOCALLY_TESTED);
         localLabels.add(MERGE);
 
@@ -104,7 +104,7 @@ public class GitHubPRLabelAddedEventTest {
      */
     @Test
     public void allLabelsAlreadyExist() throws IOException {
-        List<String> localLabels = new ArrayList<String>();
+        Set<String> localLabels = new HashSet<>();
         localLabels.add(LOCALLY_TESTED);
         localLabels.add(MERGE);
         localLabels.add(REVIEWED);
@@ -134,7 +134,7 @@ public class GitHubPRLabelAddedEventTest {
      */
     @Test
     public void noLabelsWasRemoved() throws IOException {
-        List<String> localLabels = new ArrayList<String>();
+        Set<String> localLabels = new HashSet<>();
         localLabels.add(MERGE);
         localLabels.add(REVIEWED);
         localLabels.add(LOCALLY_TESTED);
@@ -144,7 +144,7 @@ public class GitHubPRLabelAddedEventTest {
         remoteLabels.add(reviewedLabel);
         remoteLabels.add(mergeLabel);
 
-        commonExpectations( localLabels);
+        commonExpectations(localLabels);
         when(issue.getLabels())
                 .thenReturn(remoteLabels);
         when(testLabel.getName())
@@ -159,7 +159,7 @@ public class GitHubPRLabelAddedEventTest {
         Assert.assertNull(cause);
     }
     
-    private void commonExpectations(List<String> localLabels) throws IOException {
+    private void commonExpectations(Set<String> localLabels) throws IOException {
         when(labels.getLabelsSet()).thenReturn(checkedLabels);
         when(localPR.getLabels()).thenReturn(localLabels);
         when(remotePr.getState()).thenReturn(GHIssueState.OPEN);

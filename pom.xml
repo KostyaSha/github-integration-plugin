@@ -92,7 +92,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>block-queued-job</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.1.0</version>
             <optional>true</optional>
         </dependency>
 
