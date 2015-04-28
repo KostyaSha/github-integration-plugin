@@ -34,13 +34,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for GitHubPRRepository.
- */
+* Unit tests for GitHubPRRepository.
+*/
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({GithubProjectProperty.class, GithubUrl.class, BulkChange.class,
         Functions.class, Jenkins.class, User.class})
 public class GitHubPRRepositoryTest {
-    private static final String CONFIG_PATH = "src/test/resources";
     private static final int PR_REBUILD_ID = 1;
 
     //size of map that getAllPrBuilds() will return
@@ -57,31 +56,16 @@ public class GitHubPRRepositoryTest {
     @Mock private User user;
 
     //mocked final classes
-    @Mock private GithubProjectProperty projectProperty;
-    @Mock private GithubUrl githubUrl;
     @Mock private Jenkins instance;
 
-    @Test
-    public void forProjectConfigFileExists() throws IOException, NoSuchFieldException, IllegalAccessException {
-        forProjectCommonTest(CONFIG_PATH);
-    }
-
-    @Test
-    public void forProjectConfigFileIsAbsent() throws IOException, NoSuchFieldException, IllegalAccessException {
-        forProjectCommonTest("some/path");
-    }
-
-    @Test
-    public void forProjectConfigFileIsBad() throws IOException, NoSuchFieldException, IllegalAccessException {
-        forProjectCommonTest(CONFIG_PATH + "/invalidConfig");
-    }
+    private GitHubPRRepositoryFactory factory = new GitHubPRRepositoryFactory();
 
     @Test
     public void getAllPrBuildsWithCause()  {
-        forProjectCommonExpectations(CONFIG_PATH);
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
 
-        GitHubPRRepository repo = GitHubPRRepository.forProject(job);
+        GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
         Map<Integer, List<AbstractBuild<?, ?>>> prBuilds = repo.getAllPrBuilds();
 
         verify(iterator, times(BUILD_MAP_SIZE + 1)).hasNext();
@@ -92,12 +76,12 @@ public class GitHubPRRepositoryTest {
 
     @Test
     public void getAllPrBuildsNullCause()  {
-        forProjectCommonExpectations(CONFIG_PATH);
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
 
         when(build.getCause(GitHubPRCause.class)).thenReturn(null);
 
-        GitHubPRRepository repo = GitHubPRRepository.forProject(job);
+        GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
         Map<Integer, List<AbstractBuild<?, ?>>> prBuilds = repo.getAllPrBuilds();
 
         Assert.assertEquals(0, prBuilds.size());
@@ -105,10 +89,10 @@ public class GitHubPRRepositoryTest {
 
     @Test
     public void doClearRepoPullsDeleted() throws IOException {
-        forProjectCommonExpectations(CONFIG_PATH);
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
         hasPermissionExpectation(Item.DELETE, true);
 
-        GitHubPRRepository repo = GitHubPRRepository.forProject(job);
+        GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
 
         PowerMockito.mockStatic(BulkChange.class);
         when(BulkChange.contains(repo)).thenReturn(true);
@@ -121,10 +105,10 @@ public class GitHubPRRepositoryTest {
 
     @Test
     public void doClearRepoWithException() throws IOException {
-        forProjectCommonExpectations(CONFIG_PATH);
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
         hasPermissionExpectation(Item.DELETE, true);
 
-        GitHubPRRepository repo = GitHubPRRepository.forProject(job);
+        GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
 
         PowerMockito.mockStatic(BulkChange.class);
         when(BulkChange.contains(repo)).thenThrow(new RuntimeException("bad save() for test"));
@@ -137,10 +121,10 @@ public class GitHubPRRepositoryTest {
 
     @Test
     public void doClearRepoForbidden() throws IOException {
-        forProjectCommonExpectations(CONFIG_PATH);
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
         hasPermissionExpectation(Item.DELETE, false);
 
-        GitHubPRRepository repo = GitHubPRRepository.forProject(job);
+        GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
         FormValidation formValidation = repo.doClearRepo();
 
         Assert.assertEquals(FormValidation.Kind.ERROR, formValidation.kind);
@@ -149,11 +133,11 @@ public class GitHubPRRepositoryTest {
 
     @Test
     public void doRebuildFailedNoRebuildNeeded() throws IOException {
-        forProjectCommonExpectations(CONFIG_PATH);
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
         hasPermissionExpectation(Item.BUILD, true);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
 
-        GitHubPRRepository repo = GitHubPRRepository.forProject(job);
+        GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
         FormValidation formValidation = repo.doRebuildFailed();
 
         Assert.assertEquals(FormValidation.Kind.OK, formValidation.kind);
@@ -161,7 +145,7 @@ public class GitHubPRRepositoryTest {
 
     @Test
     public void doRebuildFailedWithRebuildPerformed() throws IOException {
-        forProjectCommonExpectations(CONFIG_PATH);
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
         hasPermissionExpectation(Item.BUILD, true);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
         getAllPrBuildsNonNullCauseExpectations(BUILD_MAP_SIZE);
@@ -169,7 +153,7 @@ public class GitHubPRRepositoryTest {
         when(build.getResult()).thenReturn(Result.FAILURE);
         when(build.getProject()).thenReturn(job);
 
-        GitHubPRRepository repo = GitHubPRRepository.forProject(job);
+        GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
         FormValidation formValidation = repo.doRebuildFailed();
 
         Assert.assertEquals(FormValidation.Kind.OK, formValidation.kind);
@@ -177,14 +161,14 @@ public class GitHubPRRepositoryTest {
 
     @Test
     public void doRebuildFailedWithException() throws IOException {
-        forProjectCommonExpectations(CONFIG_PATH);
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
         hasPermissionExpectation(Item.BUILD, true);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
         getAllPrBuildsNonNullCauseExpectations(BUILD_MAP_SIZE);
 
         when(build.getResult()).thenThrow(new RuntimeException("build.getResult() test exception"));
 
-        GitHubPRRepository repo = GitHubPRRepository.forProject(job);
+        GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
         FormValidation formValidation = repo.doRebuildFailed();
 
         Assert.assertEquals(FormValidation.Kind.ERROR, formValidation.kind);
@@ -192,10 +176,10 @@ public class GitHubPRRepositoryTest {
 
     @Test
     public void doRebuildFailedForbidden() throws IOException {
-        forProjectCommonExpectations(CONFIG_PATH);
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
         hasPermissionExpectation(Item.BUILD, false);
 
-        GitHubPRRepository repo = GitHubPRRepository.forProject(job);
+        GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
         FormValidation formValidation = repo.doRebuildFailed();
 
         Assert.assertEquals(FormValidation.Kind.ERROR, formValidation.kind);
@@ -203,7 +187,7 @@ public class GitHubPRRepositoryTest {
 
     @Test
     public void doRebuildWithRebuildPerformed() throws IOException {
-        forProjectCommonExpectations(CONFIG_PATH);
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
         doRebuildCommonExpectations(true, true);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
         getAllPrBuildsNonNullCauseExpectations(BUILD_MAP_SIZE);
@@ -212,7 +196,7 @@ public class GitHubPRRepositoryTest {
         when(job.scheduleBuild(anyInt(), any(Cause.UserIdCause.class), Matchers.<Action>anyVararg()))
                 .thenReturn(true);
 
-        GitHubPRRepository repo = GitHubPRRepository.forProject(job);
+        GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
         FormValidation formValidation = repo.doRebuild(request);
 
         Assert.assertEquals(FormValidation.Kind.OK, formValidation.kind);
@@ -220,14 +204,14 @@ public class GitHubPRRepositoryTest {
 
     @Test
     public void doRebuildWarnNotScheduled() throws IOException {
-        forProjectCommonExpectations(CONFIG_PATH);
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
         doRebuildCommonExpectations(false, true);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
         getAllPrBuildsNonNullCauseExpectations(BUILD_MAP_SIZE);
 
         when(build.getProject()).thenReturn(job);
 
-        GitHubPRRepository repo = GitHubPRRepository.forProject(job);
+        GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
         FormValidation formValidation = repo.doRebuild(request);
 
         Assert.assertEquals(FormValidation.Kind.WARNING, formValidation.kind);
@@ -235,14 +219,14 @@ public class GitHubPRRepositoryTest {
 
     @Test
     public void doRebuildWarnNotFound() throws IOException {
-        forProjectCommonExpectations(CONFIG_PATH);
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
         doRebuildCommonExpectations(true, true);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
         getAllPrBuildsNonNullCauseExpectations(0);
 
         when(build.getProject()).thenReturn(job);
 
-        GitHubPRRepository repo = GitHubPRRepository.forProject(job);
+        GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
         FormValidation formValidation = repo.doRebuild(request);
 
         Assert.assertEquals(FormValidation.Kind.WARNING, formValidation.kind);
@@ -250,14 +234,14 @@ public class GitHubPRRepositoryTest {
 
     @Test
     public void doRebuildWithException() throws IOException {
-        forProjectCommonExpectations(CONFIG_PATH);
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
         doRebuildCommonExpectations(true, true);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
         getAllPrBuildsNonNullCauseExpectations(BUILD_MAP_SIZE);
 
         when(build.getProject()).thenThrow(new RuntimeException("rebuild() test exception"));
 
-        GitHubPRRepository repo = GitHubPRRepository.forProject(job);
+        GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
         FormValidation formValidation = repo.doRebuild(request);
 
         Assert.assertEquals(FormValidation.Kind.ERROR, formValidation.kind);
@@ -265,10 +249,10 @@ public class GitHubPRRepositoryTest {
 
     @Test
     public void doRebuildForbidden() throws IOException {
-        forProjectCommonExpectations(CONFIG_PATH);
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
         doRebuildCommonExpectations(true, false);
 
-        GitHubPRRepository repo = GitHubPRRepository.forProject(job);
+        GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
         FormValidation formValidation = repo.doRebuild(request);
 
         Assert.assertEquals(FormValidation.Kind.ERROR, formValidation.kind);
@@ -307,26 +291,6 @@ public class GitHubPRRepositoryTest {
         when(instance.hasPermission(permission)).thenReturn(isAllowed);
         PowerMockito.mockStatic(User.class);
         when(User.current()).thenReturn(user);
-    }
-
-    private void forProjectCommonTest(String filePath) throws IOException, NoSuchFieldException, IllegalAccessException {
-        forProjectCommonExpectations(filePath);
-
-        GitHubPRRepository repo = GitHubPRRepository.forProject(job);
-        Field project = TestUtil.getPrivateField("project", GitHubPRRepository.class);
-        Field configFileField = TestUtil.getPrivateField("configFile", GitHubPRRepository.class);
-        XmlFile configFile = (XmlFile) configFileField.get(repo);
-
-        Assert.assertEquals(job, project.get(repo));
-        Assert.assertEquals(new File(filePath), configFile.getFile().getParentFile());
-    }
-
-    private void forProjectCommonExpectations(String filePath) {
-        File file = new File(filePath);
-        when(job.getRootDir()).thenReturn(file);
-        when(job.getTrigger(GitHubPRTrigger.class)).thenReturn(trigger);
-        when(job.getProperty(GithubProjectProperty.class)).thenReturn(projectProperty);
-        when(projectProperty.getProjectUrl()).thenReturn(githubUrl);
     }
 
     private void getAllPrBuildsCommonExpectations(int size) {

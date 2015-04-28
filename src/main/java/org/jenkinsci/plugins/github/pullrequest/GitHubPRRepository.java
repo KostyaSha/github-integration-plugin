@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
-import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import hudson.*;
 import hudson.model.*;
 import hudson.model.listeners.SaveableListener;
@@ -10,8 +9,6 @@ import jenkins.model.Jenkins;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
-import javax.annotation.Nonnull;
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
@@ -78,33 +75,6 @@ public class GitHubPRRepository implements Action, Saveable {
         }
 
         return map;
-    }
-
-    //TODO move to transient factory
-    @Nonnull
-    public static GitHubPRRepository forProject(AbstractProject<?, ?> job) {
-        XmlFile configFile = new XmlFile(new File(job.getRootDir(), FILE));
-
-        GitHubPRTrigger trigger = job.getTrigger(GitHubPRTrigger.class);
-        String repoFullName = trigger.getRepoFullName(job);
-
-        GithubProjectProperty property = job.getProperty(GithubProjectProperty.class);
-        String githubUrl = property.getProjectUrl().toString();
-        GitHubPRRepository localRepository;
-        if (configFile.exists()) {
-            try {
-                localRepository = (GitHubPRRepository) configFile.read();
-            } catch (IOException e) {
-                LOGGER.log(Level.INFO, "Can't read saved repository, creating new one", e);
-                localRepository = new GitHubPRRepository(repoFullName, githubUrl, new HashMap<Integer, GitHubPRPullRequest>());
-            }
-        } else {
-            localRepository = new GitHubPRRepository(repoFullName, githubUrl, new HashMap<Integer, GitHubPRPullRequest>());
-        }
-
-        localRepository.project = job;
-        localRepository.configFile = configFile;
-        return localRepository;
     }
 
     public String getFullName() {
@@ -227,5 +197,13 @@ public class GitHubPRRepository implements Action, Saveable {
         actions.add(build.getAction(CauseAction.class));
 
         return build.getProject().scheduleBuild(0, new Cause.UserIdCause(), actions.toArray(new Action[actions.size()]));
+    }
+
+    public void setProject(AbstractProject<?, ?> project) {
+        this.project = project;
+    }
+
+    public void setConfigFile(XmlFile configFile) {
+        this.configFile = configFile;
     }
 }
