@@ -43,11 +43,11 @@ public class GitHubPRLabelUnblockQueueCondition extends BlockQueueCondition {
                 final GitHubPRCause gitHubPRCause = (GitHubPRCause) cause;
                 final Set<String> causeLabels = gitHubPRCause.getLabels();
                 if (getLabel() != null) {
-                    if (label.getLabelsSet().containsAll(causeLabels)) {
+                    if (causeLabels.containsAll(label.getLabelsSet())) {
                         if (item.task instanceof AbstractProject<?, ?>) {
                             final AbstractProject<?, ?> abstractProject = (AbstractProject<?, ?>) item.task;
                             LOGGER.log(Level.FINE, "Unblocking job item {0} with matched labels {1}",
-                                    new Object[]{ abstractProject.getFullName(), causeLabels.toString()});
+                                    new Object[]{ abstractProject.getFullName(), label.getLabelsSet()});
                         }
 
                         return true;
