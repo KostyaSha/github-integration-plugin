@@ -96,7 +96,7 @@ public class GitHubPRLabelAddedEventTest {
 
         GitHubPRLabelAddedEvent instance = new GitHubPRLabelAddedEvent(labels);
         GitHubPRCause cause = instance.isStateChanged(null, remotePr,localPR);
-        Assert.assertEquals("[reviewed, locally tested, merge] labels were added", cause.getReason());
+        Assert.assertEquals("[merge, reviewed, locally tested] labels were added", cause.getReason());
     }
 
     /**
