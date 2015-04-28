@@ -312,38 +312,28 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
                 continue;
             }
 
-            boolean skip = false; // should we skip PR?
-            for (GitHubPREvent event : getEvents()) {  // skip checks
+            for (GitHubPREvent event : getEvents()) {  // waterfall, first matched win
+                // skip event
                 try {
                     if (event.isSkip(this, remotePR, localPR)) {
-                        skip = true;
                         LOGGER.log(Level.FINE, "Skipping PR #{0}", remotePR.getNumber());
-                        break;
+                        continue;
                     }
                 } catch (IOException e) {
-                    skip = true; // because we can't be sure that we allowed to trigger build
+                    // because we can't be sure that we allowed to trigger build
                     LOGGER.log(Level.WARNING, "Skip event failed, so skipping PR", e);
-                    break;
+                    continue;
                 }
-            }
 
-            if (skip) {
-                continue;
-            }
-
-            for (GitHubPREvent event : getEvents()) {   // heavy check
-                GitHubPRCause cause = null;
+                // trigger event
                 try {
-                    cause = event.isStateChanged(this, remotePR, localPR);
-                } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, "Can't check trigger event", e);
-                }
-
-                if (cause != null) {
+                    GitHubPRCause cause = event.isStateChanged(this, remotePR, localPR);
                     LOGGER.log(Level.FINE, "Triggering build for {0}, because {1}",
                             new Object[]{remotePR.getNumber(), cause.getReason()});
                     build(cause);
                     break; // don't check other events
+                } catch (IOException e) {
+                    LOGGER.log(Level.WARNING, "Can't check trigger event", e);
                 }
             }
         }
