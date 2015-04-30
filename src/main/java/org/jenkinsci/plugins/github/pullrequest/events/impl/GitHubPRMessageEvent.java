@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest.events.impl;
 
 import hudson.Extension;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
@@ -14,7 +15,9 @@ import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.annotation.CheckForNull;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -25,6 +28,7 @@ import java.util.regex.Pattern;
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRMessageEvent extends GitHubPREvent {
+    private static final String DISPLAY_NAME = "Comment message";
     private final static Logger LOGGER = Logger.getLogger(GitHubPRMessageEvent.class.getName());
 
     private String runMsg = ".*test\\W+this\\W+please.*";
@@ -39,10 +43,12 @@ public class GitHubPRMessageEvent extends GitHubPREvent {
     }
 
     @Override
-    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR, GitHubPRPullRequest localPR) {
+    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
+                                        @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) {
         if (localPR == null || localPR.getLastCommentCreatedAt() == null) {
             return null; // nothing to compare
         }
+        final PrintStream logger = listener.getLogger();
 
 //        LOGGER.log(Level.FINE, "Checking for new messages...");
 
@@ -50,6 +56,8 @@ public class GitHubPRMessageEvent extends GitHubPREvent {
         try {
             for (GHIssueComment comment : remotePR.getComments()) {
                 if (localPR.getLastCommentCreatedAt().compareTo(comment.getCreatedAt()) < 0) {
+                    logger.println(DISPLAY_NAME + ": state has changed (new comment found - \""
+                            + comment.getBody() + "\")");
                     cause = checkComment(comment, gitHubPRTrigger.getUserRestriction(), remotePR);
                 }
             }
@@ -81,7 +89,7 @@ public class GitHubPRMessageEvent extends GitHubPREvent {
     public static class DescriptorImpl extends GitHubPREventDescriptor {
         @Override
         public String getDisplayName() {
-            return "Comment message";
+            return DISPLAY_NAME;
         }
     }
 }

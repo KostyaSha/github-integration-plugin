@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest.events.impl;
 
 import hudson.Extension;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
@@ -11,7 +12,7 @@ import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
-import java.util.logging.Level;
+import java.io.PrintStream;
 import java.util.logging.Logger;
 
 /**
@@ -20,6 +21,7 @@ import java.util.logging.Logger;
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRCloseEvent extends GitHubPREvent {
+    private static final String DISPLAY_NAME = "Pull Request Closed";
     private final static Logger LOGGER = Logger.getLogger(GitHubPRCloseEvent.class.getName());
 
     @DataBoundConstructor
@@ -27,7 +29,8 @@ public class GitHubPRCloseEvent extends GitHubPREvent {
     }
 
     @Override
-    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR, GitHubPRPullRequest localPR) throws IOException {
+    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
+                                        GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
         if (localPR == null) {
             return null;
         }
@@ -36,6 +39,8 @@ public class GitHubPRCloseEvent extends GitHubPREvent {
 
         // must be closed once
         if (remotePR.getState().equals(GHIssueState.CLOSED)) {
+            final PrintStream logger = listener.getLogger();
+            logger.println(DISPLAY_NAME + ": state has changed (PR was closed)");
             cause = new GitHubPRCause(remotePR, null, "PR was closed", null, null);
         }
 
@@ -46,7 +51,7 @@ public class GitHubPRCloseEvent extends GitHubPREvent {
     public static class DescriptorImpl extends GitHubPREventDescriptor {
         @Override
         public String getDisplayName() {
-            return "Pull Request Closed";
+            return DISPLAY_NAME;
         }
     }
 }

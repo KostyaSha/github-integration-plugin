@@ -1,7 +1,9 @@
 package org.jenkinsci.plugins.github.pullrequest.events.impl;
 
 import com.google.common.collect.Iterables;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.Extension;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
@@ -16,6 +18,7 @@ import org.kohsuke.github.PagedIterable;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,6 +28,7 @@ import java.util.logging.Logger;
  * @author Kanstantsin Shautsou
  */
 public class GitHubPROpenEvent extends GitHubPREvent {
+    private static final String DISPLAY_NAME = "Pull Request Opened";
     private static final Logger LOGGER = Logger.getLogger(GitHubPROpenEvent.class.getName());
 
     @DataBoundConstructor
@@ -32,7 +36,8 @@ public class GitHubPROpenEvent extends GitHubPREvent {
     }
 
     @Override
-    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR, GitHubPRPullRequest localPR) throws IOException {
+    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
+                                        @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
         if (remotePR.getState().equals(GHIssueState.CLOSED)) {
             return null; // already closed, nothing to check
         }
@@ -40,6 +45,8 @@ public class GitHubPROpenEvent extends GitHubPREvent {
         GitHubPRCause cause = null;
         String causeMessage = "PR opened";
         if (localPR == null) { // new
+            final PrintStream logger = listener.getLogger();
+            logger.println(DISPLAY_NAME + ": state has changed (PR was opened)");
             cause = new GitHubPRCause(remotePR, remotePR.getUser(), causeMessage, null, null);
         }
 
@@ -50,7 +57,7 @@ public class GitHubPROpenEvent extends GitHubPREvent {
     public static class DescriptorImpl extends GitHubPREventDescriptor {
         @Override
         public final String getDisplayName() {
-            return "Pull Request Opened";
+            return DISPLAY_NAME;
         }
     }
 }
