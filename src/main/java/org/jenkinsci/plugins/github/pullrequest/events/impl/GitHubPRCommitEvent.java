@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest.events.impl;
 
 import hudson.Extension;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
@@ -10,6 +11,7 @@ import org.kohsuke.github.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,14 +22,15 @@ import java.util.logging.Logger;
  */
 public class GitHubPRCommitEvent extends GitHubPREvent {
     private static final Logger LOGGER = Logger.getLogger(GitHubPROpenEvent.class.getName());
-    static final String causeMessage = "Commit changed";
+    private static final String DISPLAY_NAME = "Commit changed";
 
     @DataBoundConstructor
     public GitHubPRCommitEvent() {
     }
 
     @Override
-    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR, GitHubPRPullRequest localPR) throws IOException {
+    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
+                                        GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
         if (remotePR.getState().equals(GHIssueState.CLOSED)) {
             //TODO check whether push to closed allowed?
             return null; // already closed, nothing to check
@@ -42,8 +45,10 @@ public class GitHubPRCommitEvent extends GitHubPREvent {
         GHCommitPointer head = remotePR.getHead();
         if (!localPR.getHeadSha().equals(head.getSha())) {
             LOGGER.log(Level.FINE, "New commit. Sha: {0} => {1}", new Object[]{localPR.getHeadSha(), head.getSha()});
+            final PrintStream logger = listener.getLogger();
+            logger.println(this.getClass().getSimpleName() + ": new commit found, sha " + head.getSha());
             GHUser user = head.getUser();
-            cause = new GitHubPRCause(remotePR, remotePR.getUser(), causeMessage, user.getName(), user.getEmail());
+            cause = new GitHubPRCause(remotePR, remotePR.getUser(), DISPLAY_NAME, user.getName(), user.getEmail());
         }
 
         return cause;
@@ -53,7 +58,7 @@ public class GitHubPRCommitEvent extends GitHubPREvent {
     public static class DescriptorImpl extends GitHubPREventDescriptor {
         @Override
         public final String getDisplayName() {
-            return causeMessage;
+            return DISPLAY_NAME;
         }
     }
 }

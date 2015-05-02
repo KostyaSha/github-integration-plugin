@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest.events.impl;
 
 import hudson.Extension;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
@@ -15,6 +16,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.CheckForNull;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -27,6 +29,7 @@ import java.util.logging.Logger;
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRLabelExistsEvent extends GitHubPREvent {
+    private static final String DISPLAY_NAME = "Labels exist";
     private static final Logger LOGGER = Logger.getLogger(GitHubPRLabelExistsEvent.class.getName());
 
     private final GitHubPRLabel label;
@@ -37,7 +40,8 @@ public class GitHubPRLabelExistsEvent extends GitHubPREvent {
     }
 
     @Override
-    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR, @CheckForNull GitHubPRPullRequest localPR) throws IOException {
+    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
+                                        @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
         if (remotePR.getState().equals(GHIssueState.CLOSED)) {
             return null; // already closed, skip check?
         }
@@ -52,6 +56,8 @@ public class GitHubPRLabelExistsEvent extends GitHubPREvent {
         }
 
         if (existingLabels.containsAll(label.getLabelsSet())) {
+            final PrintStream logger = listener.getLogger();
+            logger.println(DISPLAY_NAME + ": " + label.getLabelsSet() + " found");
             cause = new GitHubPRCause(remotePR, remotePR.getUser(), label.getLabelsSet() + " labels exist", null, null);
         }
 
@@ -64,9 +70,10 @@ public class GitHubPRLabelExistsEvent extends GitHubPREvent {
 
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
+
         @Override
         public String getDisplayName() {
-            return "Labels exist";
+            return DISPLAY_NAME;
         }
     }
 }

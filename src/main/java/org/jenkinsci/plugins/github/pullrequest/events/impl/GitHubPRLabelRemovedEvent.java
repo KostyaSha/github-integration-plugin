@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest.events.impl;
 
 import hudson.Extension;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
@@ -15,6 +16,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.CheckForNull;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,6 +30,7 @@ import java.util.logging.Logger;
  * @author Alina Karpovich
  */
 public class GitHubPRLabelRemovedEvent extends GitHubPREvent {
+    private static final String DISPLAY_NAME = "Label removed";
     private static final Logger LOGGER = Logger.getLogger(GitHubPRLabelRemovedEvent.class.getName());
 
     private final GitHubPRLabel label;
@@ -38,7 +41,8 @@ public class GitHubPRLabelRemovedEvent extends GitHubPREvent {
     }
 
     @Override
-    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR, @CheckForNull GitHubPRPullRequest localPR) throws IOException {
+    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
+                                        @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
         if (remotePR.getState().equals(GHIssueState.CLOSED)) {
             return null; // already closed, skip check?
         }
@@ -75,6 +79,9 @@ public class GitHubPRLabelRemovedEvent extends GitHubPREvent {
             }
         }
         if (hasLocal && !hasRemote) { // really removed
+            final PrintStream logger = listener.getLogger();
+            logger.println(DISPLAY_NAME + ": state has changed ("
+                    + label.getLabelsSet() + " labels were removed)");
             cause = new GitHubPRCause(remotePR, remotePR.getUser(), label.getLabelsSet() + " labels were removed", null, null);
         }
 
@@ -87,9 +94,10 @@ public class GitHubPRLabelRemovedEvent extends GitHubPREvent {
 
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
+
         @Override
         public String getDisplayName() {
-            return "Label removed";
+            return DISPLAY_NAME;
         }
     }
 }

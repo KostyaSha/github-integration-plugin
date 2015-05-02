@@ -10,25 +10,15 @@ import com.squareup.okhttp.OkUrlFactory;
 import hudson.Extension;
 import hudson.Util;
 import hudson.XmlFile;
-import hudson.model.AbstractProject;
-import hudson.model.Action;
-import hudson.model.Cause;
-import hudson.model.CauseAction;
-import hudson.model.Item;
-import hudson.model.ParameterDefinition;
-import hudson.model.ParameterValue;
-import hudson.model.ParametersAction;
-import hudson.model.ParametersDefinitionProperty;
+import hudson.model.*;
 import hudson.model.Queue;
-import hudson.model.Run;
-import hudson.model.Saveable;
-import hudson.model.StringParameterValue;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.plugins.git.util.BuildData;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.DescribableList;
 import hudson.util.FormValidation;
+import hudson.util.StreamTaskListener;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 
@@ -57,12 +47,10 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.ObjectStreamException;
+import java.io.*;
 import java.net.Proxy;
 import java.net.URL;
+import java.text.DateFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -115,6 +103,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     private transient String repoFullName;
     private transient GHRepository remoteRepository;
     private transient GitHubPRRepository localRepository;
+    private GitHubPRPollingLogAction pollingLogAction;
 
     @DataBoundConstructor
     public GitHubPRTrigger(String spec,
@@ -206,31 +195,58 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         }
 
         long startTime = System.currentTimeMillis();
-        LOGGER.log(Level.FINE, "Running GitHub Pull Request trigger check.");
 
-        // triggers are always triggered on the cron, but we just no-op if we are using GitHub hooks.
-        if (getTriggerMode() != GitHubPRTriggerMode.CRON) {
-            return;
-        }
+        List<GitHubPRCause> causes = Collections.emptyList();
+        try (StreamTaskListener listener = new StreamTaskListener(pollingLogAction.getLogFile())) {
+            final PrintStream logger = listener.getLogger();
+            logger.println("Started on "+ DateFormat.getDateTimeInstance().format(new Date()));
+            LOGGER.log(Level.FINE, "Running GitHub Pull Request trigger check.");
 
-        GitHubPRRepository localRepository = null;
-        try {
-            localRepository = job.getAction(GitHubPRRepository.class);
-            check(localRepository);
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Can't save repository state, because: '{0}'", e.getMessage());
-        }
+            // triggers are always triggered on the cron, but we just no-op if we are using GitHub hooks.
+            if (getTriggerMode() != GitHubPRTriggerMode.CRON) {
+                return;
+            }
 
-        if (localRepository != null) {
+            GitHubPRRepository localRepository = null;
             try {
-                localRepository.save();
+                localRepository = job.getAction(GitHubPRRepository.class);
+                causes = check(localRepository, listener);
             } catch (IOException e) {
+                listener.error("Can't save repository state, because " + e.getMessage());
                 LOGGER.log(Level.SEVERE, "Can't save repository state, because: '{0}'", e.getMessage());
             }
+
+            if (localRepository != null) {
+                try {
+                    localRepository.save();
+                } catch (IOException e) {
+                    listener.error("Can't save repository state, because " + e.getMessage());
+                    LOGGER.log(Level.SEVERE, "Can't save repository state, because: '{0}'", e.getMessage());
+                }
+            }
+
+            long duration = System.currentTimeMillis() - startTime;
+            LOGGER.log(Level.INFO, "End  GitHub Pull Request trigger check. Summary time: {0}ms", duration);
+            logger.println("Finished at "+ DateFormat.getDateTimeInstance().format(new Date())
+                    + ", duration " + duration + "ms");
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "can't trigger build");
         }
 
-        long duration = System.currentTimeMillis() - startTime;
-        LOGGER.log(Level.INFO, "End  GitHub Pull Request trigger check. Summary time: {0}ms", duration);
+        for (GitHubPRCause cause : causes) {
+            try {
+                cause.setPollingLog(pollingLogAction.getLogFile());
+                build(cause);
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, "can't trigger build");
+            }
+        }
+    }
+
+    @Override
+    public Collection<? extends Action> getProjectActions() {
+        pollingLogAction = new GitHubPRPollingLogAction(job);
+        return Collections.singleton(pollingLogAction);
     }
 
     /**
@@ -244,10 +260,15 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
      * - last open PR <-> now changed -> trigger only
      * - special comment in PR -> trigger
      */
-    public void check(GitHubPRRepository localRepository) throws IOException {
+    public List<GitHubPRCause> check(GitHubPRRepository localRepository, TaskListener listener) throws IOException {
+        final PrintStream logger = listener.getLogger();
+
         GHRateLimit rateLimitBefore = getGitHub().getRateLimit();
         LOGGER.log(Level.FINE, "GitHub rate limit before check: {0}", rateLimitBefore);
+        logger.println("GitHub rate limit before check: " + rateLimitBefore);
         int checkedPR = 0;
+
+        final ArrayList<GitHubPRCause> gitHubPRCauses = new ArrayList<GitHubPRCause>();
 
         // get local and remote list of PRs
         HashMap<Integer, GitHubPRPullRequest> localPulls = localRepository.getPulls();
@@ -279,7 +300,9 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             @CheckForNull GitHubPRPullRequest localPR = localPulls.get(remotePR.getNumber());
 
             if (!isUpdated(remotePR, localPR)) { // light check
-                LOGGER.log(Level.FINE, "PR {0} not changed", remotePR.getNumber());
+                LOGGER.log(Level.FINE, "PR #{0} {1} not changed", new Object[] {remotePR.getNumber(),
+                        remotePR.getTitle()});
+                logger.println("PR #" + remotePR.getNumber() + " " + remotePR.getTitle()+ " not changed");
                 continue;
             }
 
@@ -299,44 +322,58 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             if (skipFirstRun) {
                 LOGGER.log(Level.INFO, "Skipping first run for {0} and PR #{1}",
                         new Object[]{job.getFullName(), remotePR.getNumber()});
+                logger.println("Skipping first run for " + job.getFullName() + " and PR #" + remotePR.getNumber());
                 continue;
             }
 
             if (branchRestriction != null && branchRestriction.isBranchBuildAllowed(remotePR)) {
-                LOGGER.log(Level.WARNING, "Skipping because branch for" + remotePR.getTitle());
+                LOGGER.log(Level.WARNING, "Skipping #{0} {1} because of branch restriction",
+                        new Object[] {remotePR.getNumber(), remotePR.getTitle()});
+                logger.println("Skipping #" + remotePR.getNumber() + " " + remotePR.getTitle()
+                        + " because of branch restriction");
                 continue;
             }
 
             if (userRestriction != null && !userRestriction.isWhitelisted(remotePR.getUser())) {
-                LOGGER.log(Level.WARNING, "Skipping user {0}", remotePR.getUser());
+                LOGGER.log(Level.WARNING, "Skipping #{0} {1} because of user restriction (user - {2})",
+                        new Object[] {remotePR.getNumber(), remotePR.getTitle(), remotePR.getUser()});
+                logger.println("Skipping #"+ remotePR.getNumber() + " " + remotePR.getTitle()
+                        + " because of user restriction (user - " + remotePR.getUser() + ")");
                 continue;
             }
 
             for (GitHubPREvent event : getEvents()) {  // waterfall, first matched win
                 // skip event
                 try {
-                    if (event.isSkip(this, remotePR, localPR)) {
+                    if (event.isSkip(this, remotePR, localPR, listener)) {
                         LOGGER.log(Level.FINE, "Skipping PR #{0}", remotePR.getNumber());
+                        logger.println("Skipping PR #"+ remotePR.getNumber());
                         continue;
                     }
                 } catch (IOException e) {
                     // because we can't be sure that we allowed to trigger build
                     LOGGER.log(Level.WARNING, "Skip event failed, so skipping PR", e);
+                    listener.error("Skip event failed, so skipping PR");
                     continue;
                 }
 
                 // trigger event
                 try {
-                    GitHubPRCause cause = event.isStateChanged(this, remotePR, localPR);
-                    LOGGER.log(Level.FINE, "Triggering build for {0}, because {1}",
-                            new Object[]{remotePR.getNumber(), cause.getReason()});
-                    build(cause);
-                    break; // don't check other events
+                    GitHubPRCause cause = event.isStateChanged(this, remotePR, localPR, listener);
+                    if (cause != null) {
+                        LOGGER.log(Level.FINE, "Triggering build for {0}, because {1}",
+                                new Object[]{remotePR.getNumber(), cause.getReason()});
+                        logger.println("Triggering build for " + remotePR.getNumber()
+                                + " because " + cause.getReason());
+                        gitHubPRCauses.add(cause);
+                        break; // don't check other events
+                    }
                 } catch (IOException e) {
                     LOGGER.log(Level.WARNING, "Can't check trigger event", e);
                 }
             }
         }
+
 
         if (skipFirstRun) {
             LOGGER.log(Level.INFO, "Skipping first run for {0}", job.getFullName());
@@ -348,6 +385,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         int consumed = rateLimitBefore.remaining - rateLimitAfter.remaining;
         LOGGER.log(Level.INFO, "GitHub rate limit after check: {0}, consumed: {1}, checked PRs: {2}",
                 new Object[]{rateLimitAfter, consumed, checkedPR});
+        return gitHubPRCauses;
     }
 
     /**

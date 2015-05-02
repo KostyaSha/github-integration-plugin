@@ -1,5 +1,8 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
+import hudson.model.AbstractBuild;
+import hudson.triggers.SCMTrigger;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHUser;
@@ -8,6 +11,7 @@ import hudson.model.Cause;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
@@ -15,6 +19,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.util.logging.Level.WARNING;
 
 public class GitHubPRCause extends Cause {
     private static final Logger LOGGER = Logger.getLogger(GitHubPRCause.class.getName());
@@ -40,6 +46,7 @@ public class GitHubPRCause extends Cause {
     private final String commitAuthorName;
     private final String commitAuthorEmail;
     private String condRef;
+    private String pollingLog;
 
     public GitHubPRCause(GHPullRequest remotePr,
                          GHUser triggerSender,
@@ -95,6 +102,18 @@ public class GitHubPRCause extends Cause {
         }
 
         this.condRef = mergeable ? "merge" : "head";
+    }
+
+    @Override
+    public void onAddedTo(AbstractBuild build) {
+        try {
+            SCMTrigger.BuildAction action = new SCMTrigger.BuildAction(build);
+            FileUtils.writeStringToFile(action.getPollingLogFile(), pollingLog);
+            build.replaceAction(action);
+        } catch (IOException e) {
+            LOGGER.log(WARNING,"Failed to persist the polling log",e);
+        }
+        pollingLog = null;
     }
 
     @Override
@@ -182,6 +201,14 @@ public class GitHubPRCause extends Cause {
     @Nonnull
     public String getCondRef() {
         return condRef;
+    }
+
+    public void setPollingLog(String pollingLog) {
+        this.pollingLog = pollingLog;
+    }
+
+    public void setPollingLog(File logFile) throws IOException {
+        this.pollingLog = FileUtils.readFileToString(logFile);
     }
 
     @Override

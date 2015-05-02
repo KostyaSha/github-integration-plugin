@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest.events;
 
 import hudson.model.AbstractDescribableImpl;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
@@ -31,8 +32,8 @@ public abstract class GitHubPREvent extends AbstractDescribableImpl<GitHubPREven
     public GitHubPRCause isStateChanged(
             GitHubPRTrigger gitHubPRTrigger,
             GHPullRequest remotePR,
-            @CheckForNull GitHubPRPullRequest localPR
-    ) throws IOException {
+            @CheckForNull GitHubPRPullRequest localPR,
+            TaskListener listener) throws IOException {
         return null;
     }
 
@@ -45,7 +46,8 @@ public abstract class GitHubPREvent extends AbstractDescribableImpl<GitHubPREven
      */
     public boolean isSkip(GitHubPRTrigger gitHubPRTrigger,
                           GHPullRequest remotePR,
-                          @CheckForNull GitHubPRPullRequest localPR)
+                          @CheckForNull GitHubPRPullRequest localPR,
+                          TaskListener listener)
             throws IOException {
         return false;
     }
@@ -53,7 +55,9 @@ public abstract class GitHubPREvent extends AbstractDescribableImpl<GitHubPREven
     /**
      * Check that is used for lightweight hooks (pure GitHub hooks).
      */
-    public GitHubPRCause checkHook(GitHubPRTrigger gitHubPRTrigger, GHEventPayload payload) {
+    public GitHubPRCause checkHook(GitHubPRTrigger gitHubPRTrigger,
+                                   GHEventPayload payload,
+                                   TaskListener listener) {
         return null;
     }
 
