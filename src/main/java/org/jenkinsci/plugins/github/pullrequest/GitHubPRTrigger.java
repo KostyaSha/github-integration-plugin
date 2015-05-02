@@ -194,6 +194,11 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             return;
         }
 
+        // triggers are always triggered on the cron, but we just no-op if we are using GitHub hooks.
+        if (getTriggerMode() != GitHubPRTriggerMode.CRON) {
+            return;
+        }
+
         long startTime = System.currentTimeMillis();
 
         List<GitHubPRCause> causes = Collections.emptyList();
@@ -201,11 +206,6 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             final PrintStream logger = listener.getLogger();
             logger.println("Started on "+ DateFormat.getDateTimeInstance().format(new Date()));
             LOGGER.log(Level.FINE, "Running GitHub Pull Request trigger check.");
-
-            // triggers are always triggered on the cron, but we just no-op if we are using GitHub hooks.
-            if (getTriggerMode() != GitHubPRTriggerMode.CRON) {
-                return;
-            }
 
             GitHubPRRepository localRepository = null;
             try {
@@ -302,7 +302,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             if (!isUpdated(remotePR, localPR)) { // light check
                 LOGGER.log(Level.FINE, "PR #{0} {1} not changed", new Object[] {remotePR.getNumber(),
                         remotePR.getTitle()});
-                logger.println("PR #" + remotePR.getNumber() + " " + remotePR.getTitle()+ " not changed");
+                logger.println("PR #" + remotePR.getNumber() + " " + remotePR.getTitle() + " not changed");
                 continue;
             }
 
