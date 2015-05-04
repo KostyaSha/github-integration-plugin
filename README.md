@@ -48,11 +48,8 @@ TODO:
 
  - [ ] review injected variables in Cause and String parameters
  - [ ] integrate with git-plugin by providing patch for BuildData get through BuildChooser?
- - [ ] introduce enum/class for triggering modes
  - [ ] implement hooks triggering
- - [ ] polling log Action for project/build
- - [ ] help files
- - [ ] tests
+ - [ ] more tests
 
 Configuration:
  - Set GitHub project property with link to your GH repository
