@@ -44,11 +44,6 @@ Integration with [github-plugin](https://wiki.jenkins-ci.org/display/JENKINS/Git
   - have one Global configuration
   - reuse credentials lookup
 
-Can supersede?
-
- - [ghprb-plugin](https://wiki.jenkins-ci.org/display/JENKINS/GitHub+pull+request+builder+plugin)
- - CloudBees PR plugin
-
 TODO:
 
  - [ ] review injected variables in Cause and String parameters
