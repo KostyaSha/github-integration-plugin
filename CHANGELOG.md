@@ -1,5 +1,8 @@
 ## Changelog
 
+## 0.1.0-beta8
+Version forward: maven-release-plugin failed
+
 ## 0.1.0-beta7
 
 * Polling log in project/build
