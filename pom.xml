@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>github-pullrequest</artifactId>
-    <version>0.0.1-beta7</version>
+    <version>0.0.1-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <name>GitHub Pull Request Plugin</name>
