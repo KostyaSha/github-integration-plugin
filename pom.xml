@@ -17,7 +17,7 @@
 
     <name>GitHub Pull Request Plugin</name>
     <description>GitHub Pull Request Plugin for Jenkins</description>
-    <!--<url>https://wiki.jenkins-ci.org/display/JENKINS/GitHub+Pull+Request+plugin</url>-->
+    <url>https://wiki.jenkins-ci.org/display/JENKINS/GitHub+Pull+Request+Plugin</url>
     <licenses>
         <license>
             <name>MIT License</name>
