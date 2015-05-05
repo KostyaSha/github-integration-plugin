@@ -47,7 +47,7 @@ public class GitHubPROpenEvent extends GitHubPREvent {
         if (localPR == null) { // new
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": state has changed (PR was opened)");
-            cause = new GitHubPRCause(remotePR, remotePR.getUser(), causeMessage, isSkip(), null, null);
+            cause = new GitHubPRCause(remotePR, causeMessage, isSkip());
         }
 
         return cause;

@@ -48,7 +48,7 @@ public class GitHubPRNonMergeableEvent extends GitHubPREvent {
         mergeable = mergeable != null ? mergeable : false;
 
         if (!mergeable) {
-            return new GitHubPRCause(remotePR, remotePR.getUser(), DISPLAY_NAME, isSkip(), null, null);
+            return new GitHubPRCause(remotePR, DISPLAY_NAME, isSkip());
         }
 
         return null;

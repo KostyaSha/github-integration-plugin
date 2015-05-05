@@ -81,7 +81,7 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
             if ((userRestriction == null || userRestriction.isWhitelisted(comment.getUser()))
                     && Pattern.compile(this.comment).matcher(body).matches()) {
                 LOGGER.log(Level.FINEST, "Triggering by comment '{0}'", body);
-                cause = new GitHubPRCause(remotePR, remotePR.getUser(), "PR was triggered by comment", isSkip(), null, null);
+                cause = new GitHubPRCause(remotePR, "PR was triggered by comment", isSkip());
             }
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, "Couldn't check comment #" + comment.getId(), ex);

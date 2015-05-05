@@ -68,7 +68,7 @@ public class GitHubPRTriggerTest {
 
         GitHubPRCause cause = new GitHubPRCause("headSha", 1, true, "targetBranch", "srcBranch","mail@mail.com",
                 "title", new URL("http://www.example.com"), "repoOwner", new HashSet<String>(),
-                null, "nice reason", "author name", "anotherMait@mail.com");
+                null, false, "nice reason", "author name", "anotherMait@mail.com");
         FreeStyleBuild build = p.scheduleBuild2(0, cause).get();
         j.waitUntilNoActivity();
 

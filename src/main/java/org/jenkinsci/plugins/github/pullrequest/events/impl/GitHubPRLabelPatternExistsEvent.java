@@ -48,7 +48,7 @@ public class GitHubPRLabelPatternExistsEvent extends GitHubPREvent {
                 if (labelPattern.matcher(label.getName()).matches()) {
                     logger.println(DISPLAY_NAME + ": Pull request has label: " + labelPatternStr);
                     LOGGER.log(Level.INFO, "Pull request has '{0}' label.", labelPatternStr);
-                    cause = new GitHubPRCause(remotePR, remotePR.getUser(), "PR has label: " + labelPatternStr, isSkip(), null, null);
+                    cause = new GitHubPRCause(remotePR, "PR has label: " + labelPatternStr, isSkip());
 
                     break OUT;
                 }

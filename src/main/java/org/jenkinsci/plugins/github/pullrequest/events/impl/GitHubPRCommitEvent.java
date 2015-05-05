@@ -48,7 +48,7 @@ public class GitHubPRCommitEvent extends GitHubPREvent {
             final PrintStream logger = listener.getLogger();
             logger.println(this.getClass().getSimpleName() + ": new commit found, sha " + head.getSha());
             GHUser user = head.getUser();
-            cause = new GitHubPRCause(remotePR, remotePR.getUser(), DISPLAY_NAME, isSkip(), user.getName(), user.getEmail());
+            cause = new GitHubPRCause(remotePR, DISPLAY_NAME, isSkip());
         }
 
         return cause;

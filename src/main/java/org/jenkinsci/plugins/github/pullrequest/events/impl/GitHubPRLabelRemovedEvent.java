@@ -82,7 +82,7 @@ public class GitHubPRLabelRemovedEvent extends GitHubPREvent {
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": state has changed ("
                     + label.getLabelsSet() + " labels were removed)");
-            cause = new GitHubPRCause(remotePR, remotePR.getUser(), label.getLabelsSet() + " labels were removed", isSkip(), null, null);
+            cause = new GitHubPRCause(remotePR, label.getLabelsSet() + " labels were removed", isSkip());
         }
 
         return cause;

@@ -59,8 +59,8 @@ public class GitHubPRDescriptionEvent extends GitHubPREvent {
                     LOGGER.log(Level.INFO, "Pull request description with {0} skipBuildPhrase. Hence skipping the buildAndComment.",
                             skipBuildPhrase);
                     logger.println(DISPLAY_NAME + ": Pull request description contains " + skipBuildPhrase + ", skipping");
-                    cause = new GitHubPRCause(remotePR, remotePR.getUser(),
-                            "Pull request description contains " + skipBuildPhrase + ", skipping", isSkip(), null, null);
+                    cause = new GitHubPRCause(remotePR, "Pull request description contains " + skipBuildPhrase + ", skipping",
+                            isSkip());
                     break;
                 }
             }

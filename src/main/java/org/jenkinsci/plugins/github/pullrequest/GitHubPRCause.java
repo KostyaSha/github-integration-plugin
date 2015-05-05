@@ -49,25 +49,20 @@ public class GitHubPRCause extends Cause {
     private String pollingLog;
 
     public GitHubPRCause(GHPullRequest remotePr,
-                         GHUser triggerSender,
                          String reason,
-                         boolean skip,
-                         String commitAuthorName,
-                         String commitAuthorEmail) throws IOException {
-        this(new GitHubPRPullRequest(remotePr), triggerSender, skip, reason, commitAuthorName, commitAuthorEmail);
+                         boolean skip) throws IOException {
+        this(new GitHubPRPullRequest(remotePr), remotePr.getUser(), skip, reason);
     }
 
     public GitHubPRCause(GitHubPRPullRequest pr,
                          GHUser triggerSender,
                          boolean skip,
-                         String reason,
-                         String commitAuthorName,
-                         String commitAuthorEmail) throws IOException {
+                         String reason) throws IOException {
         this(pr.getHeadSha(), pr.getNumber(),
                 pr.isMergeable(), pr.getBaseRef(), pr.getHeadRef(),
                 pr.getUserEmail(), pr.getTitle(), pr.getHtmlUrl(), pr.getSourceRepoOwner(),
                 pr.getLabels(),
-                triggerSender, skip, reason, commitAuthorName, commitAuthorEmail);
+                triggerSender, skip, reason,"", "");
     }
 
     public GitHubPRCause(String headSha, int number, boolean mergeable,
