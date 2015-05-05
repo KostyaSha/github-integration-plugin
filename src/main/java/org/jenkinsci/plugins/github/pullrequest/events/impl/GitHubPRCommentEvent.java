@@ -4,13 +4,10 @@ import hudson.Extension;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREventDescriptor;
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction;
-import org.kohsuke.github.GHEventPayload;
-import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -23,28 +20,35 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
- * Trigger PR based on comment status
+ * Trigger/skip PR based on comment pattern
  *
  * @author Kanstantsin Shautsou
  */
-public class GitHubPRMessageEvent extends GitHubPREvent {
-    private static final String DISPLAY_NAME = "Comment message";
-    private final static Logger LOGGER = Logger.getLogger(GitHubPRMessageEvent.class.getName());
+public class GitHubPRCommentEvent extends GitHubPREvent {
+    private static final String DISPLAY_NAME = "Comment matched to pattern";
+    private final static Logger LOGGER = Logger.getLogger(GitHubPRCommentEvent.class.getName());
 
-    private String runMsg = ".*test\\W+this\\W+please.*";
+    private String comment = "";
 
-    public String getRunMsg() {
-        return runMsg;
+    private boolean skip;
+
+    public String getComment() {
+        return comment;
+    }
+
+    public boolean isSkip() {
+        return skip;
     }
 
     @DataBoundConstructor
-    public GitHubPRMessageEvent(String runMsg) {
-        this.runMsg = runMsg;
+    public GitHubPRCommentEvent(String comment, boolean skip) {
+        this.comment = comment;
+        this.skip = skip;
     }
 
     @Override
-    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
-                                        @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) {
+    public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
+                               @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) {
         if (localPR == null || localPR.getLastCommentCreatedAt() == null) {
             return null; // nothing to compare
         }
@@ -75,9 +79,9 @@ public class GitHubPRMessageEvent extends GitHubPREvent {
             String body = comment.getBody();
 
             if ((userRestriction == null || userRestriction.isWhitelisted(comment.getUser()))
-                    && Pattern.compile(runMsg).matcher(body).matches()) {
+                    && Pattern.compile(this.comment).matcher(body).matches()) {
                 LOGGER.log(Level.FINEST, "Triggering by comment '{0}'", body);
-                cause = new GitHubPRCause(remotePR, remotePR.getUser(), "PR was triggered by comment", null, null);
+                cause = new GitHubPRCause(remotePR, remotePR.getUser(), "PR was triggered by comment", isSkip(), null, null);
             }
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, "Couldn't check comment #" + comment.getId(), ex);

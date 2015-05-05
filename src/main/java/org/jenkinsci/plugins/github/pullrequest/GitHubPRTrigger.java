@@ -9,14 +9,11 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.OkUrlFactory;
 import hudson.Extension;
 import hudson.Util;
-import hudson.XmlFile;
 import hudson.model.*;
 import hudson.model.Queue;
 import hudson.model.queue.QueueTaskFuture;
-import hudson.plugins.git.util.BuildData;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
-import hudson.util.DescribableList;
 import hudson.util.FormValidation;
 import hudson.util.StreamTaskListener;
 import jenkins.model.Jenkins;
@@ -28,8 +25,6 @@ import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRBranchRestr
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction;
 import org.kohsuke.github.GHAuthorization;
 import org.kohsuke.github.GHCommitState;
-import org.kohsuke.github.GHEvent;
-import org.kohsuke.github.GHHook;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRateLimit;
@@ -49,7 +44,6 @@ import javax.servlet.ServletException;
 
 import java.io.*;
 import java.net.Proxy;
-import java.net.URL;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.logging.Level;
@@ -337,7 +331,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             if (userRestriction != null && !userRestriction.isWhitelisted(remotePR.getUser())) {
                 LOGGER.log(Level.WARNING, "Skipping #{0} {1} because of user restriction (user - {2})",
                         new Object[] {remotePR.getNumber(), remotePR.getTitle(), remotePR.getUser()});
-                logger.println("Skipping #"+ remotePR.getNumber() + " " + remotePR.getTitle()
+                logger.println("Skipping #" + remotePR.getNumber() + " " + remotePR.getTitle()
                         + " because of user restriction (user - " + remotePR.getUser() + ")");
                 continue;
             }
@@ -345,25 +339,25 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             for (GitHubPREvent event : getEvents()) {  // waterfall, first matched win
                 // skip event
                 try {
-                    if (event.isSkip(this, remotePR, localPR, listener)) {
+                    if (event.isSkip() && event.check(this, remotePR, localPR, listener) != null) {
                         LOGGER.log(Level.FINE, "Skipping PR #{0}", remotePR.getNumber());
                         logger.println("Skipping PR #"+ remotePR.getNumber());
-                        continue;
+                        break;
                     }
                 } catch (IOException e) {
                     // because we can't be sure that we allowed to trigger build
                     LOGGER.log(Level.WARNING, "Skip event failed, so skipping PR", e);
                     listener.error("Skip event failed, so skipping PR");
-                    continue;
+                    break;
                 }
 
                 // trigger event
                 try {
-                    GitHubPRCause cause = event.isStateChanged(this, remotePR, localPR, listener);
+                    GitHubPRCause cause = event.check(this, remotePR, localPR, listener);
                     if (cause != null) {
-                        LOGGER.log(Level.FINE, "Triggering build for {0}, because {1}",
+                        LOGGER.log(Level.FINE, "Triggering build for PR #'{0}', because {1}",
                                 new Object[]{remotePR.getNumber(), cause.getReason()});
-                        logger.println("Triggering build for " + remotePR.getNumber()
+                        logger.println("Triggering build for PR #" + remotePR.getNumber()
                                 + " because " + cause.getReason());
                         gitHubPRCauses.add(cause);
                         break; // don't check other events
@@ -496,6 +490,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         values.add(new StringParameterValue("GITHUB_PR_SOURCE_REPO_OWNER", valueOf(cause.getSourceRepoOwner())));
         values.add(new StringParameterValue("GITHUB_PR_HEAD_SHA", cause.getHeadSha()));
         values.add(new StringParameterValue("GITHUB_PR_COND_REF", cause.getCondRef()));  //TODO better name?
+        values.add(new BooleanParameterValue("GITHUB_PR_CAUSE_SKIP", cause.isSkip()));
         final StringParameterValue prNumber = new StringParameterValue("GITHUB_PR_NUMBER", valueOf(Integer.toString(cause.getNumber())));
         values.add(prNumber);
 
@@ -599,7 +594,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             throw ex;
         } catch (Throwable t) {
             LOGGER.log(Level.FINE, "Can't connect to GitHub {0}. Bad Global plugin configuration.", t.getMessage());
-            throw new IOException("Can''t connect to GitHub: " + t.getMessage() + ". Bad Global plugin configuration.");
+            throw new IOException("Can't connect to GitHub: " + t.getMessage() + ". Bad Global plugin configuration.");
         }
 
         if (gh == null) {

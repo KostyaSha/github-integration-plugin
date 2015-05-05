@@ -29,8 +29,8 @@ public class GitHubPRCommitEvent extends GitHubPREvent {
     }
 
     @Override
-    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
-                                        GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
+    public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
+                               GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
         if (remotePR.getState().equals(GHIssueState.CLOSED)) {
             //TODO check whether push to closed allowed?
             return null; // already closed, nothing to check
@@ -48,7 +48,7 @@ public class GitHubPRCommitEvent extends GitHubPREvent {
             final PrintStream logger = listener.getLogger();
             logger.println(this.getClass().getSimpleName() + ": new commit found, sha " + head.getSha());
             GHUser user = head.getUser();
-            cause = new GitHubPRCause(remotePR, remotePR.getUser(), DISPLAY_NAME, user.getName(), user.getEmail());
+            cause = new GitHubPRCause(remotePR, remotePR.getUser(), DISPLAY_NAME, isSkip(), user.getName(), user.getEmail());
         }
 
         return cause;

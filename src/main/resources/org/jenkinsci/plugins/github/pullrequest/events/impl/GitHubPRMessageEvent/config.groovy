@@ -2,6 +2,10 @@ package org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRMessageEven
 
 def f = namespace(lib.FormTagLib);
 
-f.entry(title:_("Trigger phrase"), field:"runMsg") {
+f.entry(field: "skip", title: "Skip PR?") {
+    f.checkbox()
+}
+
+f.entry(title:_("Comment"), field:"comment") {
     f.textbox()
 }

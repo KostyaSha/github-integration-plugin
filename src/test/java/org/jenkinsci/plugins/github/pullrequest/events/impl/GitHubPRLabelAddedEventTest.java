@@ -5,13 +5,11 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kohsuke.github.*;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
@@ -70,7 +68,7 @@ public class GitHubPRLabelAddedEventTest {
         when(reviewedLabel.getName()).thenReturn(REVIEWED);
         
         GitHubPRLabelAddedEvent instance = new GitHubPRLabelAddedEvent(labels);
-        GitHubPRCause cause = instance.isStateChanged(null, remotePr,localPR, listener);
+        GitHubPRCause cause = instance.check(null, remotePr, localPR, listener);
         Assert.assertNull(cause);
     }
 
@@ -101,7 +99,7 @@ public class GitHubPRLabelAddedEventTest {
         causeCreationExpectations();
 
         GitHubPRLabelAddedEvent instance = new GitHubPRLabelAddedEvent(labels);
-        GitHubPRCause cause = instance.isStateChanged(null, remotePr,localPR, listener);
+        GitHubPRCause cause = instance.check(null, remotePr, localPR, listener);
         Assert.assertEquals(localLabels, cause.getLabels());
     }
 
@@ -131,7 +129,7 @@ public class GitHubPRLabelAddedEventTest {
                 .thenReturn(MERGE);
 
         GitHubPRLabelAddedEvent instance = new GitHubPRLabelAddedEvent(labels);
-        GitHubPRCause cause = instance.isStateChanged(null, remotePr,localPR, listener);
+        GitHubPRCause cause = instance.check(null, remotePr, localPR, listener);
         Assert.assertNull(cause);
     }
 
@@ -161,7 +159,7 @@ public class GitHubPRLabelAddedEventTest {
                 .thenReturn(MERGE);
 
         GitHubPRLabelAddedEvent instance = new GitHubPRLabelAddedEvent(labels);
-        GitHubPRCause cause = instance.isStateChanged(null, remotePr,localPR, listener);
+        GitHubPRCause cause = instance.check(null, remotePr, localPR, listener);
         Assert.assertNull(cause);
     }
     

@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRLabelExistsEvent;
+package org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRLabelPatternExistsEvent;
 
 def f = namespace(lib.FormTagLib);
 

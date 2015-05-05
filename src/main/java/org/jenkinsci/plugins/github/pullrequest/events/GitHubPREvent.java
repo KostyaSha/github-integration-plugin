@@ -21,35 +21,28 @@ public abstract class GitHubPREvent extends AbstractDescribableImpl<GitHubPREven
     private static final Logger LOGGER = Logger.getLogger(GitHubPREvent.class.getName());
 
     /**
+     * Is it skip event?
+     *
+     * @return true when this event must be skip event
+     */
+    public boolean isSkip() {
+        return false;
+    }
+
+    /**
      * indicates that PR was changed
      *
      * @param remotePR current PR state fetched from GH
      * @param localPR  PR state from last run saved in jenkins. null when not exist before
      * @return true if PR should be run
      */
-
     @CheckForNull
-    public GitHubPRCause isStateChanged(
+    public GitHubPRCause check(
             GitHubPRTrigger gitHubPRTrigger,
             GHPullRequest remotePR,
             @CheckForNull GitHubPRPullRequest localPR,
             TaskListener listener) throws IOException {
         return null;
-    }
-
-    /**
-     * Indicates that PR must be skip even if any isStateChanged returned true.
-     *
-     * @param remotePR current PR state fetched from GH
-     * @param localPR  PR state from last run saved in jenkins. null when not exist before
-     * @return if true PR run skipped
-     */
-    public boolean isSkip(GitHubPRTrigger gitHubPRTrigger,
-                          GHPullRequest remotePR,
-                          @CheckForNull GitHubPRPullRequest localPR,
-                          TaskListener listener)
-            throws IOException {
-        return false;
     }
 
     /**

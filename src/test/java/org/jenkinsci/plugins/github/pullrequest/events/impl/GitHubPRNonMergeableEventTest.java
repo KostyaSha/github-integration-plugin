@@ -19,7 +19,7 @@ import static org.mockito.Mockito.*;
  * @author Alina Karpovich
  */
 @RunWith(MockitoJUnitRunner.class)
-public class GitHubPRSkipNonMergeableEventTest {
+public class GitHubPRNonMergeableEventTest {
 
     @Mock private GitHubPRTrigger trigger;
     @Mock private GHPullRequest remotePr;
@@ -29,7 +29,7 @@ public class GitHubPRSkipNonMergeableEventTest {
 
     @Test
     public void remotePRIsMergeable() throws IOException {
-        GitHubPRSkipNonMergeableEvent instance = new GitHubPRSkipNonMergeableEvent();
+        GitHubPRNonMergeableEvent instance = new GitHubPRNonMergeableEvent();
 
         when(remotePr.getMergeable()).thenReturn(true);
         when(listener.getLogger()).thenReturn(logger);
@@ -39,7 +39,7 @@ public class GitHubPRSkipNonMergeableEventTest {
 
     @Test
     public void remotePRIsNotMergeable() throws IOException {
-        GitHubPRSkipNonMergeableEvent instance = new GitHubPRSkipNonMergeableEvent();
+        GitHubPRNonMergeableEvent instance = new GitHubPRNonMergeableEvent();
 
         when(remotePr.getMergeable()).thenReturn(false);
         when(listener.getLogger()).thenReturn(logger);
@@ -49,7 +49,7 @@ public class GitHubPRSkipNonMergeableEventTest {
 
     @Test
     public void remotePRReturnsNullForMergeable() throws IOException {
-        GitHubPRSkipNonMergeableEvent instance = new GitHubPRSkipNonMergeableEvent();
+        GitHubPRNonMergeableEvent instance = new GitHubPRNonMergeableEvent();
 
         when(remotePr.getMergeable()).thenReturn(null);
         when(listener.getLogger()).thenReturn(logger);
@@ -59,7 +59,7 @@ public class GitHubPRSkipNonMergeableEventTest {
 
     @Test
     public void remotePRThrowsExceptionForMergeable() throws IOException {
-        GitHubPRSkipNonMergeableEvent instance = new GitHubPRSkipNonMergeableEvent();
+        GitHubPRNonMergeableEvent instance = new GitHubPRNonMergeableEvent();
 
         when(remotePr.getMergeable()).thenThrow(new IOException("test IO"));
         when(listener.getLogger()).thenReturn(logger);

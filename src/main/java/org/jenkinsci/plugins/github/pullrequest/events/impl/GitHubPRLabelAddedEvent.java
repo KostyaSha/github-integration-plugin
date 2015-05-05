@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRLabelAddedEvent extends GitHubPREvent {
-    private static final String DISPLAY_NAME = "Label added";
+    private static final String DISPLAY_NAME = "Labels added";
     private static final Logger LOGGER = Logger.getLogger(GitHubPRLabelAddedEvent.class.getName());
 
     private final GitHubPRLabel label;
@@ -46,8 +46,8 @@ public class GitHubPRLabelAddedEvent extends GitHubPREvent {
     }
 
     @Override
-    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
-                                        @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
+    public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
+                               @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
         if (remotePR.getState().equals(GHIssueState.CLOSED)) {
             return null; // already closed, skip check?
         }
@@ -70,7 +70,7 @@ public class GitHubPRLabelAddedEvent extends GitHubPREvent {
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": state has changed (" + label.getLabelsSet() + " labels were added");
             cause = new GitHubPRCause(remotePR, remotePR.getUser(), label.getLabelsSet()
-                    + " labels were added", null, null);
+                    + " labels were added", isSkip(), null, null);
         }
 
         return cause;
