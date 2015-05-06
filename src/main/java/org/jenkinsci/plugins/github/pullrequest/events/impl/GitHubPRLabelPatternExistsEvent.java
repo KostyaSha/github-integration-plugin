@@ -40,22 +40,18 @@ public class GitHubPRLabelPatternExistsEvent extends GitHubPREvent {
     public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR, @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
         final PrintStream logger = listener.getLogger();
 
-        GitHubPRCause cause = null;
-        OUT:
         for (GHLabel label : remotePR.getRepository().getIssue(remotePR.getNumber()).getLabels()) {
             for (String labelPatternStr : this.label.getLabelsSet()) {
                 Pattern labelPattern = Pattern.compile(labelPatternStr);
                 if (labelPattern.matcher(label.getName()).matches()) {
                     logger.println(DISPLAY_NAME + ": Pull request has label: " + labelPatternStr);
                     LOGGER.log(Level.INFO, "Pull request has '{0}' label.", labelPatternStr);
-                    cause = new GitHubPRCause(remotePR, "PR has label: " + labelPatternStr, isSkip());
-
-                    break OUT;
+                    return new GitHubPRCause(remotePR, "PR has label: " + labelPatternStr, isSkip());
                 }
             }
         }
 
-        return cause;
+        return null;
     }
 
     public GitHubPRLabel getLabel() {
