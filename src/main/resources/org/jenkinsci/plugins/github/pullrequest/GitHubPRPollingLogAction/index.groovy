@@ -13,7 +13,7 @@ l.layout(title: my.displayName) {
     st.include(page: "sidepanel", it: my.project)
     l.main_panel() {
         h1(my.displayName);
-        h4("Polling log of last attempt of build.")
+//        h4("Polling log of last attempt of build.")
         def log = my.log;
         if (log) {j
             pre() {

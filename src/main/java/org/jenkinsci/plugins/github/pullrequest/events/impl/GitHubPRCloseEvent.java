@@ -29,8 +29,8 @@ public class GitHubPRCloseEvent extends GitHubPREvent {
     }
 
     @Override
-    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
-                                        GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
+    public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
+                               GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
         if (localPR == null) {
             return null;
         }
@@ -41,7 +41,7 @@ public class GitHubPRCloseEvent extends GitHubPREvent {
         if (remotePR.getState().equals(GHIssueState.CLOSED)) {
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": state has changed (PR was closed)");
-            cause = new GitHubPRCause(remotePR, null, "PR was closed", null, null);
+            cause = new GitHubPRCause(remotePR, "PR was closed", isSkip());
         }
 
         return cause;

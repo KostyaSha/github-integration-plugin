@@ -36,8 +36,8 @@ public class GitHubPROpenEvent extends GitHubPREvent {
     }
 
     @Override
-    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
-                                        @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
+    public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
+                               @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
         if (remotePR.getState().equals(GHIssueState.CLOSED)) {
             return null; // already closed, nothing to check
         }
@@ -47,7 +47,7 @@ public class GitHubPROpenEvent extends GitHubPREvent {
         if (localPR == null) { // new
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": state has changed (PR was opened)");
-            cause = new GitHubPRCause(remotePR, remotePR.getUser(), causeMessage, null, null);
+            cause = new GitHubPRCause(remotePR, causeMessage, isSkip());
         }
 
         return cause;

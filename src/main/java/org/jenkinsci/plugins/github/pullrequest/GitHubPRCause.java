@@ -1,13 +1,12 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
 import hudson.model.AbstractBuild;
+import hudson.model.Cause;
 import hudson.triggers.SCMTrigger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHUser;
-
-import hudson.model.Cause;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -15,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,33 +43,32 @@ public class GitHubPRCause extends Cause {
      */
     private final String commitAuthorName;
     private final String commitAuthorEmail;
+
+    private boolean skip;
     private String condRef;
     private String pollingLog;
 
     public GitHubPRCause(GHPullRequest remotePr,
-                         GHUser triggerSender,
                          String reason,
-                         String commitAuthorName,
-                         String commitAuthorEmail) throws IOException {
-        this(new GitHubPRPullRequest(remotePr), triggerSender, reason, commitAuthorName, commitAuthorEmail);
+                         boolean skip) throws IOException {
+        this(new GitHubPRPullRequest(remotePr), remotePr.getUser(), skip, reason);
     }
 
     public GitHubPRCause(GitHubPRPullRequest pr,
                          GHUser triggerSender,
-                         String reason,
-                         String commitAuthorName,
-                         String commitAuthorEmail) throws IOException {
+                         boolean skip,
+                         String reason) throws IOException {
         this(pr.getHeadSha(), pr.getNumber(),
                 pr.isMergeable(), pr.getBaseRef(), pr.getHeadRef(),
                 pr.getUserEmail(), pr.getTitle(), pr.getHtmlUrl(), pr.getSourceRepoOwner(),
                 pr.getLabels(),
-                triggerSender, reason, commitAuthorName, commitAuthorEmail);
+                triggerSender, skip, reason,"", "");
     }
 
     public GitHubPRCause(String headSha, int number, boolean mergeable,
                          String targetBranch, String sourceBranch, String prAuthorEmail,
                          String title, URL htmlUrl, String sourceRepoOwner, Set<String> labels,
-                         GHUser triggerSender, String reason,
+                         GHUser triggerSender, boolean skip, String reason,
                          String commitAuthorName, String commitAuthorEmail) {
 
         this.headSha = headSha;
@@ -84,6 +81,7 @@ public class GitHubPRCause extends Cause {
         this.htmlUrl = htmlUrl;
         this.sourceRepoOwner = sourceRepoOwner;
         this.labels = labels;
+        this.skip = skip;
         this.reason = reason;
         this.commitAuthorName = commitAuthorName;
         this.commitAuthorEmail = commitAuthorEmail;
@@ -111,7 +109,7 @@ public class GitHubPRCause extends Cause {
             FileUtils.writeStringToFile(action.getPollingLogFile(), pollingLog);
             build.replaceAction(action);
         } catch (IOException e) {
-            LOGGER.log(WARNING,"Failed to persist the polling log",e);
+            LOGGER.log(WARNING, "Failed to persist the polling log", e);
         }
         pollingLog = null;
     }
@@ -167,6 +165,10 @@ public class GitHubPRCause extends Cause {
         return triggerSenderEmail;
     }
 
+    public boolean isSkip() {
+        return skip;
+    }
+
     public String getReason() {
         return reason;
     }
@@ -216,29 +218,33 @@ public class GitHubPRCause extends Cause {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        GitHubPRCause that = (GitHubPRCause) o;
+        GitHubPRCause cause = (GitHubPRCause) o;
 
-        if (mergeable != that.mergeable) return false;
-        if (number != that.number) return false;
-        if (commitAuthorEmail != null ? !commitAuthorEmail.equals(that.commitAuthorEmail) : that.commitAuthorEmail != null)
+        if (number != cause.number) return false;
+        if (mergeable != cause.mergeable) return false;
+        if (skip != cause.skip) return false;
+        if (headSha != null ? !headSha.equals(cause.headSha) : cause.headSha != null) return false;
+        if (targetBranch != null ? !targetBranch.equals(cause.targetBranch) : cause.targetBranch != null) return false;
+        if (sourceBranch != null ? !sourceBranch.equals(cause.sourceBranch) : cause.sourceBranch != null) return false;
+        if (prAuthorEmail != null ? !prAuthorEmail.equals(cause.prAuthorEmail) : cause.prAuthorEmail != null)
             return false;
-        if (commitAuthorName != null ? !commitAuthorName.equals(that.commitAuthorName) : that.commitAuthorName != null)
+        if (title != null ? !title.equals(cause.title) : cause.title != null) return false;
+        if (htmlUrl != null ? !htmlUrl.equals(cause.htmlUrl) : cause.htmlUrl != null) return false;
+        if (sourceRepoOwner != null ? !sourceRepoOwner.equals(cause.sourceRepoOwner) : cause.sourceRepoOwner != null)
             return false;
-        if (condRef != null ? !condRef.equals(that.condRef) : that.condRef != null) return false;
-        if (headSha != null ? !headSha.equals(that.headSha) : that.headSha != null) return false;
-        if (prAuthorEmail != null ? !prAuthorEmail.equals(that.prAuthorEmail) : that.prAuthorEmail != null)
+        if (triggerSenderName != null ? !triggerSenderName.equals(cause.triggerSenderName) : cause.triggerSenderName != null)
             return false;
-        if (reason != null ? !reason.equals(that.reason) : that.reason != null) return false;
-        if (sourceBranch != null ? !sourceBranch.equals(that.sourceBranch) : that.sourceBranch != null) return false;
-        if (targetBranch != null ? !targetBranch.equals(that.targetBranch) : that.targetBranch != null) return false;
-        if (title != null ? !title.equals(that.title) : that.title != null) return false;
-        if (triggerSenderName != null ? !triggerSenderName.equals(that.triggerSenderName) : that.triggerSenderName != null)
+        if (triggerSenderEmail != null ? !triggerSenderEmail.equals(cause.triggerSenderEmail) : cause.triggerSenderEmail != null)
             return false;
-        if (triggerSenderEmail != null ? !triggerSenderEmail.equals(that.triggerSenderEmail) : that.triggerSenderEmail != null)
+        if (labels != null ? !labels.equals(cause.labels) : cause.labels != null) return false;
+        if (reason != null ? !reason.equals(cause.reason) : cause.reason != null) return false;
+        if (commitAuthorName != null ? !commitAuthorName.equals(cause.commitAuthorName) : cause.commitAuthorName != null)
             return false;
-        if (htmlUrl != null ? !htmlUrl.equals(that.htmlUrl) : that.htmlUrl != null) return false;
+        if (commitAuthorEmail != null ? !commitAuthorEmail.equals(cause.commitAuthorEmail) : cause.commitAuthorEmail != null)
+            return false;
+        if (condRef != null ? !condRef.equals(cause.condRef) : cause.condRef != null) return false;
+        return !(pollingLog != null ? !pollingLog.equals(cause.pollingLog) : cause.pollingLog != null);
 
-        return true;
     }
 
     @Override
@@ -251,12 +257,16 @@ public class GitHubPRCause extends Cause {
         result = 31 * result + (prAuthorEmail != null ? prAuthorEmail.hashCode() : 0);
         result = 31 * result + (title != null ? title.hashCode() : 0);
         result = 31 * result + (htmlUrl != null ? htmlUrl.hashCode() : 0);
+        result = 31 * result + (sourceRepoOwner != null ? sourceRepoOwner.hashCode() : 0);
         result = 31 * result + (triggerSenderName != null ? triggerSenderName.hashCode() : 0);
         result = 31 * result + (triggerSenderEmail != null ? triggerSenderEmail.hashCode() : 0);
+        result = 31 * result + (labels != null ? labels.hashCode() : 0);
         result = 31 * result + (reason != null ? reason.hashCode() : 0);
         result = 31 * result + (commitAuthorName != null ? commitAuthorName.hashCode() : 0);
         result = 31 * result + (commitAuthorEmail != null ? commitAuthorEmail.hashCode() : 0);
+        result = 31 * result + (skip ? 1 : 0);
         result = 31 * result + (condRef != null ? condRef.hashCode() : 0);
+        result = 31 * result + (pollingLog != null ? pollingLog.hashCode() : 0);
         return result;
     }
 
@@ -271,13 +281,16 @@ public class GitHubPRCause extends Cause {
                 ", prAuthorEmail='" + prAuthorEmail + '\'' +
                 ", title='" + title + '\'' +
                 ", htmlUrl=" + htmlUrl +
-                ", triggerSenderName=" + triggerSenderName +
-                ", triggerSenderEmail=" + triggerSenderEmail +
+                ", sourceRepoOwner='" + sourceRepoOwner + '\'' +
+                ", triggerSenderName='" + triggerSenderName + '\'' +
+                ", triggerSenderEmail='" + triggerSenderEmail + '\'' +
+                ", labels=" + labels +
                 ", reason='" + reason + '\'' +
                 ", commitAuthorName='" + commitAuthorName + '\'' +
                 ", commitAuthorEmail='" + commitAuthorEmail + '\'' +
+                ", skip=" + skip +
                 ", condRef='" + condRef + '\'' +
+                ", pollingLog='" + pollingLog + '\'' +
                 '}';
     }
-
 }

@@ -62,7 +62,7 @@ public class GitHubPRLabelRemovedEventTest {
         when(label.getName()).thenReturn(TESTS_FAILURE);
         
         GitHubPRLabelRemovedEvent instance = new GitHubPRLabelRemovedEvent(labels);
-        GitHubPRCause cause = instance.isStateChanged(null, remotePr,localPR, listener);
+        GitHubPRCause cause = instance.check(null, remotePr, localPR, listener);
         Assert.assertNull(cause);
     }
 
@@ -80,7 +80,7 @@ public class GitHubPRLabelRemovedEventTest {
         causeCreationExpectations();
 
         GitHubPRLabelRemovedEvent instance = new GitHubPRLabelRemovedEvent(labels);
-        GitHubPRCause cause = instance.isStateChanged(null, remotePr,localPR, listener);
+        GitHubPRCause cause = instance.check(null, remotePr, localPR, listener);
         Assert.assertEquals("[tests failure, not reviewed, not ready for merge] labels were removed", cause.getReason());
     }
 
@@ -106,7 +106,7 @@ public class GitHubPRLabelRemovedEventTest {
         when(label.getName()).thenReturn(NOT_REVIEWED);
 
         GitHubPRLabelRemovedEvent instance = new GitHubPRLabelRemovedEvent(labels);
-        GitHubPRCause cause = instance.isStateChanged(null, remotePr,localPR, listener);
+        GitHubPRCause cause = instance.check(null, remotePr, localPR, listener);
         Assert.assertNull(cause);
     }
     

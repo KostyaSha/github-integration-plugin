@@ -2,33 +2,41 @@ package org.jenkinsci.plugins.github.pullrequest.events.impl;
 
 import hudson.Extension;
 import hudson.model.TaskListener;
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREventDescriptor;
-import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHPullRequest;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 /**
  * Event to skip PRs that can't be merged.
  *
  * @author Alina Karpovich
  */
-public class GitHubPRSkipNonMergeableEvent extends GitHubPREvent {
-    private static final String DISPLAY_NAME = "Skip not mergeable";
-    private final static Logger LOGGER = Logger.getLogger(GitHubPRSkipNonMergeableEvent.class.getName());
+public class GitHubPRNonMergeableEvent extends GitHubPREvent {
+    private static final String DISPLAY_NAME = "Not mergeable";
+    private final static Logger LOGGER = Logger.getLogger(GitHubPRNonMergeableEvent.class.getName());
+
+    private boolean skip = true;
+
+    @DataBoundConstructor
+    public GitHubPRNonMergeableEvent(boolean skip) {
+        this.skip = skip;
+    }
 
     @Override
-    public boolean isSkip(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
-                          @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
+    public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
+                               @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
         final PrintStream logger = listener.getLogger();
+
         Boolean mergeable;
         try {
             mergeable = remotePR.getMergeable();
@@ -38,10 +46,17 @@ public class GitHubPRSkipNonMergeableEvent extends GitHubPREvent {
             mergeable = false;
         }
         mergeable = mergeable != null ? mergeable : false;
+
         if (!mergeable) {
-            logger.println(DISPLAY_NAME + ": not mergeable, skipping");
+            return new GitHubPRCause(remotePR, DISPLAY_NAME, isSkip());
         }
-        return !mergeable;
+
+        return null;
+    }
+
+    @Override
+    public boolean isSkip() {
+        return skip;
     }
 
     @Extension

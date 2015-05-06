@@ -12,7 +12,9 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 /**
- * Created by Alina_Karpovich on 4/30/2015.
+ * Link for project page, shows triggered polling log
+ *
+ * @author Alina Karpovich
  */
 public class GitHubPRPollingLogAction implements Action {
     private AbstractProject<?, ?> project;

@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  * @author Alina Karpovich
  */
 public class GitHubPRLabelRemovedEvent extends GitHubPREvent {
-    private static final String DISPLAY_NAME = "Label removed";
+    private static final String DISPLAY_NAME = "Labels removed";
     private static final Logger LOGGER = Logger.getLogger(GitHubPRLabelRemovedEvent.class.getName());
 
     private final GitHubPRLabel label;
@@ -41,8 +41,8 @@ public class GitHubPRLabelRemovedEvent extends GitHubPREvent {
     }
 
     @Override
-    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
-                                        @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
+    public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
+                               @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
         if (remotePR.getState().equals(GHIssueState.CLOSED)) {
             return null; // already closed, skip check?
         }
@@ -82,7 +82,7 @@ public class GitHubPRLabelRemovedEvent extends GitHubPREvent {
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": state has changed ("
                     + label.getLabelsSet() + " labels were removed)");
-            cause = new GitHubPRCause(remotePR, remotePR.getUser(), label.getLabelsSet() + " labels were removed", null, null);
+            cause = new GitHubPRCause(remotePR, label.getLabelsSet() + " labels were removed", isSkip());
         }
 
         return cause;

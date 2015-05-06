@@ -33,32 +33,34 @@ public class GitHubPRLabelExistsEvent extends GitHubPREvent {
     private static final Logger LOGGER = Logger.getLogger(GitHubPRLabelExistsEvent.class.getName());
 
     private final GitHubPRLabel label;
+    private boolean skip = true;
 
     @DataBoundConstructor
-    public GitHubPRLabelExistsEvent(GitHubPRLabel label) {
+    public GitHubPRLabelExistsEvent(GitHubPRLabel label, boolean skip) {
         this.label = label;
+        this.skip = skip;
     }
 
     @Override
-    public GitHubPRCause isStateChanged(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
-                                        @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
+    public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
+                               @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
         if (remotePR.getState().equals(GHIssueState.CLOSED)) {
             return null; // already closed, skip check?
         }
 
         GitHubPRCause cause = null;
 
-        Collection<GHLabel> ghLabels = remotePR.getRepository().getIssue(remotePR.getNumber()).getLabels();
+        Collection<GHLabel> remoteLabels = remotePR.getRepository().getIssue(remotePR.getNumber()).getLabels();
         Set<String> existingLabels = new HashSet<String>();
 
-        for (GHLabel ghLabel : ghLabels) {
+        for (GHLabel ghLabel : remoteLabels) {
             existingLabels.add(ghLabel.getName());
         }
 
         if (existingLabels.containsAll(label.getLabelsSet())) {
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": " + label.getLabelsSet() + " found");
-            cause = new GitHubPRCause(remotePR, remotePR.getUser(), label.getLabelsSet() + " labels exist", null, null);
+            cause = new GitHubPRCause(remotePR, label.getLabelsSet() + " labels exist", isSkip());
         }
 
         return cause;
@@ -66,6 +68,10 @@ public class GitHubPRLabelExistsEvent extends GitHubPREvent {
 
     public GitHubPRLabel getLabel() {
         return label;
+    }
+
+    public boolean isSkip() {
+        return skip;
     }
 
     @Extension
