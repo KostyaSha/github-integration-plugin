@@ -329,7 +329,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
                 try {
                     GitHubPRCause cause = event.check(this, remotePR, localPR, listener);
                     if (cause != null) {
-                        if (event.isSkip()) {
+                        if (cause.isSkip()) {
                             LOGGER.log(Level.FINE, "Skipping PR #{0}", remotePR.getNumber());
                             logger.println("Skipping PR #" + remotePR.getNumber());
                             break;
@@ -342,17 +342,10 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
                             break;
                         }
                     }
-
                 } catch (IOException e) {
-                    if (event.isSkip()) {
-                        // because we can't be sure that we allowed to trigger build
-                        LOGGER.log(Level.WARNING, "Skip event failed, so skipping PR", e);
-                        listener.error("Skip event failed, so skipping PR");
-                        break;
-                    } else {
-                        // just try next event
-                        LOGGER.log(Level.WARNING, "Can't check trigger event", e);
-                    }
+                    LOGGER.log(Level.WARNING, "Can't check trigger event", e);
+                    listener.error("Skip event failed, so skipping PR");
+                    break;
                 }
 
             }
