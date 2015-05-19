@@ -21,15 +21,6 @@ public abstract class GitHubPREvent extends AbstractDescribableImpl<GitHubPREven
     private static final Logger LOGGER = Logger.getLogger(GitHubPREvent.class.getName());
 
     /**
-     * Is it skip event?
-     *
-     * @return true when this event must be skip event
-     */
-    public boolean isSkip() {
-        return false;
-    }
-
-    /**
      * indicates that PR was changed
      *
      * @param remotePR current PR state fetched from GH

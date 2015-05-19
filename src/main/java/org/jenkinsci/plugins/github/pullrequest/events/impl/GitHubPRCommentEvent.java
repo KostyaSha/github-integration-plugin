@@ -30,20 +30,13 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
 
     private String comment = "";
 
-    private boolean skip;
-
     public String getComment() {
         return comment;
     }
 
-    public boolean isSkip() {
-        return skip;
-    }
-
     @DataBoundConstructor
-    public GitHubPRCommentEvent(String comment, boolean skip) {
+    public GitHubPRCommentEvent(String comment) {
         this.comment = comment;
-        this.skip = skip;
     }
 
     @Override
@@ -53,8 +46,6 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
             return null; // nothing to compare
         }
         final PrintStream logger = listener.getLogger();
-
-//        LOGGER.log(Level.FINE, "Checking for new messages...");
 
         GitHubPRCause cause = null;
         try {
@@ -81,7 +72,7 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
             if ((userRestriction == null || userRestriction.isWhitelisted(comment.getUser()))
                     && Pattern.compile(this.comment).matcher(body).matches()) {
                 LOGGER.log(Level.FINEST, "Triggering by comment '{0}'", body);
-                cause = new GitHubPRCause(remotePR, "PR was triggered by comment", isSkip());
+                cause = new GitHubPRCause(remotePR, "PR was triggered by comment", false);
             }
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, "Couldn't check comment #" + comment.getId(), ex);

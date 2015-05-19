@@ -41,7 +41,7 @@ public class GitHubPRCloseEvent extends GitHubPREvent {
         if (remotePR.getState().equals(GHIssueState.CLOSED)) {
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": state has changed (PR was closed)");
-            cause = new GitHubPRCause(remotePR, "PR was closed", isSkip());
+            cause = new GitHubPRCause(remotePR, "PR was closed", false);
         }
 
         return cause;

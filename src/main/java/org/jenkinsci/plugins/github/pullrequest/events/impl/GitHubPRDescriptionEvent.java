@@ -28,12 +28,10 @@ public class GitHubPRDescriptionEvent extends GitHubPREvent {
     private final static Logger LOGGER = Logger.getLogger(GitHubPRDescriptionEvent.class.getName());
 
     private final String skipMsg;
-    private boolean skip = true;
 
     @DataBoundConstructor
-    public GitHubPRDescriptionEvent(String skipMsg, boolean skip) {
+    public GitHubPRDescriptionEvent(String skipMsg) {
         this.skipMsg = skipMsg;
-        this.skip = skip;
     }
 
     /**
@@ -42,14 +40,17 @@ public class GitHubPRDescriptionEvent extends GitHubPREvent {
      * @param remotePR {@link org.kohsuke.github.GHIssue} that contains description for checking
      */
     @Override
-    public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR, @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
+    public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger,
+                               GHPullRequest remotePR,
+                               @CheckForNull GitHubPRPullRequest localPR,
+                               TaskListener listener) throws IOException {
         final PrintStream logger = listener.getLogger();
 
         GitHubPRCause cause = null;
 
         String pullRequestBody = remotePR.getBody().trim();
         if (StringUtils.isNotBlank(pullRequestBody)) {
-            HashSet<String> skipBuildPhrases = new HashSet<String>(Arrays.asList(getSkipMsg().split("[\\r\\n]+")));
+            HashSet<String> skipBuildPhrases = new HashSet<>(Arrays.asList(getSkipMsg().split("[\\r\\n]+")));
             skipBuildPhrases.remove("");
 
             for (String skipBuildPhrase : skipBuildPhrases) {
@@ -59,18 +60,13 @@ public class GitHubPRDescriptionEvent extends GitHubPREvent {
                     LOGGER.log(Level.INFO, "Pull request description with {0} skipBuildPhrase. Hence skipping the buildAndComment.",
                             skipBuildPhrase);
                     logger.println(DISPLAY_NAME + ": Pull request description contains " + skipBuildPhrase + ", skipping");
-                    cause = new GitHubPRCause(remotePR, "Pull request description contains " + skipBuildPhrase + ", skipping",
-                            isSkip());
+                    cause = new GitHubPRCause(remotePR, "Pull request description contains " + skipBuildPhrase + ", skipping", true);
                     break;
                 }
             }
         }
 
         return cause;
-    }
-
-    public boolean isSkip() {
-        return skip;
     }
 
     public String getSkipMsg() {

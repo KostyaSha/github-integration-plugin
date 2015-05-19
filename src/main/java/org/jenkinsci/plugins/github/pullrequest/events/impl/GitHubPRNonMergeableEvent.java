@@ -54,7 +54,6 @@ public class GitHubPRNonMergeableEvent extends GitHubPREvent {
         return null;
     }
 
-    @Override
     public boolean isSkip() {
         return skip;
     }
