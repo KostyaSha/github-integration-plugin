@@ -76,7 +76,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
      * Set PR(commit) status before build. No configurable message for it.
      */
     private boolean preStatus = false;
-    private boolean cancelPrev = false;
+    private boolean cancelQueued = false;
     private boolean skipFirstRun = false;
     @CheckForNull
     private GitHubPRUserRestriction userRestriction;
@@ -104,8 +104,8 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     @DataBoundSetter
-    public void setCancelPrev(boolean cancelPrev) {
-        this.cancelPrev = cancelPrev;
+    public void setCancelQueued(boolean cancelQueued) {
+        this.cancelQueued = cancelQueued;
     }
 
     @DataBoundSetter
@@ -397,8 +397,8 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         StringBuilder sb = new StringBuilder();
         sb.append("Run queued");
 
-        if (cancelPrev && cancelBuild(cause.getNumber())) {
-            sb.append("Previous build stopped.");
+        if (cancelQueued && cancelQueuedBuildByPrNumber(cause.getNumber())) {
+            sb.append("Queued builds aborted.");
         }
 
         QueueTaskFuture<?> queueTaskFuture = startJob(cause);
@@ -423,7 +423,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     /**
      * Cancel previous builds for specified PR id.
      */
-    private boolean cancelBuild(int id) {
+    private boolean cancelQueuedBuildByPrNumber(int id) {
         Queue queue = getJenkinsInstance().getQueue();
         List<Queue.Item> approximateItemsQuickly = queue.getApproximateItemsQuickly();
 
@@ -542,8 +542,8 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         return preStatus;
     }
 
-    public boolean isCancelPrev() {
-        return cancelPrev;
+    public boolean isCancelQueued() {
+        return cancelQueued;
     }
 
     public boolean isSkipFirstRun() {
