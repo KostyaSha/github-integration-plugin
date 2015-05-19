@@ -20,7 +20,7 @@ f.entry(title: "Set status before build", field: "preStatus") {
     f.checkbox()
 }
 
-f.entry(title: "Cancel previous builds", field: "cancelPrev") {
+f.entry(title: "Cancel queued builds", field: "cancelQueued") {
     f.checkbox()
 }
 
