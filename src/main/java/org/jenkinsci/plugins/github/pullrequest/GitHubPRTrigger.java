@@ -1,9 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
 import antlr.ANTLRException;
-
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
-
 import com.squareup.okhttp.Cache;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.OkUrlFactory;
@@ -18,21 +16,11 @@ import hudson.util.FormValidation;
 import hudson.util.StreamTaskListener;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
-
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREventDescriptor;
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRBranchRestriction;
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction;
-import org.kohsuke.github.GHAuthorization;
-import org.kohsuke.github.GHCommitState;
-import org.kohsuke.github.GHIssueState;
-import org.kohsuke.github.GHPullRequest;
-import org.kohsuke.github.GHRateLimit;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GHUser;
-import org.kohsuke.github.GitHub;
-import org.kohsuke.github.GitHubBuilder;
-import org.kohsuke.github.RateLimitHandler;
+import org.kohsuke.github.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -41,8 +29,10 @@ import org.kohsuke.stapler.StaplerRequest;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.net.Proxy;
 import java.text.DateFormat;
 import java.util.*;
@@ -59,12 +49,12 @@ import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.Descripto
  * - just incoming hooks, without persist (save PR state to local xml)
  * - hooks with persist
  * - cron run, persist
- * <p/>
+ * <p>
  * Restrictions can't have resolver, so they separate and provide security check methods:
  * - Target branch restriction {@link org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction}
  * - User restriction (check comments, labels, etc) {@link org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction}
  * (whitelist manipulations using comments is also allowed)
- * <p/>
+ * <p>
  * Event triggering is modular. Now they can be split to any events:
  * - Trigger by comment
  * - Trigger when PR opened
@@ -184,7 +174,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     @Override
     public void run() {
         if (job == null || job.isDisabled()) {
-            LOGGER.log(Level.FINE, "Job {0} is disabled, but trigger run!", job == null ? "no job" :job.getFullName());
+            LOGGER.log(Level.FINE, "Job {0} is disabled, but trigger run!", job == null ? "no job" : job.getFullName());
             return;
         }
 
@@ -198,7 +188,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         List<GitHubPRCause> causes = Collections.emptyList();
         try (StreamTaskListener listener = new StreamTaskListener(pollingLogAction.getLogFile())) {
             final PrintStream logger = listener.getLogger();
-            logger.println("Started on "+ DateFormat.getDateTimeInstance().format(new Date()));
+            logger.println("Started on " + DateFormat.getDateTimeInstance().format(new Date()));
             LOGGER.log(Level.FINE, "Running GitHub Pull Request trigger check.");
 
             GitHubPRRepository localRepository = null;
@@ -221,7 +211,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
             long duration = System.currentTimeMillis() - startTime;
             LOGGER.log(Level.INFO, "End  GitHub Pull Request trigger check. Summary time: {0}ms", duration);
-            logger.println("Finished at "+ DateFormat.getDateTimeInstance().format(new Date())
+            logger.println("Finished at " + DateFormat.getDateTimeInstance().format(new Date())
                     + ", duration " + duration + "ms");
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "can't trigger build");
@@ -294,7 +284,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             @CheckForNull GitHubPRPullRequest localPR = localPulls.get(remotePR.getNumber());
 
             if (!isUpdated(remotePR, localPR)) { // light check
-                LOGGER.log(Level.FINE, "PR #{0} {1} not changed", new Object[] {remotePR.getNumber(),
+                LOGGER.log(Level.FINE, "PR #{0} {1} not changed", new Object[]{remotePR.getNumber(),
                         remotePR.getTitle()});
                 logger.println("PR #" + remotePR.getNumber() + " " + remotePR.getTitle() + " not changed");
                 continue;
@@ -322,15 +312,14 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
             if (branchRestriction != null && branchRestriction.isBranchBuildAllowed(remotePR)) {
                 LOGGER.log(Level.WARNING, "Skipping #{0} {1} because of branch restriction",
-                        new Object[] {remotePR.getNumber(), remotePR.getTitle()});
-                logger.println("Skipping #" + remotePR.getNumber() + " " + remotePR.getTitle()
-                        + " because of branch restriction");
+                        new Object[]{remotePR.getNumber(), remotePR.getTitle()});
+                logger.println("Skipping #" + remotePR.getNumber() + " " + remotePR.getTitle() + " because of branch restriction");
                 continue;
             }
 
             if (userRestriction != null && !userRestriction.isWhitelisted(remotePR.getUser())) {
                 LOGGER.log(Level.WARNING, "Skipping #{0} {1} because of user restriction (user - {2})",
-                        new Object[] {remotePR.getNumber(), remotePR.getTitle(), remotePR.getUser()});
+                        new Object[]{remotePR.getNumber(), remotePR.getTitle(), remotePR.getUser()});
                 logger.println("Skipping #" + remotePR.getNumber() + " " + remotePR.getTitle()
                         + " because of user restriction (user - " + remotePR.getUser() + ")");
                 continue;
@@ -342,7 +331,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
                     if (cause != null) {
                         if (event.isSkip()) {
                             LOGGER.log(Level.FINE, "Skipping PR #{0}", remotePR.getNumber());
-                            logger.println("Skipping PR #"+ remotePR.getNumber());
+                            logger.println("Skipping PR #" + remotePR.getNumber());
                             break;
                         } else {
                             LOGGER.log(Level.FINE, "Triggering build for PR #'{0}', because {1}",
@@ -527,7 +516,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
      */
     private List<ParameterValue> getDefaultParametersValues() {
         ParametersDefinitionProperty paramDefProp = job.getProperty(ParametersDefinitionProperty.class);
-        ArrayList<ParameterValue> defValues = new ArrayList<ParameterValue>();
+        ArrayList<ParameterValue> defValues = new ArrayList<>();
 
         /*
          * This check is made ONLY if someone will call this method even if isParametrized() is false.
