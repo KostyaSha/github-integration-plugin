@@ -284,9 +284,8 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             @CheckForNull GitHubPRPullRequest localPR = localPulls.get(remotePR.getNumber());
 
             if (!isUpdated(remotePR, localPR)) { // light check
-                LOGGER.log(Level.FINE, "PR #{0} {1} not changed", new Object[]{remotePR.getNumber(),
-                        remotePR.getTitle()});
-                logger.println("PR #" + remotePR.getNumber() + " " + remotePR.getTitle() + " not changed");
+                LOGGER.log(Level.FINE, "PR #{0} '{1}' not changed", new Object[]{remotePR.getNumber(), remotePR.getTitle()});
+                logger.println("PR #" + remotePR.getNumber() + " '" + remotePR.getTitle() + "' not changed");
                 continue;
             }
 
@@ -350,7 +349,6 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
             }
         }
-
 
         if (skipFirstRun) {
             LOGGER.log(Level.INFO, "Skipping first run for {0}", job.getFullName());
