@@ -350,7 +350,6 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             }
         }
 
-
         if (skipFirstRun) {
             LOGGER.log(Level.INFO, "Skipping first run for {0}", job.getFullName());
             skipFirstRun = false;
