@@ -641,16 +641,13 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
         private String apiUrl = "https://api.github.com";
         private String whitelistUserMsg = ".*add\\W+to\\W+whitelist.*";
-        private String testPhrase = ".*test\\W+this\\W+please.*";
-        private String skipBuildPhrase = ".*\\[skip\\W+ci\\].*";
         private String spec = "H/5 * * * *";
-        private String msgSuccess = "Test PASSed.";
-        private String msgFailure = "Test FAILed.";
+
         private String username;
         private String password;
         private String accessToken;
         private String publishedURL;
-        private String requestForTestingPhrase;
+
         private transient GitHub gh;
         private int cacheSize = 20; // MB
 
@@ -678,24 +675,12 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             password = formData.getString("password");
             accessToken = formData.getString("accessToken");
             publishedURL = formData.getString("publishedURL");
-            requestForTestingPhrase = formData.getString("requestForTestingPhrase");
             whitelistUserMsg = formData.getString("whitelistUserMsg");
-            testPhrase = formData.getString("testPhrase");
-            skipBuildPhrase = formData.getString("skipBuildPhrase");
             spec = formData.getString("spec");
-            msgSuccess = formData.getString("msgSuccess");
-            msgFailure = formData.getString("msgFailure");
             cacheSize = formData.getInt("cacheSize");
 
             save();
             return super.configure(req, formData);
-        }
-
-        public FormValidation doCheckAdminlist(@QueryParameter String value) throws ServletException {
-            if (!adminlistPattern.matcher(value).matches()) {
-                return FormValidation.error("GitHub username may only contain alphanumeric characters or dashes and cannot begin with a dash. Separate them with whitespaces.");
-            }
-            return FormValidation.ok();
         }
 
         public FormValidation doCheckServerAPIUrl(@QueryParameter String value) {
@@ -845,20 +830,8 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             return getJenkinsInstance().getRootUrl();
         }
 
-        public String getRequestForTestingPhrase() {
-            return requestForTestingPhrase;
-        }
-
         public String getWhitelistUserMsg() {
             return whitelistUserMsg;
-        }
-
-        public String getTestPhrase() {
-            return testPhrase;
-        }
-
-        public String getSkipBuildPhrase() {
-            return skipBuildPhrase;
         }
 
         public String getSpec() {
@@ -867,14 +840,6 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
         public String getApiUrl() {
             return apiUrl;
-        }
-
-        public String getMsgSuccess() {
-            return msgSuccess;
-        }
-
-        public String getMsgFailure() {
-            return msgFailure;
         }
 
         // list all available descriptors for choosing in job configuration

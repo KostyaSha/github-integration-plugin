@@ -31,31 +31,11 @@ f.section(title:_(descriptor.displayName)){
         f.textbox()
     }
 
-    f.entry(title: _("Request for testing phrase"), field:"requestForTestingPhrase"){
-        f.textbox(default : "Can one of the admins verify this patch?")
-    }
-
     f.entry(title: _("Add user to white list phrase"), field:"whitelistUserMsg"){
         f.textbox(default: ".*ok\\W+to\\W+test.*")
     }
 
-    f.entry(title: _("Test phrase"), field: "testPhrase") {
-        f.textbox(default: ".*test\\W+this\\W+please.*")
-    }
-
-    f.entry(title: _("Skip build phrase"), field: "skipBuildPhrase") {
-        f.textbox(default: ".*\\[skip\\W+ci\\].*")
-    }
-
     f.entry(title: _("Crontab line"), field: "spec", help: "/descriptor/hudson.triggers.TimerTrigger/help/spec") {
         f.textbox(default:"H/5 * * * *", checkUrl: "'descriptorByName/hudson.triggers.TimerTrigger/checkSpec?value=' + encodeURIComponent(this.value)")
-    }
-
-    f.entry(title: _("Default success message"), field: "msgSuccess") {
-        f.textarea(default: "Test PASSed")
-    }
-
-    f.entry(title: _("Default failure message"), field: "msgFailure") {
-        f.textarea(default: "Test FAILed.")
     }
 }
