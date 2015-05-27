@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  */
 public class GitHubPRCloseEvent extends GitHubPREvent {
     private static final String DISPLAY_NAME = "Pull Request Closed";
-    private final static Logger LOGGER = Logger.getLogger(GitHubPRCloseEvent.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GitHubPRCloseEvent.class.getName()); //NOPMD
 
     @DataBoundConstructor
     public GitHubPRCloseEvent() {

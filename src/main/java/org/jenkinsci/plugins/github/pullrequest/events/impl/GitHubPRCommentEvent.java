@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
  */
 public class GitHubPRCommentEvent extends GitHubPREvent {
     private static final String DISPLAY_NAME = "Comment matched to pattern";
-    private final static Logger LOGGER = Logger.getLogger(GitHubPRCommentEvent.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GitHubPRCommentEvent.class.getName());
 
     private String comment = "";
 
@@ -57,7 +57,7 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
                 }
             }
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Couldn''t obtain comments: {0}", e.getMessage());
+            LOGGER.log(Level.SEVERE, "Couldn't obtain comments: {}", e.getMessage());
         }
         return cause;
     }

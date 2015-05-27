@@ -5,11 +5,9 @@ import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.plugins.git.util.BuildData;
-import org.kohsuke.github.GHCommitState;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,7 +18,7 @@ import java.util.logging.Logger;
  */
 @Extension
 public class GitHubPRBuildListener extends RunListener<AbstractBuild<?, ?>> {
-    private final static Logger LOGGER = Logger.getLogger(GitHubPRBuildListener.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GitHubPRBuildListener.class.getName());
 
     @Override
     public void onCompleted(AbstractBuild<?, ?> build, @Nonnull TaskListener listener) {

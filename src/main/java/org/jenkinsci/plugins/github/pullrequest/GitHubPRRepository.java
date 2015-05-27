@@ -1,6 +1,8 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
-import hudson.*;
+import hudson.BulkChange;
+import hudson.Functions;
+import hudson.XmlFile;
 import hudson.model.*;
 import hudson.model.listeners.SaveableListener;
 import hudson.util.FormValidation;
@@ -10,7 +12,10 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,7 +37,7 @@ public class GitHubPRRepository implements Action, Saveable {
     private final String fullName;
     private final String githubUrl;
 
-    private HashMap<Integer, GitHubPRPullRequest> pulls;
+    private Map<Integer, GitHubPRPullRequest> pulls;
 
     /**
      * Object that represent GitHub repository to work with
@@ -40,13 +45,13 @@ public class GitHubPRRepository implements Action, Saveable {
      * @param fullName repository full name. for case of changed jobs url
      * @param pulls    previous pull request state
      */
-    public GitHubPRRepository(String fullName, String githubUrl, HashMap<Integer, GitHubPRPullRequest> pulls) {
+    public GitHubPRRepository(String fullName, String githubUrl, Map<Integer, GitHubPRPullRequest> pulls) {
         this.pulls = pulls;
         this.fullName = fullName;
         this.githubUrl = githubUrl;
     }
 
-    public HashMap<Integer, GitHubPRPullRequest> getPulls() {
+    public Map<Integer, GitHubPRPullRequest> getPulls() {
         return pulls;
     }
 

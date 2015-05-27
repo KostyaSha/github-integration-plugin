@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
  */
 public class GitHubPRLabelPatternExistsEvent extends GitHubPREvent {
     private static final String DISPLAY_NAME = "Labels matched to patterns";
-    private final static Logger LOGGER = Logger.getLogger(GitHubPRLabelPatternExistsEvent.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GitHubPRLabelPatternExistsEvent.class.getName());
 
     private final GitHubPRLabel label;
     private boolean skip = true;

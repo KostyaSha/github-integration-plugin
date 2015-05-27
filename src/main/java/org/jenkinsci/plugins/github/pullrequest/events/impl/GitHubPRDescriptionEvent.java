@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  */
 public class GitHubPRDescriptionEvent extends GitHubPREvent {
     private static final String DISPLAY_NAME = "Description matched to pattern";
-    private final static Logger LOGGER = Logger.getLogger(GitHubPRDescriptionEvent.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GitHubPRDescriptionEvent.class.getName());
 
     private final String skipMsg;
 

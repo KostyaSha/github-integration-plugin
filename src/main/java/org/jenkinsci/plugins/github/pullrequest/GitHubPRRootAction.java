@@ -8,9 +8,7 @@ import jenkins.model.Jenkins;
 import org.acegisecurity.Authentication;
 import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.io.IOUtils;
-import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.kohsuke.github.GHEventPayload;
-import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -23,8 +21,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.*;
 
 /**
  * Hook handler for GitHubPR.

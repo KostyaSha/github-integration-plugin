@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.github.pullrequest.extra;
 
-import com.google.common.base.Splitter;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Cause;
@@ -10,7 +9,6 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -22,7 +20,7 @@ import java.util.logging.Logger;
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRLabelUnblockQueueCondition extends BlockQueueCondition {
-    private final static Logger LOGGER = Logger.getLogger(GitHubPRLabelUnblockQueueCondition.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GitHubPRLabelUnblockQueueCondition.class.getName());
 
     private GitHubPRLabel label;
 

@@ -6,17 +6,13 @@ import hudson.model.Descriptor;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
-import org.kohsuke.github.GHIssueComment;
-import org.kohsuke.github.GHOrganization;
-import org.kohsuke.github.GHPullRequest;
-import org.kohsuke.github.GHUser;
-import org.kohsuke.github.GitHub;
-import org.kohsuke.github.PagedIterable;
+import org.kohsuke.github.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -26,8 +22,8 @@ import java.util.regex.Pattern;
  */
 public class GitHubPRUserRestriction implements Describable<GitHubPRUserRestriction> {
     private static final Logger LOGGER = Logger.getLogger(GitHubPRUserRestriction.class.getName());
-    private final HashSet<String> orgsSet;
-    private final HashSet<String> usersSet;
+    private final Set<String> orgsSet;
+    private final Set<String> usersSet;
     private final String whitelistUserMsg;
     private final String orgs;
 
@@ -38,9 +34,9 @@ public class GitHubPRUserRestriction implements Describable<GitHubPRUserRestrict
     public GitHubPRUserRestriction(final String orgs, final String users, final String whitelistUserMsg) {
         //TODO check if System.lineSeparator() is correct separator (2 usages)
         this.orgs = orgs;
-        this.orgsSet = new HashSet<String>(Arrays.asList(orgs.split(System.lineSeparator())));
+        this.orgsSet = new HashSet<>(Arrays.asList(orgs.split(System.lineSeparator())));
         this.users = users;
-        this.usersSet = new HashSet<String>(Arrays.asList(users.split(System.lineSeparator())));
+        this.usersSet = new HashSet<>(Arrays.asList(users.split(System.lineSeparator())));
         this.whitelistUserMsg = whitelistUserMsg;
     }
 
@@ -49,6 +45,7 @@ public class GitHubPRUserRestriction implements Describable<GitHubPRUserRestrict
      */
     public void updateUsers(GHPullRequest remotePr) throws IOException {
         PagedIterable<GHIssueComment> ghIssueComments = remotePr.listComments();
+        //TODO check
         for (GHIssueComment comment : ghIssueComments) {
             if (whitelistUserPattern == null) {
                 whitelistUserPattern = Pattern.compile(whitelistUserMsg);

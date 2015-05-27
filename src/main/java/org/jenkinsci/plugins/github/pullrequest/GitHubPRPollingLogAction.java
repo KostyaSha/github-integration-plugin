@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
-import hudson.Functions;
 import hudson.Util;
 import hudson.console.AnnotatedLargeText;
 import hudson.model.AbstractProject;

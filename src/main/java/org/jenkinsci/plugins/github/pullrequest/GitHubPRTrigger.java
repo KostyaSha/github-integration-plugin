@@ -29,7 +29,6 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -42,7 +41,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.DescriptorImpl.get;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.DescriptorImpl.getJenkinsInstance;
 
 /**
@@ -69,7 +67,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     private static final Logger LOGGER = Logger.getLogger(GitHubPRTrigger.class.getName());
 
     //TODO replace with {@link GitHubRepositoryName.class} ?
-    private static final Pattern ghFullRepoName = Pattern.compile("^(http[s]?://[^/]*)/([^/]*/[^/]*).*");
+    private static final Pattern GH_FULL_REPO_NAME = Pattern.compile("^(http[s]?://[^/]*)/([^/]*/[^/]*).*");
 
     @CheckForNull
     private GitHubPRTriggerMode triggerMode = GitHubPRTriggerMode.CRON;
@@ -89,7 +87,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     // for performance
     private transient String repoFullName;
     private transient GHRepository remoteRepository;
-    private transient GitHubPRRepository localRepository;
+
     @CheckForNull
     private transient GitHubPRPollingLogAction pollingLogAction;
 
@@ -166,7 +164,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         }
 
         String baseUrl = ghpp.getProjectUrl().baseUrl();
-        Matcher m = ghFullRepoName.matcher(baseUrl);
+        Matcher m = GH_FULL_REPO_NAME.matcher(baseUrl);
         if (!m.matches()) {
             throw new IllegalArgumentException(String.format("Invalid GitHub project url: %s", baseUrl));
         }
@@ -291,7 +289,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         final ArrayList<GitHubPRCause> gitHubPRCauses = new ArrayList<GitHubPRCause>();
 
         // get local and remote list of PRs
-        HashMap<Integer, GitHubPRPullRequest> localPulls = localRepository.getPulls();
+        Map<Integer, GitHubPRPullRequest> localPulls = localRepository.getPulls();
         String repoFullName1 = getRepoFullName();
         GHRepository ghRepository = getGitHub().getRepository(repoFullName1);
 
@@ -605,13 +603,13 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             gh = getDescriptor().getGitHub();
         } catch (FileNotFoundException ex) {
             LOGGER.log(Level.INFO, "Can't connect to GitHub {0}. Bad Global plugin configuration.", ex.getMessage());
-            throw new IOException("Can't connect to GitHub: " + ex.getMessage() + ". Bad Global plugin configuration.");
+            throw new IOException("Can't connect to GitHub: " + ex.getMessage() + ". Bad Global plugin configuration.", ex);
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, "Can't connect to GitHub {0}. Bad Global plugin configuration.", ex.getMessage());
             throw ex;
         } catch (Throwable t) {
             LOGGER.log(Level.FINE, "Can't connect to GitHub {0}. Bad Global plugin configuration.", t.getMessage());
-            throw new IOException("Can't connect to GitHub: " + t.getMessage() + ". Bad Global plugin configuration.");
+            throw new IOException("Can't connect to GitHub: " + t.getMessage() + ". Bad Global plugin configuration.", t);
         }
 
         if (gh == null) {
@@ -644,11 +642,9 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
-        private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
-
-        // GitHub username may only contain alphanumeric characters or dashes and cannot begin with a dash
-        private static final Pattern adminlistPattern = Pattern.compile("((\\p{Alnum}[\\p{Alnum}-]*)|\\s)*");
         private static final Logger LOGGER = Logger.getLogger(DescriptorImpl.class.getName());
+
+        private final transient  SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
 
         private String apiUrl = "https://api.github.com";
         private String whitelistUserMsg = ".*add\\W+to\\W+whitelist.*";

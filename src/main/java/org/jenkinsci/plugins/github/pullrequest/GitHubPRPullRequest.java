@@ -1,12 +1,18 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
 import hudson.Functions;
-import org.kohsuke.github.*;
+import org.kohsuke.github.GHIssueComment;
+import org.kohsuke.github.GHLabel;
+import org.kohsuke.github.GHPullRequest;
+import org.kohsuke.github.GHRepository;
 
 import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  */
 public class GitHubPRNonMergeableEvent extends GitHubPREvent {
     private static final String DISPLAY_NAME = "Not mergeable";
-    private final static Logger LOGGER = Logger.getLogger(GitHubPRNonMergeableEvent.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GitHubPRNonMergeableEvent.class.getName());
 
     private boolean skip = true;
 

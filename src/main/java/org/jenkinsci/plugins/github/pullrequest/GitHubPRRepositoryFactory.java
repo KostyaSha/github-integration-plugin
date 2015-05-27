@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  */
 @Extension
 public class GitHubPRRepositoryFactory extends TransientProjectActionFactory {
-    private final static Logger LOGGER = Logger.getLogger(GitHubPRRepositoryFactory.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GitHubPRRepositoryFactory.class.getName());
 
     @Override
     public Collection<? extends Action> createFor(AbstractProject project) {
