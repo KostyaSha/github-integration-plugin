@@ -42,6 +42,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.DescriptorImpl.get;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.DescriptorImpl.getJenkinsInstance;
 
 /**
@@ -89,7 +90,8 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     private transient String repoFullName;
     private transient GHRepository remoteRepository;
     private transient GitHubPRRepository localRepository;
-    private GitHubPRPollingLogAction pollingLogAction;
+    @CheckForNull
+    private transient GitHubPRPollingLogAction pollingLogAction;
 
     @DataBoundConstructor
     public GitHubPRTrigger(String spec,
@@ -207,10 +209,8 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         long startTime = System.currentTimeMillis();
 
         List<GitHubPRCause> causes = Collections.emptyList();
-        //TODO fix this, there is bug with unitialised (null) pollingLogAction under some cases
-        getProjectActions(); // temp init variable
-        
-        try (StreamTaskListener listener = new StreamTaskListener(pollingLogAction.getLogFile())) {
+
+        try (StreamTaskListener listener = new StreamTaskListener(getPollingLogAction().getLogFile())) {
             final PrintStream logger = listener.getLogger();
             logger.println("Started on " + DateFormat.getDateTimeInstance().format(new Date()));
             LOGGER.log(Level.FINE, "Running GitHub Pull Request trigger check.");
@@ -252,10 +252,17 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         }
     }
 
+    public GitHubPRPollingLogAction getPollingLogAction() {
+        if (pollingLogAction == null) {
+            pollingLogAction = new GitHubPRPollingLogAction(job);
+        }
+
+        return pollingLogAction;
+    }
+
     @Override
     public Collection<? extends Action> getProjectActions() {
-        pollingLogAction = new GitHubPRPollingLogAction(job);
-        return Collections.singleton(pollingLogAction);
+        return Collections.singleton(getPollingLogAction());
     }
 
     /**

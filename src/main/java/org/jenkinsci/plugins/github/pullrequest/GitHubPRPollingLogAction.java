@@ -17,7 +17,7 @@ import java.nio.charset.Charset;
  * @author Alina Karpovich
  */
 public class GitHubPRPollingLogAction implements Action {
-    private AbstractProject<?, ?> project;
+    private transient AbstractProject<?, ?> project;
 
     public GitHubPRPollingLogAction(AbstractProject<?, ?> project) {
         this.project = project;
