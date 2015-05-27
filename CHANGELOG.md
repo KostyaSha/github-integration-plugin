@@ -1,5 +1,10 @@
 ## Changelog
 
+## 0.1.0-beta10
+
+* Feature: Experimental hooks support
+* Fix: Don't persist project object
+
 ## 0.1.0-beta9
 
 * skip events refactoring
