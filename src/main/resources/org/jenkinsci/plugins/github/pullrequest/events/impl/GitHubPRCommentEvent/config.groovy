@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRMessageEvent;
+package org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRCommentEvent;
 
 def f = namespace(lib.FormTagLib);
 
