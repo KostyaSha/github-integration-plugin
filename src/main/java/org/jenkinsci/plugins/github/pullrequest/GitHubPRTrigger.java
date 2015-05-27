@@ -13,6 +13,7 @@ import hudson.model.queue.QueueTaskFuture;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.FormValidation;
+import hudson.util.SequentialExecutionQueue;
 import hudson.util.StreamTaskListener;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -69,6 +70,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     //TODO replace with {@link GitHubRepositoryName.class} ?
     private static final Pattern ghFullRepoName = Pattern.compile("^(http[s]?://[^/]*)/([^/]*/[^/]*).*");
 
+    @CheckForNull
     private GitHubPRTriggerMode triggerMode = GitHubPRTriggerMode.CRON;
     @CheckForNull
     private final List<GitHubPREvent> events;
@@ -173,19 +175,41 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
     @Override
     public void run() {
+        if (getTriggerMode() != null && getTriggerMode() == GitHubPRTriggerMode.CRON) {
+            doRun();
+        }
+    }
+
+    /**
+     * For running from external places. Goes to queue.
+     */
+    public void queueRun(AbstractProject<?, ?> job) {
+        this.job = job;
+        getDescriptor().queue.execute(new Runnable() {
+            @Override
+            public void run() {
+                doRun();
+            }
+        });
+    }
+
+    public void doRun() {
         if (job == null || job.isDisabled()) {
             LOGGER.log(Level.FINE, "Job {0} is disabled, but trigger run!", job == null ? "no job" : job.getFullName());
             return;
         }
 
-        // triggers are always triggered on the cron, but we just no-op if we are using GitHub hooks.
-        if (getTriggerMode() != GitHubPRTriggerMode.CRON) {
+        if (!((getTriggerMode() == GitHubPRTriggerMode.CRON) ||
+                (getTriggerMode() == GitHubPRTriggerMode.HEAVY_HOOKS))) {
             return;
         }
 
         long startTime = System.currentTimeMillis();
 
         List<GitHubPRCause> causes = Collections.emptyList();
+        //TODO fix this, there is bug with unitialised (null) pollingLogAction under some cases
+        getProjectActions(); // temp init variable
+        
         try (StreamTaskListener listener = new StreamTaskListener(pollingLogAction.getLogFile())) {
             final PrintStream logger = listener.getLogger();
             logger.println("Started on " + DateFormat.getDateTimeInstance().format(new Date()));
@@ -213,8 +237,9 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             LOGGER.log(Level.INFO, "End  GitHub Pull Request trigger check. Summary time: {0}ms", duration);
             logger.println("Finished at " + DateFormat.getDateTimeInstance().format(new Date())
                     + ", duration " + duration + "ms");
-        } catch (IOException e) {
+        } catch (Throwable e) {
             LOGGER.log(Level.SEVERE, "can't trigger build");
+            return;
         }
 
         for (GitHubPRCause cause : causes) {
@@ -608,6 +633,8 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
+        private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
+
         // GitHub username may only contain alphanumeric characters or dashes and cannot begin with a dash
         private static final Pattern adminlistPattern = Pattern.compile("((\\p{Alnum}[\\p{Alnum}-]*)|\\s)*");
         private static final Logger LOGGER = Logger.getLogger(DescriptorImpl.class.getName());
