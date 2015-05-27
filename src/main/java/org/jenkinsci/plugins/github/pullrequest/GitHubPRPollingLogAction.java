@@ -51,7 +51,7 @@ public class GitHubPRPollingLogAction implements Action {
      * @since 1.350
      */
     public void writeLogTo(XMLOutput out) throws IOException {
-        new AnnotatedLargeText<GitHubPRPollingLogAction>(getLogFile(),
+        new AnnotatedLargeText<>(getLogFile(),
                 Charset.defaultCharset(),true,this).writeHtmlTo(0,out.asWriter());
     }
 

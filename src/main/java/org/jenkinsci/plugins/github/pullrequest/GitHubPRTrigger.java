@@ -130,13 +130,13 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     @Override
     public void start(AbstractProject<?, ?> project, boolean newInstance) {
         LOGGER.log(Level.INFO, "Starting GitHub Pull Request trigger for project {0}", project.getName());
+        super.start(project, newInstance);
 
         if (getTriggerMode() != GitHubPRTriggerMode.CRON) {
             //TODO implement
             return;
         }
 
-        super.start(project, newInstance);
     }
 
     // there race conditions when job is null but trigger exists
