@@ -1,5 +1,9 @@
 ## Changelog
 
+## 0.1.0-beta11
+
+* Fixed trigger by comment UI entry
+
 ## 0.1.0-beta10
 
 * Fix broken polling page
