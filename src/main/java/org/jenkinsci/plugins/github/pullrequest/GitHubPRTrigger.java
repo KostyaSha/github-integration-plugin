@@ -238,7 +238,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             logger.println("Finished at " + DateFormat.getDateTimeInstance().format(new Date())
                     + ", duration " + duration + "ms");
         } catch (Throwable e) {
-            LOGGER.log(Level.SEVERE, "can't trigger build");
+            LOGGER.log(Level.SEVERE, "can't trigger build {}", e.getMessage());
             return;
         }
 
@@ -247,13 +247,14 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
                 cause.setPollingLog(pollingLogAction.getLogFile());
                 build(cause);
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "can't trigger build");
+                LOGGER.log(Level.SEVERE, "can't trigger build {}", e.getMessage());
             }
         }
     }
 
+    @CheckForNull
     public GitHubPRPollingLogAction getPollingLogAction() {
-        if (pollingLogAction == null) {
+        if (pollingLogAction == null && job != null) {
             pollingLogAction = new GitHubPRPollingLogAction(job);
         }
 
@@ -262,6 +263,9 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
     @Override
     public Collection<? extends Action> getProjectActions() {
+        if (getPollingLogAction() == null) {
+            return Collections.emptyList();
+        }
         return Collections.singleton(getPollingLogAction());
     }
 
