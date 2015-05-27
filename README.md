@@ -3,7 +3,7 @@ GitHub Pull Request Plugin
 This is rewritten version of [ghprb-plugin](https://wiki.jenkins-ci.org/display/JENKINS/GitHub+pull+request+builder+plugin) that after many years is in complex code state when keeping backward compatibility with fixing all bugs almost impossible.
 Code inspired by github-plugin, git-plugin, ghprb-plugin and others.
 
-Description:
+## Description:
 
 - By design it extensible and new features can be added easily
 - Restriction features are not bundled into main code and can be extended separately. Available as API for doing checks from other plugin parts
@@ -44,14 +44,14 @@ Integration with [github-plugin](https://wiki.jenkins-ci.org/display/JENKINS/Git
   - have one Global configuration
   - reuse credentials lookup
 
-TODO:
+## TODO:
 
  - [ ] review injected variables in Cause and String parameters
  - [ ] integrate with git-plugin by providing patch for BuildData get through BuildChooser?
  - [ ] implement hooks triggering
  - [ ] more tests
 
-Configuration:
+## Configuration:
  - Set GitHub project property with link to your GH repository
  - Configure GIT SCM: add any repo name i.e. 'origin-pull' and set refspec to `+refs/pull/${GITHUB_PR_NUMBER}/merge:refs/remotes/origin-pull/pull/${GITHUB_PR_NUMBER}/merge` if you want run build for merged state or '/head' for building exact PR commits, or `$GITHUB_PR_COND_REF` if you want 'head' state when PR is not mergeable (according to GH state). Set branch specifier to `origin-pull/pull/${GITHUB_PR_NUMBER}/merge`. This exact link allows to speedup fetch sources.
  - If you want use hooks, then go to your GitHub repository "Settings" and press add "webhook", then "Let me select individual events.", choose "Pull Request" and "Issues" and set url in the next form "http://yourjenkinsurl/github-pullrequest/"
