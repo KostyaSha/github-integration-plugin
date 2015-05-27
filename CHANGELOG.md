@@ -2,6 +2,7 @@
 
 ## 0.1.0-beta10
 
+* Fix broken polling page
 * Feature: Experimental hooks support
 * Fix: Don't persist project object
 
