@@ -16,9 +16,9 @@ import java.util.logging.Logger;
  * @author Kanstantsin Shautsou
  */
 @Extension
-public class GitHubPRRootActionCrumbeExclusion extends CrumbExclusion {
+public class GitHubPRRootActionCrumbExclusion extends CrumbExclusion {
 
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRRootActionCrumbeExclusion.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GitHubPRRootActionCrumbExclusion.class.getName());
 
     @Override
     public boolean process(HttpServletRequest req, HttpServletResponse resp, FilterChain chain) throws IOException, ServletException {
