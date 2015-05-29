@@ -13,8 +13,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implements removing of labels (one or many) from GitHub.
@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRLabelRemovePublisher extends GitHubPRAbstractPublisher {
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRLabelRemovePublisher.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRLabelRemovePublisher.class);
 
     private GitHubPRLabel labelProperty;
 
@@ -49,7 +49,7 @@ public class GitHubPRLabelRemovePublisher extends GitHubPRAbstractPublisher {
             getGhIssue(build).setLabels(remoteLabels.toArray(new String[remoteLabels.size()]));
         } catch (IOException ex) {
             listener.getLogger().println("Couldn't remove label for PR #" + getNumber(build) + " " + ex.getMessage());
-            LOGGER.log(Level.SEVERE, "Couldn't remove label for PR #" + getNumber(), ex);
+            LOGGER.error("Couldn't remove label for PR #{}", getNumber(), ex);
             handlePublisherError(build);
         }
         return true;

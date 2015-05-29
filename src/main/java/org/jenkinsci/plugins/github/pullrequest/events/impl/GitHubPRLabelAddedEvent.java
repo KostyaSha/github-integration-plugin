@@ -19,7 +19,8 @@ import java.io.PrintStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * When label is added to pull request. Set of labels is considered added only when
@@ -30,7 +31,7 @@ import java.util.logging.Logger;
  */
 public class GitHubPRLabelAddedEvent extends GitHubPREvent {
     private static final String DISPLAY_NAME = "Labels added";
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRLabelAddedEvent.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRLabelAddedEvent.class);
 
     private final GitHubPRLabel label;
 

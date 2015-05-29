@@ -8,7 +8,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link com.cloudbees.jenkins.GitHubWebHookCrumbExclusion}
@@ -18,7 +19,7 @@ import java.util.logging.Logger;
 @Extension
 public class GitHubPRRootActionCrumbExclusion extends CrumbExclusion {
 
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRRootActionCrumbExclusion.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRRootActionCrumbExclusion.class);
 
     @Override
     public boolean process(HttpServletRequest req, HttpServletResponse resp, FilterChain chain) throws IOException, ServletException {

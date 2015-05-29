@@ -10,7 +10,8 @@ import org.kohsuke.github.GHPullRequest;
 
 import javax.annotation.CheckForNull;
 import java.io.IOException;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Extension point for various GH events that triggers job
@@ -18,7 +19,7 @@ import java.util.logging.Logger;
  * @author Kanstantsin Shautsou
  */
 public abstract class GitHubPREvent extends AbstractDescribableImpl<GitHubPREvent> {
-    private static final Logger LOGGER = Logger.getLogger(GitHubPREvent.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPREvent.class);
 
     /**
      * indicates that PR was changed

@@ -13,15 +13,15 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Kanstantsin Shautsou
  */
 @Extension
 public class GitHubPRRepositoryFactory extends TransientProjectActionFactory {
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRRepositoryFactory.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRRepositoryFactory.class);
 
     @Override
     public Collection<? extends Action> createFor(AbstractProject project) {
@@ -51,7 +51,7 @@ public class GitHubPRRepositoryFactory extends TransientProjectActionFactory {
             try {
                 localRepository = (GitHubPRRepository) configFile.read();
             } catch (IOException e) {
-                LOGGER.log(Level.INFO, "Can't read saved repository, creating new one", e);
+                LOGGER.info("Can't read saved repository, creating new one", e);
                 localRepository = new GitHubPRRepository(repoFullName, githubUrl, new HashMap<Integer, GitHubPRPullRequest>());
             }
         } else {

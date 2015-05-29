@@ -15,8 +15,8 @@ import org.kohsuke.github.GHIssueState;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Closes pull request after build.
@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  * @author Alina Karpovich
  */
 public class GitHubPRClosePublisher extends GitHubPRAbstractPublisher {
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRClosePublisher.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRClosePublisher.class);
 
     @DataBoundConstructor
     public GitHubPRClosePublisher(StatusVerifier statusVerifier, PublisherErrorHandler errorHandler) {
@@ -44,7 +44,7 @@ public class GitHubPRClosePublisher extends GitHubPRAbstractPublisher {
                     try {
                         getGhPullRequest(build).close();
                     } catch (IOException ex) {
-                        LOGGER.log(Level.SEVERE, "Couldn't close the pull request #" + getNumber(build) + ": '", ex);
+                        LOGGER.error("Couldn't close the pull request #{}:", getNumber(build), ex);
                     }
                 }
             } catch (IOException ex) {

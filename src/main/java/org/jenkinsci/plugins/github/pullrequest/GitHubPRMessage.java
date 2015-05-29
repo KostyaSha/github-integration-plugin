@@ -14,8 +14,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents a comment for GitHub that can contain token macros.
@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  * @author Alina Karpovich
  */
 public class GitHubPRMessage extends AbstractDescribableImpl<GitHubPRMessage> {
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRMessage.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRMessage.class);
 
     private String content;
 
@@ -65,13 +65,13 @@ public class GitHubPRMessage extends AbstractDescribableImpl<GitHubPRMessage> {
                 content = (String) tokenMacroExpand.invoke(null, build, listener, content, false, macros);
             }
         } catch (ClassNotFoundException e) {
-            LOGGER.log(Level.SEVERE, "Can't find class", e);
+            LOGGER.error("Can't find class", e);
         } catch (NoSuchMethodException e) {
-            LOGGER.log(Level.SEVERE, "Can't evaluate macro", e);
+            LOGGER.error("Can't evaluate macro", e);
         } catch (InvocationTargetException e) {
-            LOGGER.log(Level.SEVERE, "Can't evaluate macro", e);
+            LOGGER.error("Can't evaluate macro", e);
         } catch (IllegalAccessException e) {
-            LOGGER.log(Level.SEVERE, "Can't evaluate macro", e);
+            LOGGER.error("Can't evaluate macro", e);
         }
 
         return content;

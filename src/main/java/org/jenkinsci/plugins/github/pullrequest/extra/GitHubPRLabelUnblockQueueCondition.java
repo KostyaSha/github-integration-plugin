@@ -12,7 +12,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Unblock when label found
@@ -20,7 +21,7 @@ import java.util.logging.Logger;
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRLabelUnblockQueueCondition extends BlockQueueCondition {
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRLabelUnblockQueueCondition.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRLabelUnblockQueueCondition.class);
 
     private GitHubPRLabel label;
 
@@ -44,8 +45,8 @@ public class GitHubPRLabelUnblockQueueCondition extends BlockQueueCondition {
                     if (causeLabels.containsAll(label.getLabelsSet())) {
                         if (item.task instanceof AbstractProject<?, ?>) {
                             final AbstractProject<?, ?> abstractProject = (AbstractProject<?, ?>) item.task;
-                            LOGGER.log(Level.FINE, "Unblocking job item {0} with matched labels {1}",
-                                    new Object[]{ abstractProject.getFullName(), label.getLabelsSet()});
+                            LOGGER.debug("Unblocking job item {} with matched labels {}",
+                                    abstractProject.getFullName(), label.getLabelsSet());
                         }
 
                         return true;

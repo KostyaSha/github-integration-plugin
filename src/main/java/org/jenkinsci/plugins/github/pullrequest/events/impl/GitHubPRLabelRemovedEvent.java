@@ -17,7 +17,8 @@ import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collection;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * When label is removed from GitHub issue(== pull request). Set of labels is considered removed only when
@@ -29,7 +30,7 @@ import java.util.logging.Logger;
  */
 public class GitHubPRLabelRemovedEvent extends GitHubPREvent {
     private static final String DISPLAY_NAME = "Labels removed";
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRLabelRemovedEvent.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRLabelRemovedEvent.class);
 
     private final GitHubPRLabel label;
 

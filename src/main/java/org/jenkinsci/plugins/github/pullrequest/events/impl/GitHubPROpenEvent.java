@@ -14,7 +14,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * When PR opened or commits changed in it
@@ -23,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class GitHubPROpenEvent extends GitHubPREvent {
     private static final String DISPLAY_NAME = "Pull Request Opened";
-    private static final Logger LOGGER = Logger.getLogger(GitHubPROpenEvent.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPROpenEvent.class);
 
     @DataBoundConstructor
     public GitHubPROpenEvent() {

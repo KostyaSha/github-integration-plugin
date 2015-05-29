@@ -15,13 +15,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static java.util.logging.Level.WARNING;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GitHubPRCause extends Cause {
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRCause.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRCause.class);
 
     private final String headSha;
     private final int number;
@@ -90,12 +88,12 @@ public class GitHubPRCause extends Cause {
             try {
                 this.triggerSenderName = triggerSender.getName();
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Can't get trigger sender name from remote PR");
+                LOGGER.error("Can't get trigger sender name from remote PR");
             }
             try {
                 this.triggerSenderEmail = triggerSender.getEmail();
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Can't get trigger sender email from remote PR");
+                LOGGER.error("Can't get trigger sender email from remote PR");
             }
         }
 
@@ -109,7 +107,7 @@ public class GitHubPRCause extends Cause {
             FileUtils.writeStringToFile(action.getPollingLogFile(), pollingLog);
             build.replaceAction(action);
         } catch (IOException e) {
-            LOGGER.log(WARNING, "Failed to persist the polling log", e);
+            LOGGER.warn("Failed to persist the polling log", e);
         }
         pollingLog = null;
     }

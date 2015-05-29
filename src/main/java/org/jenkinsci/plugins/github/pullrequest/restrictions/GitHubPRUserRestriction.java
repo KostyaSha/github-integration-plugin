@@ -13,15 +13,16 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.regex.Pattern;
 
 /**
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRUserRestriction implements Describable<GitHubPRUserRestriction> {
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRUserRestriction.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRUserRestriction.class);
     private final Set<String> orgsSet;
     private final Set<String> usersSet;
     private final String whitelistUserMsg;
@@ -55,7 +56,7 @@ public class GitHubPRUserRestriction implements Describable<GitHubPRUserRestrict
     }
 
     public void addUserToWhitelist(String author, GitHubPRTrigger gitHubPRTrigger) {
-        LOGGER.log(Level.INFO, "Adding {0} to whitelist", author);
+        LOGGER.info("Adding {} to whitelist", author);
         usersSet.add(author);
         gitHubPRTrigger.trySave();
     }
@@ -90,7 +91,7 @@ public class GitHubPRUserRestriction implements Describable<GitHubPRUserRestrict
             }
 
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Can't connect retrieve comment data from GitHub", e);
+            LOGGER.error("Can't connect retrieve comment data from GitHub", e);
         }
     }
 
@@ -111,7 +112,7 @@ public class GitHubPRUserRestriction implements Describable<GitHubPRUserRestrict
         try {
             ret = user != null && user.getLogin().equals(getGitHub().getMyself().getLogin());
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Can't connect retrieve user data from GitHub", e);
+            LOGGER.error("Can't connect retrieve user data from GitHub", e);
         }
         return ret;
     }
@@ -126,7 +127,7 @@ public class GitHubPRUserRestriction implements Describable<GitHubPRUserRestrict
                     break;
                 }
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Can't connect retrieve organization data from GitHub", e);
+                LOGGER.error("Can't connect retrieve organization data from GitHub", e);
             }
         }
         return ret;

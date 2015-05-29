@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Hook handler for GitHubPR.
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 @Extension
 public class GitHubPRRootAction implements UnprotectedRootAction {
     static final String URL = "github-pullrequest";
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRRootAction.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRRootAction.class);
 
     public String getIconFileName() {
         return null;
@@ -48,9 +48,9 @@ public class GitHubPRRootAction implements UnprotectedRootAction {
     public void doIndex(StaplerRequest req, StaplerResponse resp) {
         String event = req.getHeader("X-GitHub-Event");
         if (event.equals("ping")) {
-            LOGGER.log(Level.INFO, "Got 'ping' event");
+            LOGGER.info("Got 'ping' event");
         } else {
-            LOGGER.log(Level.FINE, "Got {} event", event);
+            LOGGER.debug("Got {} event", event);
         }
 
         try {
@@ -63,21 +63,21 @@ public class GitHubPRRootAction implements UnprotectedRootAction {
                 try (BufferedReader reader = req.getReader()) {
                     payload = IOUtils.toString(reader);
                 } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE, "Can't get payload from json: {0}", e.getMessage());
+                    LOGGER.error("Can't get payload from json: {}", e.getMessage());
                     return;
                 }
             } else if ("application/x-www-form-urlencoded".equals(type)) {
                 payload = req.getParameter("payload");
             } else {
-                LOGGER.log(Level.SEVERE, "Unknown content type {0}", type);
+                LOGGER.error("Unknown content type {}", type);
                 return;
             }
 
             if (payload == null || payload.isEmpty()) {
-                LOGGER.log(Level.WARNING, "Bad payload {0}", payload);
+                LOGGER.warn("Bad payload {}", payload);
                 return;
             } else {
-                LOGGER.log(Level.FINEST, "Payload {0}", payload);
+                LOGGER.trace("Payload {}", payload);
             }
 
 
@@ -92,7 +92,7 @@ public class GitHubPRRootAction implements UnprotectedRootAction {
                 GHEventPayload.PullRequest pr = (GHEventPayload.PullRequest) parsedPayload;
                 jobs = getJobs(pr.getPullRequest().getRepository().getFullName());
             } else {
-                LOGGER.log(Level.WARNING, "Request not known");
+                LOGGER.warn("Request not known");
             }
 
             for (AbstractProject<?, ?> job : jobs) {
@@ -102,7 +102,7 @@ public class GitHubPRRootAction implements UnprotectedRootAction {
                 }
 
                 if (trigger.getTriggerMode() == null) {
-                    LOGGER.log(Level.WARNING, "Job {0} has bad trigger mode.", job.getFullName());
+                    LOGGER.warn("Job {} has bad trigger mode.", job.getFullName());
                     continue;
                 }
 
@@ -112,7 +112,7 @@ public class GitHubPRRootAction implements UnprotectedRootAction {
                         break;
 
                     case LIGHT_HOOKS:
-                        LOGGER.log(Level.WARNING, "Unsupported LIGHT_HOOKS trigger mode");
+                        LOGGER.warn("Unsupported LIGHT_HOOKS trigger mode");
 //                        LOGGER.log(Level.INFO, "Begin processing hooks for {0}", trigger.getRepoFullName(job));
 //                        for (GitHubPREvent prEvent : trigger.getEvents()) {
 //                            GitHubPRCause cause = prEvent.checkHook(trigger, parsedPayload, null);
@@ -124,7 +124,7 @@ public class GitHubPRRootAction implements UnprotectedRootAction {
                 }
             }
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, "Failed to parse github hook payload.", ex);
+            LOGGER.error("Failed to parse github hook payload.", ex);
         }
     }
 

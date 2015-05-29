@@ -15,8 +15,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implements addition of labels (one or many) to GitHub.
@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRLabelAddPublisher extends GitHubPRAbstractPublisher {
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRLabelAddPublisher.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRLabelAddPublisher.class);
 
     private GitHubPRLabel labelProperty;
 
@@ -49,7 +49,7 @@ public class GitHubPRLabelAddPublisher extends GitHubPRAbstractPublisher {
             getGhIssue(build).setLabels(remoteLabels.toArray(new String[remoteLabels.size()]));
         } catch (IOException ex) {
             listener.getLogger().println("Couldn't add label for PR #" + getNumber(build) + " " + ex.getMessage());
-            LOGGER.log(Level.SEVERE, "Couldn't add label for PR #" + getNumber(), ex);
+            LOGGER.error("Couldn't add label for PR #{}", getNumber(), ex);
             handlePublisherError(build);
         }
         return true;

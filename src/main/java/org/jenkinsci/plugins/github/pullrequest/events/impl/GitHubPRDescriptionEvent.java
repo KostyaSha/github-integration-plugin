@@ -16,8 +16,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.regex.Pattern;
 
 /**
@@ -25,7 +26,7 @@ import java.util.regex.Pattern;
  */
 public class GitHubPRDescriptionEvent extends GitHubPREvent {
     private static final String DISPLAY_NAME = "Description matched to pattern";
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRDescriptionEvent.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRDescriptionEvent.class);
 
     private final String skipMsg;
 
@@ -57,7 +58,7 @@ public class GitHubPRDescriptionEvent extends GitHubPREvent {
                 skipBuildPhrase = skipBuildPhrase.trim();
                 Pattern skipBuildPhrasePattern = Pattern.compile(skipBuildPhrase);
                 if (skipBuildPhrasePattern.matcher(pullRequestBody).matches()) {
-                    LOGGER.log(Level.INFO, "Pull request description with {0} skipBuildPhrase. Hence skipping the buildAndComment.",
+                    LOGGER.info("Pull request description with {} skipBuildPhrase. Hence skipping the buildAndComment.",
                             skipBuildPhrase);
                     logger.println(DISPLAY_NAME + ": Pull request description contains " + skipBuildPhrase + ", skipping");
                     cause = new GitHubPRCause(remotePR, "Pull request description contains " + skipBuildPhrase + ", skipping", true);
