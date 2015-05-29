@@ -10,8 +10,9 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.regex.Pattern;
 
 /**
@@ -20,7 +21,7 @@ import java.util.regex.Pattern;
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRBranchRestriction implements Describable<GitHubPRBranchRestriction> {
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRBranchRestriction.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRBranchRestriction.class);
 
     private final String targetBranch;
     private final Set<String> targetBranchList;
@@ -46,8 +47,8 @@ public class GitHubPRBranchRestriction implements Describable<GitHubPRBranchRest
             }
         }
 
-        LOGGER.log(Level.FINEST, "Target branch {0} is {1} in our whitelist of target branches",
-                new Object[]{branchName, (isAllowed ? "" : "not ")});
+        LOGGER.trace("Target branch {} is {} in our whitelist of target branches", branchName,
+                (isAllowed ? "" : "not "));
         return isAllowed;
     }
 

@@ -16,8 +16,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * GitHub Repository local state = last trigger run() state.
@@ -30,7 +30,7 @@ public class GitHubPRRepository implements Action, Saveable {
      * Store constantly changing information in project directory with .runtime.xml tail
      */
     public static final String FILE = GitHubPRRepository.class.getName() + ".runtime.xml";
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRRepository.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRRepository.class);
     private transient XmlFile configFile; // for save()
     private transient AbstractProject<?, ?> project;  // for UI
 
@@ -64,7 +64,7 @@ public class GitHubPRRepository implements Action, Saveable {
 
         Map<Integer, List<AbstractBuild<?, ?>>> map = new HashMap<Integer, List<AbstractBuild<?, ?>>>();
         final RunList<? extends AbstractBuild<?, ?>> builds = project.getBuilds();
-        LOGGER.log(Level.FINE, "Got {0} builds for project {1}", new Object[]{builds.size(), project.getFullName()});
+        LOGGER.debug("Got {} builds for project {}", builds.size(), project.getFullName());
 
         for (AbstractBuild build : builds) {
             GitHubPRCause cause = (GitHubPRCause) build.getCause(GitHubPRCause.class);
@@ -124,8 +124,8 @@ public class GitHubPRRepository implements Action, Saveable {
                 result = FormValidation.error("Forbidden");
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Can\'t delete repository file '{0}', '{1}'",
-                    new Object[] {configFile.getFile().getAbsolutePath(), e.getMessage()});
+            LOGGER.error("Can\'t delete repository file '{}', '{}'",
+                    configFile.getFile().getAbsolutePath(), e.getMessage());
             result = FormValidation.error("Can't delete: " + e.getMessage());
         }
         return result;
@@ -149,7 +149,7 @@ public class GitHubPRRepository implements Action, Saveable {
                 result = FormValidation.error("Forbidden");
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Can't start rebuild", e.getMessage());
+            LOGGER.error("Can't start rebuild", e.getMessage());
             result = FormValidation.error("Can't start rebuild: " + e.getMessage());
         }
         return result;
@@ -183,7 +183,7 @@ public class GitHubPRRepository implements Action, Saveable {
                 result = FormValidation.warning("Build not found");
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Can't start rebuild", e.getMessage());
+            LOGGER.error("Can't start rebuild", e.getMessage());
             result = FormValidation.error("Can't start rebuild: " + e.getMessage());
         }
         return result;

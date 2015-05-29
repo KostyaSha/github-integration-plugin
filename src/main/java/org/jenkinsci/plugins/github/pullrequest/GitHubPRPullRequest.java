@@ -13,8 +13,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Maintains state about a Pull Request for a particular Jenkins job.  This is what understands the current state
@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  * Used from {@link GitHubPRRepository}
  */
 public class GitHubPRPullRequest {
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRPullRequest.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRPullRequest.class);
 
     private final int number;
     private final Date issueUpdatedAt;
@@ -63,14 +63,14 @@ public class GitHubPRPullRequest {
             }
             lastCommentCreatedAt = maxDate.getTime() == 0 ? null : new Date(maxDate.getTime());
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Can't get comments for PR: {}", e.getMessage());
+            LOGGER.warn("Can't get comments for PR: {}", e.getMessage());
             lastCommentCreatedAt = null;
         }
 
         try {
             userEmail = pr.getUser().getEmail();
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Can't get GitHub user email: {}", e.getMessage());
+            LOGGER.warn("Can't get GitHub user email: {}", e.getMessage());
             userEmail = "";
         }
 
@@ -79,14 +79,14 @@ public class GitHubPRPullRequest {
         try {
             updateLabels(remoteRepo.getIssue(number).getLabels());
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Can't retrieve label list: {}", e.getMessage());
+            LOGGER.warn("Can't retrieve label list: {}", e.getMessage());
         }
 
         // see https://github.com/kohsuke/github-api/issues/111
         try {
             mergeable = pr.getMergeable();
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Can't get mergeable status: {}", e.getMessage());
+            LOGGER.warn("Can't get mergeable status: {}", e.getMessage());
             mergeable = false;
         }
         sourceRepoOwner = remoteRepo.getOwnerName();

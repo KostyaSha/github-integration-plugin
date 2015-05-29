@@ -14,7 +14,8 @@ import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Event to skip PRs that can't be merged.
@@ -23,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class GitHubPRNonMergeableEvent extends GitHubPREvent {
     private static final String DISPLAY_NAME = "Not mergeable";
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRNonMergeableEvent.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRNonMergeableEvent.class);
 
     private boolean skip = true;
 
@@ -42,7 +43,7 @@ public class GitHubPRNonMergeableEvent extends GitHubPREvent {
             mergeable = remotePR.getMergeable();
         } catch (IOException e) {
             logger.println(DISPLAY_NAME + ": can't get mergeable status");
-            LOGGER.log(Level.WARNING, "Can't get mergeable status: {}", e.getMessage());
+            LOGGER.warn("Can't get mergeable status: {}", e.getMessage());
             mergeable = false;
         }
         mergeable = mergeable != null ? mergeable : false;

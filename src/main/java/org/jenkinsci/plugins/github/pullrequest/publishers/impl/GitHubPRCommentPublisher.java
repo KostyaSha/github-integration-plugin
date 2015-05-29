@@ -13,8 +13,8 @@ import org.jenkinsci.plugins.github.pullrequest.utils.StatusVerifier;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Adds specified text to comments after build.
@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRCommentPublisher extends GitHubPRAbstractPublisher {
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRCommentPublisher.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRCommentPublisher.class);
 
     private GitHubPRMessage comment;
 
@@ -51,8 +51,7 @@ public class GitHubPRCommentPublisher extends GitHubPRAbstractPublisher {
             try {
                 getGhPullRequest(build).comment(message);
             } catch (IOException ex) {
-                LOGGER.log(Level.SEVERE, "Couldn't add comment to pull request #"
-                        + getNumber(build) + ": '" + message + "'", ex);
+                LOGGER.error("Couldn't add comment to pull request #{}: '{}'", getNumber(build), message, ex);
                 handlePublisherError(build);
             }
             listener.getLogger().println(message);

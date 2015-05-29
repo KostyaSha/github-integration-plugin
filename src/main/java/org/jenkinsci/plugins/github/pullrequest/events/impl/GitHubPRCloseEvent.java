@@ -13,7 +13,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * When PR closed
@@ -22,7 +23,7 @@ import java.util.logging.Logger;
  */
 public class GitHubPRCloseEvent extends GitHubPREvent {
     private static final String DISPLAY_NAME = "Pull Request Closed";
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRCloseEvent.class.getName()); //NOPMD
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRCloseEvent.class); //NOPMD
 
     @DataBoundConstructor
     public GitHubPRCloseEvent() {

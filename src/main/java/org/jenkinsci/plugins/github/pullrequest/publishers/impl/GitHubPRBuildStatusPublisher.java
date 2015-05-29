@@ -16,8 +16,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Sets build status on GitHub.
@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRBuildStatusPublisher.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRBuildStatusPublisher.class);
 
     private GitHubPRMessage statusMsg = new GitHubPRMessage("$GITHUB_PR_COND_REF run ended");
     private GHCommitState unstableAs = GHCommitState.FAILURE;
@@ -61,8 +61,8 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
             String statusMsgValue = getStatusMsg().expandAll(build, listener);
             String buildUrl = publishedURL + build.getUrl();
 
-            LOGGER.log(Level.INFO, "Setting status of {0} to {1} with url {2} and message: {3}",
-                    new Object[]{c.getHeadSha(), state, buildUrl, statusMsgValue});
+            LOGGER.info("Setting status of {} to {} with url {} and message: {}",
+                    c.getHeadSha(), state, buildUrl, statusMsgValue);
 
             try {
                 build.getProject()
@@ -72,18 +72,18 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
             } catch (IOException ex) {
                 if (buildMessage != null) {
                     String comment = null;
-                    LOGGER.log(Level.SEVERE, "Could not update commit status of the Pull Request on GitHub.", ex);
+                    LOGGER.error("Could not update commit status of the Pull Request on GitHub.", ex);
                     if (state == GHCommitState.SUCCESS) {
                         comment = buildMessage.getSuccessMsg().expandAll(build, listener);
                     } else if (state == GHCommitState.FAILURE) {
                         comment = buildMessage.getFailureMsg().expandAll(build, listener);
                     }
                     listenerLogger.println("Adding comment...");
-                    LOGGER.log(Level.INFO, "Adding comment, because: ", ex);
+                    LOGGER.info("Adding comment, because: ", ex);
                     addComment(c.getNumber(), comment, build, listener);
                 } else {
                     listenerLogger.println("Could not update commit status of the Pull Request on GitHub." + ex.getMessage());
-                    LOGGER.log(Level.SEVERE, "Could not update commit status of the Pull Request on GitHub.", ex);
+                    LOGGER.error("Could not update commit status of the Pull Request on GitHub.", ex);
                 }
                 handlePublisherError(build);
             }

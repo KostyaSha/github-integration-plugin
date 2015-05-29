@@ -14,8 +14,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Triggers build when commit hash changed
@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRCommitEvent extends GitHubPREvent {
-    private static final Logger LOGGER = Logger.getLogger(GitHubPROpenEvent.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPROpenEvent.class);
     private static final String DISPLAY_NAME = "Commit changed";
 
     @DataBoundConstructor
@@ -46,7 +46,7 @@ public class GitHubPRCommitEvent extends GitHubPREvent {
 
         GHCommitPointer head = remotePR.getHead();
         if (!localPR.getHeadSha().equals(head.getSha())) {
-            LOGGER.log(Level.FINE, "New commit. Sha: {0} => {1}", new Object[]{localPR.getHeadSha(), head.getSha()});
+            LOGGER.debug("New commit. Sha: {} => {}", localPR.getHeadSha(), head.getSha());
             final PrintStream logger = listener.getLogger();
             logger.println(this.getClass().getSimpleName() + ": new commit found, sha " + head.getSha());
 //            GHUser user = head.getUser();

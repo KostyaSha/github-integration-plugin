@@ -36,8 +36,9 @@ import java.io.PrintStream;
 import java.net.Proxy;
 import java.text.DateFormat;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,7 +65,7 @@ import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.Descripto
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRTrigger.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRTrigger.class);
 
     //TODO replace with {@link GitHubRepositoryName.class} ?
     private static final Pattern GH_FULL_REPO_NAME = Pattern.compile("^(http[s]?://[^/]*)/([^/]*/[^/]*).*");
@@ -127,7 +128,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
     @Override
     public void start(AbstractProject<?, ?> project, boolean newInstance) {
-        LOGGER.log(Level.INFO, "Starting GitHub Pull Request trigger for project {0}", project.getName());
+        LOGGER.info("Starting GitHub Pull Request trigger for project {}", project.getName());
         super.start(project, newInstance);
 
         if (getTriggerMode() != GitHubPRTriggerMode.CRON) {
@@ -148,12 +149,12 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         }
 
         if (job == null) {
-            LOGGER.log(Level.SEVERE, "job object is null, race condition?");
+            LOGGER.error("job object is null, race condition?");
             throw new IllegalStateException("Job object is null");
         }
 
         if (job.getProperty(GithubProjectProperty.class) == null) {
-            LOGGER.log(Level.INFO, "GitHub project not set up, cannot start GitHub PR trigger for job {0}", job);
+            LOGGER.info("GitHub project not set up, cannot start GitHub PR trigger for job {}", job);
             throw new IllegalArgumentException("GitHub project property is not defined. " +
                     "Cannot start GitHub PR trigger for job " + job.getName());
         }
@@ -195,7 +196,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
     public void doRun() {
         if (job == null || job.isDisabled()) {
-            LOGGER.log(Level.FINE, "Job {0} is disabled, but trigger run!", job == null ? "no job" : job.getFullName());
+            LOGGER.debug("Job {} is disabled, but trigger run!", job == null ? "no job" : job.getFullName());
             return;
         }
 
@@ -211,7 +212,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         try (StreamTaskListener listener = new StreamTaskListener(getPollingLogAction().getLogFile())) {
             final PrintStream logger = listener.getLogger();
             logger.println("Started on " + DateFormat.getDateTimeInstance().format(new Date()));
-            LOGGER.log(Level.FINE, "Running GitHub Pull Request trigger check.");
+            LOGGER.debug("Running GitHub Pull Request trigger check.");
 
             GitHubPRRepository localRepository = null;
             try {
@@ -219,7 +220,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
                 causes = check(localRepository, listener);
             } catch (IOException e) {
                 listener.error("Can't save repository state, because " + e.getMessage());
-                LOGGER.log(Level.SEVERE, "Can't save repository state, because: '{0}'", e.getMessage());
+                LOGGER.error("Can't save repository state, because: '{}'", e.getMessage());
             }
 
             if (localRepository != null) {
@@ -227,16 +228,16 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
                     localRepository.save();
                 } catch (IOException e) {
                     listener.error("Can't save repository state, because " + e.getMessage());
-                    LOGGER.log(Level.SEVERE, "Can't save repository state, because: '{0}'", e.getMessage());
+                    LOGGER.error("Can't save repository state, because: '{}'", e.getMessage());
                 }
             }
 
             long duration = System.currentTimeMillis() - startTime;
-            LOGGER.log(Level.INFO, "End  GitHub Pull Request trigger check. Summary time: {0}ms", duration);
+            LOGGER.info("End  GitHub Pull Request trigger check. Summary time: {}ms", duration);
             logger.println("Finished at " + DateFormat.getDateTimeInstance().format(new Date())
                     + ", duration " + duration + "ms");
         } catch (Throwable e) {
-            LOGGER.log(Level.SEVERE, "can't trigger build {}", e.getMessage());
+            LOGGER.error("can't trigger build {}", e.getMessage());
             return;
         }
 
@@ -245,7 +246,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
                 cause.setPollingLog(pollingLogAction.getLogFile());
                 build(cause);
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "can't trigger build {}", e.getMessage());
+                LOGGER.error("can't trigger build {}", e.getMessage());
             }
         }
     }
@@ -282,7 +283,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         final PrintStream logger = listener.getLogger();
 
         GHRateLimit rateLimitBefore = getGitHub().getRateLimit();
-        LOGGER.log(Level.FINE, "GitHub rate limit before check: {0}", rateLimitBefore);
+        LOGGER.debug("GitHub rate limit before check: {}", rateLimitBefore);
         logger.println("GitHub rate limit before check: " + rateLimitBefore);
         int checkedPR = 0;
 
@@ -318,7 +319,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             @CheckForNull GitHubPRPullRequest localPR = localPulls.get(remotePR.getNumber());
 
             if (!isUpdated(remotePR, localPR)) { // light check
-                LOGGER.log(Level.FINE, "PR #{0} '{1}' not changed", new Object[]{remotePR.getNumber(), remotePR.getTitle()});
+                LOGGER.debug("PR #{} '{}' not changed", remotePR.getNumber(), remotePR.getTitle());
                 logger.println("PR #" + remotePR.getNumber() + " '" + remotePR.getTitle() + "' not changed");
                 continue;
             }
@@ -337,22 +338,22 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             }
 
             if (skipFirstRun) {
-                LOGGER.log(Level.INFO, "Skipping first run for {0} and PR #{1}",
-                        new Object[]{job.getFullName(), remotePR.getNumber()});
+                LOGGER.info("Skipping first run for {} and PR #{}",
+                        job.getFullName(), remotePR.getNumber());
                 logger.println("Skipping first run for " + job.getFullName() + " and PR #" + remotePR.getNumber());
                 continue;
             }
 
             if (branchRestriction != null && branchRestriction.isBranchBuildAllowed(remotePR)) {
-                LOGGER.log(Level.WARNING, "Skipping #{0} {1} because of branch restriction",
-                        new Object[]{remotePR.getNumber(), remotePR.getTitle()});
+                LOGGER.warn("Skipping #{} {} because of branch restriction",
+                        remotePR.getNumber(), remotePR.getTitle());
                 logger.println("Skipping #" + remotePR.getNumber() + " " + remotePR.getTitle() + " because of branch restriction");
                 continue;
             }
 
             if (userRestriction != null && !userRestriction.isWhitelisted(remotePR.getUser())) {
-                LOGGER.log(Level.WARNING, "Skipping #{0} {1} because of user restriction (user - {2})",
-                        new Object[]{remotePR.getNumber(), remotePR.getTitle(), remotePR.getUser()});
+                LOGGER.warn("Skipping #{} {} because of user restriction (user - {})",
+                        remotePR.getNumber(), remotePR.getTitle(), remotePR.getUser());
                 logger.println("Skipping #" + remotePR.getNumber() + " " + remotePR.getTitle()
                         + " because of user restriction (user - " + remotePR.getUser() + ")");
                 continue;
@@ -363,12 +364,12 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
                     GitHubPRCause cause = event.check(this, remotePR, localPR, listener);
                     if (cause != null) {
                         if (cause.isSkip()) {
-                            LOGGER.log(Level.FINE, "Skipping PR #{0}", remotePR.getNumber());
+                            LOGGER.debug("Skipping PR #{}", remotePR.getNumber());
                             logger.println("Skipping PR #" + remotePR.getNumber());
                             break;
                         } else {
-                            LOGGER.log(Level.FINE, "Triggering build for PR #'{0}', because {1}",
-                                    new Object[]{remotePR.getNumber(), cause.getReason()});
+                            LOGGER.debug("Triggering build for PR #'{}', because {}",
+                                    remotePR.getNumber(), cause.getReason());
                             logger.println("Triggering build for PR #" + remotePR.getNumber() + " because " + cause.getReason());
                             gitHubPRCauses.add(cause);
                             // don't check other events
@@ -376,7 +377,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
                         }
                     }
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, "Can't check trigger event", e);
+                    LOGGER.warn("Can't check trigger event", e);
                     listener.error("Skip event failed, so skipping PR");
                     break;
                 }
@@ -385,15 +386,15 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         }
 
         if (skipFirstRun) {
-            LOGGER.log(Level.INFO, "Skipping first run for {0}", job.getFullName());
+            LOGGER.info("Skipping first run for {}", job.getFullName());
             skipFirstRun = false;
             trySave(); //TODO or better fail with IOException?
         }
 
         GHRateLimit rateLimitAfter = getGitHub().getRateLimit();
         int consumed = rateLimitBefore.remaining - rateLimitAfter.remaining;
-        LOGGER.log(Level.INFO, "GitHub rate limit after check: {0}, consumed: {1}, checked PRs: {2}",
-                new Object[]{rateLimitAfter, consumed, checkedPR});
+        LOGGER.info("GitHub rate limit after check: {}, consumed: {}, checked PRs: {}",
+                rateLimitAfter, consumed, checkedPR);
         return gitHubPRCauses;
     }
 
@@ -411,8 +412,8 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         boolean updated = prUpd || issueUpd || headUpd;
 
         if (updated) {
-            LOGGER.log(Level.INFO, "Pull request #{0} was updated at: {1} by {2}",
-                    new Object[]{localPR.getNumber(), localPR.getPrUpdatedAt(), localPR.getUserLogin()});
+            LOGGER.info("Pull request #{} was updated at: {} by {}",
+                    localPR.getNumber(), localPR.getPrUpdatedAt(), localPR.getUserLogin());
         }
 
         return updated;
@@ -428,10 +429,10 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
         QueueTaskFuture<?> queueTaskFuture = startJob(cause);
         if (queueTaskFuture == null) {
-            LOGGER.log(Level.SEVERE, "Job didn't start");
+            LOGGER.error("Job didn't start");
         }
 
-        LOGGER.log(Level.INFO, sb.toString());
+        LOGGER.info(sb.toString());
 
         GitHub connection = getGitHub();    // remote connection
         if (connection != null && preStatus) {
@@ -477,7 +478,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     public void stop() {
         //TODO clean hooks?
         if (job != null) {
-            LOGGER.log(Level.INFO, "Stopping the GitHub PR trigger for project {0}", job.getFullName());
+            LOGGER.info("Stopping the GitHub PR trigger for project {}", job.getFullName());
         }
         super.stop();
     }
@@ -602,13 +603,13 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         try {
             gh = getDescriptor().getGitHub();
         } catch (FileNotFoundException ex) {
-            LOGGER.log(Level.INFO, "Can't connect to GitHub {0}. Bad Global plugin configuration.", ex.getMessage());
+            LOGGER.info("Can't connect to GitHub {}. Bad Global plugin configuration.", ex.getMessage());
             throw new IOException("Can't connect to GitHub: " + ex.getMessage() + ". Bad Global plugin configuration.", ex);
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, "Can't connect to GitHub {0}. Bad Global plugin configuration.", ex.getMessage());
+            LOGGER.error("Can't connect to GitHub {}. Bad Global plugin configuration.", ex.getMessage());
             throw ex;
         } catch (Throwable t) {
-            LOGGER.log(Level.FINE, "Can't connect to GitHub {0}. Bad Global plugin configuration.", t.getMessage());
+            LOGGER.debug("Can't connect to GitHub {}. Bad Global plugin configuration.", t.getMessage());
             throw new IOException("Can't connect to GitHub: " + t.getMessage() + ". Bad Global plugin configuration.", t);
         }
 
@@ -623,7 +624,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         try {
             job.save();
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Error while saving job to file", e);
+            LOGGER.error("Error while saving job to file", e);
         }
     }
 
@@ -642,7 +643,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
-        private static final Logger LOGGER = Logger.getLogger(DescriptorImpl.class.getName());
+        private static final Logger LOGGER = LoggerFactory.getLogger(DescriptorImpl.class);
 
         private final transient  SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
 
@@ -749,7 +750,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             GHRateLimit rateLimit = gh.getRateLimit();
             if (rateLimit.remaining <= 60) {
                 gh = null;
-                LOGGER.log(Level.WARNING, rateLimit.toString());
+                LOGGER.warn(rateLimit.toString());
                 throw new IOException("Rate limit is lower then 60, set correct token: " + rateLimit);
             }
         }
@@ -768,7 +769,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
         public GitHub getGitHub() throws IOException {
             if (isConnectionChanged() || gh == null) {
-                LOGGER.log(Level.FINE, "Opening GitHub connection...");
+                LOGGER.debug("Opening GitHub connection...");
                 connect();
             }
             return gh;
@@ -787,7 +788,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             if (oldHash != newHash) {
                 oldHash = newHash;
                 changed = true;
-                LOGGER.log(Level.FINE, "Connection parameters changed");
+                LOGGER.debug("Connection parameters changed");
             }
 
             return changed;
@@ -797,11 +798,11 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             boolean orgHasMember = false;
             try {
                 orgHasMember = getGitHub().getOrganization(organisation).hasMember(member);
-                LOGGER.log(Level.FINE, "org.hasMember(member)? user:'{0}' org: '{1}' == '{2}'",
-                        new Object[]{member.getLogin(), organisation, orgHasMember ? "yes" : "no"});
+                LOGGER.debug("org.hasMember(member)? user:'{}' org: '{}' == '{}'",
+                        member.getLogin(), organisation, orgHasMember ? "yes" : "no");
 
             } catch (IOException ex) {
-                LOGGER.log(Level.SEVERE, "Can't get organization data", ex);
+                LOGGER.error("Can't get organization data", ex);
             }
             return orgHasMember;
         }

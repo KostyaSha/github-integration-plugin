@@ -20,8 +20,8 @@ import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static hudson.model.Result.SUCCESS;
 import static hudson.model.Result.UNSTABLE;
@@ -32,7 +32,7 @@ import static hudson.model.Result.UNSTABLE;
  * @author Alina Karpovich
  */
 public abstract class GitHubPRAbstractPublisher extends Recorder {
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRAbstractPublisher.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRAbstractPublisher.class);
 
     private transient GHRepository ghRepository;
     private transient GHIssue ghIssue;
@@ -116,7 +116,7 @@ public abstract class GitHubPRAbstractPublisher extends Recorder {
             try {
                 finalComment = build.getEnvironment(listener).expand(comment);
             } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Error", e);
+                LOGGER.error("Error", e);
             }
         }
 
@@ -126,7 +126,7 @@ public abstract class GitHubPRAbstractPublisher extends Recorder {
                 ghRepository.getPullRequest(id).comment(finalComment);
             }
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, "Couldn't add comment to pull request #" + id + ": '" + finalComment + "'", ex);
+            LOGGER.error("Couldn't add comment to pull request #{}: '{}'", id, finalComment, ex);
         }
     }
 

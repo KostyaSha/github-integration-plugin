@@ -12,16 +12,16 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRMessage;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.kohsuke.github.GHCommitState;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Sets pr status for build caused by GitHubPRCause
  */
 public class GitHubPRStatusBuilder extends Builder {
-    private static final Logger LOGGER = java.util.logging.Logger.getLogger(GitHubPRStatusBuilder.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRStatusBuilder.class);
 
     private GitHubPRMessage statusMessage = new GitHubPRMessage("$GITHUB_PR_COND_REF run started");
 
@@ -64,7 +64,7 @@ public class GitHubPRStatusBuilder extends Builder {
             }
         } catch (IOException e) {
             listener.getLogger().println("Can't update build description");
-            LOGGER.log(Level.SEVERE, "Can't set commit status", e);
+            LOGGER.error("Can't set commit status", e);
         }
 
         return true;

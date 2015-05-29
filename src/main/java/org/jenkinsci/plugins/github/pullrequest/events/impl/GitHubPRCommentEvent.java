@@ -15,8 +15,9 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.regex.Pattern;
 
 /**
@@ -26,7 +27,7 @@ import java.util.regex.Pattern;
  */
 public class GitHubPRCommentEvent extends GitHubPREvent {
     private static final String DISPLAY_NAME = "Comment matched to pattern";
-    private static final Logger LOGGER = Logger.getLogger(GitHubPRCommentEvent.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRCommentEvent.class);
 
     private String comment = "";
 
@@ -57,7 +58,7 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
                 }
             }
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Couldn't obtain comments: {}", e.getMessage());
+            LOGGER.warn("Couldn't obtain comments: {}", e.getMessage());
         }
         return cause;
     }
@@ -71,11 +72,11 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
 
             if ((userRestriction == null || userRestriction.isWhitelisted(comment.getUser()))
                     && Pattern.compile(this.comment).matcher(body).matches()) {
-                LOGGER.log(Level.FINEST, "Triggering by comment '{0}'", body);
+                LOGGER.trace("Triggering by comment '{}'", body);
                 cause = new GitHubPRCause(remotePR, "PR was triggered by comment", false);
             }
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, "Couldn't check comment #" + comment.getId(), ex);
+            LOGGER.error("Couldn't check comment #{}", comment.getId(), ex);
         }
         return cause;
     }
