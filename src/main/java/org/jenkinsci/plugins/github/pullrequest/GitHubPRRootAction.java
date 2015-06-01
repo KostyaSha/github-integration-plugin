@@ -80,16 +80,18 @@ public class GitHubPRRootAction implements UnprotectedRootAction {
                 LOGGER.trace("Payload {}", payload);
             }
 
-
-            GHEventPayload parsedPayload = null;
+            Integer prNumber = null;
+            GHEventPayload parsedPayload;
             Set<AbstractProject<?, ?>> jobs = new HashSet<>();
             if ("issue_comment".equals(event)) {
                 parsedPayload = gh.parseEventPayload(new StringReader(payload), GHEventPayload.IssueComment.class);
-                GHEventPayload.IssueComment commentPayload = gh.parseEventPayload(new StringReader(payload), GHEventPayload.IssueComment.class);
+                GHEventPayload.IssueComment commentPayload = (GHEventPayload.IssueComment) parsedPayload;
+                prNumber = commentPayload.getIssue().getNumber();
                 jobs = getJobs(commentPayload.getRepository().getFullName());
             } else if ("pull_request".equals(event)) {
                 parsedPayload = gh.parseEventPayload(new StringReader(payload), GHEventPayload.PullRequest.class);
                 GHEventPayload.PullRequest pr = (GHEventPayload.PullRequest) parsedPayload;
+                prNumber = pr.getNumber();
                 jobs = getJobs(pr.getPullRequest().getRepository().getFullName());
             } else {
                 LOGGER.warn("Request not known");
@@ -108,7 +110,7 @@ public class GitHubPRRootAction implements UnprotectedRootAction {
 
                 switch (trigger.getTriggerMode()) {
                     case HEAVY_HOOKS:
-                        trigger.queueRun(job);
+                        trigger.queueRun(job, prNumber.intValue());
                         break;
 
                     case LIGHT_HOOKS:
