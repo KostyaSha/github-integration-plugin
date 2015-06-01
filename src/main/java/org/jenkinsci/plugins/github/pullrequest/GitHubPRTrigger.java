@@ -177,24 +177,28 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     @Override
     public void run() {
         if (getTriggerMode() != null && getTriggerMode() == GitHubPRTriggerMode.CRON) {
-            doRun();
+            doRun(null);
         }
     }
 
     /**
      * For running from external places. Goes to queue.
      */
-    public void queueRun(AbstractProject<?, ?> job) {
+    public void queueRun(AbstractProject<?, ?> job, final int prNumber) {
         this.job = job;
         getDescriptor().queue.execute(new Runnable() {
             @Override
             public void run() {
-                doRun();
+                doRun(prNumber);
             }
         });
     }
 
-    public void doRun() {
+    /**
+     * Runs check
+     * @param prNumber - PR number for check, if null - then all RPs
+     */
+    public void doRun(Integer prNumber) {
         if (job == null || job.isDisabled()) {
             LOGGER.debug("Job {} is disabled, but trigger run!", job == null ? "no job" : job.getFullName());
             return;
@@ -217,7 +221,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             GitHubPRRepository localRepository = null;
             try {
                 localRepository = job.getAction(GitHubPRRepository.class);
-                causes = check(localRepository, listener);
+                causes = check(localRepository, listener, prNumber);
             } catch (IOException e) {
                 listener.error("Can't save repository state, because " + e.getMessage());
                 LOGGER.error("Can't save repository state, because: '{}'", e.getMessage());
@@ -279,7 +283,8 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
      * - last open PR <-> now changed -> trigger only
      * - special comment in PR -> trigger
      */
-    public List<GitHubPRCause> check(GitHubPRRepository localRepository, TaskListener listener) throws IOException {
+    public List<GitHubPRCause> check(GitHubPRRepository localRepository, TaskListener listener, Integer prNumber)
+            throws IOException {
         final PrintStream logger = listener.getLogger();
 
         GHRateLimit rateLimitBefore = getGitHub().getRateLimit();
@@ -287,33 +292,41 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         logger.println("GitHub rate limit before check: " + rateLimitBefore);
         int checkedPR = 0;
 
-        final ArrayList<GitHubPRCause> gitHubPRCauses = new ArrayList<GitHubPRCause>();
+        final ArrayList<GitHubPRCause> gitHubPRCauses = new ArrayList<>();
 
         // get local and remote list of PRs
         Map<Integer, GitHubPRPullRequest> localPulls = localRepository.getPulls();
         String repoFullName1 = getRepoFullName();
         GHRepository ghRepository = getGitHub().getRepository(repoFullName1);
 
-        List<GHPullRequest> remotePulls;
-        remotePulls = ghRepository.getPullRequests(GHIssueState.OPEN);
-        // add PRs that was closed on remote
-        for (Map.Entry<Integer, GitHubPRPullRequest> localPr : localPulls.entrySet()) {
-            boolean contains = false;
+        List<GHPullRequest> remotePulls = new ArrayList<>();
+        if (prNumber == null) {
+            remotePulls = ghRepository.getPullRequests(GHIssueState.OPEN);
+            // add PRs that was closed on remote
+            for (Map.Entry<Integer, GitHubPRPullRequest> localPr : localPulls.entrySet()) {
+                boolean contains = false;
 
-            for (GHPullRequest remotePR : remotePulls) {
-                if (remotePR.getNumber() == localPr.getKey()) {
-                    contains = true;
-                    break;
+                for (GHPullRequest remotePR : remotePulls) {
+                    if (remotePR.getNumber() == localPr.getKey()) {
+                        contains = true;
+                        break;
+                    }
+                }
+
+                if (!contains) {
+                    remotePulls.add(ghRepository.getPullRequest(localPr.getKey()));
                 }
             }
-
-            if (!contains) {
-                remotePulls.add(ghRepository.getPullRequest(localPr.getKey()));
-            }
+        } else {
+            remotePulls.add(ghRepository.getPullRequest(prNumber));
         }
 
         for (GHPullRequest remotePR : remotePulls) {
             checkedPR++;
+
+//            //prefetch
+//            remotePR.getLabels();
+//            remotePR.getMergedBy();
 
             //null if local not existed before
             @CheckForNull GitHubPRPullRequest localPR = localPulls.get(remotePR.getNumber());
