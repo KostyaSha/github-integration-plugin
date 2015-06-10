@@ -8,7 +8,6 @@ import com.squareup.okhttp.OkUrlFactory;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.*;
-import hudson.model.Queue;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
@@ -26,6 +25,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -35,14 +36,18 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Proxy;
 import java.text.DateFormat;
-import java.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.Arrays.asList;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.DescriptorImpl.getJenkinsInstance;
+import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.*;
 
 /**
  * GitHub Pull Request trigger.
@@ -66,6 +71,7 @@ import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.Descripto
  */
 public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRTrigger.class);
+    private static final Cause NO_CAUSE = null;
 
     //TODO replace with {@link GitHubRepositoryName.class} ?
     private static final Pattern GH_FULL_REPO_NAME = Pattern.compile("^(http[s]?://[^/]*)/([^/]*/[^/]*).*");
@@ -497,39 +503,27 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     private QueueTaskFuture<?> startJob(GitHubPRCause cause) {
-        List<Action> actions = new ArrayList<Action>();
-        actions.add(new CauseAction(cause));
-
         List<ParameterValue> values = getDefaultParametersValues();
+        values.addAll(asList(
+                TRIGGER_SENDER_AUTHOR.param(cause.getTriggerSenderName()),
+                TRIGGER_SENDER_EMAIL.param(cause.getTriggerSenderEmail()),
+                COMMIT_AUTHOR_NAME.param(cause.getCommitAuthorName()),
+                COMMIT_AUTHOR_EMAIL.param(cause.getCommitAuthorEmail()),
+                TARGET_BRANCH.param(cause.getTargetBranch()),
+                SOURCE_BRANCH.param(cause.getSourceBranch()),
+                AUTHOR_EMAIL.param(cause.getPRAuthorEmail()),
+                SHORT_DESC.param(cause.getShortDescription()),
+                TITLE.param(cause.getTitle()),
+                URL.param(cause.getHtmlUrl().toString()),
+                SOURCE_REPO_OWNER.param(cause.getSourceRepoOwner()),
+                HEAD_SHA.param(cause.getHeadSha()),
+                COND_REF.param(cause.getCondRef()),
+                CAUSE_SKIP.param(cause.isSkip()),
+                NUMBER.param(String.valueOf(cause.getNumber()))
+        ));
 
-        values.add(new StringParameterValue("GITHUB_PR_TRIGGER_SENDER_AUTHOR", valueOf(cause.getTriggerSenderName())));
-        values.add(new StringParameterValue("GITHUB_PR_TRIGGER_SENDER_EMAIL", valueOf(cause.getTriggerSenderEmail())));
-
-        values.add(new StringParameterValue("GITHUB_PR_COMMIT_AUTHOR_NAME", valueOf(cause.getCommitAuthorName())));
-        values.add(new StringParameterValue("GITHUB_RP_COMMIT_AUTHOR_EMAIL", valueOf(cause.getCommitAuthorEmail())));
-
-        values.add(new StringParameterValue("GITHUB_PR_TARGET_BRANCH", valueOf(cause.getTargetBranch())));
-        values.add(new StringParameterValue("GITHUB_PR_SOURCE_BRANCH", valueOf(cause.getSourceBranch())));
-
-        values.add(new StringParameterValue("GITHUB_PR_AUTHOR_EMAIL", valueOf(cause.getPRAuthorEmail())));
-
-        values.add(new StringParameterValue("GITHUB_PR_SHORT_DESC", valueOf(cause.getShortDescription())));
-        values.add(new StringParameterValue("GITHUB_PR_TITLE", valueOf(cause.getTitle())));
-        values.add(new StringParameterValue("GITHUB_PR_URL", valueOf(cause.getHtmlUrl().toString())));
-        values.add(new StringParameterValue("GITHUB_PR_SOURCE_REPO_OWNER", valueOf(cause.getSourceRepoOwner())));
-        values.add(new StringParameterValue("GITHUB_PR_HEAD_SHA", cause.getHeadSha()));
-        values.add(new StringParameterValue("GITHUB_PR_COND_REF", cause.getCondRef()));  //TODO better name?
-        values.add(new BooleanParameterValue("GITHUB_PR_CAUSE_SKIP", cause.isSkip()));
-        final StringParameterValue prNumber = new StringParameterValue("GITHUB_PR_NUMBER", valueOf(Integer.toString(cause.getNumber())));
-        values.add(prNumber);
-
-        actions.add(new ParametersAction(values));
-
-        return this.job.scheduleBuild2(job.getQuietPeriod(), null, actions);
-    }
-
-    private String valueOf(String s) {
-        return s == null ? "" : s;
+        return this.job.scheduleBuild2(job.getQuietPeriod(), NO_CAUSE,
+                asList(new CauseAction(cause), new ParametersAction(values)));
     }
 
 //    /**
@@ -555,7 +549,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
      */
     private List<ParameterValue> getDefaultParametersValues() {
         ParametersDefinitionProperty paramDefProp = job.getProperty(ParametersDefinitionProperty.class);
-        ArrayList<ParameterValue> defValues = new ArrayList<>();
+        List<ParameterValue> defValues = new ArrayList<>();
 
         /*
          * This check is made ONLY if someone will call this method even if isParametrized() is false.
@@ -658,7 +652,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     public static class DescriptorImpl extends TriggerDescriptor {
         private static final Logger LOGGER = LoggerFactory.getLogger(DescriptorImpl.class);
 
-        private final transient  SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
+        private final transient SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
 
         private String apiUrl = "https://api.github.com";
         private String whitelistUserMsg = ".*add\\W+to\\W+whitelist.*";
@@ -718,7 +712,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         public FormValidation doCreateApiToken(@QueryParameter("username") final String username, @QueryParameter("password") final String password) {
             try {
                 GitHub gh = new GitHubBuilder().withEndpoint(apiUrl).withPassword(username, password).build();
-                GHAuthorization token = gh.createToken(Arrays.asList(GHAuthorization.REPO_STATUS, GHAuthorization.REPO), "Jenkins GitHub Pull Request Plugin", null);
+                GHAuthorization token = gh.createToken(asList(GHAuthorization.REPO_STATUS, GHAuthorization.REPO), "Jenkins GitHub Pull Request Plugin", null);
                 return FormValidation.ok("Token created: " + token.getToken());
             } catch (IOException ex) {
                 return FormValidation.error("Can't create GitHub token " + ex.getMessage());
