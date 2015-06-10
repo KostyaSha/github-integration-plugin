@@ -7,7 +7,7 @@
 ## 0.1.0-beta12
 
 * Optimise hooks based check
-* Кeplace all jdk logging with slf4j-jdk
+* Replace all jdk logging with slf4j-jdk
 
 ## 0.1.0-beta11
 
