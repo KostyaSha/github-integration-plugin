@@ -1,5 +1,13 @@
 ## Changelog
 
+## 0.1.0-beta13
+
+* Indent trigger configuration UI
+
+## 0.1.0-beta12
+
+* Optimise hooks based check
+
 ## 0.1.0-beta11
 
 * Fixed trigger by comment UI entry
