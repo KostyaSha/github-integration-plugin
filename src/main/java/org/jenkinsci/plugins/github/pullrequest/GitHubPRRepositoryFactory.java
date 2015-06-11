@@ -30,7 +30,7 @@ public class GitHubPRRepositoryFactory extends TransientProjectActionFactory {
                 return Collections.singleton(forProject(project));
             }
         } catch (Throwable t) {
-            // bad configured project i.e. github project property wrong
+            LOGGER.warn("Bad configured project {} - {}", project.getFullName(), t.getMessage());
             return Collections.emptyList();
         }
 

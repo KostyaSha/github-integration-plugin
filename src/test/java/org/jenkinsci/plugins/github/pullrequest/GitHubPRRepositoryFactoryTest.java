@@ -2,17 +2,12 @@ package org.jenkinsci.plugins.github.pullrequest;
 
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import com.coravy.hudson.plugins.github.GithubUrl;
-import hudson.BulkChange;
-import hudson.Functions;
 import hudson.XmlFile;
 import hudson.model.*;
-import hudson.util.RunList;
-import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.github.pullrequest.util.TestUtil;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.kohsuke.stapler.StaplerRequest;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -24,8 +19,9 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 /**
@@ -36,6 +32,7 @@ import static org.mockito.Mockito.when;
 public class GitHubPRRepositoryFactoryTest {
     public static final String CONFIG_PATH = "src/test/resources";
 
+    @Mock private ItemGroup parent;
     @Mock private AbstractProject<?, ?> job;
     @Mock private GitHubPRTrigger trigger;
 
@@ -61,6 +58,16 @@ public class GitHubPRRepositoryFactoryTest {
         Collection<? extends Action> repoCollection = new GitHubPRRepositoryFactory().createFor(job);
         Assert.assertTrue(repoCollection instanceof List);
         Assert.assertTrue(repoCollection.isEmpty());
+    }
+
+    @Test
+    public void shouldNotCreateRepoForTriggerWithExc() throws Exception {
+        when(job.getTrigger(GitHubPRTrigger.class)).thenReturn(trigger);
+        when(parent.getFullName()).thenReturn("mocked job");
+        when(job.getParent()).thenReturn(parent);
+        when(trigger.getRepoFullName(job)).thenThrow(Throwable.class);
+        
+        assertThat(new GitHubPRRepositoryFactory().createFor(job), hasSize(0));
     }
 
     private void createForCommonTest(String filePath) throws IOException, NoSuchFieldException, IllegalAccessException {

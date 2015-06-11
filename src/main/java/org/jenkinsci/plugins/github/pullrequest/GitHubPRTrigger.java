@@ -45,8 +45,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Arrays.asList;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.DescriptorImpl.getJenkinsInstance;
+import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.*;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.*;
 
 /**
@@ -77,7 +81,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     private static final Pattern GH_FULL_REPO_NAME = Pattern.compile("^(http[s]?://[^/]*)/([^/]*/[^/]*).*");
 
     @CheckForNull
-    private GitHubPRTriggerMode triggerMode = GitHubPRTriggerMode.CRON;
+    private GitHubPRTriggerMode triggerMode = CRON;
     @CheckForNull
     private final List<GitHubPREvent> events;
     /**
@@ -137,7 +141,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         LOGGER.info("Starting GitHub Pull Request trigger for project {}", project.getName());
         super.start(project, newInstance);
 
-        if (getTriggerMode() != GitHubPRTriggerMode.CRON) {
+        if (getTriggerMode() != CRON) {
             //TODO implement
             return;
         }
@@ -150,31 +154,20 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     public String getRepoFullName(AbstractProject<?, ?> job) {
-        if (repoFullName != null && !repoFullName.trim().equals("")) {
+        if (isNotBlank(repoFullName)) {
             return repoFullName;
         }
 
-        if (job == null) {
-            LOGGER.error("job object is null, race condition?");
-            throw new IllegalStateException("Job object is null");
-        }
+        checkNotNull(job, "job object is null, race condition?");
+        GithubProjectProperty ghpp = job.getProperty(GithubProjectProperty.class);
 
-        if (job.getProperty(GithubProjectProperty.class) == null) {
-            LOGGER.info("GitHub project not set up, cannot start GitHub PR trigger for job {}", job);
-            throw new IllegalArgumentException("GitHub project property is not defined. " +
-                    "Cannot start GitHub PR trigger for job " + job.getName());
-        }
-
-        final GithubProjectProperty ghpp = job.getProperty(GithubProjectProperty.class);
-        if (ghpp == null || ghpp.getProjectUrl() == null) {
-            throw new IllegalArgumentException("A GitHub project url is required.");
-        }
+        checkNotNull(ghpp, "GitHub project property is not defined. Can't setup GitHub PR trigger for job %s", job.getName());
+        checkNotNull(ghpp.getProjectUrl(), "A GitHub project url is required");
 
         String baseUrl = ghpp.getProjectUrl().baseUrl();
         Matcher m = GH_FULL_REPO_NAME.matcher(baseUrl);
-        if (!m.matches()) {
-            throw new IllegalArgumentException(String.format("Invalid GitHub project url: %s", baseUrl));
-        }
+
+        checkArgument(m.matches(), "Invalid GitHub project url: %s", baseUrl);
 
         repoFullName = m.group(2);
         return repoFullName;
@@ -182,7 +175,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
     @Override
     public void run() {
-        if (getTriggerMode() != null && getTriggerMode() == GitHubPRTriggerMode.CRON) {
+        if (getTriggerMode() != null && getTriggerMode() == CRON) {
             doRun(null);
         }
     }
@@ -210,8 +203,14 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             return;
         }
 
-        if (!((getTriggerMode() == GitHubPRTriggerMode.CRON) ||
-                (getTriggerMode() == GitHubPRTriggerMode.HEAVY_HOOKS))) {
+        if (!(getTriggerMode() == CRON || getTriggerMode() == HEAVY_HOOKS)) {
+            LOGGER.warn("Trigger mode {} is not supported yet ({})", getTriggerMode(), job.getFullName());
+            return;
+        }
+
+        GitHubPRRepository localRepository = job.getAction(GitHubPRRepository.class);
+        if (localRepository == null) {
+            LOGGER.warn("Can't get repository info, maybe project {} misconfigured?", job.getFullName());
             return;
         }
 
@@ -224,22 +223,18 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             logger.println("Started on " + DateFormat.getDateTimeInstance().format(new Date()));
             LOGGER.debug("Running GitHub Pull Request trigger check.");
 
-            GitHubPRRepository localRepository = null;
             try {
-                localRepository = job.getAction(GitHubPRRepository.class);
                 causes = check(localRepository, listener, prNumber);
             } catch (IOException e) {
                 listener.error("Can't save repository state, because " + e.getMessage());
                 LOGGER.error("Can't save repository state, because: '{}'", e.getMessage());
             }
 
-            if (localRepository != null) {
-                try {
-                    localRepository.save();
-                } catch (IOException e) {
-                    listener.error("Can't save repository state, because " + e.getMessage());
-                    LOGGER.error("Can't save repository state, because: '{}'", e.getMessage());
-                }
+            try {
+                localRepository.save();
+            } catch (IOException e) {
+                listener.error("Can't save repository state, because " + e.getMessage());
+                LOGGER.error("Can't save repository state, because: '{}'", e.getMessage());
             }
 
             long duration = System.currentTimeMillis() - startTime;
