@@ -693,7 +693,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             return super.configure(req, formData);
         }
 
-        public FormValidation doCheckServerAPIUrl(@QueryParameter String value) {
+        public FormValidation doCheckApiUrl(@QueryParameter String value) {
             if ("https://api.github.com".equals(value)) {
                 return FormValidation.ok();
             }
