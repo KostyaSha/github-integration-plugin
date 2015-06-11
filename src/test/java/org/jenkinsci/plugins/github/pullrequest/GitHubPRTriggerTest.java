@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
+import antlr.ANTLRException;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import hudson.Functions;
 import hudson.Launcher;
@@ -8,20 +9,24 @@ import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.git.util.BuildData;
+import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.concurrent.ExecutionException;
+import java.util.List;
 
+import static java.lang.String.format;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -63,7 +68,7 @@ public class GitHubPRTriggerTest {
     public void checkBuildDataAbsenceAfterBuild() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject("test-job");
         p.addProperty(new GithubProjectProperty("https://github.com/KostyaSha/test-repo"));
-        p.addTrigger(new GitHubPRTrigger("", GitHubPRTriggerMode.CRON, null));
+        p.addTrigger(defaultGitHubPRTrigger());
         p.getBuildersList().add(new BuildDataBuilder());
 
         GitHubPRCause cause = new GitHubPRCause("headSha", 1, true, "targetBranch", "srcBranch","mail@mail.com",
@@ -73,6 +78,27 @@ public class GitHubPRTriggerTest {
         j.waitUntilNoActivity();
 
         assertTrue(build.getActions(BuildData.class).size() == 0);
+    }
+
+    @Test
+    public void shouldParseRepoNameFromProp() throws IOException, ANTLRException {
+        FreeStyleProject p = j.createFreeStyleProject();
+        String repo = "org/repo";
+        p.addProperty(new GithubProjectProperty(format("https://github.com/%s", repo))); 
+        
+        assertThat(defaultGitHubPRTrigger().getRepoFullName(p), equalTo(repo));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void shouldThrowExcOnEmptyGithubPropInGetRepoNameMethod() throws IOException, ANTLRException {
+        FreeStyleProject p = j.createFreeStyleProject();
+        defaultGitHubPRTrigger().getRepoFullName(p);
+    }
+
+    private static GitHubPRTrigger defaultGitHubPRTrigger() throws ANTLRException {
+        String spec = "";
+        List<GitHubPREvent> events = Collections.emptyList();
+        return new GitHubPRTrigger(spec, GitHubPRTriggerMode.CRON, events);
     }
 
     @After

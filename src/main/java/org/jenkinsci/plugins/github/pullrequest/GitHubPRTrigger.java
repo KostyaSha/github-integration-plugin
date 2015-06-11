@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
 import antlr.ANTLRException;
+import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import com.squareup.okhttp.Cache;
 import com.squareup.okhttp.OkHttpClient;
@@ -42,13 +43,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Arrays.asList;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.DescriptorImpl.getJenkinsInstance;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.*;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.*;
@@ -76,9 +74,6 @@ import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.*;
 public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRTrigger.class);
     private static final Cause NO_CAUSE = null;
-
-    //TODO replace with {@link GitHubRepositoryName.class} ?
-    private static final Pattern GH_FULL_REPO_NAME = Pattern.compile("^(http[s]?://[^/]*)/([^/]*/[^/]*).*");
 
     @CheckForNull
     private GitHubPRTriggerMode triggerMode = CRON;
@@ -154,22 +149,21 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     public String getRepoFullName(AbstractProject<?, ?> job) {
-        if (isNotBlank(repoFullName)) {
-            return repoFullName;
+        if (isBlank(repoFullName)) {
+            
+            checkNotNull(job, "job object is null, race condition?");
+            GithubProjectProperty ghpp = job.getProperty(GithubProjectProperty.class);
+
+            checkNotNull(ghpp, "GitHub project property is not defined. Can't setup GitHub PR trigger for job %s", job.getName());
+            checkNotNull(ghpp.getProjectUrl(), "A GitHub project url is required");
+
+            GitHubRepositoryName repo = GitHubRepositoryName.create(ghpp.getProjectUrl().baseUrl());
+
+            checkNotNull(repo, "Invalid GitHub project url: %s", ghpp.getProjectUrl().baseUrl());
+            
+            repoFullName = String.format("%s/%s", repo.userName, repo.repositoryName);
         }
-
-        checkNotNull(job, "job object is null, race condition?");
-        GithubProjectProperty ghpp = job.getProperty(GithubProjectProperty.class);
-
-        checkNotNull(ghpp, "GitHub project property is not defined. Can't setup GitHub PR trigger for job %s", job.getName());
-        checkNotNull(ghpp.getProjectUrl(), "A GitHub project url is required");
-
-        String baseUrl = ghpp.getProjectUrl().baseUrl();
-        Matcher m = GH_FULL_REPO_NAME.matcher(baseUrl);
-
-        checkArgument(m.matches(), "Invalid GitHub project url: %s", baseUrl);
-
-        repoFullName = m.group(2);
+        
         return repoFullName;
     }
 
