@@ -3,6 +3,7 @@
 ## 0.1.0-beta13
 
 * Indent trigger configuration UI
+* Prevent NPE in weird missconfigured case
 
 ## 0.1.0-beta12
 
