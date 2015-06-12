@@ -245,7 +245,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
                 cause.setPollingLog(pollingLogAction.getLogFile());
                 build(cause);
             } catch (IOException e) {
-                LOGGER.error("can't trigger build {}", e.getMessage());
+                LOGGER.error("can't trigger build {}", e.getMessage(), e);
             }
         }
     }

@@ -117,7 +117,7 @@ public class GitHubPRRepository implements Action, Saveable {
         try {
             Jenkins instance = GitHubPRTrigger.DescriptorImpl.getJenkinsInstance();
             if (instance.hasPermission(Item.DELETE)) {
-                pulls = null;
+                pulls = new HashMap<>();
                 save();
                 result = FormValidation.ok("Pulls deleted");
             } else {
