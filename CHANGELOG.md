@@ -4,6 +4,9 @@
 
 * Indent trigger configuration UI
 * Prevent NPE in weird missconfigured case
+* Fixed check api url method in global config
+* Replace custom repo name parsing with github-plugin class
+* Fix NPE after pulls clearing in GHRepo action
 
 ## 0.1.0-beta12
 

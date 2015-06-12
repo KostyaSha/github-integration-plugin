@@ -4,14 +4,11 @@ import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import com.coravy.hudson.plugins.github.GithubUrl;
 import hudson.BulkChange;
 import hudson.Functions;
-import hudson.XmlFile;
 import hudson.model.*;
 import hudson.security.Permission;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
 import jenkins.model.Jenkins;
-import org.acegisecurity.Authentication;
-import org.jenkinsci.plugins.github.pullrequest.util.TestUtil;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,11 +20,13 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.*;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -97,10 +96,8 @@ public class GitHubPRRepositoryTest {
         PowerMockito.mockStatic(BulkChange.class);
         when(BulkChange.contains(repo)).thenReturn(true);
 
-        FormValidation formValidation = repo.doClearRepo();
-
-        Assert.assertEquals(FormValidation.Kind.OK, formValidation.kind);
-        Assert.assertEquals(null, repo.getPulls());
+        assertThat(repo.doClearRepo().kind, equalTo(FormValidation.Kind.OK));
+        assertThat(repo.getPulls().keySet(), hasSize(0));
     }
 
     @Test
@@ -113,10 +110,8 @@ public class GitHubPRRepositoryTest {
         PowerMockito.mockStatic(BulkChange.class);
         when(BulkChange.contains(repo)).thenThrow(new RuntimeException("bad save() for test"));
 
-        FormValidation formValidation = repo.doClearRepo();
-
-        Assert.assertEquals(FormValidation.Kind.ERROR, formValidation.kind);
-        Assert.assertEquals(null, repo.getPulls());
+        assertThat(repo.doClearRepo().kind, equalTo(FormValidation.Kind.ERROR));
+        assertThat(repo.getPulls().keySet(), hasSize(0));
     }
 
     @Test
@@ -125,10 +120,9 @@ public class GitHubPRRepositoryTest {
         hasPermissionExpectation(Item.DELETE, false);
 
         GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
-        FormValidation formValidation = repo.doClearRepo();
 
-        Assert.assertEquals(FormValidation.Kind.ERROR, formValidation.kind);
-        Assert.assertNotEquals(null, repo.getPulls());
+        assertThat(repo.doClearRepo().kind, equalTo(FormValidation.Kind.ERROR));
+        assertThat(repo.getPulls().keySet(), hasSize(greaterThan(0)));
     }
 
     @Test
