@@ -52,8 +52,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
     @Override
     protected void onEvent(GHEvent event, String payload) {
         try {
-            GitHub gh = ((GitHubPRTrigger.DescriptorImpl) Jenkins.getInstance()
-                    .getDescriptorOrDie(GitHubPRTrigger.class)).getGitHub();
+            GitHub gh = GitHub.connectAnonymously();
 
             PullRequestInfo info = extractPullRequestInfo(event, payload, gh);
 
