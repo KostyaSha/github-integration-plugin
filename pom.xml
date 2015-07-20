@@ -43,6 +43,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven-release-plugin.version>2.5.1</maven-release-plugin.version>
         <maven-findbugs-plugin.version>3.0.1</maven-findbugs-plugin.version>
+        <powermock.version>1.6.0</powermock.version>
     </properties>
 
     <dependencies>
@@ -50,8 +51,7 @@
         <dependency>
             <groupId>com.coravy.hudson.plugins.github</groupId>
             <artifactId>github</artifactId>
-            <!--<version>1.11</version>-->
-            <version>1.10</version>
+            <version>1.12.0-alpha-1</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -124,19 +124,19 @@
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-core</artifactId>
-            <version>1.6.0</version>
+            <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
-            <version>1.6.0</version>
+            <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito</artifactId>
-            <version>1.6.0</version>
+            <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
