@@ -17,6 +17,8 @@ import hudson.util.SequentialExecutionQueue;
 import hudson.util.StreamTaskListener;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang3.Validate;
+import org.jenkinsci.plugins.github.config.GitHubServerConfig;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREventDescriptor;
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRBranchRestriction;
@@ -47,6 +49,7 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.DescriptorImpl.getJenkinsInstance;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.*;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.*;
@@ -688,13 +691,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         }
 
         public FormValidation doCheckApiUrl(@QueryParameter String value) {
-            if ("https://api.github.com".equals(value)) {
-                return FormValidation.ok();
-            }
-            if (value.endsWith("/api/v3") || value.endsWith("/api/v3/")) {
-                return FormValidation.ok();
-            }
-            return FormValidation.warning("GitHub API URI is \"https://api.github.com\". GitHub Enterprise API URL ends with \"/api/v3\"");
+            return Jenkins.getInstance().getDescriptorByType(GitHubServerConfig.DescriptorImpl.class).doCheckApiUrl(value);
         }
 
         // create token for specified login/password
@@ -724,13 +721,8 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         private synchronized void connect() throws IOException {
             Jenkins instance = getJenkinsInstance();
 
-            if (apiUrl == null || apiUrl.isEmpty()) {
-                throw new IllegalStateException("GitHub api url is not defined");
-            }
-
-            if (accessToken == null || accessToken.isEmpty()) {
-                throw new IllegalStateException("Wrong argument accessToken");
-            }
+            Validate.validState(isNotEmpty(apiUrl), "GitHub api url is not defined");
+            Validate.validState(isNotEmpty(accessToken), "Wrong argument accessToken");
 
             Cache cache = new Cache(new File(instance.getRootDir(), GitHubPRTrigger.class.getName() + ".cache"), getCacheSize() * 1024 * 1024);
             OkHttpConnector okHttpConnector = new OkHttpConnector(new OkUrlFactory(new OkHttpClient().setCache(cache).setProxy(getProxy())));
