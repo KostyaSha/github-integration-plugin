@@ -163,10 +163,10 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             GitHubRepositoryName repo = GitHubRepositoryName.create(ghpp.getProjectUrl().baseUrl());
 
             checkNotNull(repo, "Invalid GitHub project url: %s", ghpp.getProjectUrl().baseUrl());
-            
-            repoFullName = String.format("%s/%s", repo.userName, repo.repositoryName);
+
+            repoFullName = String.format("%s/%s", repo.getUserName(), repo.getRepositoryName());
         }
-        
+
         return repoFullName;
     }
 

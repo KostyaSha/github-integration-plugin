@@ -1,7 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
-import hudson.model.AbstractBuild;
 import hudson.model.Cause;
+import hudson.model.Run;
 import hudson.triggers.SCMTrigger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -101,7 +101,7 @@ public class GitHubPRCause extends Cause {
     }
 
     @Override
-    public void onAddedTo(AbstractBuild build) {
+    public void onAddedTo(@Nonnull Run build) {
         try {
             SCMTrigger.BuildAction action = new SCMTrigger.BuildAction(build);
             FileUtils.writeStringToFile(action.getPollingLogFile(), pollingLog);
