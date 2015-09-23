@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.github.pullrequest.webhook;
 import com.google.common.base.Predicate;
 import hudson.Extension;
 import hudson.model.AbstractProject;
+import hudson.model.Job;
 import hudson.security.ACL;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.github.extension.GHEventsSubscriber;
@@ -40,7 +41,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
     private static Logger LOGGER = LoggerFactory.getLogger(GHPullRequestSubscriber.class);
 
     @Override
-    protected boolean isApplicable(AbstractProject<?, ?> abstractProject) {
+    protected boolean isApplicable(Job<?, ?> abstractProject) {
         return withTrigger(GitHubPRTrigger.class).apply(abstractProject);
     }
 
@@ -62,12 +63,13 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
 
                 switch (triggerMode) {
                     case HEAVY_HOOKS:
+                        LOGGER.debug("Queued check for {} (PR #{}) after heavy hook", job.getName(), info.getNum());
                         trigger.queueRun(job, info.getNum());
                         break;
 
                     case LIGHT_HOOKS:
                         LOGGER.warn("Unsupported LIGHT_HOOKS trigger mode");
-//                        LOGGER.log(Level.INFO, "Begin processing hooks for {0}", trigger.getRepoFullName(job));
+//                        LOGGER.info("Begin processing hooks for {}", trigger.getRepoFullName(job));
 //                        for (GitHubPREvent prEvent : trigger.getEvents()) {
 //                            GitHubPRCause cause = prEvent.checkHook(trigger, parsedPayload, null);
 //                            if (cause != null) {
