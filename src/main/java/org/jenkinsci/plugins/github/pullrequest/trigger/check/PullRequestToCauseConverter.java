@@ -28,13 +28,17 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
     private final LoggingTaskListenerWrapper listener;
     private final GitHubPRTrigger trigger;
 
-    private PullRequestToCauseConverter(GitHubPRRepository localRepo, LoggingTaskListenerWrapper listener, GitHubPRTrigger trigger) {
+    private PullRequestToCauseConverter(GitHubPRRepository localRepo,
+                                        LoggingTaskListenerWrapper listener,
+                                        GitHubPRTrigger trigger) {
         this.localRepo = localRepo;
         this.listener = listener;
         this.trigger = trigger;
     }
 
-    public static PullRequestToCauseConverter toGitHubPRCause(GitHubPRRepository localRepo, LoggingTaskListenerWrapper listener, GitHubPRTrigger trigger) {
+    public static PullRequestToCauseConverter toGitHubPRCause(GitHubPRRepository localRepo,
+                                                              LoggingTaskListenerWrapper listener,
+                                                              GitHubPRTrigger trigger) {
         return new PullRequestToCauseConverter(localRepo, listener, trigger);
     }
 

@@ -9,6 +9,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import static org.kohsuke.github.GHIssueState.CLOSED;
+import static org.kohsuke.github.GHIssueState.OPEN;
+
 /**
  * @author lanwen (Merkushev Kirill)
  */
@@ -26,18 +29,16 @@ public class LocalRepoUpdater implements Function<GHPullRequest, GHPullRequest> 
 
     @Override
     public GHPullRequest apply(GHPullRequest remotePR) {
-        switch (remotePR.getState()) {
-            case OPEN:
-                try {
-                    localRepo.getPulls().put(remotePR.getNumber(), new GitHubPRPullRequest(remotePR));
-                } catch (IOException e) {
-                    LOGGER.warn("Can't store to local storage PR #{}", remotePR.getNumber(), e);
-                }
-                break;
-            case CLOSED:
-                localRepo.getPulls().remove(remotePR.getNumber()); // don't store
-                break;
+        if (remotePR.getState() == OPEN) {
+            try {
+                localRepo.getPulls().put(remotePR.getNumber(), new GitHubPRPullRequest(remotePR));
+            } catch (IOException e) {
+                LOGGER.warn("Can't store to local storage PR #{}", remotePR.getNumber(), e);
+            }
+        } else if (remotePR.getState() == CLOSED) {
+            localRepo.getPulls().remove(remotePR.getNumber()); // don't store
         }
+
         return remotePR;
     }
 }

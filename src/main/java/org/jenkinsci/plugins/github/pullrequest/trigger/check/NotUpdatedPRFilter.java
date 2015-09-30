@@ -6,7 +6,6 @@ import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.jenkinsci.plugins.github.pullrequest.utils.LoggingTaskListenerWrapper;
-import org.jenkinsci.plugins.github.util.misc.NullSafePredicate;
 import org.kohsuke.github.GHPullRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +34,7 @@ public class NotUpdatedPRFilter implements Predicate<GHPullRequest> {
     @Override
     public boolean apply(GHPullRequest remotePR) {
         @CheckForNull GitHubPRPullRequest localPR = localRepo.getPulls().get(remotePR.getNumber());
-        
+
         if (!isUpdated(remotePR, localPR)) { // light check
             logger.debug("PR [#{} {}] not changed", remotePR.getNumber(), remotePR.getTitle());
             return false;
@@ -52,8 +51,12 @@ public class NotUpdatedPRFilter implements Predicate<GHPullRequest> {
         }
         try {
 
-            boolean prUpd = new CompareToBuilder().append(localPR.getPrUpdatedAt(), remotePR.getUpdatedAt()).build() < 0; // by time
-            boolean issueUpd = new CompareToBuilder().append(localPR.getIssueUpdatedAt(), remotePR.getIssueUpdatedAt()).build() < 0;
+            boolean prUpd = new CompareToBuilder()
+                    .append(localPR.getPrUpdatedAt(), remotePR.getUpdatedAt()).build() < 0; // by time
+
+            boolean issueUpd = new CompareToBuilder()
+                    .append(localPR.getIssueUpdatedAt(), remotePR.getIssueUpdatedAt()).build() < 0;
+
             boolean headUpd = !StringUtils.equals(localPR.getHeadSha(), remotePR.getHead().getSha()); // or head?
             boolean updated = prUpd || issueUpd || headUpd;
 

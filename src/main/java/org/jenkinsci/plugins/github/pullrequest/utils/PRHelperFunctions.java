@@ -16,6 +16,8 @@ import java.io.IOException;
 public final class PRHelperFunctions {
     private static final Logger LOGGER = LoggerFactory.getLogger(PRHelperFunctions.class);
 
+    private PRHelperFunctions() {
+    }
 
     public static Function<Integer, GHPullRequest> fetchRemotePR(final GHRepository ghRepository) {
         return new FetchRemotePRFunction(ghRepository);
@@ -24,7 +26,6 @@ public final class PRHelperFunctions {
     public static Function<GHPullRequest, Integer> extractPRNumber() {
         return new ExtractPRNumberFunction();
     }
-
 
     private static class FetchRemotePRFunction implements Function<Integer, GHPullRequest> {
         private final GHRepository ghRepository;

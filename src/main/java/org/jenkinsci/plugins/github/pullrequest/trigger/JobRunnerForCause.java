@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest.trigger;
 
-import com.cloudbees.jenkins.GitHubWebHook;
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
@@ -24,6 +25,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.cloudbees.jenkins.GitHubWebHook.getJenkinsInstance;
+import static com.google.common.base.Predicates.instanceOf;
 import static java.util.Arrays.asList;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.DescriptorImpl.githubFor;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.AUTHOR_EMAIL;
@@ -41,6 +44,7 @@ import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TITLE;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TRIGGER_SENDER_AUTHOR;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TRIGGER_SENDER_EMAIL;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.URL;
+import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 
 /**
  * @author lanwen (Merkushev Kirill)
@@ -48,7 +52,7 @@ import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.URL;
 public class JobRunnerForCause implements Predicate<GitHubPRCause> {
     private static final Logger LOGGER = LoggerFactory.getLogger(JobRunnerForCause.class);
     private static final Cause NO_CAUSE = null;
-    
+
     private AbstractProject<?, ?> job;
     private GitHubPRTrigger trigger;
 
@@ -97,25 +101,19 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
     /**
      * Cancel previous builds for specified PR id.
      */
-    private boolean cancelQueuedBuildByPrNumber(int id) {
-        Queue queue = GitHubWebHook.getJenkinsInstance().getQueue();
-        List<Queue.Item> approximateItemsQuickly = queue.getApproximateItemsQuickly();
+    private static boolean cancelQueuedBuildByPrNumber(final int id) {
+        Queue queue = getJenkinsInstance().getQueue();
 
-        for (Queue.Item item : approximateItemsQuickly) {
-            List<? extends Action> allActions = item.getAllActions();
-            for (Action action : allActions) {
-                if (action instanceof CauseAction) {
-                    CauseAction causeAction = (CauseAction) action;
-                    for (Cause cause : causeAction.getCauses()) {
-                        if (cause instanceof GitHubPRCause) {
-                            GitHubPRCause gitHubPRCause = (GitHubPRCause) cause;
-                            if (gitHubPRCause.getNumber() == id) {
-                                queue.cancel(item);
-                                return true;
-                            }
-                        }
-                    }
-                }
+        for (Queue.Item item : queue.getApproximateItemsQuickly()) {
+            Optional<Cause> cause = from(item.getAllActions())
+                    .filter(instanceOf(CauseAction.class))
+                    .transformAndConcat(new CausesFromAction())
+                    .filter(instanceOf(GitHubPRCause.class))
+                    .firstMatch(new CauseHasPRNum(id));
+
+            if (cause.isPresent()) {
+                queue.cancel(item);
+                return true;
             }
         }
 
@@ -172,4 +170,23 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
         return defValues;
     }
 
+    private static class CausesFromAction implements Function<Action, Iterable<Cause>> {
+        @Override
+        public Iterable<Cause> apply(Action input) {
+            return ((CauseAction) input).getCauses();
+        }
+    }
+
+    private static class CauseHasPRNum implements Predicate<Cause> {
+        private final int id;
+
+        public CauseHasPRNum(int id) {
+            this.id = id;
+        }
+
+        @Override
+        public boolean apply(Cause cause) {
+            return ((GitHubPRCause) cause).getNumber() == id;
+        }
+    }
 }
