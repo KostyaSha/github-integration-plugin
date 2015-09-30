@@ -10,7 +10,9 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.git.util.BuildData;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
-import org.junit.*;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExternalResource;
 import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
@@ -33,25 +35,41 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class GitHubPRTriggerTest {
+
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
-    private boolean origDefaultUseCache = true;
+    @Rule
+    public ExternalResource isWin = new ExternalResource() {
+        private boolean origDefaultUseCache = true;
 
-    @Before
-    public void setUp() throws Exception {
-        if(Functions.isWindows()) {
-            // To avoid JENKINS-4409.
-            // URLConnection caches handles to jar files by default,
-            // and it prevents delete temporary directories.
-            // Disable caching here.
-            // Though defaultUseCache is a static field,
-            // its setter and getter are provided as instance methods.
-            URLConnection aConnection = new File(".").toURI().toURL().openConnection();
-            origDefaultUseCache = aConnection.getDefaultUseCaches();
-            aConnection.setDefaultUseCaches(false);
+        @Override
+        protected void before() throws Throwable {
+            if (Functions.isWindows()) {
+                // To avoid JENKINS-4409.
+                // URLConnection caches handles to jar files by default,
+                // and it prevents delete temporary directories.
+                // Disable caching here.
+                // Though defaultUseCache is a static field,
+                // its setter and getter are provided as instance methods.
+                URLConnection aConnection = new File(".").toURI().toURL().openConnection();
+                origDefaultUseCache = aConnection.getDefaultUseCaches();
+                aConnection.setDefaultUseCaches(false);
+            }
         }
-    }
+
+        @Override
+        protected void after() {
+            try {
+                if (Functions.isWindows()) {
+                    URLConnection aConnection = new File(".").toURI().toURL().openConnection();
+                    aConnection.setDefaultUseCaches(origDefaultUseCache);
+                }
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+    };
 
     @Test
     public void checkBuildDataExistenceAfterBuild() throws Exception {
@@ -71,7 +89,7 @@ public class GitHubPRTriggerTest {
         p.addTrigger(defaultGitHubPRTrigger());
         p.getBuildersList().add(new BuildDataBuilder());
 
-        GitHubPRCause cause = new GitHubPRCause("headSha", 1, true, "targetBranch", "srcBranch","mail@mail.com",
+        GitHubPRCause cause = new GitHubPRCause("headSha", 1, true, "targetBranch", "srcBranch", "mail@mail.com",
                 "title", new URL("http://www.example.com"), "repoOwner", new HashSet<String>(),
                 null, false, "nice reason", "author name", "anotherMait@mail.com");
         FreeStyleBuild build = p.scheduleBuild2(0, cause).get();
@@ -84,8 +102,8 @@ public class GitHubPRTriggerTest {
     public void shouldParseRepoNameFromProp() throws IOException, ANTLRException {
         FreeStyleProject p = j.createFreeStyleProject();
         String repo = "org/repo";
-        p.addProperty(new GithubProjectProperty(format("https://github.com/%s", repo))); 
-        
+        p.addProperty(new GithubProjectProperty(format("https://github.com/%s", repo)));
+
         assertThat(defaultGitHubPRTrigger().getRepoFullName(p), equalTo(repo));
     }
 
@@ -101,17 +119,9 @@ public class GitHubPRTriggerTest {
         return new GitHubPRTrigger(spec, GitHubPRTriggerMode.CRON, events);
     }
 
-    @After
-    public void tearDown() throws Exception {
-        if(Functions.isWindows()) {
-            URLConnection aConnection = new File(".").toURI().toURL().openConnection();
-            aConnection.setDefaultUseCaches(origDefaultUseCache);
-        }
-    }
-
     private class BuildDataBuilder extends TestBuilder {
         @Override
-        public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+        public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
             build.addAction(new BuildData());
             return true;
         }

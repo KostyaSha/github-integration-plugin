@@ -7,11 +7,15 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.kohsuke.github.*;
+import org.kohsuke.github.GHCommitPointer;
+import org.kohsuke.github.GHIssue;
+import org.kohsuke.github.GHIssueState;
+import org.kohsuke.github.GHLabel;
+import org.kohsuke.github.GHPullRequest;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GHUser;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -20,47 +24,60 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 /**
- * @author Alina Karpovich 
+ * @author Alina Karpovich
  */
 @RunWith(MockitoJUnitRunner.class)
 public class GitHubPRLabelRemovedEventTest {
-    
+
     private static final String NOT_READY_FOR_MERGE = "not ready for merge";
     private static final String NOT_REVIEWED = "not reviewed";
     private static final String TESTS_FAILURE = "tests failure";
 
-    @Mock private GHPullRequest remotePr;
-    @Mock private GitHubPRPullRequest localPR;
-    @Mock private GitHubPRLabel labels;
-    @Mock private GHRepository repository;
-    @Mock private GHIssue issue;
-    @Mock private GHLabel label;
-    @Mock private TaskListener listener;
-    @Mock private PrintStream logger;
+    @Mock
+    private GHPullRequest remotePr;
+    @Mock
+    private GitHubPRPullRequest localPR;
+    @Mock
+    private GitHubPRLabel labels;
+    @Mock
+    private GHRepository repository;
+    @Mock
+    private GHIssue issue;
+    @Mock
+    private GHLabel label;
+    @Mock
+    private TaskListener listener;
+    @Mock
+    private PrintStream logger;
 
     private Set<String> checkedLabels = new HashSet<String>();
+
     {
         checkedLabels.add(NOT_READY_FOR_MERGE);
         checkedLabels.add(NOT_REVIEWED);
         checkedLabels.add(TESTS_FAILURE);
     }
-    
+
     /**
      * Case when there is three checked labels and there is one that wasn't removed yet.
      */
     @Test
     public void twoOfThreeLabelsWasRemoved() throws IOException {
         Set<String> localLabels = new HashSet<>();
-        localLabels.add(TESTS_FAILURE);   
-        
+        localLabels.add(TESTS_FAILURE);
+
         List<GHLabel> remoteLabels = new ArrayList<GHLabel>();
         remoteLabels.add(label);
 
         commonExpectations(localLabels);
         when(issue.getLabels()).thenReturn(remoteLabels);
         when(label.getName()).thenReturn(TESTS_FAILURE);
-        
+
         GitHubPRLabelRemovedEvent instance = new GitHubPRLabelRemovedEvent(labels);
         GitHubPRCause cause = instance.check(null, remotePr, localPR, listener);
         Assert.assertNull(cause);
@@ -95,7 +112,7 @@ public class GitHubPRLabelRemovedEventTest {
         localLabels.add(TESTS_FAILURE);
 
         List<GHLabel> remoteLabels = new ArrayList<GHLabel>();
-        for (int i=0; i<localLabels.size(); i++) {
+        for (int i = 0; i < localLabels.size(); i++) {
             remoteLabels.add(label);
         }
 
@@ -109,7 +126,7 @@ public class GitHubPRLabelRemovedEventTest {
         GitHubPRCause cause = instance.check(null, remotePr, localPR, listener);
         Assert.assertNull(cause);
     }
-    
+
     private void commonExpectations(Set<String> localLabels) throws IOException {
         when(labels.getLabelsSet()).thenReturn(checkedLabels);
         when(localPR.getLabels()).thenReturn(localLabels);
@@ -118,11 +135,11 @@ public class GitHubPRLabelRemovedEventTest {
         when(repository.getIssue(anyInt())).thenReturn(issue);
         when(listener.getLogger()).thenReturn(logger);
     }
-    
+
     private void causeCreationExpectations() throws IOException {
         GHUser mockUser = mock(GHUser.class);
         GHCommitPointer mockPointer = mock(GHCommitPointer.class);
-        
+
         when(remotePr.getUser()).thenReturn(mockUser);
         when(remotePr.getHead()).thenReturn(mockPointer);
         when(remotePr.getBase()).thenReturn(mockPointer);

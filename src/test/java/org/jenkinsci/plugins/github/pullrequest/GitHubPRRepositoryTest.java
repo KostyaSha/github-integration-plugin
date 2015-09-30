@@ -4,7 +4,14 @@ import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import com.coravy.hudson.plugins.github.GithubUrl;
 import hudson.BulkChange;
 import hudson.Functions;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Action;
+import hudson.model.Cause;
+import hudson.model.Item;
+import hudson.model.ItemGroup;
+import hudson.model.Result;
+import hudson.model.User;
 import hudson.security.Permission;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
@@ -21,20 +28,25 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
-* Unit tests for GitHubPRRepository.
-*/
+ * Unit tests for GitHubPRRepository.
+ */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({GithubProjectProperty.class, GithubUrl.class, BulkChange.class,
         Functions.class, Jenkins.class, User.class})
@@ -44,23 +56,33 @@ public class GitHubPRRepositoryTest {
     //size of map that getAllPrBuilds() will return
     private static final int BUILD_MAP_SIZE = PR_REBUILD_ID + 2;
 
-    @Mock private ItemGroup itemGroup;
-    @Mock private AbstractProject<?, ?> job;
-    @Mock private GitHubPRTrigger trigger;
-    @Mock private RunList builds;
-    @Mock private Iterator iterator;
-    @Mock private AbstractBuild build;
-    @Mock private GitHubPRCause cause;
-    @Mock private StaplerRequest request;
-    @Mock private User user;
+    @Mock
+    private ItemGroup itemGroup;
+    @Mock
+    private AbstractProject<?, ?> job;
+    @Mock
+    private GitHubPRTrigger trigger;
+    @Mock
+    private RunList builds;
+    @Mock
+    private Iterator iterator;
+    @Mock
+    private AbstractBuild build;
+    @Mock
+    private GitHubPRCause cause;
+    @Mock
+    private StaplerRequest request;
+    @Mock
+    private User user;
 
     //mocked final classes
-    @Mock private Jenkins instance;
+    @Mock
+    private Jenkins instance;
 
     private GitHubPRRepositoryFactory factory = new GitHubPRRepositoryFactory();
 
     @Test
-    public void getAllPrBuildsWithCause()  {
+    public void getAllPrBuildsWithCause() {
         GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
 
@@ -74,7 +96,7 @@ public class GitHubPRRepositoryTest {
     }
 
     @Test
-    public void getAllPrBuildsNullCause()  {
+    public void getAllPrBuildsNullCause() {
         GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
 
@@ -263,7 +285,7 @@ public class GitHubPRRepositoryTest {
         when(Functions.getResourcePath()).thenReturn(prefix);
 
         GitHubPRRepository repo = new GitHubPRRepository(fullName, url,
-                new HashMap<Integer, GitHubPRPullRequest>() );
+                new HashMap<Integer, GitHubPRPullRequest>());
 
         Assert.assertEquals(fullName, repo.getFullName());
         Assert.assertEquals(url, repo.getGithubUrl());
@@ -274,7 +296,7 @@ public class GitHubPRRepositoryTest {
     private void doRebuildCommonExpectations(boolean hasParameter, boolean isAllowed) {
         hasPermissionExpectation(Item.BUILD, isAllowed);
         when(request.hasParameter(anyString())).thenReturn(hasParameter);
-        if(hasParameter) {
+        if (hasParameter) {
             when(request.getParameter(anyString())).thenReturn(Integer.toString(PR_REBUILD_ID));
         }
     }
@@ -296,7 +318,7 @@ public class GitHubPRRepositoryTest {
         when(builds.iterator()).thenReturn(iterator);
 
         OngoingStubbing<Boolean> hasNextExpectation = size >= 1 ?
-                when(iterator.hasNext()).thenReturn(true) : when(iterator.hasNext()).thenReturn(false) ;
+                when(iterator.hasNext()).thenReturn(true) : when(iterator.hasNext()).thenReturn(false);
         for (int i = 1; i < size; i++) {
             hasNextExpectation.thenReturn(true);
         }
