@@ -17,6 +17,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.io.IOException;
 
 import static com.google.common.base.Charsets.UTF_8;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
@@ -63,6 +65,32 @@ public class GHPullRequestSubscriberTest {
         new GHPullRequestSubscriber().onEvent(GHEvent.ISSUE_COMMENT, classpath("payload/issue_comment.json"));
 
         verify(trigger).queueRun(eq(job), eq(1));
+    }
+
+    @Test
+    public void shouldNotBeApplicableWithoutTrigger() throws Exception {
+        FreeStyleProject job = jenkins.createFreeStyleProject();
+        assertThat("only for jobs with trigger", new GHPullRequestSubscriber().isApplicable(job), is(false));
+    }
+
+    @Test
+    public void shouldNotBeApplicableWithCronTrigger() throws Exception {
+        when(trigger.getTriggerMode()).thenReturn(GitHubPRTriggerMode.CRON);
+
+        FreeStyleProject job = jenkins.createFreeStyleProject();
+        job.addTrigger(trigger);
+
+        assertThat("should ignore cron trigger", new GHPullRequestSubscriber().isApplicable(job), is(false));
+    }
+
+    @Test
+    public void shouldBeApplicableWithHooksTrigger() throws Exception {
+        when(trigger.getTriggerMode()).thenReturn(GitHubPRTriggerMode.HEAVY_HOOKS);
+
+        FreeStyleProject job = jenkins.createFreeStyleProject();
+        job.addTrigger(trigger);
+
+        assertThat("only for jobs with trigger with hook", new GHPullRequestSubscriber().isApplicable(job), is(true));
     }
 
     public static String classpath(String path) throws IOException {
