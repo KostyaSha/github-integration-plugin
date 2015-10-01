@@ -3,11 +3,15 @@ package org.jenkinsci.plugins.github.pullrequest.events.impl;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.kohsuke.github.*;
+import org.kohsuke.github.GHCommitPointer;
+import org.kohsuke.github.GHIssue;
+import org.kohsuke.github.GHLabel;
+import org.kohsuke.github.GHPullRequest;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GHUser;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -15,8 +19,10 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collections;
 
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Alina Karpovich
@@ -24,15 +30,24 @@ import static org.junit.Assert.*;
 @RunWith(MockitoJUnitRunner.class)
 public class GitHubPRNonMergeableEventTest {
 
-    @Mock private GitHubPRTrigger trigger;
-    @Mock private GHPullRequest remotePr;
-    @Mock private GitHubPRPullRequest localPr;
-    @Mock private TaskListener listener;
-    @Mock private PrintStream logger;
-    @Mock private GHUser ghUser;
-    @Mock private GHCommitPointer ghCommitPointer;
-    @Mock private GHIssue ghIssue;
-    @Mock private GHRepository ghRepository;
+    @Mock
+    private GitHubPRTrigger trigger;
+    @Mock
+    private GHPullRequest remotePr;
+    @Mock
+    private GitHubPRPullRequest localPr;
+    @Mock
+    private TaskListener listener;
+    @Mock
+    private PrintStream logger;
+    @Mock
+    private GHUser ghUser;
+    @Mock
+    private GHCommitPointer ghCommitPointer;
+    @Mock
+    private GHIssue ghIssue;
+    @Mock
+    private GHRepository ghRepository;
 
     @Before
     public void before() throws IOException {

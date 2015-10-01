@@ -3,7 +3,9 @@ package org.jenkinsci.plugins.github.pullrequest;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import com.coravy.hudson.plugins.github.GithubUrl;
 import hudson.XmlFile;
-import hudson.model.*;
+import hudson.model.AbstractProject;
+import hudson.model.Action;
+import hudson.model.ItemGroup;
 import org.jenkinsci.plugins.github.pullrequest.util.TestUtil;
 import org.junit.Assert;
 import org.junit.Test;
@@ -32,9 +34,12 @@ import static org.mockito.Mockito.when;
 public class GitHubPRRepositoryFactoryTest {
     public static final String CONFIG_PATH = "src/test/resources";
 
-    @Mock private ItemGroup parent;
-    @Mock private AbstractProject<?, ?> job;
-    @Mock private GitHubPRTrigger trigger;
+    @Mock
+    private ItemGroup parent;
+    @Mock
+    private AbstractProject<?, ?> job;
+    @Mock
+    private GitHubPRTrigger trigger;
 
     @Test
     public void createForConfigFileExists() throws IOException, NoSuchFieldException, IllegalAccessException {
@@ -66,7 +71,7 @@ public class GitHubPRRepositoryFactoryTest {
         when(parent.getFullName()).thenReturn("mocked job");
         when(job.getParent()).thenReturn(parent);
         when(trigger.getRepoFullName(job)).thenThrow(Throwable.class);
-        
+
         assertThat(new GitHubPRRepositoryFactory().createFor(job), hasSize(0));
     }
 
@@ -84,7 +89,7 @@ public class GitHubPRRepositoryFactoryTest {
 
     public static GitHubPRRepository getRepo(Collection<? extends Action> repoCollection) {
         GitHubPRRepository repo = null;
-        for (Iterator<GitHubPRRepository> iterator = (Iterator<GitHubPRRepository>) repoCollection.iterator(); iterator.hasNext();) {
+        for (Iterator<GitHubPRRepository> iterator = (Iterator<GitHubPRRepository>) repoCollection.iterator(); iterator.hasNext(); ) {
             repo = iterator.next();
         }
         return repo;
@@ -93,7 +98,7 @@ public class GitHubPRRepositoryFactoryTest {
     /**
      * Requires @PrepareForTest({GithubProjectProperty.class, GithubUrl.class}) in class usig it.
      *
-     * @param job mock job.
+     * @param job     mock job.
      * @param trigger mock trigger that is expected to be returned via job.getTrigger(GitHubPRTrigger.class).
      */
     public static void createForCommonExpectations(AbstractProject<?, ?> job, GitHubPRTrigger trigger) {
@@ -104,12 +109,12 @@ public class GitHubPRRepositoryFactoryTest {
      * Requires @PrepareForTest({GithubProjectProperty.class, GithubUrl.class}) in class usig it.
      *
      * @param filePath job's root directiry.
-     * @param job mock job.
-     * @param trigger mock trigger that is expected to be returned via job.getTrigger(GitHubPRTrigger.class).
+     * @param job      mock job.
+     * @param trigger  mock trigger that is expected to be returned via job.getTrigger(GitHubPRTrigger.class).
      */
     public static void createForCommonExpectations(String filePath,
-                                                    AbstractProject<?, ?> job,
-                                                    GitHubPRTrigger trigger) {
+                                                   AbstractProject<?, ?> job,
+                                                   GitHubPRTrigger trigger) {
         GithubUrl githubUrl = PowerMockito.mock(GithubUrl.class);
         GithubProjectProperty projectProperty = PowerMockito.mock(GithubProjectProperty.class);
 

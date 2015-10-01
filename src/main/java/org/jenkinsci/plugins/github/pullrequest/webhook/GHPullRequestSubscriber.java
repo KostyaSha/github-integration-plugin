@@ -26,13 +26,15 @@ import java.util.Set;
 import static com.google.common.collect.Sets.immutableEnumSet;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
+import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.HEAVY_HOOKS;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
+import static org.jenkinsci.plugins.github.util.JobInfoHelpers.triggerFrom;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.withTrigger;
 
 /**
  * Uses extension point from github-plugin to get events form standard github-webhook endpoint.
  * Subscribes on pull_request and issue_comment events.
- * 
+ *
  * @author lanwen (Merkushev Kirill)
  */
 @SuppressWarnings("unused")
@@ -41,8 +43,9 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
     private static Logger LOGGER = LoggerFactory.getLogger(GHPullRequestSubscriber.class);
 
     @Override
-    protected boolean isApplicable(Job<?, ?> abstractProject) {
-        return withTrigger(GitHubPRTrigger.class).apply(abstractProject);
+    protected boolean isApplicable(Job<?, ?> job) {
+        GitHubPRTrigger trigger = triggerFrom(job, GitHubPRTrigger.class);
+        return trigger != null && trigger.getTriggerMode() == HEAVY_HOOKS; 
     }
 
     @Override

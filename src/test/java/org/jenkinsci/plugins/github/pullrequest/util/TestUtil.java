@@ -2,8 +2,9 @@ package org.jenkinsci.plugins.github.pullrequest.util;
 
 import java.lang.reflect.Field;
 
-public class TestUtil {
-    private TestUtil() {}
+public final class TestUtil {
+    private TestUtil() {
+    }
 
     public static Field getPrivateField(String fieldName, Class<?> clazz) throws NoSuchFieldException {
         Field field = clazz.getDeclaredField(fieldName);
