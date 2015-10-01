@@ -10,6 +10,7 @@ import hudson.Util;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Item;
+import hudson.model.Job;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.SequentialExecutionQueue;
@@ -66,6 +67,7 @@ import static org.jenkinsci.plugins.github.pullrequest.trigger.check.UserRestric
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.UserRestrictionPopulator.prepareUserRestrictionFilter;
 import static org.jenkinsci.plugins.github.pullrequest.utils.PRHelperFunctions.extractPRNumber;
 import static org.jenkinsci.plugins.github.pullrequest.utils.PRHelperFunctions.fetchRemotePR;
+import static org.jenkinsci.plugins.github.pullrequest.webhook.WebhookInfoPredicates.withHookTriggerMode;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
 
@@ -182,7 +184,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         LOGGER.info("Starting GitHub Pull Request trigger for project {}", project.getName());
         super.start(project, newInstance);
 
-        if (newInstance && GitHubPlugin.configuration().isManageHooks() && HEAVY_HOOKS == getTriggerMode()) {
+        if (newInstance && GitHubPlugin.configuration().isManageHooks() && withHookTriggerMode().apply(project)) {
             GitHubWebHook.get().registerHookFor(project);
         }
     }
@@ -238,7 +240,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
         });
     }
 
-    public String getRepoFullName(AbstractProject<?, ?> job) {
+    public String getRepoFullName(Job<?, ?> job) {
         if (isBlank(repoFullName)) {
 
             checkNotNull(job, "job object is null, race condition?");
@@ -329,8 +331,8 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
      * - special comment in PR -> trigger
      *
      * @param localRepository persisted data to compare with remote state
-     * @param listener logger to write to console and to polling log
-     * @param prNumber pull request number to fetch only required num. Can be null
+     * @param listener        logger to write to console and to polling log
+     * @param prNumber        pull request number to fetch only required num. Can be null
      *
      * @return causes which ready to be converted to job-starts. One cause per repo.
      */
@@ -345,7 +347,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
             // get local and remote list of PRs
             GHRepository remoteRepository = github.getRepository(getRepoFullName(job));
             Set<GHPullRequest> remotePulls = pullRequestsToCheck(prNumber, remoteRepository, localRepository);
-            
+
             Set<GHPullRequest> prepeared = from(remotePulls)
                     .filter(notUpdated(localRepository, listener))
                     .transform(prepareUserRestrictionFilter(localRepository, this)).toSet();
@@ -358,7 +360,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
                     ))
                     .transform(toGitHubPRCause(localRepository, listener, this))
                     .filter(notNull()).toList();
-            
+
             LOGGER.trace("Causes count for {}: {}", localRepository.getFullName(), causes.size());
             from(prepeared).transform(updateLocalRepo(localRepository)).toSet();
 

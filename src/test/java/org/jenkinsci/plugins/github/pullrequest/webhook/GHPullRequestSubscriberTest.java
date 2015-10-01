@@ -84,8 +84,28 @@ public class GHPullRequestSubscriberTest {
     }
 
     @Test
-    public void shouldBeApplicableWithHooksTrigger() throws Exception {
+    public void shouldBeApplicableWithHeavyHooksTrigger() throws Exception {
         when(trigger.getTriggerMode()).thenReturn(GitHubPRTriggerMode.HEAVY_HOOKS);
+
+        FreeStyleProject job = jenkins.createFreeStyleProject();
+        job.addTrigger(trigger);
+
+        assertThat("only for jobs with trigger with hook", new GHPullRequestSubscriber().isApplicable(job), is(true));
+    }
+
+    @Test
+    public void shouldBeApplicableWithCronHooksTrigger() throws Exception {
+        when(trigger.getTriggerMode()).thenReturn(GitHubPRTriggerMode.HEAVY_HOOKS_CRON);
+
+        FreeStyleProject job = jenkins.createFreeStyleProject();
+        job.addTrigger(trigger);
+
+        assertThat("only for jobs with trigger with hook", new GHPullRequestSubscriber().isApplicable(job), is(true));
+    }
+
+    @Test
+    public void shouldBeApplicableWithLightHooksTrigger() throws Exception {
+        when(trigger.getTriggerMode()).thenReturn(GitHubPRTriggerMode.LIGHT_HOOKS);
 
         FreeStyleProject job = jenkins.createFreeStyleProject();
         job.addTrigger(trigger);
