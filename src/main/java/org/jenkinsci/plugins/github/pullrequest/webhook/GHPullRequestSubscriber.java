@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.github.pullrequest.webhook;
 
-import com.google.common.base.Predicate;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Job;
@@ -25,11 +24,10 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.immutableEnumSet;
 import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
-import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.HEAVY_HOOKS;
+import static org.jenkinsci.plugins.github.pullrequest.webhook.WebhookInfoPredicates.withApplicableTrigger;
+import static org.jenkinsci.plugins.github.pullrequest.webhook.WebhookInfoPredicates.withRepo;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.triggerFrom;
-import static org.jenkinsci.plugins.github.util.JobInfoHelpers.withTrigger;
 
 /**
  * Uses extension point from github-plugin to get events form standard github-webhook endpoint.
@@ -40,12 +38,11 @@ import static org.jenkinsci.plugins.github.util.JobInfoHelpers.withTrigger;
 @SuppressWarnings("unused")
 @Extension
 public class GHPullRequestSubscriber extends GHEventsSubscriber {
-    private static Logger LOGGER = LoggerFactory.getLogger(GHPullRequestSubscriber.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GHPullRequestSubscriber.class);
 
     @Override
     protected boolean isApplicable(Job<?, ?> job) {
-        GitHubPRTrigger trigger = triggerFrom(job, GitHubPRTrigger.class);
-        return trigger != null && trigger.getTriggerMode() == HEAVY_HOOKS; 
+        return withApplicableTrigger().apply(job);
     }
 
     @Override
@@ -60,11 +57,12 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
 
             PullRequestInfo info = extractPullRequestInfo(event, payload, gh);
 
-            for (AbstractProject<?, ?> job : getJobs(info.getRepo())) {
-                GitHubPRTrigger trigger = job.getTrigger(GitHubPRTrigger.class);
+            for (AbstractProject job : getJobs(info.getRepo())) {
+                GitHubPRTrigger trigger = triggerFrom(job, GitHubPRTrigger.class);
                 GitHubPRTriggerMode triggerMode = trigger.getTriggerMode();
 
                 switch (triggerMode) {
+                    case HEAVY_HOOKS_CRON:
                     case HEAVY_HOOKS:
                         LOGGER.debug("Queued check for {} (PR #{}) after heavy hook", job.getName(), info.getNum());
                         trigger.queueRun(job, info.getNum());
@@ -118,22 +116,11 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                 List<AbstractProject> jobs = Jenkins.getInstance().getAllItems(AbstractProject.class);
                 ret.addAll(FluentIterableWrapper.from(jobs)
                         .filter(isBuildable())
-                        .filter(withTrigger(GitHubPRTrigger.class))
+                        .filter(withApplicableTrigger())
                         .filter(withRepo(repo)).toSet());
             }
         });
 
         return ret;
-    }
-
-    private Predicate<AbstractProject> withRepo(final String repo) {
-        return new Predicate<AbstractProject>() {
-            @Override
-            public boolean apply(AbstractProject job) {
-                GitHubPRTrigger trigger = (GitHubPRTrigger) job.getTrigger(GitHubPRTrigger.class);
-                return trigger.getTriggerMode() != null
-                        && equalsIgnoreCase(repo, trigger.getRepoFullName(job));
-            }
-        };
     }
 }
