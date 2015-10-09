@@ -47,9 +47,9 @@ Integration with [github-plugin](https://wiki.jenkins-ci.org/display/JENKINS/Git
 
 ## TODO:
 
- - [ ] review injected variables in Cause and String parameters
+ - [x] review injected variables in Cause and String parameters
  - [ ] integrate with git-plugin by providing patch for BuildData get through BuildChooser?
- - [ ] implement hooks triggering
+ - [x] implement hooks triggering
  - [ ] more tests
 
 ## Configuration:
