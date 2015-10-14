@@ -39,11 +39,11 @@ Code inspired by github-plugin, git-plugin, ghprb-plugin and others.
 Integration with [github-plugin](https://wiki.jenkins-ci.org/display/JENKINS/GitHub+Plugin) can
 
 - optimize/reuse code for:
-  - searching projects
-  - using one hook url
-  - hooks configuration (with periodic cleaning?)
-  - have one Global configuration
-  - reuse credentials lookup
+  - [x] searching projects
+  - [x] using one hook url
+  - [x] hooks configuration (with periodic cleaning?)
+  - [x] have one Global configuration
+  - [x] reuse credentials lookup
 
 ## TODO:
 
