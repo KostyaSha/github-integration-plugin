@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class GitHubPRStatusBuilderTest {
-    private static final String DEFAULT_MESSAGE = "$GITHUB_PR_COND_REF run started";
+    private static final String DEFAULT_MESSAGE = GitHubPRStatusBuilder.DEFAULT_MESSAGE.getContent();
     private static final String CUSTOM_MESSAGE = "Custom run message";
 
     @Mock private AbstractBuild<?, ?> build;

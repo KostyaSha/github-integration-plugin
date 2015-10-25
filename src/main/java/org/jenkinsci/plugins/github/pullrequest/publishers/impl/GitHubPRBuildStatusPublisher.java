@@ -16,6 +16,8 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.publishers.GitHubPRAbstractPublisher;
 import org.jenkinsci.plugins.github.pullrequest.utils.PublisherErrorHandler;
 import org.jenkinsci.plugins.github.pullrequest.utils.StatusVerifier;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.github.GHCommitState;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
@@ -35,9 +37,17 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRBuildStatusPublisher.class);
 
-    private GitHubPRMessage statusMsg = new GitHubPRMessage("$GITHUB_PR_COND_REF run ended");
+    private GitHubPRMessage statusMsg = new GitHubPRMessage("${GITHUB_PR_COND_REF} run ended");
     private GHCommitState unstableAs = GHCommitState.FAILURE;
     private BuildMessage buildMessage = new BuildMessage();
+
+    /**
+     * Constructor with defaults. Only for groovy UI.
+     */
+    @Restricted(NoExternalUse.class)
+    public GitHubPRBuildStatusPublisher() {
+        super(null, null);
+    }
 
     @DataBoundConstructor
     public GitHubPRBuildStatusPublisher(GitHubPRMessage statusMsg, GHCommitState unstableAs, BuildMessage buildMessage,

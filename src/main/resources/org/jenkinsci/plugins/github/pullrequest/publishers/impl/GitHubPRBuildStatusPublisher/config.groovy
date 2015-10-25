@@ -1,6 +1,13 @@
 package org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRBuildStatusPublisher;
 
+import org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRBuildStatusPublisher
+
 def f = namespace(lib.FormTagLib);
+
+// Stapler doesn't produce default values, so recreate object
+if (instance == null) {
+    instance = new GitHubPRBuildStatusPublisher();
+}
 
 f.optionalProperty(title: "Use only for builds with specific status", field: "statusVerifier")
 

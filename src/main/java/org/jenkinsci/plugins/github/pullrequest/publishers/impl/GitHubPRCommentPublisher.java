@@ -10,6 +10,8 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRMessage;
 import org.jenkinsci.plugins.github.pullrequest.publishers.GitHubPRAbstractPublisher;
 import org.jenkinsci.plugins.github.pullrequest.utils.PublisherErrorHandler;
 import org.jenkinsci.plugins.github.pullrequest.utils.StatusVerifier;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -25,7 +27,15 @@ import org.slf4j.LoggerFactory;
 public class GitHubPRCommentPublisher extends GitHubPRAbstractPublisher {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRCommentPublisher.class);
 
-    private GitHubPRMessage comment;
+    private GitHubPRMessage comment = new GitHubPRMessage("Build ${BUILD_NUMBER} ${BUILD_RESULT}");
+
+    /**
+     * Constructor with defaults. Only for groovy UI.
+     */
+    @Restricted(NoExternalUse.class)
+    public GitHubPRCommentPublisher() {
+        super(null, null);
+    }
 
     @DataBoundConstructor
     public GitHubPRCommentPublisher(GitHubPRMessage comment, StatusVerifier statusVerifier, PublisherErrorHandler errorHandler) {
