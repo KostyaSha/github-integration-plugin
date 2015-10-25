@@ -42,7 +42,8 @@ public class GitHubPRStatusBuilder extends Builder {
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+            throws InterruptedException, IOException {
         GitHubPRTrigger trigger = build.getProject().getTrigger(GitHubPRTrigger.class);
         if (trigger == null) {
             return true;

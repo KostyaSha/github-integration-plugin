@@ -4,12 +4,12 @@ def f = namespace(lib.FormTagLib);
 
 f.optionalProperty(title: "Use only for builds with specific status", field: "statusVerifier")
 
-f.entry(title:_("Status message")) {
+f.entry(title: _("Status message")) {
     f.property(field: "statusMsg")
 }
 
-f.entry(title:_("Mark unstable build in GitHub as "), field:"unstableAs"){
-    f.enum(){
+f.entry(title: _("Mark unstable build in GitHub as "), field: "unstableAs") {
+    f.enum() {
         text(my.name())
     }
 }

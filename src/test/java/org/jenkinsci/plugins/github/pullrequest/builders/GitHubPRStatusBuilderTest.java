@@ -1,7 +1,10 @@
 package org.jenkinsci.plugins.github.pullrequest.builders;
 
 import hudson.Launcher;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import hudson.model.ItemGroup;
+import hudson.model.Project;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRMessage;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
@@ -12,10 +15,10 @@ import org.kohsuke.github.GHRepository;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Mockito.*;
-
 import java.io.IOException;
 import java.io.PrintStream;
+
+import static org.mockito.Mockito.*;
 
 /**
  * @author Alina Karpovich
