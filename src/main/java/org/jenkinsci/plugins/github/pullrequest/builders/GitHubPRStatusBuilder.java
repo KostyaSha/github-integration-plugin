@@ -81,7 +81,7 @@ public class GitHubPRStatusBuilder extends Builder {
 
         @Override
         public String getDisplayName() {
-            return "Set pull request status to \"pending\" on GitHub";
+            return "GitHub PR: set 'pending' status";
         }
     }
 }
