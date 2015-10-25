@@ -23,6 +23,8 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.CheckForNull;
+
 import static hudson.model.Result.SUCCESS;
 import static hudson.model.Result.UNSTABLE;
 
@@ -34,11 +36,18 @@ import static hudson.model.Result.UNSTABLE;
 public abstract class GitHubPRAbstractPublisher extends Recorder {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRAbstractPublisher.class);
 
+    @CheckForNull
     private transient GHRepository ghRepository;
+    @CheckForNull
     private transient GHIssue ghIssue;
+    @CheckForNull
     private transient GHPullRequest ghPullRequest;
+    @CheckForNull
     private int number;
+
+    @CheckForNull
     private StatusVerifier statusVerifier;
+    @CheckForNull
     private PublisherErrorHandler errorHandler;
 
     public GitHubPRAbstractPublisher(StatusVerifier statusVerifier, PublisherErrorHandler errorHandler) {
