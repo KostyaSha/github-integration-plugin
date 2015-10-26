@@ -1,5 +1,9 @@
 GitHub Pull Request Plugin
 ==========================
+
+[![Coverage](https://img.shields.io/sonar/http/sonar.lanwen.ru/org.jenkins-ci.plugins:github-pullrequest/coverage.svg?style=flat)](http://sonar.lanwen.ru/dashboard/index?id=org.jenkins-ci.plugins:github-pullrequest)
+
+
 This is rewritten version of [ghprb-plugin](https://wiki.jenkins-ci.org/display/JENKINS/GitHub+pull+request+builder+plugin) that after many years is in complex code state when keeping backward compatibility with fixing all bugs almost impossible.
 Code inspired by github-plugin, git-plugin, ghprb-plugin and others.
 
