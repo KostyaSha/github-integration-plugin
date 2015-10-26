@@ -10,11 +10,14 @@ import hudson.tasks.Builder;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRMessage;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.github.GHCommitState;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.CheckForNull;
 import java.io.IOException;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -25,8 +28,15 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class GitHubPRStatusBuilder extends Builder {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRStatusBuilder.class);
 
-    private GitHubPRMessage statusMessage = new GitHubPRMessage("$GITHUB_PR_COND_REF run started");
+    public static final GitHubPRMessage DEFAULT_MESSAGE = new GitHubPRMessage("${GITHUB_PR_COND_REF} run started");
 
+    @CheckForNull
+    private GitHubPRMessage statusMessage = DEFAULT_MESSAGE;
+
+    /**
+     * Constructor with defaults. Only for groovy UI.
+     */
+    @Restricted(NoExternalUse.class)
     public GitHubPRStatusBuilder() {
     }
 
@@ -42,7 +52,8 @@ public class GitHubPRStatusBuilder extends Builder {
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+            throws InterruptedException, IOException {
         GitHubPRTrigger trigger = build.getProject().getTrigger(GitHubPRTrigger.class);
         if (trigger == null) {
             return true;
@@ -81,7 +92,7 @@ public class GitHubPRStatusBuilder extends Builder {
 
         @Override
         public String getDisplayName() {
-            return "Set pull request status to \"pending\" on GitHub";
+            return "GitHub PR: set 'pending' status";
         }
     }
 }

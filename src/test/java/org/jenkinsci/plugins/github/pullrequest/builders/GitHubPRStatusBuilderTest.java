@@ -1,7 +1,10 @@
 package org.jenkinsci.plugins.github.pullrequest.builders;
 
 import hudson.Launcher;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import hudson.model.ItemGroup;
+import hudson.model.Project;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRMessage;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
@@ -12,17 +15,17 @@ import org.kohsuke.github.GHRepository;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Mockito.*;
-
 import java.io.IOException;
 import java.io.PrintStream;
+
+import static org.mockito.Mockito.*;
 
 /**
  * @author Alina Karpovich
  */
 @RunWith(MockitoJUnitRunner.class)
 public class GitHubPRStatusBuilderTest {
-    private static final String DEFAULT_MESSAGE = "$GITHUB_PR_COND_REF run started";
+    private static final String DEFAULT_MESSAGE = GitHubPRStatusBuilder.DEFAULT_MESSAGE.getContent();
     private static final String CUSTOM_MESSAGE = "Custom run message";
 
     @Mock private AbstractBuild<?, ?> build;
