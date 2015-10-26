@@ -1,12 +1,15 @@
 package org.jenkinsci.plugins.github.pullrequest.builders;
 
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRMessage;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
@@ -25,7 +28,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 /**
  * Sets pr status for build caused by GitHubPRCause
  */
-public class GitHubPRStatusBuilder extends Builder {
+public class GitHubPRStatusBuilder extends Builder implements SimpleBuildStep {
+    private static final long serialVersionUID = 1L;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRStatusBuilder.class);
 
     public static final GitHubPRMessage DEFAULT_MESSAGE = new GitHubPRMessage("${GITHUB_PR_COND_REF} run started");
@@ -52,16 +57,19 @@ public class GitHubPRStatusBuilder extends Builder {
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+    public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener)
             throws InterruptedException, IOException {
-        GitHubPRTrigger trigger = build.getProject().getTrigger(GitHubPRTrigger.class);
+        // No triggers in Run class, but we need it
+        AbstractBuild<?, ?> build = (AbstractBuild<?, ?>) run;
+
+        GitHubPRTrigger trigger = build.getParent().getTrigger(GitHubPRTrigger.class);
         if (trigger == null) {
-            return true;
+            return;
         }
 
         GitHubPRCause cause = build.getCause(GitHubPRCause.class);
         if (cause == null) {
-            return true;
+            return;
         }
 
         // GitHub status for commit
@@ -73,20 +81,20 @@ public class GitHubPRStatusBuilder extends Builder {
                         GHCommitState.PENDING,
                         url,
                         statusMessage.expandAll(build, listener),
-                        build.getProject().getFullName());
+                        build.getParent().getFullName());
             }
         } catch (IOException e) {
             listener.getLogger().println("Can't update build description");
             LOGGER.error("Can't set commit status", e);
         }
 
-        return true;
     }
 
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptor<Builder> {
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
+            // workflow wants Run, but API doesn't support it
             return true;
         }
 
