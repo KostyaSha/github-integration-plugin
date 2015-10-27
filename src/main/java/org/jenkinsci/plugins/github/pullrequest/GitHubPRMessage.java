@@ -53,40 +53,38 @@ public class GitHubPRMessage extends AbstractDescribableImpl<GitHubPRMessage> {
      */
     @Restricted(NoExternalUse.class)
     @CheckForNull
-    public static String expandAll(String content, Run<?, ?> run, TaskListener listener)
+    public static String expandAll(String body, Run<?, ?> run, TaskListener listener)
             throws IOException, InterruptedException {
-        if (content == null || content.length() == 0) {
-            return content; // Do nothing for an empty String
+        if (body == null || body.length() == 0) {
+            return body; // Do nothing for an empty String
         }
 
         // Expand environment variables
-        content = run.getEnvironment(listener).expand(content);
+        body = run.getEnvironment(listener).expand(body);
 
         // Expand build variables + token macro if they available
         if (run instanceof AbstractBuild<?, ?>) {
             final AbstractBuild<?, ?> build = (AbstractBuild<?, ?>) run;
-            content = Util.replaceMacro(content, build.getBuildVariableResolver());
+            body = Util.replaceMacro(body, build.getBuildVariableResolver());
 
-            Jenkins jenkins = Jenkins.getActiveInstance();
             try {
+                Jenkins jenkins = Jenkins.getActiveInstance();
                 ClassLoader uberClassLoader = jenkins.pluginManager.uberClassLoader;
-
+                List macros = null;
                 if (jenkins.getPlugin("token-macro") != null) {
-                    List macros = null;
-
-                    //get private macroses like groovy template ${SCRIPT} if available
+                    // get private macroses like groovy template ${SCRIPT} if available
                     if (jenkins.getPlugin("email-ext") != null) {
                         Class<?> contentBuilderClazz = uberClassLoader.loadClass("hudson.plugins.emailext.plugins.ContentBuilder");
                         Method getPrivateMacrosMethod = contentBuilderClazz.getDeclaredMethod("getPrivateMacros");
                         macros = new ArrayList((Collection) getPrivateMacrosMethod.invoke(null));
                     }
 
-                    //calls TokenMacro.expand(build, listener, content, false, macros)
+                    // call TokenMacro.expand(build, listener, content, false, macros)
                     Class<?> tokenMacroClazz = uberClassLoader.loadClass("org.jenkinsci.plugins.tokenmacro.TokenMacro");
                     Method tokenMacroExpand = tokenMacroClazz.getDeclaredMethod("expand", AbstractBuild.class,
                             TaskListener.class, String.class, boolean.class, List.class);
 
-                    content = (String) tokenMacroExpand.invoke(null, build, listener, content, false, macros);
+                    body = (String) tokenMacroExpand.invoke(null, build, listener, body, false, macros);
                 }
             } catch (ClassNotFoundException e) {
                 LOGGER.error("Can't find class", e);
@@ -95,7 +93,7 @@ public class GitHubPRMessage extends AbstractDescribableImpl<GitHubPRMessage> {
             }
         }
 
-        return content;
+        return body;
     }
 
     public String getContent() {
