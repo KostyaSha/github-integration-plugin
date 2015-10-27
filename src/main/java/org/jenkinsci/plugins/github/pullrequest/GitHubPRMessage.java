@@ -8,6 +8,8 @@ import hudson.model.Descriptor;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -40,9 +42,19 @@ public class GitHubPRMessage extends AbstractDescribableImpl<GitHubPRMessage> {
     /**
      * Expand all what we can from given run
      */
+    @Restricted(NoExternalUse.class)
     @CheckForNull
     public String expandAll(Run<?, ?> run, TaskListener listener) throws IOException, InterruptedException {
-        String content = getContent();
+        return expandAll(getContent(), run, listener);
+    }
+
+    /**
+     * Expand all what we can from given run
+     */
+    @Restricted(NoExternalUse.class)
+    @CheckForNull
+    public static String expandAll(String content, Run<?, ?> run, TaskListener listener)
+            throws IOException, InterruptedException {
         if (content == null || content.length() == 0) {
             return content; // Do nothing for an empty String
         }
@@ -81,7 +93,6 @@ public class GitHubPRMessage extends AbstractDescribableImpl<GitHubPRMessage> {
             } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
                 LOGGER.error("Can't evaluate macro", e);
             }
-
         }
 
         return content;

@@ -3,7 +3,6 @@ package org.jenkinsci.plugins.github.pullrequest.builders;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -75,20 +74,12 @@ public class GitHubPRStatusBuilder extends Builder implements SimpleBuildStep {
         try {
             if (statusMessage != null) {
                 String url = trigger.getDescriptor().getJenkinsURL() + run.getUrl();
-                String expandedMessage;
-                if (run instanceof AbstractBuild<?, ?>) {
-                    final AbstractBuild<?, ?> build = (AbstractBuild<?, ?>) run;
-                    expandedMessage = statusMessage.expandAll(build, listener);
-                } else {
-                    // Workflow doesn't expand variables with token macro!
-                    expandedMessage = statusMessage.getContent();
-                }
 
                 trigger.getRemoteRepo().createCommitStatus(
                         cause.getHeadSha(),
                         GHCommitState.PENDING,
                         url,
-                        expandedMessage,
+                        statusMessage.expandAll(run, listener),
                         run.getParent().getFullName()
                 );
             }
