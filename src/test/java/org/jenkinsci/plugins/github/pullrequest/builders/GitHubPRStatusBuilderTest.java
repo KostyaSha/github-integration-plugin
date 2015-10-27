@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.github.pullrequest.builders;
 
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -9,7 +10,10 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRMessage;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.kohsuke.github.GHRepository;
 import org.mockito.Mock;
@@ -28,6 +32,9 @@ public class GitHubPRStatusBuilderTest {
     private static final String DEFAULT_MESSAGE = GitHubPRStatusBuilder.DEFAULT_MESSAGE.getContent();
     private static final String CUSTOM_MESSAGE = "Custom run message";
 
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
+
     @Mock private AbstractBuild<?, ?> build;
     @Mock private Launcher launcher;
     @Mock private BuildListener listener;
@@ -39,6 +46,12 @@ public class GitHubPRStatusBuilderTest {
     @Mock private GHRepository remoteRepository;
     @Mock private GitHubPRMessage message;
     @Mock private ItemGroup itemGroup;
+    public FilePath ws;
+
+    @Before
+    public void prepare() throws IOException {
+         ws = new FilePath(folder.newFile());
+    }
 
     @Test
     public void createBuilder() {
@@ -79,6 +92,8 @@ public class GitHubPRStatusBuilderTest {
     public void runBuilderWithNullTrigger() throws IOException, InterruptedException {
         GitHubPRStatusBuilder builder = new GitHubPRStatusBuilder(new GitHubPRMessage(CUSTOM_MESSAGE));
 
+        when(build.getWorkspace()).thenReturn(ws);
+
         triggerExpectations(null);
 
         Assert.assertTrue(builder.perform(build, launcher, listener));
@@ -90,6 +105,7 @@ public class GitHubPRStatusBuilderTest {
 
         triggerExpectations(trigger);
         when(build.getCause(GitHubPRCause.class)).thenReturn(null);
+        when(build.getWorkspace()).thenReturn(ws);
 
         Assert.assertTrue(builder.perform(build, launcher, listener));
     }
@@ -99,8 +115,12 @@ public class GitHubPRStatusBuilderTest {
         GitHubPRStatusBuilder builder = new GitHubPRStatusBuilder(new GitHubPRMessage(CUSTOM_MESSAGE));
 
         triggerExpectations(trigger);
+
         when(build.getCause(GitHubPRCause.class)).thenReturn(cause);
+        when(build.getWorkspace()).thenReturn(ws);
+
         urlExpectations();
+
         when(trigger.getRemoteRepo()).thenThrow(new IOException("on getting remote repo"));
         when(listener.getLogger()).thenReturn(logger);
 
@@ -114,11 +134,14 @@ public class GitHubPRStatusBuilderTest {
         GitHubPRStatusBuilder builder = new GitHubPRStatusBuilder(message);
 
         triggerExpectations(trigger);
+
         when(build.getCause(GitHubPRCause.class)).thenReturn(cause);
+        when(build.getWorkspace()).thenReturn(ws);
+
         urlExpectations();
+
         when(trigger.getRemoteRepo()).thenReturn(remoteRepository);
         when(message.expandAll(build, listener)).thenReturn("expanded");
-
         when(build.getProject()).thenReturn(project);
         when(project.getParent()).thenReturn(itemGroup);
         when(itemGroup.getFullName()).thenReturn("project full name");
