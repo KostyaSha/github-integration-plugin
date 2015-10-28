@@ -2,8 +2,8 @@ package org.jenkinsci.plugins.github.pullrequest;
 
 import hudson.Util;
 import hudson.console.AnnotatedLargeText;
-import hudson.model.AbstractProject;
 import hudson.model.Action;
+import hudson.model.Job;
 import org.apache.commons.jelly.XMLOutput;
 
 import java.io.File;
@@ -16,13 +16,13 @@ import java.nio.charset.Charset;
  * @author Alina Karpovich
  */
 public class GitHubPRPollingLogAction implements Action {
-    private transient AbstractProject<?, ?> project;
+    private transient Job<?, ?> project;
 
-    public GitHubPRPollingLogAction(AbstractProject<?, ?> project) {
+    public GitHubPRPollingLogAction(Job<?, ?> project) {
         this.project = project;
     }
 
-    public AbstractProject<?,?> getOwner() {
+    public Job<?,?> getOwner() {
         return project;
     }
 
@@ -50,8 +50,7 @@ public class GitHubPRPollingLogAction implements Action {
      * @since 1.350
      */
     public void writeLogTo(XMLOutput out) throws IOException {
-        new AnnotatedLargeText<>(getLogFile(),
-                Charset.defaultCharset(),true,this).writeHtmlTo(0,out.asWriter());
+        new AnnotatedLargeText<>(getLogFile(), Charset.defaultCharset(),true,this).writeHtmlTo(0,out.asWriter());
     }
 
     public File getLogFile() {
