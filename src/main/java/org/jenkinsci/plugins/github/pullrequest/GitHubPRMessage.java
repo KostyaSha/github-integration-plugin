@@ -52,14 +52,14 @@ public class GitHubPRMessage extends AbstractDescribableImpl<GitHubPRMessage> {
      */
     @Restricted(NoExternalUse.class)
     @CheckForNull
-    public static String expandAll(String body, Run<?, ?> run, TaskListener listener)
+    public static String expandAll(String content, Run<?, ?> run, TaskListener listener)
             throws IOException, InterruptedException {
-        if (body == null || body.length() == 0) {
-            return body; // Do nothing for an empty String
+        if (content == null || content.length() == 0) {
+            return content; // Do nothing for an empty String
         }
 
         // Expand environment variables
-        body = run.getEnvironment(listener).expand(body);
+        String body = run.getEnvironment(listener).expand(content);
 
         // Expand build variables + token macro if they available
         if (run instanceof AbstractBuild<?, ?>) {
