@@ -1,5 +1,10 @@
 ## Changelog
 
+
+## 0.1.0-beta14
+
+* Provide default configuration in UI
+
 ## 0.1.0-beta13
 
 * Indent trigger configuration UI
