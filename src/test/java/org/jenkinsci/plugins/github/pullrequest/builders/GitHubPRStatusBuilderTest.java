@@ -121,7 +121,7 @@ public class GitHubPRStatusBuilderTest {
         triggerExpectations(trigger);
 
         when(build.getCause(GitHubPRCause.class)).thenReturn(cause);
-        when(build.getWorkspace()).thenReturn(ws);
+        doReturn(ws).when(build.getWorkspace());
 
         urlExpectations();
 
