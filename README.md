@@ -4,8 +4,7 @@ GitHub Pull Request Plugin
 [![Coverage](https://img.shields.io/sonar/http/sonar.lanwen.ru/org.jenkins-ci.plugins:github-pullrequest/coverage.svg?style=flat)](http://sonar.lanwen.ru/dashboard/index?id=org.jenkins-ci.plugins:github-pullrequest)
 
 
-This is rewritten version of [ghprb-plugin](https://wiki.jenkins-ci.org/display/JENKINS/GitHub+pull+request+builder+plugin) that after many years is in complex code state when keeping backward compatibility with fixing all bugs almost impossible.
-Code inspired by github-plugin, git-plugin, ghprb-plugin and others.
+This was rewritten version of [ghprb-plugin](https://wiki.jenkins-ci.org/display/JENKINS/GitHub+pull+request+builder+plugin). After many years ghprb was in complex code state when keeping backward compatibility with fixing all bugs almost impossible (IMHO). Today it separate plugin. Code was inspired by github-plugin, git-plugin, ghprb-plugin and others.
 
 ## Description:
 
@@ -39,10 +38,7 @@ Code inspired by github-plugin, git-plugin, ghprb-plugin and others.
 - All input variables starts from `GITHUB_PR_*`
 - Refspec for [git-plugin](https://wiki.jenkins-ci.org/display/JENKINS/Git+Plugin) is not hardcoded, branch specifier can be constructed using input variables
 - Configuration and code tried to be workflow friendly
-
-Integration with [github-plugin](https://wiki.jenkins-ci.org/display/JENKINS/GitHub+Plugin) can
-
-- optimize/reuse code for:
+- integrated with [github-plugin](https://wiki.jenkins-ci.org/display/JENKINS/GitHub+Plugin) optimized/reused code for:
   - [x] searching projects
   - [x] using one hook url
   - [x] hooks configuration (with periodic cleaning?)
