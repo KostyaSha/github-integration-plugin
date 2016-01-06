@@ -73,45 +73,47 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
             return;
         }
 
-        if (publishedURL != null && !publishedURL.isEmpty()) {
-            GHCommitState state = getCommitState(run, unstableAs);
+        if (publishedURL == null || publishedURL.isEmpty()) {
+            return;
+        }
 
-            GitHubPRCause c = run.getCause(GitHubPRCause.class);
+        GHCommitState state = getCommitState(run, unstableAs);
 
-            String statusMsgValue = getStatusMsg().expandAll(run, listener);
-            String buildUrl = publishedURL + run.getUrl();
+        GitHubPRCause c = run.getCause(GitHubPRCause.class);
 
-            LOGGER.info("Setting status of {} to {} with url {} and message: {}",
-                    c.getHeadSha(), state, buildUrl, statusMsgValue);
+        String statusMsgValue = getStatusMsg().expandAll(run, listener);
+        String buildUrl = publishedURL + run.getUrl();
 
-            // TODO check permissions to write human friendly message
-            final GitHubPRTrigger trigger = JobInfoHelpers.triggerFrom(run.getParent(), GitHubPRTrigger.class);
-            if (trigger == null) {
-                // silently skip. TODO implement error handler, like in publishers
-                return;
-            }
+        LOGGER.info("Setting status of {} to {} with url {} and message: {}",
+                c.getHeadSha(), state, buildUrl, statusMsgValue);
 
-            try {
-                trigger.getRemoteRepo().createCommitStatus(c.getHeadSha(), state, buildUrl, statusMsgValue,
-                        run.getParent().getFullName());
-            } catch (IOException ex) {
-                if (buildMessage != null) {
-                    String comment = null;
-                    LOGGER.error("Could not update commit status of the Pull Request on GitHub. ", ex);
-                    if (state == GHCommitState.SUCCESS) {
-                        comment = buildMessage.getSuccessMsg().expandAll(run, listener);
-                    } else if (state == GHCommitState.FAILURE) {
-                        comment = buildMessage.getFailureMsg().expandAll(run, listener);
-                    }
-                    listenerLogger.println("Adding comment...");
-                    LOGGER.info("Adding comment, because: ", ex);
-                    addComment(c.getNumber(), comment, run, listener);
-                } else {
-                    listenerLogger.println("Could not update commit status of the Pull Request on GitHub." + ex.getMessage());
-                    LOGGER.error("Could not update commit status of the Pull Request on GitHub.", ex);
+        // TODO check permissions to write human friendly message
+        final GitHubPRTrigger trigger = JobInfoHelpers.triggerFrom(run.getParent(), GitHubPRTrigger.class);
+        if (trigger == null) {
+            // silently skip. TODO implement error handler, like in publishers
+            return;
+        }
+
+        try {
+            trigger.getRemoteRepo().createCommitStatus(c.getHeadSha(), state, buildUrl, statusMsgValue,
+                    run.getParent().getFullName());
+        } catch (IOException ex) {
+            if (buildMessage != null) {
+                String comment = null;
+                LOGGER.error("Could not update commit status of the Pull Request on GitHub. ", ex);
+                if (state == GHCommitState.SUCCESS) {
+                    comment = buildMessage.getSuccessMsg().expandAll(run, listener);
+                } else if (state == GHCommitState.FAILURE) {
+                    comment = buildMessage.getFailureMsg().expandAll(run, listener);
                 }
-                handlePublisherError(run);
+                listenerLogger.println("Adding comment...");
+                LOGGER.info("Adding comment, because: ", ex);
+                addComment(c.getNumber(), comment, run, listener);
+            } else {
+                listenerLogger.println("Could not update commit status of the Pull Request on GitHub." + ex.getMessage());
+                LOGGER.error("Could not update commit status of the Pull Request on GitHub.", ex);
             }
+            handlePublisherError(run);
         }
     }
 
