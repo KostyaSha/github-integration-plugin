@@ -148,6 +148,7 @@ public abstract class GitHubPRAbstractPublisher extends Recorder implements Simp
         GHCommitState state;
         Result result = run.getResult();
         if (result == null) {
+            LOGGER.error("{} result is null.", run);
             state = GHCommitState.ERROR;
         } else if (result.isBetterOrEqualTo(SUCCESS)) {
             state = GHCommitState.SUCCESS;
