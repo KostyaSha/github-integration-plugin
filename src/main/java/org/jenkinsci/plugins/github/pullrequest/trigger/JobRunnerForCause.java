@@ -139,7 +139,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                 CAUSE_SKIP.param(cause.isSkip()),
                 NUMBER.param(String.valueOf(cause.getNumber()))
         ));
-        // no way to get quietPeriod, so temporary ignore it
+        //TODO no way to get quietPeriod, so temporary ignore it
         return asParameterizedJobMixIn(job).scheduleBuild2(0, new CauseAction(cause), new ParametersAction(values));
     }
 

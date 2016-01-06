@@ -1,11 +1,12 @@
 package org.jenkinsci.plugins.github.pullrequest.publishers.impl;
 
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Api;
-import hudson.model.BuildListener;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
 import org.jenkinsci.plugins.github.pullrequest.publishers.GitHubPRAbstractPublisher;
@@ -13,10 +14,11 @@ import org.jenkinsci.plugins.github.pullrequest.utils.PublisherErrorHandler;
 import org.jenkinsci.plugins.github.pullrequest.utils.StatusVerifier;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import java.io.IOException;
 
 /**
  * Closes pull request after build.
@@ -32,27 +34,27 @@ public class GitHubPRClosePublisher extends GitHubPRAbstractPublisher {
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-        if (getStatusVerifier() != null && !getStatusVerifier().isRunAllowed(build)) {
-            return true;
+    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher,
+                        @Nonnull TaskListener listener) throws InterruptedException, IOException {
+        if (getStatusVerifier() != null && !getStatusVerifier().isRunAllowed(run)) {
+            return;
         }
 
         String publishedURL = getTriggerDescriptor().getPublishedURL();
         if (publishedURL != null && !publishedURL.isEmpty()) {
             try {
-                if (getGhIssue(build).getState().equals(GHIssueState.OPEN)) {
+                if (getGhIssue(run).getState().equals(GHIssueState.OPEN)) {
                     try {
-                        getGhPullRequest(build).close();
+                        getGhPullRequest(run).close();
                     } catch (IOException ex) {
-                        LOGGER.error("Couldn't close the pull request #{}:", getNumber(build), ex);
+                        LOGGER.error("Couldn't close the pull request #{}:", getNumber(run), ex);
                     }
                 }
             } catch (IOException ex) {
                 listener.getLogger().println("Can't close pull request \n" + ex.getMessage());
-                handlePublisherError(build);
+                handlePublisherError(run);
             }
         }
-        return true;
     }
 
     public final Api getApi() {

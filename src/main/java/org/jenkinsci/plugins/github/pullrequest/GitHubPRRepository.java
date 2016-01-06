@@ -4,16 +4,16 @@ import com.cloudbees.jenkins.GitHubWebHook;
 import hudson.BulkChange;
 import hudson.Functions;
 import hudson.XmlFile;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.Action;
-import hudson.model.Cause;
 import hudson.model.CauseAction;
 import hudson.model.Item;
+import hudson.model.Job;
 import hudson.model.ParametersAction;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.Saveable;
 import hudson.model.listeners.SaveableListener;
+import hudson.model.queue.QueueTaskFuture;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
 import jenkins.model.Jenkins;
@@ -28,6 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.jenkinsci.plugins.github.util.JobInfoHelpers.asParameterizedJobMixIn;
+
 /**
  * GitHub Repository local state = last trigger run() state.
  * Store only necessary variables.
@@ -36,12 +38,12 @@ import java.util.Map;
  */
 public class GitHubPRRepository implements Action, Saveable {
     /**
-     * Store constantly changing information in project directory with .runtime.xml tail
+     * Store constantly changing information in job directory with .runtime.xml tail
      */
     public static final String FILE = GitHubPRRepository.class.getName() + ".runtime.xml";
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRRepository.class);
     private transient XmlFile configFile; // for save()
-    private transient AbstractProject<?, ?> project;  // for UI
+    private transient Job<?, ?> job;  // for UI
 
     private final String fullName;
     private final String githubUrl;
@@ -69,22 +71,22 @@ public class GitHubPRRepository implements Action, Saveable {
      *
      * @return map with keys - numbers of built PRs and values - lists of related builds.
      */
-    public Map<Integer, List<AbstractBuild<?, ?>>> getAllPrBuilds() {
+    public Map<Integer, List<Run<?, ?>>> getAllPrBuilds() {
 
-        Map<Integer, List<AbstractBuild<?, ?>>> map = new HashMap<>();
-        final RunList<? extends AbstractBuild<?, ?>> builds = project.getBuilds();
-        LOGGER.debug("Got builds for project {}", project.getFullName());
+        Map<Integer, List<Run<?, ?>>> map = new HashMap<>();
+        final RunList<?> runs = job.getBuilds();
+        LOGGER.debug("Got builds for job {}", job.getFullName());
 
-        for (AbstractBuild build : builds) {
-            GitHubPRCause cause = (GitHubPRCause) build.getCause(GitHubPRCause.class);
+        for (Run<?, ?> run : runs) {
+            GitHubPRCause cause = (GitHubPRCause) run.getCause(GitHubPRCause.class);
             if (cause != null) {
                 int number = cause.getNumber();
-                List<AbstractBuild<?, ?>> buildsByNumber = map.get(number);
+                List<Run<?, ?>> buildsByNumber = map.get(number);
                 if (buildsByNumber == null) {
                     buildsByNumber = new ArrayList<>();
                     map.put(number, buildsByNumber);
                 }
-                buildsByNumber.add(build);
+                buildsByNumber.add(run);
             }
         }
 
@@ -158,10 +160,10 @@ public class GitHubPRRepository implements Action, Saveable {
         try {
             Jenkins instance = GitHubWebHook.getJenkinsInstance();
             if (instance.hasPermission(Item.BUILD)) {
-                Map<Integer, List<AbstractBuild<?, ?>>> builds = getAllPrBuilds();
-                for (List<AbstractBuild<?, ?>> buildList : builds.values()) {
+                Map<Integer, List<Run<?, ?>>> builds = getAllPrBuilds();
+                for (List<Run<?, ?>> buildList : builds.values()) {
                     if (!buildList.isEmpty() && Result.FAILURE.equals(buildList.get(0).getResult())) {
-                        AbstractBuild<?, ?> lastBuild = buildList.get(0);
+                        Run<?, ?> lastBuild = buildList.get(0);
                         rebuild(lastBuild);
                     }
                 }
@@ -192,8 +194,8 @@ public class GitHubPRRepository implements Action, Saveable {
                 prId = Integer.valueOf(req.getParameter(prNumberParam));
             }
 
-            Map<Integer, List<AbstractBuild<?, ?>>> builds = getAllPrBuilds();
-            List<AbstractBuild<?, ?>> prBuilds = builds.get(prId);
+            Map<Integer, List<Run<?, ?>>> builds = getAllPrBuilds();
+            List<Run<?, ?>> prBuilds = builds.get(prId);
             if (prBuilds != null && !prBuilds.isEmpty()) {
                 if (rebuild(prBuilds.get(0))) {
                     result = FormValidation.ok("Rebuild scheduled");
@@ -210,16 +212,18 @@ public class GitHubPRRepository implements Action, Saveable {
         return result;
     }
 
-    private static boolean rebuild(AbstractBuild<?, ?> build) {
-        return build.getProject().scheduleBuild(0,
-                new Cause.UserIdCause(),
-                build.getAction(ParametersAction.class),
-                build.getAction(CauseAction.class)
-        );
+    private static boolean rebuild(Run<?, ?> run) {
+        final QueueTaskFuture queueTaskFuture = asParameterizedJobMixIn(run.getParent())
+                .scheduleBuild2(
+                        0,
+                        run.getAction(ParametersAction.class),
+                        run.getAction(CauseAction.class)
+                );
+        return queueTaskFuture != null;
     }
 
-    public void setProject(AbstractProject<?, ?> project) {
-        this.project = project;
+    public void setJob(Job<?, ?> job) {
+        this.job = job;
     }
 
     public void setConfigFile(XmlFile configFile) {

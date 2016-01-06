@@ -335,7 +335,6 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
      * @param localRepository persisted data to compare with remote state
      * @param listener        logger to write to console and to polling log
      * @param prNumber        pull request number to fetch only required num. Can be null
-     *
      * @return causes which ready to be converted to job-starts. One cause per repo.
      */
     private List<GitHubPRCause> readyToBuildCauses(GitHubPRRepository localRepository,

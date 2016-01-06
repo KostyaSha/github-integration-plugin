@@ -1,19 +1,21 @@
 package org.jenkinsci.plugins.github.pullrequest.publishers;
 
 import hudson.AbortException;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import jenkins.model.Jenkins;
+import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.utils.PublisherErrorHandler;
 import org.jenkinsci.plugins.github.pullrequest.utils.StatusVerifier;
+import org.jenkinsci.plugins.github.util.JobInfoHelpers;
 import org.kohsuke.github.GHCommitState;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHPullRequest;
@@ -27,13 +29,14 @@ import javax.annotation.CheckForNull;
 
 import static hudson.model.Result.SUCCESS;
 import static hudson.model.Result.UNSTABLE;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromRun;
 
 /**
  * Common actions for label addition and deletion.
  *
  * @author Alina Karpovich
  */
-public abstract class GitHubPRAbstractPublisher extends Recorder {
+public abstract class GitHubPRAbstractPublisher extends Recorder implements SimpleBuildStep {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRAbstractPublisher.class);
 
     @CheckForNull
@@ -79,21 +82,21 @@ public abstract class GitHubPRAbstractPublisher extends Recorder {
         return errorHandler;
     }
 
-    protected void handlePublisherError(AbstractBuild<?, ?> build) {
+    protected void handlePublisherError(Run<?, ?> run) {
         if (errorHandler != null) {
-            errorHandler.markBuildAfterError(build);
+            errorHandler.markBuildAfterError(run);
         }
     }
 
-    public GHRepository getGhRepository(final AbstractBuild<?, ?> build) throws IOException {
+    public GHRepository getGhRepository(final Run<?, ?> run) throws IOException {
         if (ghRepository == null) {
-            ghRepository = build.getProject().getTrigger(GitHubPRTrigger.class).getRemoteRepo();
+            ghRepository = ghPRTriggerFromRun(run).getRemoteRepo();
         }
         return ghRepository;
     }
 
-    public int getNumber(final AbstractBuild<?, ?> build) throws AbortException {
-        GitHubPRCause cause = build.getCause(GitHubPRCause.class);
+    public int getNumber(final Run<?, ?> run) throws AbortException {
+        GitHubPRCause cause = run.getCause(GitHubPRCause.class);
         if (cause == null) {
             throw new AbortException("Can't get cause from build");
         }
@@ -101,37 +104,39 @@ public abstract class GitHubPRAbstractPublisher extends Recorder {
         return number;
     }
 
-    public GHIssue getGhIssue(final AbstractBuild<?, ?> build) throws IOException {
+    public GHIssue getGhIssue(final Run<?, ?> run) throws IOException {
         if (ghIssue == null) {
-            ghIssue = getGhRepository(build).getIssue(getNumber(build));
+            ghIssue = getGhRepository(run).getIssue(getNumber(run));
         }
         return ghIssue;
     }
 
-    public GHIssue getGhPullRequest(final AbstractBuild<?, ?> build) throws IOException {
+    public GHIssue getGhPullRequest(final Run<?, ?> build) throws IOException {
         if (ghPullRequest == null) {
             ghPullRequest = getGhRepository(build).getPullRequest(getNumber(build));
         }
         return ghPullRequest;
     }
 
-    public static void addComment(final int id, final String comment, final AbstractBuild<?, ?> build, final TaskListener listener) {
+    public static void addComment(final int id, final String comment, final Run<?, ?> run, final TaskListener listener) {
         if (comment.trim().isEmpty()) {
             return;
         }
 
         String finalComment = comment;
-        if (build != null && listener != null) {
+        if (run != null && listener != null) {
             try {
-                finalComment = build.getEnvironment(listener).expand(comment);
+                finalComment = run.getEnvironment(listener).expand(comment);
             } catch (Exception e) {
                 LOGGER.error("Error", e);
             }
         }
 
         try {
-            if (build != null) {
-                GHRepository ghRepository = build.getProject().getTrigger(GitHubPRTrigger.class).getRemoteRepo();
+            if (run != null) {
+                final GitHubPRTrigger trigger = JobInfoHelpers.triggerFrom(run.getParent(), GitHubPRTrigger.class);
+
+                GHRepository ghRepository = trigger.getRemoteRepo();
                 ghRepository.getPullRequest(id).comment(finalComment);
             }
         } catch (IOException ex) {
@@ -139,9 +144,9 @@ public abstract class GitHubPRAbstractPublisher extends Recorder {
         }
     }
 
-    public static GHCommitState getCommitState(final AbstractBuild<?, ?> build, final GHCommitState unstableAs) {
+    public static GHCommitState getCommitState(final Run<?, ?> run, final GHCommitState unstableAs) {
         GHCommitState state;
-        Result result = build.getResult();
+        Result result = run.getResult();
         if (result == null) {
             state = GHCommitState.ERROR;
         } else if (result.isBetterOrEqualTo(SUCCESS)) {

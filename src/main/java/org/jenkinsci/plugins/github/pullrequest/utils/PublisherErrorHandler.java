@@ -1,10 +1,10 @@
 package org.jenkinsci.plugins.github.pullrequest.utils;
 
 import hudson.Extension;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.util.ListBoxModel;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -26,8 +26,8 @@ public class PublisherErrorHandler extends AbstractDescribableImpl<PublisherErro
         return buildStatus;
     }
 
-    public Result markBuildAfterError(AbstractBuild<?, ?> build) {
-        build.setResult(buildStatus);
+    public Result markBuildAfterError(Run<?, ?> run) {
+        run.setResult(buildStatus);
         return buildStatus;
     }
 

@@ -6,6 +6,7 @@ import hudson.XmlFile;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.ItemGroup;
+import hudson.model.Job;
 import org.jenkinsci.plugins.github.pullrequest.util.TestUtil;
 import org.junit.Assert;
 import org.junit.Test;
@@ -23,11 +24,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 /**
- * Created by Alina_Karpovich on 4/24/2015.
+ * @author Alina_Karpovich
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({GithubProjectProperty.class, GithubUrl.class})
@@ -101,26 +103,26 @@ public class GitHubPRRepositoryFactoryTest {
      * @param job     mock job.
      * @param trigger mock trigger that is expected to be returned via job.getTrigger(GitHubPRTrigger.class).
      */
-    public static void createForCommonExpectations(AbstractProject<?, ?> job, GitHubPRTrigger trigger) {
+    public static void createForCommonExpectations(Job<?, ?> job, GitHubPRTrigger trigger) {
         createForCommonExpectations(CONFIG_PATH, job, trigger);
     }
 
     /**
      * Requires @PrepareForTest({GithubProjectProperty.class, GithubUrl.class}) in class usig it.
      *
-     * @param filePath job's root directiry.
+     * @param filePath job's root directory.
      * @param job      mock job.
      * @param trigger  mock trigger that is expected to be returned via job.getTrigger(GitHubPRTrigger.class).
      */
     public static void createForCommonExpectations(String filePath,
-                                                   AbstractProject<?, ?> job,
+                                                   Job<?, ?> job,
                                                    GitHubPRTrigger trigger) {
         GithubUrl githubUrl = PowerMockito.mock(GithubUrl.class);
         GithubProjectProperty projectProperty = PowerMockito.mock(GithubProjectProperty.class);
 
         File file = new File(filePath);
         when(job.getRootDir()).thenReturn(file);
-        when(job.getTrigger(GitHubPRTrigger.class)).thenReturn(trigger);
+        when(ghPRTriggerFromJob(job)).thenReturn(trigger);
         when(job.getProperty(GithubProjectProperty.class)).thenReturn(projectProperty);
         when(projectProperty.getProjectUrl()).thenReturn(githubUrl);
     }

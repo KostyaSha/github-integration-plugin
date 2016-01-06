@@ -21,7 +21,7 @@ def makeBuildItem(def builds) {
 
 
 l.layout(title: "GitHub Pull Requests statuses") {
-    st.include(page: "sidepanel", it: my.project)
+    st.include(page: "sidepanel", it: my.job)
     script(src:"${rootURL}${h.getResourcePath()}/plugin/github-pullrequest/scripts/featureButton.js")
     l.main_panel() {
         h1("GitHub Pull Requests statuses");
