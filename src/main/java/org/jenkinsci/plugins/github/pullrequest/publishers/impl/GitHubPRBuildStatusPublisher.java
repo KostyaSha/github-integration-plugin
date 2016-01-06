@@ -84,14 +84,14 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
             LOGGER.info("Setting status of {} to {} with url {} and message: {}",
                     c.getHeadSha(), state, buildUrl, statusMsgValue);
 
-            try {
-                // TODO check permissions to write human friendly message
-                final GitHubPRTrigger trigger = JobInfoHelpers.triggerFrom(run.getParent(), GitHubPRTrigger.class);
-                if (trigger == null) {
-                    // silently skip. TODO implement error handler, like in publishers
-                    return;
-                }
+            // TODO check permissions to write human friendly message
+            final GitHubPRTrigger trigger = JobInfoHelpers.triggerFrom(run.getParent(), GitHubPRTrigger.class);
+            if (trigger == null) {
+                // silently skip. TODO implement error handler, like in publishers
+                return;
+            }
 
+            try {
                 trigger.getRemoteRepo().createCommitStatus(c.getHeadSha(), state, buildUrl, statusMsgValue,
                         run.getParent().getFullName());
             } catch (IOException ex) {
