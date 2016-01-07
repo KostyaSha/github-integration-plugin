@@ -15,6 +15,8 @@ import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.SequentialExecutionQueue;
 import jenkins.model.Jenkins;
+import jenkins.model.ParameterizedJobMixIn;
+import jenkins.triggers.SCMTriggerItem;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.github.GitHubPlugin;
 import org.jenkinsci.plugins.github.internal.GHPluginConfigException;
@@ -91,7 +93,7 @@ import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
  *
  * @author Kanstantsin Shautsou
  */
-public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
+public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRTrigger.class);
 
     @CheckForNull
@@ -180,7 +182,7 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     @Override
-    public void start(AbstractProject<?, ?> project, boolean newInstance) {
+    public void start(Job<?, ?> project, boolean newInstance) {
         LOGGER.info("Starting GitHub Pull Request trigger for project {}", project.getName());
         super.start(project, newInstance);
 
@@ -333,7 +335,6 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
      * @param localRepository persisted data to compare with remote state
      * @param listener        logger to write to console and to polling log
      * @param prNumber        pull request number to fetch only required num. Can be null
-     *
      * @return causes which ready to be converted to job-starts. One cause per repo.
      */
     private List<GitHubPRCause> readyToBuildCauses(GitHubPRRepository localRepository,
@@ -422,7 +423,8 @@ public class GitHubPRTrigger extends Trigger<AbstractProject<?, ?>> {
 
         @Override
         public boolean isApplicable(Item item) {
-            return item instanceof AbstractProject;
+            return item instanceof Job && SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(item) != null
+                    && item instanceof ParameterizedJobMixIn.ParameterizedJob;
         }
 
         @Override

@@ -1,10 +1,11 @@
 package org.jenkinsci.plugins.github.pullrequest.publishers.impl;
 
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
 import hudson.model.Api;
-import hudson.model.BuildListener;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRMessage;
 import org.jenkinsci.plugins.github.pullrequest.publishers.GitHubPRAbstractPublisher;
@@ -13,10 +14,11 @@ import org.jenkinsci.plugins.github.pullrequest.utils.StatusVerifier;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import java.io.IOException;
 
 /**
  * Adds specified text to comments after build.
@@ -38,15 +40,18 @@ public class GitHubPRCommentPublisher extends GitHubPRAbstractPublisher {
     }
 
     @DataBoundConstructor
-    public GitHubPRCommentPublisher(GitHubPRMessage comment, StatusVerifier statusVerifier, PublisherErrorHandler errorHandler) {
+    public GitHubPRCommentPublisher(GitHubPRMessage comment,
+                                    StatusVerifier statusVerifier,
+                                    PublisherErrorHandler errorHandler) {
         super(statusVerifier, errorHandler);
         this.comment = comment;
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-        if (getStatusVerifier() != null && !getStatusVerifier().isRunAllowed(build)) {
-            return true;
+    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher,
+                        @Nonnull TaskListener listener) throws InterruptedException, IOException {
+        if (getStatusVerifier() != null && !getStatusVerifier().isRunAllowed(run)) {
+            return;
         }
 
         //TODO is this check of Jenkins public url necessary?
@@ -54,19 +59,18 @@ public class GitHubPRCommentPublisher extends GitHubPRAbstractPublisher {
         //if (publishedURL != null && !publishedURL.isEmpty()) {
 
         //TODO are replaceMacros, makebuildMessage needed?
-        String message = comment.expandAll(build, listener);
+        String message = comment.expandAll(run, listener);
 
         // Only post the build's custom message if it has been set.
         if (message != null && !message.isEmpty()) {
             try {
-                getGhPullRequest(build).comment(message);
+                getGhPullRequest(run).comment(message);
             } catch (IOException ex) {
-                LOGGER.error("Couldn't add comment to pull request #{}: '{}'", getNumber(build), message, ex);
-                handlePublisherError(build);
+                LOGGER.error("Couldn't add comment to pull request #{}: '{}'", getNumber(run), message, ex);
+                handlePublisherError(run);
             }
             listener.getLogger().println(message);
         }
-        return true;
     }
 
     public final Api getApi() {
