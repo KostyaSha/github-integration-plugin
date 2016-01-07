@@ -1,5 +1,10 @@
 ## Changelog
 
+## 0.1.0-beta15
+
+* Support Job type (workflow-plugin support)
+* Reorganised to multi-module maven structure
+* Renamed to `github-integration-plugin`
 
 ## 0.1.0-beta14
 
