@@ -9,7 +9,7 @@ public enum GitHubPRTriggerMode {
     CRON ("Cron"),
     HEAVY_HOOKS ("Hooks"),
     HEAVY_HOOKS_CRON ("NOT SUPPORTED: Hooks plus Cron"),
-    LIGHT_HOOKS("NOT SUPPORTED: Light Hooks");
+    LIGHT_HOOKS("NOT SUPPORTED: Transient Hooks");
 
     private final String description;
 
