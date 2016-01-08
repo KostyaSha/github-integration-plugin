@@ -2,7 +2,7 @@ package org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRLabelExists
 
 def f = namespace(lib.FormTagLib);
 
-f.entry(field: "skip", title: "Skip PR?") {
+f.entry(field: "skip", title: "Skip pull requests with label(s)?") {
     f.checkbox()
 }
 

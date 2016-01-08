@@ -1,6 +1,11 @@
 <div>
-    Events that should trigger job.
-    Waterfall matching, first checked win.
-    Put skip events first!. For performance
-    it makes sense put "PR open" event before "Comments" event.
+    GitHub events or statuses that should or should not trigger a build of a pull request.
+    <br/>
+    The specified events will be checked in order, and the first to match will
+    be used, so be sure to put events/statuses that should prevent triggering a
+    build first in order.
+    <br/>
+    For performance reasons, "Pull Request Opened" should go before other
+    events that require more detailed checking of the pull request, such as
+    "Comment Matched to Pattern".
 </div>

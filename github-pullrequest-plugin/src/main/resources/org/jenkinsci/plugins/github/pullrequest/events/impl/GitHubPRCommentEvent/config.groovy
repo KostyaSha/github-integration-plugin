@@ -2,6 +2,6 @@ package org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRCommentEven
 
 def f = namespace(lib.FormTagLib);
 
-f.entry(title:_("Comment"), field:"comment") {
+f.entry(title:_("Comment Pattern"), field:"comment") {
     f.textbox()
 }

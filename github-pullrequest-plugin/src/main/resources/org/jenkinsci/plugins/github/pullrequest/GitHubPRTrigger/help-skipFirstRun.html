@@ -1,4 +1,7 @@
 <div>
-    If this checked, then first trigger run will not run real builds.
-    After first run this value automatically unset.
+    If selected, PRs that were pending before a first dry run of this job will
+    be ignored, and only PRs updated or created after that first dry run will
+    be built.
+    <br/>
+    NOTE: After selecting this option, you need to run the build once by hand.
 </div>
