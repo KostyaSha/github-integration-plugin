@@ -39,10 +39,8 @@ f.block {
             )
         }
 
-        f.advanced() {
-            f.optionalProperty(title: "User Restriction", field: "userRestriction")
+        f.optionalProperty(title: "Experimental: User Restriction", field: "userRestriction")
 
-            f.optionalProperty(title: "Branch Restriction", field: "branchRestriction")
-        }
+        f.optionalProperty(title: "Experimental: Branch Restriction", field: "branchRestriction")
     }
 }
