@@ -413,6 +413,10 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
         }
     }
 
+    public Job<?, ?> getJob() {
+        return job;
+    }
+
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
         private final transient SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
