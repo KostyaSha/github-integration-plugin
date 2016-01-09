@@ -128,28 +128,33 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
     }
 
     @DataBoundSetter
-    public void setPreStatus(boolean preStatus) {
+    public GitHubPRTrigger setPreStatus(boolean preStatus) {
         this.preStatus = preStatus;
+        return this;
     }
 
     @DataBoundSetter
-    public void setCancelQueued(boolean cancelQueued) {
+    public GitHubPRTrigger setCancelQueued(boolean cancelQueued) {
         this.cancelQueued = cancelQueued;
+        return this;
     }
 
     @DataBoundSetter
-    public void setSkipFirstRun(boolean skipFirstRun) {
+    public GitHubPRTrigger setSkipFirstRun(boolean skipFirstRun) {
         this.skipFirstRun = skipFirstRun;
+        return this;
     }
 
     @DataBoundSetter
-    public void setUserRestriction(GitHubPRUserRestriction userRestriction) {
+    public GitHubPRTrigger setUserRestriction(GitHubPRUserRestriction userRestriction) {
         this.userRestriction = userRestriction;
+        return this;
     }
 
     @DataBoundSetter
-    public void setBranchRestriction(GitHubPRBranchRestriction branchRestriction) {
+    public GitHubPRTrigger setBranchRestriction(GitHubPRBranchRestriction branchRestriction) {
         this.branchRestriction = branchRestriction;
+        return this;
     }
 
     public boolean isPreStatus() {
