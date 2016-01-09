@@ -78,7 +78,7 @@ public class GitHubPRRepository implements Action, Saveable {
         LOGGER.debug("Got builds for job {}", job.getFullName());
 
         for (Run<?, ?> run : runs) {
-            GitHubPRCause cause = (GitHubPRCause) run.getCause(GitHubPRCause.class);
+            GitHubPRCause cause = run.getCause(GitHubPRCause.class);
             if (cause != null) {
                 int number = cause.getNumber();
                 List<Run<?, ?>> buildsByNumber = map.get(number);

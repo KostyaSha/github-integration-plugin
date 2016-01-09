@@ -25,7 +25,7 @@ import static org.kohsuke.github.GHIssueState.CLOSED;
  */
 public class GitHubPROpenEvent extends GitHubPREvent {
     private static final String DISPLAY_NAME = "Pull Request Opened";
-    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPROpenEvent.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GitHubPROpenEvent.class);
 
     @DataBoundConstructor
     public GitHubPROpenEvent() {

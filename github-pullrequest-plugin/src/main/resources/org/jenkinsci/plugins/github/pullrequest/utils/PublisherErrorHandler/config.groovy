@@ -1,7 +1,9 @@
-package org.jenkinsci.plugins.github.pullrequest.utils.PublisherErrorHandler;
+package org.jenkinsci.plugins.github.pullrequest.utils.PublisherErrorHandler
 
-def f = namespace(lib.FormTagLib);
+import lib.FormTagLib;
 
-f.entry(title:_("If publisher failed mark build as "), field:"buildStatus"){
+def f = namespace(FormTagLib);
+
+f.entry(title: _("If publisher failed mark build as "), field: "buildStatus") {
     f.select()
 }
