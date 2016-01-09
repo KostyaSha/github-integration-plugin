@@ -44,6 +44,9 @@
         <maven-release-plugin.version>2.5.1</maven-release-plugin.version>
         <maven-findbugs-plugin.version>3.0.1</maven-findbugs-plugin.version>
         <powermock.version>1.6.0</powermock.version>
+        <logback.version>1.1.3</logback.version>
+        <workflow.version>1.12</workflow.version>
+        <excluded.tests>**/its/*.java</excluded.tests>
     </properties>
 
     <repositories>
@@ -52,6 +55,7 @@
             <url>http://repo.jenkins-ci.org/public/</url>
         </repository>
     </repositories>
+
     <pluginRepositories>
         <pluginRepository>
             <id>repo.jenkins-ci.org</id>
@@ -62,15 +66,23 @@
     <dependencies>
         <!--main plugin deps-->
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-            <version>1.7.7</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.coravy.hudson.plugins.github</groupId>
             <artifactId>github</artifactId>
             <version>1.14.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-jdk14</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -108,6 +120,20 @@
             <artifactId>block-queued-job</artifactId>
             <version>0.1.0</version>
             <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-job</artifactId>
+            <version>${workflow.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-cps</artifactId>
+            <version>${workflow.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <!--for tests-->
@@ -148,6 +174,28 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- tests logging -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${logback.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>1.0</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -167,6 +215,7 @@
                 <configuration>
                     <excludes>
                         <exclude>InjectedTest.java</exclude>
+                        <exclude>${excluded.tests}</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -218,4 +267,13 @@
             <!--</plugin>-->
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>github-its</id>
+            <properties>
+                <excluded.tests>none</excluded.tests>
+            </properties>
+        </profile>
+    </profiles>
 </project>

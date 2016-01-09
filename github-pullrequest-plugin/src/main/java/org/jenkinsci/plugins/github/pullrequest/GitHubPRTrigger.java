@@ -95,6 +95,7 @@ import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
  */
 public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRTrigger.class);
+    public static final String FINISH_MSG = "Finished GitHub Pull Request trigger check";
 
     @CheckForNull
     private GitHubPRTriggerMode triggerMode = CRON;
@@ -176,7 +177,6 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
     public List<GitHubPREvent> getEvents() {
         return events;
     }
-
 
     public GitHubPRUserRestriction getUserRestriction() {
         return userRestriction;
@@ -290,7 +290,7 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
      *
      * @param prNumber - PR number for check, if null - then all PRs
      */
-    private void doRun(Integer prNumber) {
+    public void doRun(Integer prNumber) {
         if (not(isBuildable()).apply(job)) {
             LOGGER.debug("Job {} is disabled, but trigger run!", job == null ? "<no job>" : job.getFullName());
             return;
@@ -320,7 +320,7 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
             localRepository.saveQuetly();
 
             long duration = System.currentTimeMillis() - startTime;
-            listener.info("Finished GitHub Pull Request trigger check for {} at {}. Duration: {}ms",
+            listener.info(FINISH_MSG + " for {} at {}. Duration: {}ms",
                     localRepository.getFullName(), getDateTimeInstance().format(new Date()), duration);
         } catch (Exception e) {
             LOGGER.error("Can't process check ({})", e.getMessage(), e);
