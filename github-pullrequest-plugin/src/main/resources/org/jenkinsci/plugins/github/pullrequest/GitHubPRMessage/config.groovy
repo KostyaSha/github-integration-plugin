@@ -1,7 +1,9 @@
 package org.jenkinsci.plugins.github.pullrequest.GitHubPRMessage
 
-def f = namespace(lib.FormTagLib);
+import lib.FormTagLib
 
-f.entry(title: _("Message content"), help: descriptor.getHelpFile('content')) {
-    f.expandableTextbox(field: "content")
+def f = namespace(FormTagLib);
+
+f.entry(title: _('Content'), field: 'content') {
+    f.expandableTextbox()
 }

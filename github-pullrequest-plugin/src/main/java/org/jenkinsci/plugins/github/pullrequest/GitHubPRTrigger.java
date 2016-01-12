@@ -95,6 +95,7 @@ import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
  */
 public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRTrigger.class);
+    public static final String FINISH_MSG = "Finished GitHub Pull Request trigger check";
 
     @CheckForNull
     private GitHubPRTriggerMode triggerMode = CRON;
@@ -128,28 +129,33 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
     }
 
     @DataBoundSetter
-    public void setPreStatus(boolean preStatus) {
+    public GitHubPRTrigger setPreStatus(boolean preStatus) {
         this.preStatus = preStatus;
+        return this;
     }
 
     @DataBoundSetter
-    public void setCancelQueued(boolean cancelQueued) {
+    public GitHubPRTrigger setCancelQueued(boolean cancelQueued) {
         this.cancelQueued = cancelQueued;
+        return this;
     }
 
     @DataBoundSetter
-    public void setSkipFirstRun(boolean skipFirstRun) {
+    public GitHubPRTrigger setSkipFirstRun(boolean skipFirstRun) {
         this.skipFirstRun = skipFirstRun;
+        return this;
     }
 
     @DataBoundSetter
-    public void setUserRestriction(GitHubPRUserRestriction userRestriction) {
+    public GitHubPRTrigger setUserRestriction(GitHubPRUserRestriction userRestriction) {
         this.userRestriction = userRestriction;
+        return this;
     }
 
     @DataBoundSetter
-    public void setBranchRestriction(GitHubPRBranchRestriction branchRestriction) {
+    public GitHubPRTrigger setBranchRestriction(GitHubPRBranchRestriction branchRestriction) {
         this.branchRestriction = branchRestriction;
+        return this;
     }
 
     public boolean isPreStatus() {
@@ -171,7 +177,6 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
     public List<GitHubPREvent> getEvents() {
         return events;
     }
-
 
     public GitHubPRUserRestriction getUserRestriction() {
         return userRestriction;
@@ -285,7 +290,7 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
      *
      * @param prNumber - PR number for check, if null - then all PRs
      */
-    private void doRun(Integer prNumber) {
+    public void doRun(Integer prNumber) {
         if (not(isBuildable()).apply(job)) {
             LOGGER.debug("Job {} is disabled, but trigger run!", job == null ? "<no job>" : job.getFullName());
             return;
@@ -315,7 +320,7 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
             localRepository.saveQuetly();
 
             long duration = System.currentTimeMillis() - startTime;
-            listener.info("Finished GitHub Pull Request trigger check for {} at {}. Duration: {}ms",
+            listener.info(FINISH_MSG + " for {} at {}. Duration: {}ms",
                     localRepository.getFullName(), getDateTimeInstance().format(new Date()), duration);
         } catch (Exception e) {
             LOGGER.error("Can't process check ({})", e.getMessage(), e);
@@ -406,6 +411,10 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
                     .filter(not(in(remotePRNums)))
                     .transform(fetchRemotePR(remoteRepo)).filter(notNull()).append(remotePulls).toSet();
         }
+    }
+
+    public Job<?, ?> getJob() {
+        return job;
     }
 
     @Extension
