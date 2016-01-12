@@ -122,9 +122,24 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- workflow for tests -->
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-job</artifactId>
+            <version>${workflow.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-basic-steps</artifactId>
+            <version>${workflow.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-durable-task-step</artifactId>
             <version>${workflow.version}</version>
             <scope>test</scope>
         </dependency>
@@ -191,15 +206,26 @@
 
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>2.4.5</version>
+            <artifactId>groovy</artifactId>
+            <version>2.3.1</version>
             <scope>test</scope>
         </dependency>
-
+        <!--<dependency>-->
+            <!--<groupId>org.codehaus.groovy</groupId>-->
+            <!--<artifactId>groovy-backports-compat23</artifactId>-->
+            <!--<version>2.4.5</version>-->
+            <!--<scope>test</scope>-->
+        <!--</dependency>-->
     </dependencies>
+
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.jenkins-ci.tools</groupId>
+                <artifactId>maven-hpi-plugin</artifactId>
+                <version>${maven-hpi-plugin.version}</version>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

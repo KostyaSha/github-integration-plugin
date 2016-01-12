@@ -4,6 +4,7 @@ import antlr.ANTLRException;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
+import hudson.model.FreeStyleProject;
 import hudson.model.Job;
 import hudson.util.Secret;
 import org.eclipse.jgit.api.Git;
@@ -44,6 +45,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.apache.commons.io.FileUtils.writeStringToFile;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -53,7 +55,6 @@ import static org.hamcrest.core.IsNot.not;
 import static org.jenkinsci.plugins.github.config.GitHubServerConfig.loginToGithub;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
 import static org.mockito.Matchers.isNull;
-import static org.mockito.Matchers.notNull;
 
 /**
  * @author Kanstantsin Shautsou
@@ -151,10 +152,14 @@ public abstract class AbstractPRTest {
     public void basicTest() throws Exception {
         final Job<?, ?> job = (Job<?, ?>) j.getInstance().getItem(JOB_NAME);
 
-        j.configRoundtrip(job); // activate trigger
+        // fails with workflow
+        if (job instanceof FreeStyleProject) {
+            j.configRoundtrip(job); // activate trigger
+        }
 
         // update trigger (maybe useless)
         GitHubPRTrigger trigger = ghPRTriggerFromJob(job);
+//        trigger.start(job, true); // hack configRountrip that doesn't work with workflow
 
         runTriggerAndWaitUntilEnd(trigger, 10 * GH_API_DELAY);
 
@@ -181,6 +186,8 @@ public abstract class AbstractPRTest {
 
         pulls = ghPRRepository.getPulls();
         assertThat("Pull request 1 should appear in action storage", pulls.entrySet(), Matchers.hasSize(1));
+
+        j.assertBuildStatusSuccess(job.getLastBuild());
     }
 
     public static GitHubPRTrigger getPreconfiguredTrigger() throws ANTLRException {
@@ -225,6 +232,7 @@ public abstract class AbstractPRTest {
     protected static void runTriggerAndWaitUntilEnd(GitHubPRTrigger trigger, long timeout)
             throws InterruptedException, IOException {
         final Job<?, ?> job = trigger.getJob();
+        Objects.requireNonNull(job, "Job must exist in trigger, initialise trigger!");
 
         String oldLog = null;
         final GitHubPRPollingLogAction oldAction = job.getAction(GitHubPRPollingLogAction.class);

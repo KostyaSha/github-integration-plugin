@@ -13,7 +13,6 @@ import static org.jenkinsci.plugins.github.pullrequest.util.TestUtil.classpath;
  */
 public class WorkflowITest extends AbstractPRTest {
 
-    @Ignore(value = "Fails with jquery")
     @Test
     public void workflowTest() throws Exception {
         final WorkflowJob workflowJob = j.jenkins.createProject(WorkflowJob.class, JOB_NAME);
