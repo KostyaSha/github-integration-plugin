@@ -210,12 +210,6 @@
             <version>2.3.1</version>
             <scope>test</scope>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.codehaus.groovy</groupId>-->
-            <!--<artifactId>groovy-backports-compat23</artifactId>-->
-            <!--<version>2.4.5</version>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
     </dependencies>
 
 
