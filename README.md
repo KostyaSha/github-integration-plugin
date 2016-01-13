@@ -46,6 +46,13 @@ This was rewritten version of [ghprb-plugin](https://wiki.jenkins-ci.org/display
   - [x] have one Global configuration
   - [x] reuse credentials lookup
 
+## Installation
+
+The only release now is in [Experimental Update Center](https://jenkins-ci.org/content/experimental-plugins-update-center/).
+Which is also the preferred way of installation. 
+
+If you don't want to change your Update Center, you can the download the `.hpi` from a mirror http://mirrors.jenkins-ci.org/plugins/github-pullrequest/ and upload it to Jenkins Plugin Manager.
+
 ## TODO:
 
  - [x] review injected variables in Cause and String parameters
@@ -66,4 +73,3 @@ This was rewritten version of [ghprb-plugin](https://wiki.jenkins-ci.org/display
 - If you want to set commit status right before job was put to Jenkins queue, enable "Set status before build" checkbox in trigger configuration (it will have no links because there is no real builds in jenkins, only queue item that is not a build)
 - In "Build" section "Add Build step" called "Set pull request status to "pending" on GitHub" and enter some message like "Build #${BUILD_NUMBER} started"
 - In "Post-build Actions" add "GitHub PR: set PR status" and configure message "Build #${BUILD_NUMBER} ended"
-
