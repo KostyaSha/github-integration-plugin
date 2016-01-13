@@ -1,6 +1,7 @@
-GitHub Pull Request Plugin
+GitHub Integration Plugin
 ==========================
 
+# GitHub Pull Request Plugin
 [![Coverage](https://img.shields.io/sonar/http/sonar.lanwen.ru/org.jenkins-ci.plugins:github-pullrequest/coverage.svg?style=flat)](http://sonar.lanwen.ru/dashboard/index?id=org.jenkins-ci.plugins:github-pullrequest)
 
 
