@@ -6,10 +6,10 @@ package org.jenkinsci.plugins.github.pullrequest;
  * @author Kanstantsin Shautsou
  */
 public enum GitHubPRTriggerMode {
-    CRON ("Cron"),
-    HEAVY_HOOKS ("Hooks"),
-    HEAVY_HOOKS_CRON ("NOT SUPPORTED: Hooks plus Cron"),
-    LIGHT_HOOKS("NOT SUPPORTED: Transient Hooks");
+    CRON ("Cron with Persisted Data"),
+    HEAVY_HOOKS ("Hooks with Persisted Data"),
+    HEAVY_HOOKS_CRON ("NOT SUPPORTED: Hooks plus Cron with Persisted Data"),
+    LIGHT_HOOKS("NOT SUPPORTED: Non-persistent Hooks");
 
     private final String description;
 

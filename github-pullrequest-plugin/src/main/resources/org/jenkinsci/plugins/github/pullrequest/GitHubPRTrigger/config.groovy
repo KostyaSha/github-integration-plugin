@@ -27,7 +27,7 @@ f.block {
             f.checkbox()
         }
 
-        f.entry(title: "Ignore older PRs", field: "skipFirstRun") {
+        f.entry(title: "Skip older PRs on first run", field: "skipFirstRun") {
             f.checkbox()
         }
 

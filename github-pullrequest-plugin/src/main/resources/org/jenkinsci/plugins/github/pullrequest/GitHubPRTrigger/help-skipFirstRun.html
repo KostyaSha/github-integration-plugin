@@ -1,7 +1,5 @@
 <div>
-    If selected, PRs that were pending before a first dry run of this job will
-    be ignored, and only PRs updated or created after that first dry run will
-    be built.
-    <br/>
-    NOTE: After selecting this option, you need to run the build once by hand.
+    If selected, older, pre-existing PRs will be skipped on the first run of the
+    cron, and will be marked as seen. Any changes to those PRs after the first
+    run will be treated normally, triggering builds as configured.
 </div>
