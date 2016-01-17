@@ -1,5 +1,9 @@
 ## Changelog
 
+## 0.1.0-beta16
+
+* Fixed UI settings configuration.
+
 ## 0.1.0-beta15
 
 * Support Job type (workflow-plugin support)
