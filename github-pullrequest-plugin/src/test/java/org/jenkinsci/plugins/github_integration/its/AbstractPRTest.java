@@ -195,8 +195,10 @@ public abstract class AbstractPRTest {
         gitHubPREvents.add(new GitHubPROpenEvent());
         gitHubPREvents.add(new GitHubPRCommitEvent());
 
-        return new GitHubPRTrigger("", GitHubPRTriggerMode.CRON, gitHubPREvents)
-                .setPreStatus(true);
+        final GitHubPRTrigger gitHubPRTrigger = new GitHubPRTrigger("", GitHubPRTriggerMode.CRON, gitHubPREvents);
+        gitHubPRTrigger.setPreStatus(true);
+
+        return gitHubPRTrigger;
     }
 
     public GithubProjectProperty getPreconfiguredProperty() {
