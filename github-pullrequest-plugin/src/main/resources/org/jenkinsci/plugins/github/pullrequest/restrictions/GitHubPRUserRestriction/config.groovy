@@ -19,7 +19,7 @@ f.entry(title:_("Admins"), field: "adminList"){
 //}
 
 f.entry(title: _("Whitelist user msg"), field: "whitelistUserMsg" ){
-    f.textbox(default: descriptor.whitelistUserMsg)
+    f.textbox(default: ".*add\\W+to\\W+whitelist.*")
 }
 
 f.entry(title:_("Organisations members as admins"),

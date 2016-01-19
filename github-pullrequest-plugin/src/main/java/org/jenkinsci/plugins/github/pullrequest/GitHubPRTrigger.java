@@ -26,6 +26,8 @@ import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRBranchRestr
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction;
 import org.jenkinsci.plugins.github.pullrequest.trigger.JobRunnerForCause;
 import org.jenkinsci.plugins.github.pullrequest.utils.LoggingTaskListenerWrapper;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRateLimit;
@@ -42,6 +44,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -59,7 +62,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.jenkinsci.plugins.github.config.GitHubServerConfig.withHost;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.CRON;
-import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.HEAVY_HOOKS;
+import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.LIGHT_HOOKS;
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.BranchRestrictionFilter.withBranchRestriction;
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.LocalRepoUpdater.updateLocalRepo;
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.NotUpdatedPRFilter.notUpdated;
@@ -102,7 +105,7 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
     @CheckForNull
     private GitHubPRTriggerMode triggerMode = CRON;
     @CheckForNull
-    private final List<GitHubPREvent> events;
+    private List<GitHubPREvent> events = new ArrayList<>();
     /**
      * Set PR(commit) status before build. No configurable message for it.
      */
@@ -120,6 +123,13 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
 
     @CheckForNull
     private transient GitHubPRPollingLogAction pollingLogAction;
+
+    /**
+     * For groovy UI
+     */
+    @Restricted(value = NoExternalUse.class)
+    public GitHubPRTrigger() {
+    }
 
     @DataBoundConstructor
     public GitHubPRTrigger(String spec,
@@ -195,7 +205,7 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
 
     @Override
     public void run() {
-        if (CRON == getTriggerMode()) {
+        if (getTriggerMode() != LIGHT_HOOKS) {
             doRun(null);
         }
     }
@@ -391,7 +401,7 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
     }
 
     private static boolean isSupportedTriggerMode(GitHubPRTriggerMode mode) {
-        return mode == CRON || mode == HEAVY_HOOKS;
+        return mode != LIGHT_HOOKS;
     }
 
     private static Set<GHPullRequest> pullRequestsToCheck(@Nullable Integer prNumber,
@@ -419,9 +429,6 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
     public static class DescriptorImpl extends TriggerDescriptor {
         private final transient SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
 
-        private String whitelistUserMsg = ".*add\\W+to\\W+whitelist.*";
-        private String spec = "H/5 * * * *";
-
         private String publishedURL;
 
         public DescriptorImpl() {
@@ -441,10 +448,7 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
 
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-//            req.bindJSON(this, formData);
-            publishedURL = formData.getString("publishedURL");
-            whitelistUserMsg = formData.getString("whitelistUserMsg");
-            spec = formData.getString("spec");
+            req.bindJSON(this, formData);
 
             save();
             return super.configure(req, formData);
@@ -452,6 +456,10 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
 
         public String getPublishedURL() {
             return publishedURL;
+        }
+
+        public void setPublishedURL(String publishedURL) {
+            this.publishedURL = publishedURL;
         }
 
         public String getJenkinsURL() {
@@ -463,14 +471,6 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
                 return url;
             }
             return GitHubWebHook.getJenkinsInstance().getRootUrl();
-        }
-
-        public String getWhitelistUserMsg() {
-            return whitelistUserMsg;
-        }
-
-        public String getSpec() {
-            return spec;
         }
 
         // list all available descriptors for choosing in job configuration

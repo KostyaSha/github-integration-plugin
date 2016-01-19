@@ -1,11 +1,18 @@
 package org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger
 
+import hudson.triggers.TimerTrigger
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger
+
 def f = namespace(lib.FormTagLib);
 
 def events = (instance == null ? [] : instance.events)
 //f.entry(title:_("Github hooks"), field:"useGitHubHooks") {
 //    f.checkbox()
 //}
+
+if (instance == null) {
+    instance = new GitHubPRTrigger();
+}
 
 f.block {
     table(style: 'width:100%; margin-left: 5px;') {
@@ -15,8 +22,9 @@ f.block {
             }
         }
 
-        f.entry(title: _("Crontab line"), field: "spec", help: "/descriptor/hudson.triggers.TimerTrigger/help/spec") {
-            f.textbox(default: descriptor.spec, checkUrl: "'descriptorByName/hudson.triggers.TimerTrigger/checkSpec?value=' + encodeURIComponent(this.value)")
+        f.entry(title: _("Crontab line"), field: "spec", help: "/descriptor/${TimerTrigger.getClass().getName()}/help/spec") {
+            f.textbox(default: "H/5 * * * *",
+                    checkUrl: "'descriptorByName/hudson.triggers.TimerTrigger/checkSpec?value=' + encodeURIComponent(this.value)")
         }
 
         f.entry(title: "Set status before build", field: "preStatus") {
