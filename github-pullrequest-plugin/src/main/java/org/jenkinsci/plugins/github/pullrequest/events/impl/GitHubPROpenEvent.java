@@ -16,6 +16,7 @@ import java.io.PrintStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.kohsuke.github.GHIssueState.CLOSED;
 
 /**
@@ -40,7 +41,7 @@ public class GitHubPROpenEvent extends GitHubPREvent {
 
         GitHubPRCause cause = null;
         String causeMessage = "PR opened";
-        if (localPR == null) { // new
+        if (isNull(localPR)) { // new
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": state has changed (PR was opened)");
             cause = new GitHubPRCause(remotePR, causeMessage, false);

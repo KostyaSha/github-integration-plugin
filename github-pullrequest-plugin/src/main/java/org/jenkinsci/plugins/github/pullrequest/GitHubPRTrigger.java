@@ -67,6 +67,8 @@ import static org.jenkinsci.plugins.github.pullrequest.trigger.check.PullRequest
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.SkipFirstRunForPRFilter.ifSkippedFirstRun;
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.UserRestrictionFilter.withUserRestriction;
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.UserRestrictionPopulator.prepareUserRestrictionFilter;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.PRHelperFunctions.extractPRNumber;
 import static org.jenkinsci.plugins.github.pullrequest.utils.PRHelperFunctions.fetchRemotePR;
 import static org.jenkinsci.plugins.github.pullrequest.webhook.WebhookInfoPredicates.withHookTriggerMode;
@@ -201,7 +203,7 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
     @Override
     public void stop() {
         //TODO clean hooks?
-        if (job != null) {
+        if (nonNull(job)) {
             LOGGER.info("Stopping the GitHub PR trigger for project {}", job.getFullName());
         }
         super.stop();
@@ -209,16 +211,17 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
 
     @CheckForNull
     public GitHubPRPollingLogAction getPollingLogAction() {
-        if (pollingLogAction == null && job != null) {
+        if (isNull(pollingLogAction) && nonNull(job)) {
             pollingLogAction = new GitHubPRPollingLogAction(job);
         }
 
         return pollingLogAction;
     }
 
+    @Nonnull
     @Override
     public Collection<? extends Action> getProjectActions() {
-        if (getPollingLogAction() == null) {
+        if (isNull(getPollingLogAction())) {
             return Collections.emptyList();
         }
         return Collections.singleton(getPollingLogAction());
@@ -262,7 +265,7 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
     }
 
     public GHRepository getRemoteRepo() throws IOException {
-        if (remoteRepository == null) {
+        if (isNull(remoteRepository)) {
             String repo = getRepoFullName(job);
             GithubProjectProperty ghpp = job.getProperty(GithubProjectProperty.class);
 
@@ -287,7 +290,7 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
      */
     public void doRun(Integer prNumber) {
         if (not(isBuildable()).apply(job)) {
-            LOGGER.debug("Job {} is disabled, but trigger run!", job == null ? "<no job>" : job.getFullName());
+            LOGGER.debug("Job {} is disabled, but trigger run!", isNull(job) ? "<no job>" : job.getFullName());
             return;
         }
 
@@ -297,7 +300,7 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
         }
 
         GitHubPRRepository localRepository = job.getAction(GitHubPRRepository.class);
-        if (localRepository == null) {
+        if (isNull(localRepository)) {
             LOGGER.warn("Can't get repository info, maybe project {} misconfigured?", job.getFullName());
             return;
         }
@@ -427,7 +430,7 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
 
         @Override
         public boolean isApplicable(Item item) {
-            return item instanceof Job && SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(item) != null
+            return item instanceof Job && nonNull(SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(item))
                     && item instanceof ParameterizedJobMixIn.ParameterizedJob;
         }
 

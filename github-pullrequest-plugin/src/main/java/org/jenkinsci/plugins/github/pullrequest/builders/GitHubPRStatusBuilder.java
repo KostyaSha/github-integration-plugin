@@ -25,6 +25,8 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
 /**
  * Sets pr status for build caused by GitHubPRCause
@@ -60,19 +62,19 @@ public class GitHubPRStatusBuilder extends Builder implements SimpleBuildStep {
                         @Nonnull TaskListener listener) throws InterruptedException, IOException {
         // No triggers in Run class, but we need it
         final GitHubPRTrigger trigger = JobInfoHelpers.triggerFrom(run.getParent(), GitHubPRTrigger.class);
-        if (trigger == null) {
+        if (isNull(trigger)) {
             // silently skip. TODO implement error handler, like in publishers
             return;
         }
 
         GitHubPRCause cause = run.getCause(GitHubPRCause.class);
-        if (cause == null) {
+        if (isNull(cause)) {
             return;
         }
 
         // GitHub status for commit
         try {
-            if (statusMessage != null) {
+            if (nonNull(statusMessage)) {
                 String url = trigger.getDescriptor().getJenkinsURL() + run.getUrl();
 
                 trigger.getRemoteRepo().createCommitStatus(

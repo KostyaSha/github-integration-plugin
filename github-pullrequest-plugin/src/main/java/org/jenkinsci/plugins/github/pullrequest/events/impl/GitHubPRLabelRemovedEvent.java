@@ -20,6 +20,8 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+
 /**
  * When label is removed from GitHub issue(== pull request). Set of labels is considered removed only when
  * at least one label of set was newly removed (was saved in local PR previously)
@@ -46,7 +48,7 @@ public class GitHubPRLabelRemovedEvent extends GitHubPREvent {
             return null; // already closed, skip check?
         }
 
-        if (localPR == null) {  //localPR not existed before, nothing to check
+        if (isNull(localPR)) {  //localPR not existed before, nothing to check
             return null;
         }
 

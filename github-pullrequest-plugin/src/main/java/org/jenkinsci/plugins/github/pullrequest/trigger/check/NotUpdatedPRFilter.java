@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import java.io.IOException;
 
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+
 /**
  * @author lanwen (Merkushev Kirill)
  */
@@ -46,7 +48,7 @@ public class NotUpdatedPRFilter implements Predicate<GHPullRequest> {
      * lightweight check that comments and time were changed
      */
     private static boolean isUpdated(GHPullRequest remotePR, GitHubPRPullRequest localPR) {
-        if (localPR == null) {
+        if (isNull(localPR)) {
             return true; // we don't know yet
         }
         try {

@@ -6,6 +6,8 @@ import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRBranchRestr
 import org.jenkinsci.plugins.github.pullrequest.utils.LoggingTaskListenerWrapper;
 import org.kohsuke.github.GHPullRequest;
 
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+
 /**
  * @author lanwen (Merkushev Kirill)
  */
@@ -21,7 +23,7 @@ public class BranchRestrictionFilter implements Predicate<GHPullRequest> {
     public static Predicate<GHPullRequest> withBranchRestriction(
             LoggingTaskListenerWrapper logger, GitHubPRBranchRestriction branchRestriction) {
         
-        if (branchRestriction == null) {
+        if (isNull(branchRestriction)) {
             return Predicates.alwaysTrue();
         }
 

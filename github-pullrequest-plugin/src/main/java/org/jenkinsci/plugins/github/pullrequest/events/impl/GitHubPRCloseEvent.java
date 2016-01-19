@@ -16,6 +16,8 @@ import java.io.PrintStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+
 /**
  * When PR closed
  *
@@ -32,7 +34,7 @@ public class GitHubPRCloseEvent extends GitHubPREvent {
     @Override
     public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
                                GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
-        if (localPR == null) {
+        if (isNull(localPR)) {
             return null;
         }
 

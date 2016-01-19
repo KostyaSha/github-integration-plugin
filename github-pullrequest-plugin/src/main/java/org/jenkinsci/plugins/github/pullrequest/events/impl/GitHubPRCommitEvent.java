@@ -17,6 +17,8 @@ import java.io.PrintStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+
 /**
  * Triggers build when commit hash changed
 
@@ -38,7 +40,7 @@ public class GitHubPRCommitEvent extends GitHubPREvent {
             return null; // already closed, nothing to check
         }
 
-        if (localPR == null) { // new
+        if (isNull(localPR)) { // new
             return null; // not interesting for this event
         }
 

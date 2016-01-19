@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.regex.Pattern;
 
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+
 /**
  * Trigger PR based on comment pattern.
  *
@@ -43,7 +45,7 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
     @Override
     public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
                                @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) {
-        if (localPR == null || localPR.getLastCommentCreatedAt() == null) {
+        if (isNull(localPR) || isNull(localPR.getLastCommentCreatedAt())) {
             return null; // nothing to compare
         }
         final PrintStream logger = listener.getLogger();
@@ -70,7 +72,7 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
         try {
             String body = comment.getBody();
 
-            if ((userRestriction == null || userRestriction.isWhitelisted(comment.getUser()))
+            if ((isNull(userRestriction) || userRestriction.isWhitelisted(comment.getUser()))
                     && Pattern.compile(this.comment).matcher(body).matches()) {
                 LOGGER.trace("Triggering by comment '{}'", body);
                 cause = new GitHubPRCause(remotePR, "PR was triggered by comment", false);

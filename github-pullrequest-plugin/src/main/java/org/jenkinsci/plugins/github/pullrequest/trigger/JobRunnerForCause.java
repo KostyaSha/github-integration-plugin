@@ -44,6 +44,7 @@ import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TITLE;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TRIGGER_SENDER_AUTHOR;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TRIGGER_SENDER_EMAIL;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.URL;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.asParameterizedJobMixIn;
 
@@ -74,7 +75,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
             }
 
             QueueTaskFuture<?> queueTaskFuture = startJob(cause);
-            if (queueTaskFuture == null) {
+            if (isNull(queueTaskFuture)) {
                 LOGGER.error("{} job didn't start", job.getFullName());
             }
 

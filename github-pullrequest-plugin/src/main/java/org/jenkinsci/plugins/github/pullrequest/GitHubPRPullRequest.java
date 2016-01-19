@@ -16,6 +16,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+
 /**
  * Maintains state about a Pull Request for a particular Jenkins job.  This is what understands the current state
  * of a PR for a particular job. Instances of this class are immutable.
@@ -103,7 +105,7 @@ public class GitHubPRPullRequest {
     }
 
     public boolean isMergeable() {
-        return mergeable == null ? false : mergeable;
+        return isNull(mergeable) ? false : mergeable;
     }
 
     public String getBaseRef() {

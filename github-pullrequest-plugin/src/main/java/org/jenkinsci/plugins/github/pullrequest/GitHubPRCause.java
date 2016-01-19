@@ -18,6 +18,9 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+
 public class GitHubPRCause extends Cause {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRCause.class);
 
@@ -84,12 +87,13 @@ public class GitHubPRCause extends Cause {
         this.commitAuthorName = commitAuthorName;
         this.commitAuthorEmail = commitAuthorEmail;
 
-        if (triggerSender != null) {
+        if (nonNull(triggerSender)) {
             try {
                 this.triggerSenderName = triggerSender.getName();
             } catch (IOException e) {
                 LOGGER.error("Can't get trigger sender name from remote PR");
             }
+
             try {
                 this.triggerSenderEmail = triggerSender.getEmail();
             } catch (IOException e) {
@@ -152,7 +156,7 @@ public class GitHubPRCause extends Cause {
 
     @Nonnull
     public Set<String> getLabels() {
-        return labels == null ? Collections.<String>emptySet() : labels;
+        return isNull(labels) ? Collections.<String>emptySet() : labels;
     }
 
     public String getTriggerSenderName() {
@@ -176,7 +180,7 @@ public class GitHubPRCause extends Cause {
      */
     @Nonnull
     public String getTitle() {
-        return title != null ? title : "";
+        return nonNull(title) ? title : "";
     }
 
     /**
