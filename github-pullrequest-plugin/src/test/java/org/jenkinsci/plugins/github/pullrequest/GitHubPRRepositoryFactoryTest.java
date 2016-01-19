@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
+import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import com.coravy.hudson.plugins.github.GithubUrl;
 import hudson.XmlFile;
@@ -28,6 +29,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.hasSize;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -75,7 +77,7 @@ public class GitHubPRRepositoryFactoryTest {
         when(job.getTrigger(GitHubPRTrigger.class)).thenReturn(trigger);
         when(parent.getFullName()).thenReturn("mocked job");
         when(job.getParent()).thenReturn(parent);
-        when(trigger.getRepoFullName(job)).thenThrow(Throwable.class);
+        when(trigger.getRepoFullName(job)).thenThrow(new RuntimeException());
 
         assertThat(new GitHubPRRepositoryFactory().createFor(job), hasSize(0));
     }
@@ -125,7 +127,8 @@ public class GitHubPRRepositoryFactoryTest {
 
         File file = new File(filePath);
         when(job.getRootDir()).thenReturn(file);
-//        when(ghPRTriggerFromJob(job)).thenReturn(trigger);
+        when(ghPRTriggerFromJob(job)).thenReturn(trigger);
+        when(trigger.getRepoFullName(job)).thenReturn(mock(GitHubRepositoryName.class));
         when(job.getProperty(GithubProjectProperty.class)).thenReturn(projectProperty);
         when(projectProperty.getProjectUrl()).thenReturn(githubUrl);
     }

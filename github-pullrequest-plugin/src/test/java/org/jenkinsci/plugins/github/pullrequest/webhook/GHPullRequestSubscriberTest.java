@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.github.pullrequest.webhook;
 
+import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import hudson.model.AbstractProject;
 import hudson.model.FreeStyleProject;
@@ -16,6 +17,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 
+import static com.cloudbees.jenkins.GitHubRepositoryName.create;
 import static com.google.common.base.Charsets.UTF_8;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -41,7 +43,7 @@ public class GHPullRequestSubscriberTest {
 
     @Test
     public void shouldTriggerJobOnPullRequestOpen() throws Exception {
-        when(trigger.getRepoFullName(any(AbstractProject.class))).thenReturn(REPO_FROM_PAYLOAD);
+        when(trigger.getRepoFullName(any(AbstractProject.class))).thenReturn(create(REPO_URL_FROM_PAYLOAD));
         when(trigger.getTriggerMode()).thenReturn(GitHubPRTriggerMode.HEAVY_HOOKS);
 
         FreeStyleProject job = jenkins.createFreeStyleProject();
@@ -55,7 +57,7 @@ public class GHPullRequestSubscriberTest {
 
     @Test
     public void shouldTriggerJobOnIssueComment() throws Exception {
-        when(trigger.getRepoFullName(any(AbstractProject.class))).thenReturn(REPO_FROM_PAYLOAD);
+        when(trigger.getRepoFullName(any(AbstractProject.class))).thenReturn(create(REPO_FROM_PAYLOAD));
         when(trigger.getTriggerMode()).thenReturn(GitHubPRTriggerMode.HEAVY_HOOKS);
 
         FreeStyleProject job = jenkins.createFreeStyleProject();

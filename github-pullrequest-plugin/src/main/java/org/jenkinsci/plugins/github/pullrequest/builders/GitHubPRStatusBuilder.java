@@ -85,7 +85,7 @@ public class GitHubPRStatusBuilder extends Builder implements SimpleBuildStep {
                         run.getParent().getFullName()
                 );
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             listener.getLogger().println("Can't update build description");
             LOGGER.error("Can't set commit status", e);
         }

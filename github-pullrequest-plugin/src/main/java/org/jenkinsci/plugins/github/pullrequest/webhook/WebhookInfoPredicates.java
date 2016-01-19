@@ -11,6 +11,7 @@ import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.HEAVY_HOOKS;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.HEAVY_HOOKS_CRON;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.LIGHT_HOOKS;
+import static org.jenkinsci.plugins.github.pullrequest.utils.PRHelperFunctions.asFullRepoName;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.triggerFrom;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.withTrigger;
 
@@ -56,7 +57,7 @@ public final class WebhookInfoPredicates {
 
         @Override
         public boolean apply(Job job) {
-            return equalsIgnoreCase(repo, triggerFrom(job, GitHubPRTrigger.class).getRepoFullName(job));
+            return equalsIgnoreCase(repo, asFullRepoName(triggerFrom(job, GitHubPRTrigger.class).getRepoFullName(job)));
         }
     }
 }

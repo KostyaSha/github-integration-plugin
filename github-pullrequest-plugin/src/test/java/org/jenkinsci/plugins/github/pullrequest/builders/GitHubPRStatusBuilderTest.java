@@ -23,7 +23,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Alina Karpovich
@@ -36,57 +40,68 @@ public class GitHubPRStatusBuilderTest {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
-    @Mock private AbstractBuild<?, ?> build;
-    @Mock private Launcher launcher;
-    @Mock private BuildListener listener;
-    @Mock private Project project;
-    @Mock private GitHubPRTrigger trigger;
-    @Mock private GitHubPRCause cause;
-    @Mock private PrintStream logger;
-    @Mock private GitHubPRTrigger.DescriptorImpl triggerDescriptor;
-    @Mock private GHRepository remoteRepository;
-    @Mock private GitHubPRMessage message;
-    @Mock private ItemGroup itemGroup;
+    @Mock
+    private AbstractBuild<?, ?> build;
+    @Mock
+    private Launcher launcher;
+    @Mock
+    private BuildListener listener;
+    @Mock
+    private Project project;
+    @Mock
+    private GitHubPRTrigger trigger;
+    @Mock
+    private GitHubPRCause cause;
+    @Mock
+    private PrintStream logger;
+    @Mock
+    private GitHubPRTrigger.DescriptorImpl triggerDescriptor;
+    @Mock
+    private GHRepository remoteRepository;
+    @Mock
+    private GitHubPRMessage message;
+    @Mock
+    private ItemGroup itemGroup;
     public FilePath ws;
 
     @Before
     public void prepare() throws IOException {
-         ws = new FilePath(folder.newFile());
+        ws = new FilePath(folder.newFile());
     }
 
     @Test
     public void createBuilder() {
         GitHubPRStatusBuilder builder = new GitHubPRStatusBuilder();
 
-        Assert.assertEquals(DEFAULT_MESSAGE, builder.getStatusMessage().getContent());
+        assertEquals(DEFAULT_MESSAGE, builder.getStatusMessage().getContent());
     }
 
     @Test
     public void createBuilderWithNullMessage() {
         GitHubPRStatusBuilder builder = new GitHubPRStatusBuilder(null);
 
-        Assert.assertEquals(DEFAULT_MESSAGE, builder.getStatusMessage().getContent());
+        assertEquals(DEFAULT_MESSAGE, builder.getStatusMessage().getContent());
     }
 
     @Test
     public void createBuilderWithNullMessageContent() {
         GitHubPRStatusBuilder builder = new GitHubPRStatusBuilder(new GitHubPRMessage(null));
 
-        Assert.assertEquals(DEFAULT_MESSAGE, builder.getStatusMessage().getContent());
+        assertEquals(DEFAULT_MESSAGE, builder.getStatusMessage().getContent());
     }
 
     @Test
     public void createBuilderWithEmptyMessage() {
         GitHubPRStatusBuilder builder = new GitHubPRStatusBuilder(new GitHubPRMessage(""));
 
-        Assert.assertEquals(DEFAULT_MESSAGE, builder.getStatusMessage().getContent());
+        assertEquals(DEFAULT_MESSAGE, builder.getStatusMessage().getContent());
     }
 
     @Test
     public void createBuilderWithCustomMessage() {
         GitHubPRStatusBuilder builder = new GitHubPRStatusBuilder(new GitHubPRMessage(CUSTOM_MESSAGE));
 
-        Assert.assertEquals(CUSTOM_MESSAGE, builder.getStatusMessage().getContent());
+        assertEquals(CUSTOM_MESSAGE, builder.getStatusMessage().getContent());
     }
 
     @Ignore("Can't mock workspace")
@@ -125,7 +140,7 @@ public class GitHubPRStatusBuilderTest {
 
         urlExpectations();
 
-        when(trigger.getRemoteRepo()).thenThrow(new IOException("on getting remote repo"));
+        when(trigger.getRemoteRepo()).thenThrow(new IllegalStateException("on getting remote repo"));
         when(listener.getLogger()).thenReturn(logger);
 
         Assert.assertTrue(builder.perform(build, launcher, listener));
