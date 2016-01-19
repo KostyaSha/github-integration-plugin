@@ -26,7 +26,8 @@
 //    }
 //
 //    @Override
-//    public Build prevBuildForChangelog(String branch, BuildData data, GitClient git, BuildChooserContext context) throws IOException, InterruptedException {
+//    public Build prevBuildForChangelog(String branch, BuildData data, GitClient git, BuildChooserContext context)
+//          throws IOException, InterruptedException {
 //        BuildData previousBuildData = getPreviousBuildDataFor(context.getBuild());
 //        if (previousBuildData != null){
 //            return previousBuildData.lastBuild;

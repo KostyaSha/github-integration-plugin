@@ -11,13 +11,12 @@ import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestric
 import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.io.PrintStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.regex.Pattern;
 
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
@@ -52,11 +51,11 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
 
         GitHubPRCause cause = null;
         try {
-            for (GHIssueComment comment : remotePR.getComments()) {
-                if (localPR.getLastCommentCreatedAt().compareTo(comment.getCreatedAt()) < 0) {
+            for (GHIssueComment issueComment : remotePR.getComments()) {
+                if (localPR.getLastCommentCreatedAt().compareTo(issueComment.getCreatedAt()) < 0) {
                     logger.println(DISPLAY_NAME + ": state has changed (new comment found - \""
-                            + comment.getBody() + "\")");
-                    cause = checkComment(comment, gitHubPRTrigger.getUserRestriction(), remotePR);
+                            + issueComment.getBody() + "\")");
+                    cause = checkComment(issueComment, gitHubPRTrigger.getUserRestriction(), remotePR);
                 }
             }
         } catch (IOException e) {
@@ -65,20 +64,20 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
         return cause;
     }
 
-    private GitHubPRCause checkComment(GHIssueComment comment,
+    private GitHubPRCause checkComment(GHIssueComment issueComment,
                                        GitHubPRUserRestriction userRestriction,
                                        GHPullRequest remotePR) {
         GitHubPRCause cause = null;
         try {
-            String body = comment.getBody();
+            String body = issueComment.getBody();
 
-            if ((isNull(userRestriction) || userRestriction.isWhitelisted(comment.getUser()))
-                    && Pattern.compile(this.comment).matcher(body).matches()) {
+            if ((isNull(userRestriction) || userRestriction.isWhitelisted(issueComment.getUser()))
+                    && Pattern.compile(comment).matcher(body).matches()) {
                 LOGGER.trace("Triggering by comment '{}'", body);
                 cause = new GitHubPRCause(remotePR, "PR was triggered by comment", false);
             }
         } catch (IOException ex) {
-            LOGGER.error("Couldn't check comment #{}", comment.getId(), ex);
+            LOGGER.error("Couldn't check comment #{}", issueComment.getId(), ex);
         }
         return cause;
     }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -238,52 +239,6 @@
                     </excludes>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <version>${maven-findbugs-plugin.version}</version>
-                <configuration>
-                    <effort>Max</effort>
-                    <threshold>Low</threshold>
-                    <xmlOutput>true</xmlOutput>
-                    <failOnError>false</failOnError>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <!--<plugin>-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-checkstyle-plugin</artifactId>-->
-            <!--<version>2.14</version>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<id>validate</id>-->
-            <!--&lt;!&ndash;<phase>validate</phase>&ndash;&gt;-->
-            <!--<configuration>-->
-            <!--<configLocation>checkstyle.xml</configLocation>-->
-            <!--<suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>-->
-            <!--&lt;!&ndash;<propertyExpansion>config_loc=${project.build.directory}/</propertyExpansion>&ndash;&gt;-->
-            <!--<includeTestSourceDirectory>true</includeTestSourceDirectory>-->
-            <!--<encoding>UTF-8</encoding>-->
-            <!--<consoleOutput>true</consoleOutput>-->
-            <!--<failsOnError>false</failsOnError>-->
-            <!--</configuration>-->
-            <!--<goals>-->
-            <!--<goal>check</goal>-->
-            <!--</goals>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
-            <!--<plugin>-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-pmd-plugin</artifactId>-->
-            <!--<version>3.4</version>-->
-            <!--</plugin>-->
         </plugins>
     </build>
 
@@ -293,6 +248,64 @@
             <properties>
                 <excluded.tests>none</excluded.tests>
             </properties>
+        </profile>
+
+        <profile>
+            <id>gh-integration-analysers</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <version>2.17</version>
+                        <executions>
+                            <execution>
+                                <id>validate</id>
+                                <!--<phase>validate</phase>-->
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <configLocation>src/test/resources/checkstyle/checkstyle.xml</configLocation>
+                            <suppressionsLocation>src/test/resources/checkstyle/checkstyle-suppressions.xml
+                            </suppressionsLocation>
+                            <encoding>UTF-8</encoding>
+                            <consoleOutput>true</consoleOutput>
+                            <failsOnError>false</failsOnError>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>findbugs-maven-plugin</artifactId>
+                        <version>${maven-findbugs-plugin.version}</version>
+                        <configuration>
+                            <effort>Max</effort>
+                            <threshold>Low</threshold>
+                            <xmlOutput>true</xmlOutput>
+                            <failOnError>false</failOnError>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!--<plugin>-->
+                    <!--<groupId>org.apache.maven.plugins</groupId>-->
+                    <!--<artifactId>maven-pmd-plugin</artifactId>-->
+                    <!--<version>3.4</version>-->
+                    <!--</plugin>-->
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>

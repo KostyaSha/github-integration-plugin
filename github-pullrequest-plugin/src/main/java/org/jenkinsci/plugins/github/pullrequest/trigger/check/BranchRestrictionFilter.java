@@ -22,7 +22,7 @@ public class BranchRestrictionFilter implements Predicate<GHPullRequest> {
 
     public static Predicate<GHPullRequest> withBranchRestriction(
             LoggingTaskListenerWrapper logger, GitHubPRBranchRestriction branchRestriction) {
-        
+
         if (isNull(branchRestriction)) {
             return Predicates.alwaysTrue();
         }

@@ -39,9 +39,9 @@ public class GitHubPRBranchRestriction implements Describable<GitHubPRBranchRest
         //if allowed branch list is empty, it's allowed to build any branch
         boolean isAllowed = targetBranchList.isEmpty();
 
-        for (String targetBranch : targetBranchList) {
+        for (String branch : targetBranchList) {
             //if branch name matches to pattern, allow build
-            isAllowed = Pattern.compile(targetBranch).matcher(branchName).matches();
+            isAllowed = Pattern.compile(branch).matcher(branchName).matches();
             if (isAllowed) {
                 break;
             }

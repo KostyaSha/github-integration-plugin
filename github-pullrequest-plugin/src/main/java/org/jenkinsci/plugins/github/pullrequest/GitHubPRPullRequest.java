@@ -187,6 +187,7 @@ public class GitHubPRPullRequest {
                 '}';
     }
 
+    //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -232,5 +233,5 @@ public class GitHubPRPullRequest {
         result = 31 * result + (sourceRepoOwner != null ? sourceRepoOwner.hashCode() : 0);
         return result;
     }
-
+    //CHECKSTYLE:ON
 }

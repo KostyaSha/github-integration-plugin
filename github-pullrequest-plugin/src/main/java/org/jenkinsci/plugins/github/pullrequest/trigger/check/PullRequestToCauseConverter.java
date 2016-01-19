@@ -59,7 +59,7 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
     /* package */ class EventToCauseConverter implements Function<GitHubPREvent, GitHubPRCause> {
         private final GHPullRequest remotePR;
 
-        public EventToCauseConverter(GHPullRequest remotePR) {
+        EventToCauseConverter(GHPullRequest remotePR) {
             this.remotePR = remotePR;
         }
 

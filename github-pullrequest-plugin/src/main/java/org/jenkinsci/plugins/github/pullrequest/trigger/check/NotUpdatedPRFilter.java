@@ -69,11 +69,10 @@ public class NotUpdatedPRFilter implements Predicate<GHPullRequest> {
 
             return updated;
         } catch (IOException e) {
-            // should never happen because 
+            // should never happen because
             LOGGER.warn("Can't compare PR [#{} {}] with local copy for update",
                     remotePR.getNumber(), remotePR.getTitle(), e);
             return false;
         }
     }
 }
-

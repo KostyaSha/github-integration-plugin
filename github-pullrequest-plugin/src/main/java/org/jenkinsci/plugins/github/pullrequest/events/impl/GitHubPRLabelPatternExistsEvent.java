@@ -11,13 +11,12 @@ import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREventDescriptor;
 import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.io.PrintStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.regex.Pattern;
 
 /**
@@ -38,13 +37,14 @@ public class GitHubPRLabelPatternExistsEvent extends GitHubPREvent {
 
 
     @Override
-    public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR, @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
+    public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
+                               @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
         final PrintStream logger = listener.getLogger();
 
-        for (GHLabel label : remotePR.getRepository().getIssue(remotePR.getNumber()).getLabels()) {
-            for (String labelPatternStr : this.label.getLabelsSet()) {
+        for (GHLabel ghLabel : remotePR.getRepository().getIssue(remotePR.getNumber()).getLabels()) {
+            for (String labelPatternStr : label.getLabelsSet()) {
                 Pattern labelPattern = Pattern.compile(labelPatternStr);
-                if (labelPattern.matcher(label.getName()).matches()) {
+                if (labelPattern.matcher(ghLabel.getName()).matches()) {
                     logger.println(DISPLAY_NAME + ": Pull request has label: " + labelPatternStr);
                     LOGGER.info("Pull request has '{}' label.", labelPatternStr);
                     return new GitHubPRCause(remotePR, "PR has label: " + labelPatternStr, isSkip());

@@ -87,7 +87,8 @@ import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
  * <p>
  * Restrictions can't have resolver, so they separate and provide security check methods:
  * - Target branch restriction {@link org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction}
- * - User restriction (check comments, labels, etc) {@link org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction}
+ * - User restriction (check comments, labels, etc)
+ * {@link org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction}
  * (whitelist manipulations using comments is also allowed)
  * <p>
  * Event triggering is modular. Now they can be split to any events:
@@ -261,7 +262,8 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
             checkNotNull(job, "job object is null, race condition?");
             GithubProjectProperty ghpp = job.getProperty(GithubProjectProperty.class);
 
-            checkNotNull(ghpp, "GitHub project property is not defined. Can't setup GitHub PR trigger for job %s", job.getName());
+            checkNotNull(ghpp, "GitHub project property is not defined. Can't setup GitHub PR trigger for job %s",
+                    job.getName());
             checkNotNull(ghpp.getProjectUrl(), "A GitHub project url is required");
 
             GitHubRepositoryName repo = GitHubRepositoryName.create(ghpp.getProjectUrl().baseUrl());
@@ -359,8 +361,9 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
             listener.debug("GitHub rate limit before check: {}", rateLimitBefore);
 
             // get local and remote list of PRs
-            GHRepository remoteRepository = github.getRepository(getRepoFullName(job));
-            Set<GHPullRequest> remotePulls = pullRequestsToCheck(prNumber, remoteRepository, localRepository);
+            //FIXME HiddenField: 'remoteRepository' hides a field? renamed to `remoteRepo`
+            GHRepository remoteRepo = github.getRepository(getRepoFullName(job));
+            Set<GHPullRequest> remotePulls = pullRequestsToCheck(prNumber, remoteRepo, localRepository);
 
             Set<GHPullRequest> prepeared = from(remotePulls)
                     .filter(notUpdated(localRepository, listener))
@@ -427,7 +430,8 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
 
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
-        private final transient SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
+        private final transient SequentialExecutionQueue queue =
+                new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
 
         private String publishedURL;
 

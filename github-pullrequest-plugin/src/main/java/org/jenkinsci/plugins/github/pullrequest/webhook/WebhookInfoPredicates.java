@@ -50,7 +50,7 @@ public final class WebhookInfoPredicates {
     private static class WithRepo implements Predicate<Job> {
         private final String repo;
 
-        public WithRepo(String repo) {
+        WithRepo(String repo) {
             this.repo = repo;
         }
 

@@ -63,12 +63,12 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
 
                 switch (triggerMode) {
                     case HEAVY_HOOKS_CRON:
-                    case HEAVY_HOOKS:
+                    case HEAVY_HOOKS: {
                         LOGGER.debug("Queued check for {} (PR #{}) after heavy hook", job.getName(), info.getNum());
                         trigger.queueRun(job, info.getNum());
                         break;
-
-                    case LIGHT_HOOKS:
+                    }
+                    case LIGHT_HOOKS: {
                         LOGGER.warn("Unsupported LIGHT_HOOKS trigger mode");
 //                        LOGGER.info("Begin processing hooks for {}", trigger.getRepoFullName(job));
 //                        for (GitHubPREvent prEvent : trigger.getEvents()) {
@@ -77,6 +77,9 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
 //                                trigger.build(cause);
 //                            }
 //                        }
+                        break;
+                    }
+                    default:
                         break;
                 }
             }

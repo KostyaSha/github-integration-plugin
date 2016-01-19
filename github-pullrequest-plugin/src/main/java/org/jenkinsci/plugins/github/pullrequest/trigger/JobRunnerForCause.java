@@ -89,8 +89,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                                 GHCommitState.PENDING,
                                 null,
                                 sb.toString(),
-                                job.getFullName()
-                        );
+                                job.getFullName());
             }
         } catch (IOException e) {
             LOGGER.error("Can't trigger build ({})", e.getMessage(), e);
@@ -180,7 +179,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
     private static class CauseHasPRNum implements Predicate<Cause> {
         private final int id;
 
-        public CauseHasPRNum(int id) {
+        CauseHasPRNum(int id) {
             this.id = id;
         }
 

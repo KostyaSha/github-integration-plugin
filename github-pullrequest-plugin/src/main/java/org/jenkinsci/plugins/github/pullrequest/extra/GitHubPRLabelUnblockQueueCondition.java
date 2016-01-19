@@ -8,12 +8,11 @@ import org.jenkinsci.plugins.blockqueuedjob.condition.BlockQueueCondition;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Unblock when label found
@@ -59,7 +58,7 @@ public class GitHubPRLabelUnblockQueueCondition extends BlockQueueCondition {
     }
 
     @Extension(optional = true)
-    public static class DescriptorImpl extends BlockQueueConditionDescriptor{
+    public static class DescriptorImpl extends BlockQueueConditionDescriptor {
 
         @Override
         public String getDisplayName() {

@@ -30,7 +30,7 @@ public final class PRHelperFunctions {
     private static class FetchRemotePRFunction implements Function<Integer, GHPullRequest> {
         private final GHRepository ghRepository;
 
-        public FetchRemotePRFunction(GHRepository ghRepository) {
+        FetchRemotePRFunction(GHRepository ghRepository) {
             this.ghRepository = ghRepository;
         }
 
