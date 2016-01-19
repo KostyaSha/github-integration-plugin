@@ -1,20 +1,20 @@
 package org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest
 
 import com.google.common.base.Joiner
-import hudson.Functions
-import jenkins.model.Jenkins
+import lib.FormTagLib
+import lib.LayoutTagLib
 
-def f = namespace(lib.FormTagLib);
-def l = namespace(lib.LayoutTagLib);
+def f = namespace(FormTagLib);
+def l = namespace(LayoutTagLib);
 def t = namespace("/lib/hudson")
 def st = namespace("jelly:stapler");
 
-a(href:my.htmlUrl) {
-    img(src: rootURL + my.iconFileName, width:"16", height:"16")
+a(href: my.htmlUrl) {
+    img(src: rootURL + my.iconFileName, width: "16", height: "16")
     text(" #" + my.number + ": " + my.title)
 }
 
-table(width:"1000px") {
+table(width: "1000px") {
     tr() {
         td("Head SHA: " + my.headSha)
         td("Author: " + my.userLogin)
@@ -25,13 +25,13 @@ table(width:"1000px") {
         td("Author's email: " + my.userEmail)
         td("PR updated at " + my.prUpdatedAt)
     }
-    tr(){
+    tr() {
         td("Target branch: " + my.baseRef)
         td("Is mergeable? " + my.mergeable)
         td("Last commented at " + my.lastCommentCreatedAt)
     }
     tr() {
-        def labels = (my.labels) ? Joiner.on(", ").join((List)my.labels.collect {x ->"\"" + x + "\""}) : "none"
-        td(colspan:3, "Labels: " + labels)
+        def labels = (my.labels) ? Joiner.on(", ").join((List) my.labels.collect { x -> "\"" + x + "\"" }) : "none"
+        td(colspan: 3, "Labels: " + labels)
     }
 }

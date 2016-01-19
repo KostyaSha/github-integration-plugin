@@ -1,7 +1,9 @@
-package org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRBranchRestriction;
+package org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRBranchRestriction
 
-def f = namespace(lib.FormTagLib);
+import lib.FormTagLib;
 
-f.entry(title:_("Whitelist Target Branches:"), field:"targetBranch"){
+def f = namespace(FormTagLib);
+
+f.entry(title: _("Whitelist Target Branches:"), field: "targetBranch") {
     f.expandableTextbox()
 }

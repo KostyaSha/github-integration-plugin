@@ -1,11 +1,12 @@
 package org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger
 
 import hudson.triggers.TimerTrigger
+import lib.FormTagLib
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger
 
-def f = namespace(lib.FormTagLib);
+def f = namespace(FormTagLib);
 
-def events = (instance == null ? [] : instance.events)
+//def events = (instance == null ? [] : instance.events)
 //f.entry(title:_("Github hooks"), field:"useGitHubHooks") {
 //    f.checkbox()
 //}

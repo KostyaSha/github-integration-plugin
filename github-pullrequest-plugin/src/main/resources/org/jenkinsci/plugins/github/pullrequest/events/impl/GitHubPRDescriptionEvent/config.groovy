@@ -1,7 +1,9 @@
-package org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRDescriptionEvent;
+package org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRDescriptionEvent
 
-def f = namespace(lib.FormTagLib);
+import lib.FormTagLib;
 
-f.entry(title:_("Skip build phrase"), field:"skipMsg") {
+def f = namespace(FormTagLib);
+
+f.entry(title: _("Skip build phrase"), field: "skipMsg") {
     f.textbox()
 }
