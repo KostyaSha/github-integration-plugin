@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.util.regex.Pattern;
 
 /**
- * Trigger/skip PR based on comment pattern
+ * Trigger PR based on comment pattern.
  *
  * @author Kanstantsin Shautsou
  */
