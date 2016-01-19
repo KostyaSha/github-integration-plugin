@@ -1,5 +1,9 @@
 ## Changelog
 
+## next
+
+* Clarified help texts and UI info.
+
 ## 0.1.0-beta16
 
 * Fixed UI settings configuration.
