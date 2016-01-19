@@ -27,7 +27,7 @@ f.block {
             f.checkbox()
         }
 
-        f.entry(title: "Skip first run", field: "skipFirstRun") {
+        f.entry(title: "Skip older PRs on first run", field: "skipFirstRun") {
             f.checkbox()
         }
 
@@ -39,8 +39,8 @@ f.block {
             )
         }
 
-        f.optionalProperty(title: "User Restriction", field: "userRestriction")
-   
-        f.optionalProperty(title: "Branch Restriction", field: "branchRestriction")
+        f.optionalProperty(title: "Experimental: User Restriction", field: "userRestriction")
+
+        f.optionalProperty(title: "Experimental: Branch Restriction", field: "branchRestriction")
     }
 }

@@ -1,4 +1,7 @@
 <div>
-    Trigger when all mentioned labels exists.
-    NOTE: it's not safe to use this trigger because it can infinitely trigger job after every cron check.
+    Triggers when all the given labels are on a pull request, or blocks triggering
+    if all the given labels are on a pull request.
+    <br/>
+    <strong>NOTE</strong>: This can cause infinite triggers of pull requests
+    when the skip option isn't selected, so be careful.
 </div>

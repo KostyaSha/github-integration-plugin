@@ -1,3 +1,9 @@
 <div>
-    Trigger modes, currently only "CRON" implemented.
+    Trigger modes.
+    <ul>
+        <li><strong>Cron</strong>: Checks for PRs to build periodically.</li>
+        <li><strong>Hooks</strong>: Listens for GitHub webhook events.</li>
+        <li><strong>Hooks plus Cron</strong>: Not fully supported - combines webhooks and cron checks.</li>
+        <li><strong>Transient Hooks</strong>: Not fully supported - listens for GitHub webhook events, does not preserve state for pull requests across runs or Jenkins restarts, etc.</li>
+    </ul>
 </div>

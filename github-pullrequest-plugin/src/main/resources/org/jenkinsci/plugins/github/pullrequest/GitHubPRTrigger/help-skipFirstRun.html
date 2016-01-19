@@ -1,4 +1,5 @@
 <div>
-    If this checked, then first trigger run will not run real builds.
-    After first run this value automatically unset.
+    If selected, older, pre-existing PRs will be skipped on the first run of the
+    cron, and will be marked as seen. Any changes to those PRs after the first
+    run will be treated normally, triggering builds as configured.
 </div>
