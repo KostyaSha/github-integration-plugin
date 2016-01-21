@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.PRHelperFunctions.asFullRepoName;
 
 /**
@@ -31,7 +32,7 @@ public class GitHubPRRepositoryFactory extends TransientActionFactory<Job> {
     @Override
     public Collection<? extends Action> createFor(@Nonnull Job job) {
         try {
-            if (JobInfoHelpers.triggerFrom(job, GitHubPRTrigger.class) != null) {
+            if (nonNull(JobInfoHelpers.triggerFrom(job, GitHubPRTrigger.class))) {
                 return Collections.singleton(forProject(job));
             }
         } catch (Exception ex) {
