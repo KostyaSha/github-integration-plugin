@@ -10,7 +10,7 @@
     <logger name="org.jenkinsci.plugins.github" level="DEBUG"/>
     <logger name="org.jenkinsci.plugins.github_integration" level="DEBUG"/>
 
-    <root level="debug">
-        <appender-ref ref="INFO"/>
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT"/>
     </root>
 </configuration>
