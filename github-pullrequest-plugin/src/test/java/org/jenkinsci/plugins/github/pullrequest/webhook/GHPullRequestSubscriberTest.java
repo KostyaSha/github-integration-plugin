@@ -4,9 +4,11 @@ import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import hudson.model.AbstractProject;
 import hudson.model.FreeStyleProject;
+import hudson.model.Job;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +35,6 @@ import static org.mockito.Mockito.when;
 public class GHPullRequestSubscriberTest {
 
     public static final String REPO_URL_FROM_PAYLOAD = "https://github.com/lanwen/test";
-    public static final String REPO_FROM_PAYLOAD = "lanwen/test";
 
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
@@ -56,11 +57,25 @@ public class GHPullRequestSubscriberTest {
     }
 
     @Test
-    public void shouldTriggerJobOnIssueComment() throws Exception {
-        when(trigger.getRepoFullName(any(AbstractProject.class))).thenReturn(create(REPO_FROM_PAYLOAD));
+    public void shouldTriggerFreestyleProjectOnIssueComment() throws Exception {
+        when(trigger.getRepoFullName(any(Job.class))).thenReturn(create(REPO_URL_FROM_PAYLOAD));
         when(trigger.getTriggerMode()).thenReturn(GitHubPRTriggerMode.HEAVY_HOOKS);
 
         FreeStyleProject job = jenkins.createFreeStyleProject();
+        job.addProperty(new GithubProjectProperty(REPO_URL_FROM_PAYLOAD));
+        job.addTrigger(trigger);
+
+        new GHPullRequestSubscriber().onEvent(GHEvent.ISSUE_COMMENT, classpath("payload/issue_comment.json"));
+
+        verify(trigger).queueRun(eq(job), eq(1));
+    }
+
+    @Test
+    public void shouldTriggerWorkflowJobOnIssueComment() throws Exception {
+        when(trigger.getRepoFullName(any(Job.class))).thenReturn(create(REPO_URL_FROM_PAYLOAD));
+        when(trigger.getTriggerMode()).thenReturn(GitHubPRTriggerMode.HEAVY_HOOKS);
+
+        WorkflowJob job = jenkins.getInstance().createProject(WorkflowJob.class, "workflow-job");
         job.addProperty(new GithubProjectProperty(REPO_URL_FROM_PAYLOAD));
         job.addTrigger(trigger);
 

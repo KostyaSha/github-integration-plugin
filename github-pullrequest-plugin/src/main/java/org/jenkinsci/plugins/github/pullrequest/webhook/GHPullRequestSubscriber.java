@@ -57,7 +57,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
 
             PullRequestInfo info = extractPullRequestInfo(event, payload, gh);
 
-            for (AbstractProject job : getJobs(info.getRepo())) {
+            for (Job job : getJobs(info.getRepo())) {
                 GitHubPRTrigger trigger = triggerFrom(job, GitHubPRTrigger.class);
                 GitHubPRTriggerMode triggerMode = trigger.getTriggerMode();
 
@@ -110,17 +110,19 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
         }
     }
 
-    private Set<AbstractProject> getJobs(final String repo) {
-        final Set<AbstractProject> ret = new HashSet<>();
+    private Set<Job> getJobs(final String repo) {
+        final Set<Job> ret = new HashSet<>();
 
         ACL.impersonate(ACL.SYSTEM, new Runnable() {
             @Override
             public void run() {
-                List<AbstractProject> jobs = Jenkins.getInstance().getAllItems(AbstractProject.class);
+                List<Job> jobs = Jenkins.getActiveInstance().getAllItems(Job.class);
                 ret.addAll(FluentIterableWrapper.from(jobs)
                         .filter(isBuildable())
                         .filter(withApplicableTrigger())
-                        .filter(withRepo(repo)).toSet());
+                        .filter(withRepo(repo))
+                        .toSet()
+                );
             }
         });
 

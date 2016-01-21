@@ -247,7 +247,7 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
     /**
      * For running from external places. Goes to queue.
      */
-    public void queueRun(AbstractProject<?, ?> job, final int prNumber) {
+    public void queueRun(Job<?, ?> job, final int prNumber) {
         this.job = job;
         getDescriptor().queue.execute(new Runnable() {
             @Override
@@ -259,7 +259,6 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
 
     public GitHubRepositoryName getRepoFullName(Job<?, ?> job) {
         if (isNull(repoName)) {
-
             checkNotNull(job, "job object is null, race condition?");
             GithubProjectProperty ghpp = job.getProperty(GithubProjectProperty.class);
 
