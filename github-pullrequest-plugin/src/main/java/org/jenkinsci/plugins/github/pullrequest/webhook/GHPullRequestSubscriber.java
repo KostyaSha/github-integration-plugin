@@ -1,7 +1,6 @@
 package org.jenkinsci.plugins.github.pullrequest.webhook;
 
 import hudson.Extension;
-import hudson.model.AbstractProject;
 import hudson.model.Job;
 import hudson.security.ACL;
 import jenkins.model.Jenkins;

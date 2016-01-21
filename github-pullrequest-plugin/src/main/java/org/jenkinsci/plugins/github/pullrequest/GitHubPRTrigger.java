@@ -7,7 +7,6 @@ import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import com.google.common.base.Optional;
 import hudson.Extension;
 import hudson.Util;
-import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Item;
 import hudson.model.Job;

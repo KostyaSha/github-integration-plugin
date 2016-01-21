@@ -1,7 +1,6 @@
 package org.jenkinsci.plugins.github.pullrequest.extra;
 
 import hudson.Extension;
-import hudson.model.AbstractProject;
 import hudson.model.Cause;
 import hudson.model.Job;
 import hudson.model.Queue;
