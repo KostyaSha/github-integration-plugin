@@ -1,7 +1,8 @@
 package org.jenkinsci.plugins.github.pullrequest.webhook;
 
 /**
- * Bean class to store main info from payload of webhook 
+ * Bean class to store main info from payload of webhook
+ *
  * @author lanwen (Merkushev Kirill)
  */
 public class PullRequestInfo {

@@ -1,7 +1,9 @@
-package org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
+package org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel
 
-def f = namespace(lib.FormTagLib);
+import lib.FormTagLib;
 
-f.entry(title:_("Labels"), field:"labels"){
+def f = namespace(FormTagLib);
+
+f.entry(title: _("Labels"), field: "labels") {
     f.expandableTextbox()
 }

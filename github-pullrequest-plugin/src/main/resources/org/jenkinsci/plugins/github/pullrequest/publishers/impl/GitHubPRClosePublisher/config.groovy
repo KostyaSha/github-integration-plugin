@@ -1,6 +1,8 @@
-package org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRClosePublisher;
+package org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRClosePublisher
 
-def f = namespace(lib.FormTagLib);
+import lib.FormTagLib;
+
+def f = namespace(FormTagLib);
 
 f.optionalProperty(title: "Use only for builds with specific status", field: "statusVerifier")
 

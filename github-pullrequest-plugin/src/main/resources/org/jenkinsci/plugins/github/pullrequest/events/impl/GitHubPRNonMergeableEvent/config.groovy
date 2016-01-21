@@ -1,6 +1,8 @@
-package org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRNonMergeableEvent;
+package org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRNonMergeableEvent
 
-def f = namespace(lib.FormTagLib);
+import lib.FormTagLib;
+
+def f = namespace(FormTagLib);
 
 f.entry(field: "skip", title: "Skip building unmergable pull requests?") {
     f.checkbox()

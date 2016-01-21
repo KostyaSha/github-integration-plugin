@@ -7,6 +7,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -15,8 +17,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
 public class GitHubPRCause extends Cause {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRCause.class);
@@ -60,15 +63,17 @@ public class GitHubPRCause extends Cause {
                 pr.isMergeable(), pr.getBaseRef(), pr.getHeadRef(),
                 pr.getUserEmail(), pr.getTitle(), pr.getHtmlUrl(), pr.getSourceRepoOwner(),
                 pr.getLabels(),
-                triggerSender, skip, reason,"", "");
+                triggerSender, skip, reason, "", "");
     }
 
+    //FIXME (sizes) ParameterNumber: More than 7 parameters (found 15).
+    //CHECKSTYLE:OFF
     public GitHubPRCause(String headSha, int number, boolean mergeable,
                          String targetBranch, String sourceBranch, String prAuthorEmail,
                          String title, URL htmlUrl, String sourceRepoOwner, Set<String> labels,
                          GHUser triggerSender, boolean skip, String reason,
                          String commitAuthorName, String commitAuthorEmail) {
-
+    //CHECKSTYLE:ON
         this.headSha = headSha;
         this.number = number;
         this.mergeable = mergeable;
@@ -84,12 +89,13 @@ public class GitHubPRCause extends Cause {
         this.commitAuthorName = commitAuthorName;
         this.commitAuthorEmail = commitAuthorEmail;
 
-        if (triggerSender != null) {
+        if (nonNull(triggerSender)) {
             try {
                 this.triggerSenderName = triggerSender.getName();
             } catch (IOException e) {
                 LOGGER.error("Can't get trigger sender name from remote PR");
             }
+
             try {
                 this.triggerSenderEmail = triggerSender.getEmail();
             } catch (IOException e) {
@@ -152,7 +158,7 @@ public class GitHubPRCause extends Cause {
 
     @Nonnull
     public Set<String> getLabels() {
-        return labels == null ? Collections.<String>emptySet() : labels;
+        return isNull(labels) ? Collections.<String>emptySet() : labels;
     }
 
     public String getTriggerSenderName() {
@@ -176,7 +182,7 @@ public class GitHubPRCause extends Cause {
      */
     @Nonnull
     public String getTitle() {
-        return title != null ? title : "";
+        return nonNull(title) ? title : "";
     }
 
     /**
@@ -211,6 +217,7 @@ public class GitHubPRCause extends Cause {
         this.pollingLog = FileUtils.readFileToString(logFile);
     }
 
+    //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -267,6 +274,7 @@ public class GitHubPRCause extends Cause {
         result = 31 * result + (pollingLog != null ? pollingLog.hashCode() : 0);
         return result;
     }
+    //CHECKSTYLE:ON
 
     @Override
     public String toString() {

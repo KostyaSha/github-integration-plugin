@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.asParameterizedJobMixIn;
 
 /**
@@ -82,7 +83,7 @@ public class GitHubPRRepository implements Action, Saveable {
             if (cause != null) {
                 int number = cause.getNumber();
                 List<Run<?, ?>> buildsByNumber = map.get(number);
-                if (buildsByNumber == null) {
+                if (isNull(buildsByNumber)) {
                     buildsByNumber = new ArrayList<>();
                     map.put(number, buildsByNumber);
                 }

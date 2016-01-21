@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
 import antlr.ANTLRException;
+import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import hudson.Functions;
 import hudson.Launcher;
@@ -101,10 +102,13 @@ public class GitHubPRTriggerTest {
     @Test
     public void shouldParseRepoNameFromProp() throws IOException, ANTLRException {
         FreeStyleProject p = j.createFreeStyleProject();
-        String repo = "org/repo";
-        p.addProperty(new GithubProjectProperty(format("https://github.com/%s", repo)));
+        String org = "org";
+        String repo = "repo";
+        p.addProperty(new GithubProjectProperty(format("https://github.com/%s/%s", org, repo)));
 
-        assertThat(defaultGitHubPRTrigger().getRepoFullName(p), equalTo(repo));
+        GitHubRepositoryName fullName = defaultGitHubPRTrigger().getRepoFullName(p);
+        assertThat(fullName.getUserName(), equalTo(org));
+        assertThat(fullName.getRepositoryName(), equalTo(repo));
     }
 
     @Test(expected = NullPointerException.class)

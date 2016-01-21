@@ -6,6 +6,8 @@ import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestric
 import org.jenkinsci.plugins.github.pullrequest.utils.LoggingTaskListenerWrapper;
 import org.kohsuke.github.GHPullRequest;
 
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+
 /**
  * @author lanwen (Merkushev Kirill)
  */
@@ -20,7 +22,7 @@ public class UserRestrictionFilter implements Predicate<GHPullRequest> {
 
     public static Predicate<GHPullRequest> withUserRestriction(LoggingTaskListenerWrapper listener,
                                                                GitHubPRUserRestriction userRestriction) {
-        if (userRestriction == null) {
+        if (isNull(userRestriction)) {
             return Predicates.alwaysTrue();
         } else {
             return new UserRestrictionFilter(listener, userRestriction);

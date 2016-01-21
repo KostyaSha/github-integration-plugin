@@ -1,19 +1,18 @@
 package org.jenkinsci.plugins.github.pullrequest.extra;
 
 import hudson.Extension;
-import hudson.model.AbstractProject;
 import hudson.model.Cause;
+import hudson.model.Job;
 import hudson.model.Queue;
 import org.jenkinsci.plugins.blockqueuedjob.condition.BlockQueueCondition;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Unblock when label found
@@ -43,10 +42,10 @@ public class GitHubPRLabelUnblockQueueCondition extends BlockQueueCondition {
                 final Set<String> causeLabels = gitHubPRCause.getLabels();
                 if (getLabel() != null) {
                     if (causeLabels.containsAll(label.getLabelsSet())) {
-                        if (item.task instanceof AbstractProject<?, ?>) {
-                            final AbstractProject<?, ?> abstractProject = (AbstractProject<?, ?>) item.task;
+                        if (item.task instanceof Job<?, ?>) {
+                            final Job<?, ?> job = (Job<?, ?>) item.task;
                             LOGGER.debug("Unblocking job item {} with matched labels {}",
-                                    abstractProject.getFullName(), label.getLabelsSet());
+                                    job.getFullName(), label.getLabelsSet());
                         }
 
                         return true;
@@ -59,7 +58,7 @@ public class GitHubPRLabelUnblockQueueCondition extends BlockQueueCondition {
     }
 
     @Extension(optional = true)
-    public static class DescriptorImpl extends BlockQueueConditionDescriptor{
+    public static class DescriptorImpl extends BlockQueueConditionDescriptor {
 
         @Override
         public String getDisplayName() {

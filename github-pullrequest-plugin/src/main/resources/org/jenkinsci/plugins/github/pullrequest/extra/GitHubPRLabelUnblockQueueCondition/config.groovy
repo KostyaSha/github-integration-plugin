@@ -1,5 +1,7 @@
-package org.jenkinsci.plugins.github.pullrequest.extra.GitHubPRLabelUnblockQueueCondition;
+package org.jenkinsci.plugins.github.pullrequest.extra.GitHubPRLabelUnblockQueueCondition
 
-def f = namespace(lib.FormTagLib);
+import lib.FormTagLib;
 
-f.property(field:"label")
+def f = namespace(FormTagLib);
+
+f.property(field: "label")

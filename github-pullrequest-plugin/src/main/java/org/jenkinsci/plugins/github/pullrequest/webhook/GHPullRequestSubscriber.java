@@ -1,7 +1,6 @@
 package org.jenkinsci.plugins.github.pullrequest.webhook;
 
 import hudson.Extension;
-import hudson.model.AbstractProject;
 import hudson.model.Job;
 import hudson.security.ACL;
 import jenkins.model.Jenkins;
@@ -57,18 +56,18 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
 
             PullRequestInfo info = extractPullRequestInfo(event, payload, gh);
 
-            for (AbstractProject job : getJobs(info.getRepo())) {
+            for (Job job : getJobs(info.getRepo())) {
                 GitHubPRTrigger trigger = triggerFrom(job, GitHubPRTrigger.class);
                 GitHubPRTriggerMode triggerMode = trigger.getTriggerMode();
 
                 switch (triggerMode) {
                     case HEAVY_HOOKS_CRON:
-                    case HEAVY_HOOKS:
+                    case HEAVY_HOOKS: {
                         LOGGER.debug("Queued check for {} (PR #{}) after heavy hook", job.getName(), info.getNum());
                         trigger.queueRun(job, info.getNum());
                         break;
-
-                    case LIGHT_HOOKS:
+                    }
+                    case LIGHT_HOOKS: {
                         LOGGER.warn("Unsupported LIGHT_HOOKS trigger mode");
 //                        LOGGER.info("Begin processing hooks for {}", trigger.getRepoFullName(job));
 //                        for (GitHubPREvent prEvent : trigger.getEvents()) {
@@ -77,6 +76,9 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
 //                                trigger.build(cause);
 //                            }
 //                        }
+                        break;
+                    }
+                    default:
                         break;
                 }
             }
@@ -107,17 +109,19 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
         }
     }
 
-    private Set<AbstractProject> getJobs(final String repo) {
-        final Set<AbstractProject> ret = new HashSet<>();
+    private Set<Job> getJobs(final String repo) {
+        final Set<Job> ret = new HashSet<>();
 
         ACL.impersonate(ACL.SYSTEM, new Runnable() {
             @Override
             public void run() {
-                List<AbstractProject> jobs = Jenkins.getInstance().getAllItems(AbstractProject.class);
+                List<Job> jobs = Jenkins.getActiveInstance().getAllItems(Job.class);
                 ret.addAll(FluentIterableWrapper.from(jobs)
                         .filter(isBuildable())
                         .filter(withApplicableTrigger())
-                        .filter(withRepo(repo)).toSet());
+                        .filter(withRepo(repo))
+                        .toSet()
+                );
             }
         });
 

@@ -7,11 +7,11 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.kohsuke.github.GHEventPayload;
 import org.kohsuke.github.GHPullRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
 import java.io.IOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Extension point for various GH events that triggers job
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author Kanstantsin Shautsou
  */
 public abstract class GitHubPREvent extends AbstractDescribableImpl<GitHubPREvent> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPREvent.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GitHubPREvent.class);
 
     /**
      * indicates that PR was changed

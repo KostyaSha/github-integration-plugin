@@ -30,6 +30,8 @@ import javax.annotation.CheckForNull;
 import static hudson.model.Result.SUCCESS;
 import static hudson.model.Result.UNSTABLE;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromRun;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
 /**
  * Common actions for label addition and deletion.
@@ -89,7 +91,7 @@ public abstract class GitHubPRAbstractPublisher extends Recorder implements Simp
     }
 
     public GHRepository getGhRepository(final Run<?, ?> run) throws IOException {
-        if (ghRepository == null) {
+        if (isNull(ghRepository)) {
             ghRepository = ghPRTriggerFromRun(run).getRemoteRepo();
         }
         return ghRepository;
@@ -97,7 +99,7 @@ public abstract class GitHubPRAbstractPublisher extends Recorder implements Simp
 
     public int getNumber(final Run<?, ?> run) throws AbortException {
         GitHubPRCause cause = run.getCause(GitHubPRCause.class);
-        if (cause == null) {
+        if (isNull(cause)) {
             throw new AbortException("Can't get cause from build");
         }
         number = cause.getNumber();
@@ -105,14 +107,14 @@ public abstract class GitHubPRAbstractPublisher extends Recorder implements Simp
     }
 
     public GHIssue getGhIssue(final Run<?, ?> run) throws IOException {
-        if (ghIssue == null) {
+        if (isNull(ghIssue)) {
             ghIssue = getGhRepository(run).getIssue(getNumber(run));
         }
         return ghIssue;
     }
 
     public GHIssue getGhPullRequest(final Run<?, ?> build) throws IOException {
-        if (ghPullRequest == null) {
+        if (isNull(ghPullRequest)) {
             ghPullRequest = getGhRepository(build).getPullRequest(getNumber(build));
         }
         return ghPullRequest;
@@ -124,7 +126,7 @@ public abstract class GitHubPRAbstractPublisher extends Recorder implements Simp
         }
 
         String finalComment = comment;
-        if (run != null && listener != null) {
+        if (nonNull(run) && nonNull(listener)) {
             try {
                 finalComment = run.getEnvironment(listener).expand(comment);
             } catch (Exception e) {
@@ -133,7 +135,7 @@ public abstract class GitHubPRAbstractPublisher extends Recorder implements Simp
         }
 
         try {
-            if (run != null) {
+            if (nonNull(run)) {
                 final GitHubPRTrigger trigger = JobInfoHelpers.triggerFrom(run.getParent(), GitHubPRTrigger.class);
 
                 GHRepository ghRepository = trigger.getRemoteRepo();
@@ -147,7 +149,7 @@ public abstract class GitHubPRAbstractPublisher extends Recorder implements Simp
     public static GHCommitState getCommitState(final Run<?, ?> run, final GHCommitState unstableAs) {
         GHCommitState state;
         Result result = run.getResult();
-        if (result == null) {
+        if (isNull(result)) {
             LOGGER.error("{} result is null.", run);
             state = GHCommitState.ERROR;
         } else if (result.isBetterOrEqualTo(SUCCESS)) {

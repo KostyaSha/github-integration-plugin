@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+
 /**
  * Represents a comment for GitHub that can contain token macros.
  *
@@ -54,7 +57,7 @@ public class GitHubPRMessage extends AbstractDescribableImpl<GitHubPRMessage> {
     @CheckForNull
     public static String expandAll(String content, Run<?, ?> run, TaskListener listener)
             throws IOException, InterruptedException {
-        if (content == null || content.length() == 0) {
+        if (isEmpty(content)) {
             return content; // Do nothing for an empty String
         }
 
@@ -70,9 +73,9 @@ public class GitHubPRMessage extends AbstractDescribableImpl<GitHubPRMessage> {
                 Jenkins jenkins = Jenkins.getActiveInstance();
                 ClassLoader uberClassLoader = jenkins.pluginManager.uberClassLoader;
                 List macros = null;
-                if (jenkins.getPlugin("token-macro") != null) {
+                if (nonNull(jenkins.getPlugin("token-macro"))) {
                     // get private macroses like groovy template ${SCRIPT} if available
-                    if (jenkins.getPlugin("email-ext") != null) {
+                    if (nonNull(jenkins.getPlugin("email-ext"))) {
                         Class<?> contentBuilderClazz = uberClassLoader.loadClass("hudson.plugins.emailext.plugins.ContentBuilder");
                         Method getPrivateMacrosMethod = contentBuilderClazz.getDeclaredMethod("getPrivateMacros");
                         macros = new ArrayList((Collection) getPrivateMacrosMethod.invoke(null));

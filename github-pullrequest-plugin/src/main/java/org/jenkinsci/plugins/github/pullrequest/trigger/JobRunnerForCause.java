@@ -16,19 +16,16 @@ import hudson.model.queue.QueueTaskFuture;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.kohsuke.github.GHCommitState;
-import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.cloudbees.jenkins.GitHubWebHook.getJenkinsInstance;
 import static com.google.common.base.Predicates.instanceOf;
 import static java.util.Arrays.asList;
-import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.DescriptorImpl.githubFor;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.AUTHOR_EMAIL;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.CAUSE_SKIP;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.COMMIT_AUTHOR_EMAIL;
@@ -44,6 +41,7 @@ import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TITLE;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TRIGGER_SENDER_AUTHOR;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TRIGGER_SENDER_EMAIL;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.URL;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.asParameterizedJobMixIn;
 
@@ -74,22 +72,20 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
             }
 
             QueueTaskFuture<?> queueTaskFuture = startJob(cause);
-            if (queueTaskFuture == null) {
+            if (isNull(queueTaskFuture)) {
                 LOGGER.error("{} job didn't start", job.getFullName());
             }
 
             LOGGER.info(sb.toString());
 
             // remote connection
-            GitHub connection = githubFor(URI.create(cause.getHtmlUrl().toString()));
             if (trigger.isPreStatus()) {
-                connection.getRepository(trigger.getRepoFullName(job))
+                trigger.getRemoteRepo()
                         .createCommitStatus(cause.getHeadSha(),
                                 GHCommitState.PENDING,
                                 null,
                                 sb.toString(),
-                                job.getFullName()
-                        );
+                                job.getFullName());
             }
         } catch (IOException e) {
             LOGGER.error("Can't trigger build ({})", e.getMessage(), e);
@@ -179,7 +175,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
     private static class CauseHasPRNum implements Predicate<Cause> {
         private final int id;
 
-        public CauseHasPRNum(int id) {
+        CauseHasPRNum(int id) {
             this.id = id;
         }
 

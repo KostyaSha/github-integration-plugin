@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.DescriptorImpl.githubFor;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 
 /**
  * @author Kanstantsin Shautsou
@@ -56,7 +57,7 @@ public class GitHubPRUserRestriction implements Describable<GitHubPRUserRestrict
         PagedIterable<GHIssueComment> ghIssueComments = remotePr.listComments();
         //TODO check
         for (GHIssueComment comment : ghIssueComments) {
-            if (whitelistUserPattern == null) {
+            if (isNull(whitelistUserPattern)) {
                 whitelistUserPattern = Pattern.compile(whitelistUserMsg);
             }
 
@@ -152,7 +153,7 @@ public class GitHubPRUserRestriction implements Describable<GitHubPRUserRestrict
     private static boolean isMyselfUser(GHUser user) {
         boolean ret = false;
 
-        if (user == null) {
+        if (isNull(user)) {
             return false;
         }
 
@@ -171,10 +172,6 @@ public class GitHubPRUserRestriction implements Describable<GitHubPRUserRestrict
 
     @Extension
     public static class DescriptorImpl extends Descriptor<GitHubPRUserRestriction> {
-
-        public String getWhitelistUserMsg() {
-            return GitHubPRTrigger.DescriptorImpl.get().getWhitelistUserMsg();
-        }
 
         @Override
         public final String getDisplayName() {

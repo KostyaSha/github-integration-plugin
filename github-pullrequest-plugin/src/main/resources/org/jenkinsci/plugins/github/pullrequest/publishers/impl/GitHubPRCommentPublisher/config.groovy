@@ -1,8 +1,9 @@
-package org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRCommentPublisher;
+package org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRCommentPublisher
 
+import lib.FormTagLib;
 import org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRCommentPublisher;
 
-def f = namespace(lib.FormTagLib);
+def f = namespace(FormTagLib);
 
 // Stapler doesn't produce default values, so recreate object
 if (instance == null) {

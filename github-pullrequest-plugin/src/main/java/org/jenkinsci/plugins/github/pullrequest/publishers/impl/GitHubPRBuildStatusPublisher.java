@@ -29,7 +29,10 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
 /**
  * Sets build status on GitHub.
@@ -73,7 +76,7 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
             return;
         }
 
-        if (publishedURL == null || publishedURL.isEmpty()) {
+        if (isEmpty(publishedURL)) {
             return;
         }
 
@@ -89,7 +92,7 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
 
         // TODO check permissions to write human friendly message
         final GitHubPRTrigger trigger = JobInfoHelpers.triggerFrom(run.getParent(), GitHubPRTrigger.class);
-        if (trigger == null) {
+        if (isNull(trigger)) {
             // silently skip. TODO implement error handler, like in publishers
             return;
         }
@@ -98,7 +101,7 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
             trigger.getRemoteRepo().createCommitStatus(c.getHeadSha(), state, buildUrl, statusMsgValue,
                     run.getParent().getFullName());
         } catch (IOException ex) {
-            if (buildMessage != null) {
+            if (nonNull(buildMessage)) {
                 String comment = null;
                 LOGGER.error("Could not update commit status of the Pull Request on GitHub. ", ex);
                 if (state == GHCommitState.SUCCESS) {

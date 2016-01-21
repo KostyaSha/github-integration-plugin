@@ -35,8 +35,8 @@ public class GitHubPRJobDslExtension extends ContextExtensionPoint {
         executeInContext(closure, context);
 
         return new GitHubPRBuildStatusPublisher(
-                context.message(), 
-                context.unstableAs(), 
+                context.message(),
+                context.unstableAs(),
                 null,
                 null,
                 null

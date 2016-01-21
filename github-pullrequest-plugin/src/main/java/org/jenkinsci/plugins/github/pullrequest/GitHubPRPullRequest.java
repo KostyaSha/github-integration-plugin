@@ -1,10 +1,13 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
 import hudson.Functions;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
 import java.io.IOException;
@@ -13,8 +16,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 
 /**
  * Maintains state about a Pull Request for a particular Jenkins job.  This is what understands the current state
@@ -25,6 +29,7 @@ public class GitHubPRPullRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRPullRequest.class);
 
     private final int number;
+    // https://github.com/kohsuke/github-api/issues/178
     private final Date issueUpdatedAt;
     private String title;
     private Date prUpdatedAt;
@@ -89,9 +94,8 @@ public class GitHubPRPullRequest {
             LOGGER.warn("Can't get mergeable status: {}", e.getMessage());
             mergeable = false;
         }
-        sourceRepoOwner = remoteRepo.getOwnerName();
 
-//        LOGGER.log(Level.INFO, "Created {0}", toString());
+        sourceRepoOwner = remoteRepo.getOwnerName();
     }
 
     public int getNumber() {
@@ -103,7 +107,7 @@ public class GitHubPRPullRequest {
     }
 
     public boolean isMergeable() {
-        return mergeable == null ? false : mergeable;
+        return isNull(mergeable) ? false : mergeable;
     }
 
     public String getBaseRef() {
@@ -167,24 +171,25 @@ public class GitHubPRPullRequest {
 
     @Override
     public String toString() {
-        return "GitHubPRPullRequest{" +
-                "number=" + number +
-                ", issueUpdatedAt=" + issueUpdatedAt +
-                ", title='" + title + '\'' +
-                ", prUpdatedAt=" + prUpdatedAt +
-                ", headSha='" + headSha + '\'' +
-                ", headRef='" + headRef + '\'' +
-                ", mergeable=" + mergeable +
-                ", baseRef='" + baseRef + '\'' +
-                ", userEmail='" + userEmail + '\'' +
-                ", userLogin='" + userLogin + '\'' +
-                ", htmlUrl=" + htmlUrl +
-                ", labels=" + labels +
-                ", lastCommentCreatedAt=" + lastCommentCreatedAt +
-                ", sourceRepoOwner=" + sourceRepoOwner +
-                '}';
+        return new ToStringBuilder(this, SHORT_PREFIX_STYLE)
+                .append("number", number)
+                .append("issueUpdatedAt", issueUpdatedAt)
+                .append("title", title)
+                .append("prUpdatedAt", prUpdatedAt)
+                .append("headSha", headSha)
+                .append("headRef", headRef)
+                .append("mergeable", mergeable)
+                .append("baseRef", baseRef)
+                .append("userEmail", userEmail)
+                .append("userLogin", userLogin)
+                .append("htmlUrl", htmlUrl)
+                .append("labels", labels)
+                .append("lastCommentCreatedAt", lastCommentCreatedAt)
+                .append("sourceRepoOwner", sourceRepoOwner)
+                .build();
     }
 
+    //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -207,7 +212,8 @@ public class GitHubPRPullRequest {
         if (htmlUrl != null ? !htmlUrl.equals(that.htmlUrl) : that.htmlUrl != null) return false;
         if (userEmail != null ? !userEmail.equals(that.userEmail) : that.userEmail != null) return false;
         if (userLogin != null ? !userLogin.equals(that.userLogin) : that.userLogin != null) return false;
-        if (sourceRepoOwner != null ? !sourceRepoOwner.equals(that.sourceRepoOwner) : that.sourceRepoOwner != null) return false;
+        if (sourceRepoOwner != null ? !sourceRepoOwner.equals(that.sourceRepoOwner) : that.sourceRepoOwner != null)
+            return false;
 
         return true;
     }
@@ -230,5 +236,5 @@ public class GitHubPRPullRequest {
         result = 31 * result + (sourceRepoOwner != null ? sourceRepoOwner.hashCode() : 0);
         return result;
     }
-
+    //CHECKSTYLE:ON
 }

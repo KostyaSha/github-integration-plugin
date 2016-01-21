@@ -1,7 +1,9 @@
-package org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRCommentEvent;
+package org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRCommentEvent
 
-def f = namespace(lib.FormTagLib);
+import lib.FormTagLib;
 
-f.entry(title:_("Comment Pattern"), field:"comment") {
+def f = namespace(FormTagLib);
+
+f.entry(title: _("Comment Pattern"), field: "comment") {
     f.textbox()
 }

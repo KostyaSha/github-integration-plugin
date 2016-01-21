@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.github.pullrequest.utils;
 
+import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.google.common.base.Function;
 import org.jenkinsci.plugins.github.util.misc.NullSafeFunction;
 import org.kohsuke.github.GHPullRequest;
@@ -10,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * @author lanwen (Merkushev Kirill)
  */
@@ -17,6 +20,11 @@ public final class PRHelperFunctions {
     private static final Logger LOGGER = LoggerFactory.getLogger(PRHelperFunctions.class);
 
     private PRHelperFunctions() {
+    }
+
+    public static String asFullRepoName(GitHubRepositoryName repo) {
+        checkNotNull(repo, "Can't get full name from null repo name");
+        return String.format("%s/%s", repo.getUserName(), repo.getRepositoryName());
     }
 
     public static Function<Integer, GHPullRequest> fetchRemotePR(final GHRepository ghRepository) {
@@ -30,7 +38,7 @@ public final class PRHelperFunctions {
     private static class FetchRemotePRFunction implements Function<Integer, GHPullRequest> {
         private final GHRepository ghRepository;
 
-        public FetchRemotePRFunction(GHRepository ghRepository) {
+        FetchRemotePRFunction(GHRepository ghRepository) {
             this.ghRepository = ghRepository;
         }
 

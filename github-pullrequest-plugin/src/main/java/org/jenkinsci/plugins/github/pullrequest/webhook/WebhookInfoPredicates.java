@@ -11,7 +11,8 @@ import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.HEAVY_HOOKS;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.HEAVY_HOOKS_CRON;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.LIGHT_HOOKS;
-import static org.jenkinsci.plugins.github.util.JobInfoHelpers.triggerFrom;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
+import static org.jenkinsci.plugins.github.pullrequest.utils.PRHelperFunctions.asFullRepoName;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.withTrigger;
 
 /**
@@ -41,7 +42,7 @@ public final class WebhookInfoPredicates {
         public boolean apply(Job job) {
             return Predicates.in(asList(HEAVY_HOOKS, HEAVY_HOOKS_CRON, LIGHT_HOOKS))
                     .apply(checkNotNull(
-                            triggerFrom(job, GitHubPRTrigger.class),
+                            ghPRTriggerFromJob(job),
                             "This predicate can be applied only for job with GitHubPRTrigger"
                     ).getTriggerMode());
         }
@@ -50,13 +51,18 @@ public final class WebhookInfoPredicates {
     private static class WithRepo implements Predicate<Job> {
         private final String repo;
 
-        public WithRepo(String repo) {
+        WithRepo(String repo) {
             this.repo = repo;
         }
 
         @Override
         public boolean apply(Job job) {
-            return equalsIgnoreCase(repo, triggerFrom(job, GitHubPRTrigger.class).getRepoFullName(job));
+            return equalsIgnoreCase(
+                    repo,
+                    asFullRepoName(
+                            ghPRTriggerFromJob(job).getRepoFullName(job)
+                    )
+            );
         }
     }
 }
