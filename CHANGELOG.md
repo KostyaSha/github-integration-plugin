@@ -2,7 +2,10 @@
 
 ## next
 
-* Clarified help texts and UI info.
+* [PR] Clarified help texts and UI info.
+* [PR] Support Job.class (workflow-plugin) for hooks triggering. 
+* [PR] Update block-queued-job-plugin and Extension for it to support Job.class (workflow-plugin)
+* [PR] Added checkstyle, pmd.
 
 ## 0.1.0-beta16
 
