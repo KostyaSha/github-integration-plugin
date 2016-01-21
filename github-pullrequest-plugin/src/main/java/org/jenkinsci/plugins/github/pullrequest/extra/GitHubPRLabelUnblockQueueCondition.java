@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.github.pullrequest.extra;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Cause;
+import hudson.model.Job;
 import hudson.model.Queue;
 import org.jenkinsci.plugins.blockqueuedjob.condition.BlockQueueCondition;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
@@ -42,10 +43,10 @@ public class GitHubPRLabelUnblockQueueCondition extends BlockQueueCondition {
                 final Set<String> causeLabels = gitHubPRCause.getLabels();
                 if (getLabel() != null) {
                     if (causeLabels.containsAll(label.getLabelsSet())) {
-                        if (item.task instanceof AbstractProject<?, ?>) {
-                            final AbstractProject<?, ?> abstractProject = (AbstractProject<?, ?>) item.task;
+                        if (item.task instanceof Job<?, ?>) {
+                            final Job<?, ?> job = (Job<?, ?>) item.task;
                             LOGGER.debug("Unblocking job item {} with matched labels {}",
-                                    abstractProject.getFullName(), label.getLabelsSet());
+                                    job.getFullName(), label.getLabelsSet());
                         }
 
                         return true;
