@@ -6,11 +6,6 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger
 
 def f = namespace(FormTagLib);
 
-//def events = (instance == null ? [] : instance.events)
-//f.entry(title:_("Github hooks"), field:"useGitHubHooks") {
-//    f.checkbox()
-//}
-
 if (instance == null) {
     instance = new GitHubPRTrigger();
 }
@@ -42,7 +37,7 @@ f.block {
 
         f.entry(title: _("Trigger Events"), help: descriptor.getHelpFile('events')) {
             f.hetero_list(name: "events",
-                    items: events,
+                    items: instance.events,
                     descriptors: descriptor.getEventDescriptors(),
                     hasHeader: true
             )
