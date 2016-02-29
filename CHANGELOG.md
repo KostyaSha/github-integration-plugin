@@ -2,6 +2,17 @@
 
 ## next
 
+## 0.1.0-rc4
+ * [PR] New label not exists event.
+
+## 0.1.0-rc2, 0.1.0-rc3
+ - Failed maven-release-plugin.
+ 
+## 0.1.0-rc1
+ * [PR] Fixed UI configs.
+
+## 0.1.0-beta17
+
 * [PR] Clarified help texts and UI info.
 * [PR] Support Job.class (workflow-plugin) for hooks triggering. 
 * [PR] Update block-queued-job-plugin and Extension for it to support Job.class (workflow-plugin)
