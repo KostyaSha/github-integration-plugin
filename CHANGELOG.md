@@ -2,37 +2,37 @@
 
 ## next
 
-## 0.1.0-rc4
+## 0.0.1-rc4
  * [PR] New label not exists event.
 
-## 0.1.0-rc2, 0.1.0-rc3
+## 0.0.1-rc2, 0.1.0-rc3
  - Failed maven-release-plugin.
  
-## 0.1.0-rc1
+## 0.0.1-rc1
  * [PR] Fixed UI configs.
 
-## 0.1.0-beta17
+## 0.0.1-beta17
 
 * [PR] Clarified help texts and UI info.
 * [PR] Support Job.class (workflow-plugin) for hooks triggering. 
 * [PR] Update block-queued-job-plugin and Extension for it to support Job.class (workflow-plugin)
 * [PR] Added checkstyle, pmd.
 
-## 0.1.0-beta16
+## 0.0.1-beta16
 
 * Fixed UI settings configuration.
 
-## 0.1.0-beta15
+## 0.0.1-beta15
 
 * Support Job type (workflow-plugin support)
 * Reorganised to multi-module maven structure
 * Renamed to `github-integration-plugin`
 
-## 0.1.0-beta14
+## 0.0.1-beta14
 
 * Provide default configuration in UI
 
-## 0.1.0-beta13
+## 0.0.1-beta13
 
 * Indent trigger configuration UI
 * Prevent NPE in weird missconfigured case
@@ -40,30 +40,30 @@
 * Replace custom repo name parsing with github-plugin class
 * Fix NPE after pulls clearing in GHRepo action
 
-## 0.1.0-beta12
+## 0.0.1-beta12
 
 * Optimise hooks based check
 * Replace all jdk logging with slf4j-jdk
 
-## 0.1.0-beta11
+## 0.0.1-beta11
 
 * Fixed trigger by comment UI entry
 
-## 0.1.0-beta10
+## 0.0.1-beta10
 
 * Fix broken polling page
 * Feature: Experimental hooks support
 * Fix: Don't persist project object
 
-## 0.1.0-beta9
+## 0.0.1-beta9
 
 * skip events refactoring
 * clean-ups
 
-## 0.1.0-beta8
+## 0.0.1-beta8
 Version forward: maven-release-plugin failed
 
-## 0.1.0-beta7
+## 0.0.1-beta7
 
 * Polling log in project/build
 * Waterfall conditioning
