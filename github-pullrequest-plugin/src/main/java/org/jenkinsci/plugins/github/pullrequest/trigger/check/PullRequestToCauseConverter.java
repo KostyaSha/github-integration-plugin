@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.github.pullrequest.trigger.check;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
+import com.google.common.base.Predicates;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
@@ -42,12 +43,15 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
         return new PullRequestToCauseConverter(localRepo, listener, trigger);
     }
 
+    /**
+     * @return first non-null cause from event.
+     */
     @Override
     public GitHubPRCause apply(final GHPullRequest remotePR) {
         return from(trigger.getEvents())
                 .transform(toCause(remotePR))
-                .filter(notNull())
-                .firstMatch(new SkippedCauseFilter(listener)).orNull();
+                .firstMatch(notNull())
+                .orNull();
     }
 
     @VisibleForTesting

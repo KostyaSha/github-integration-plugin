@@ -24,6 +24,7 @@ import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREventDescriptor;
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRBranchRestriction;
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction;
 import org.jenkinsci.plugins.github.pullrequest.trigger.JobRunnerForCause;
+import org.jenkinsci.plugins.github.pullrequest.trigger.check.SkippedCauseFilter;
 import org.jenkinsci.plugins.github.pullrequest.utils.LoggingTaskListenerWrapper;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
@@ -375,7 +376,11 @@ public class GitHubPRTrigger extends Trigger<Job<?, ?>> {
                             withUserRestriction(listener, userRestriction)
                     ))
                     .transform(toGitHubPRCause(localRepository, listener, this))
-                    .filter(notNull()).toList();
+                    .filter(and(
+                            notNull(),
+                            new SkippedCauseFilter(listener)
+                    ))
+                    .toList();
 
             LOGGER.trace("Causes count for {}: {}", localRepository.getFullName(), causes.size());
             from(prepeared).transform(updateLocalRepo(localRepository)).toSet();
