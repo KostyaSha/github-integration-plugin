@@ -2,6 +2,9 @@
 
 ## next
 
+## 0.0.1-rc5
+ * [PR] Fixed skip logic for events.
+
 ## 0.0.1-rc4
  * [PR] New label not exists event.
 
