@@ -137,7 +137,7 @@ public class PullRequestToCauseConverterTest {
      * identified.
      */
     @Test
-    public void shouldSkipEvenThoughNewCommit() throws Exception {
+    public void shouldSkipWhenSkippedCauseReturned() throws Exception {
         GHCommitPointer commitPtr = mock(GHCommitPointer.class);
         when(local.getPulls()).thenReturn(ImmutableMap.of(3, localPR));
         when(localPR.getHeadSha()).thenReturn("this is not the sha you are looking for");

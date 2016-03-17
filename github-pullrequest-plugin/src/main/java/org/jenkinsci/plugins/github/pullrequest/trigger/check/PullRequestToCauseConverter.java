@@ -15,9 +15,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import java.io.IOException;
 
-import static com.google.common.base.Predicates.notNull;
-import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
-
 /**
  * @author lanwen (Merkushev Kirill)
  */
@@ -44,10 +41,15 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
 
     @Override
     public GitHubPRCause apply(final GHPullRequest remotePR) {
-        return from(trigger.getEvents())
-                .transform(toCause(remotePR))
-                .filter(notNull())
-                .firstMatch(new SkippedCauseFilter(listener)).orNull();
+        for (GitHubPREvent event: trigger.getEvents()) {
+            final GitHubPRCause causeCheck = toCause(remotePR).apply(event);
+            if (null != causeCheck) {
+                // If this is a skip trigger return null to indicate that the PR should be skipped
+                // (and don't continue to evaluate any more potential causes)
+                return causeCheck.isSkip() ? null : causeCheck;
+            }
+        }
+        return null;
     }
 
     @VisibleForTesting
