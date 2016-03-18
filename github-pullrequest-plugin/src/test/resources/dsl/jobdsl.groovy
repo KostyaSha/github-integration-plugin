@@ -4,11 +4,33 @@ freeStyleJob('gh-pull-request') {
         onPullRequest {
             setPreStatus()
             mode {
+                cron()
                 heavyHooks()
+                heavyHooksCron()
             }
             events {
                 opened()
+                closed()
                 commit()
+
+                commented("match the comment")
+                skipDescription("[skip ci]")
+
+                labelAdded("jenkins")
+
+                labelExists("build")
+                skipLabelExists("skip-build")
+
+                labelNotExists("skip-build")
+                skipLabelNotExists("jenkins")
+
+                labelMatchPattern("pattern")
+                skipLabelMatchPattern("pattern")
+
+                labelRemoved("skip-build")
+
+                nonMergeable()
+                skipNonMergeable()
             }
         }
     }
