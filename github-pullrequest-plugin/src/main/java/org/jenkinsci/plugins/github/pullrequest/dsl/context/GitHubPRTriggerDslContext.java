@@ -16,6 +16,8 @@ public class GitHubPRTriggerDslContext implements Context {
     private String cron = "H/5 * * * *";
     private GitHubPRTriggerMode mode = GitHubPRTriggerMode.CRON;
     private boolean setPreStatus;
+    private boolean setCancelQueued;
+    private boolean setSkipFirstRun;
     private List<GitHubPREvent> events = new ArrayList<>();
 
     public void cron(String cron) {
@@ -31,6 +33,14 @@ public class GitHubPRTriggerDslContext implements Context {
 
     public void setPreStatus() {
         setPreStatus = true;
+    }
+
+    public void setCancelQueued() {
+        setCancelQueued = true;
+    }
+
+    public void setSkipFirstRun() {
+        setSkipFirstRun = true;
     }
 
     public void events(Runnable closure) {
@@ -51,6 +61,15 @@ public class GitHubPRTriggerDslContext implements Context {
     public boolean isSetPreStatus() {
         return setPreStatus;
     }
+
+    public boolean isSetCancelQueued() {
+        return setCancelQueued;
+    }
+
+    public boolean isSetSkipFirstRun() {
+        return setSkipFirstRun;
+    }
+
 
     public List<GitHubPREvent> events() {
         return events;
