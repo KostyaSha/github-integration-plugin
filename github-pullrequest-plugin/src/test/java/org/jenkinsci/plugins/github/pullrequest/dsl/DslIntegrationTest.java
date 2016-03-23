@@ -73,7 +73,6 @@ public class DslIntegrationTest {
         assertThat("Should add trigger of GHPR class", trigger, instanceOf(GitHubPRTrigger.class));
         assertThat("Should have pre status", trigger.isPreStatus(), equalTo(true));
         assertThat("Should have cancel queued", trigger.isCancelQueued(), equalTo(true));
-        assertThat("Should have skip first run", trigger.isSkipFirstRun(), equalTo(true));
         assertThat("Should add events", ((GitHubPRTrigger) trigger).getEvents(), hasSize(15));
         assertThat("Should set mode", ((GitHubPRTrigger) trigger).getTriggerMode(), equalTo(HEAVY_HOOKS_CRON));
     }
