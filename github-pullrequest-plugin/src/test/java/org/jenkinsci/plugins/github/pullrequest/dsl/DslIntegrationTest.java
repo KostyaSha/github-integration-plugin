@@ -23,7 +23,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.HEAVY_HOOKS;
+import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.HEAVY_HOOKS_CRON;
 import static org.junit.Assert.assertThat;
 
 public class DslIntegrationTest {
@@ -69,9 +69,11 @@ public class DslIntegrationTest {
 
         Collection<Trigger<?>> triggers = generated.getTriggers().values();
         assertThat("Should add trigger", triggers, hasSize(1));
-        Object trigger = triggers.toArray()[0];
+        GitHubPRTrigger trigger = (GitHubPRTrigger)triggers.toArray()[0];
         assertThat("Should add trigger of GHPR class", trigger, instanceOf(GitHubPRTrigger.class));
-        assertThat("Should add events", ((GitHubPRTrigger) trigger).getEvents(), hasSize(2));
-        assertThat("Should set mode", ((GitHubPRTrigger) trigger).getTriggerMode(), equalTo(HEAVY_HOOKS));
+        assertThat("Should have pre status", trigger.isPreStatus(), equalTo(true));
+        assertThat("Should have cancel queued", trigger.isCancelQueued(), equalTo(true));
+        assertThat("Should add events", ((GitHubPRTrigger) trigger).getEvents(), hasSize(15));
+        assertThat("Should set mode", ((GitHubPRTrigger) trigger).getTriggerMode(), equalTo(HEAVY_HOOKS_CRON));
     }
 }
