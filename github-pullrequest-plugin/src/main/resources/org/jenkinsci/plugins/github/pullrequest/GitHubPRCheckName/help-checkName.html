@@ -1,0 +1,26 @@
+<div>
+    The name of the commit status check displayed in the pull request.
+    The commit's status check name, shown on the pull request, is typically configured
+    with the GitHub plugin. See the 'Advanced' settings of the job's <em>GitHub
+    project</em> option. When that setting is insufficient, a custom name can be specified
+    here to help identify the particular commit status in use. This setting affects the
+    standard GitHub project value by appending custom text to the original name.
+    The final name of the check is created as:
+    <ul>
+        <li>If the job's "<em>GitHub project</em>" setting has a configured "display name"...
+            <ul>
+                <li>Without a custom name: <code>displayName</code></li>
+                <li>With a custom name: <code>displayName-customName</code></li>
+            </ul>
+        </li>
+        <li>If the GitHub project <b>does not have</b> a configured "display name"...
+            <ul>
+                <li>Without a custom name: <code>jobName</code></li>
+                <li>With a custom name: <code>customName</code></li>
+            </ul>
+        </li>
+    </ul>
+
+    Note, if using a custom name, ensure that any other corresponding status updates use
+    the same name to ensure they update the same commit status.
+</div>
