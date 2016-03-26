@@ -3,6 +3,7 @@
 ## next
 
 ## 0.0.1-rc5
+ * [PR] More job-dsl plugin configuration.
  * [PR] Fixed skip logic for events.
 
 ## 0.0.1-rc4
