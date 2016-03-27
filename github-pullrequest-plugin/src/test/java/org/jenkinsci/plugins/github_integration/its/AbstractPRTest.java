@@ -51,6 +51,7 @@ import static org.apache.commons.io.FileUtils.writeStringToFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsNot.not;
 import static org.jenkinsci.plugins.github.config.GitHubServerConfig.loginToGithub;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
@@ -165,10 +166,10 @@ public abstract class AbstractPRTest {
 
         j.waitUntilNoActivity();
 
-        assertThat(job.getLastBuild(), is(isNull()));
+        assertThat(job.getLastBuild(), is(nullValue()));
 
         GitHubPRRepository ghPRRepository = job.getAction(GitHubPRRepository.class);
-        assertThat("Action storage should be available", ghPRRepository, not(isNull()));
+        assertThat("Action storage should be available", ghPRRepository, notNullValue());
 
         Map<Integer, GitHubPRPullRequest> pulls = ghPRRepository.getPulls();
         assertThat("Action storage should be empty", pulls.entrySet(), Matchers.hasSize(0));
@@ -182,7 +183,7 @@ public abstract class AbstractPRTest {
 
         // refresh objects
         ghPRRepository = job.getAction(GitHubPRRepository.class);
-        assertThat("Action storage should be available", ghPRRepository, not(isNull()));
+        assertThat("Action storage should be available", ghPRRepository, notNullValue());
 
         pulls = ghPRRepository.getPulls();
         assertThat("Pull request 1 should appear in action storage", pulls.entrySet(), Matchers.hasSize(1));
