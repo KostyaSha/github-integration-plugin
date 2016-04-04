@@ -83,7 +83,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                 trigger.getRemoteRepo()
                         .createCommitStatus(cause.getHeadSha(),
                                 GHCommitState.PENDING,
-                                null,
+                                job.getAbsoluteUrl(),
                                 sb.toString(),
                                 job.getFullName());
             }
