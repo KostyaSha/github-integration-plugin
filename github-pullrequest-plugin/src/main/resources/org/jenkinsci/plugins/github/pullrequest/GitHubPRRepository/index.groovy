@@ -28,6 +28,19 @@ l.layout(title: "GitHub Pull Requests statuses") {
         text("Repository: ")
         a(href:my.githubUrl, my.fullName)
 
+        br()
+        br()
+        div(style: "display: inline-block") {
+            if (h.hasPermission(Item.BUILD)) {
+                def runTrigger = "runTrigger";
+                form(method: "post", action: "runTrigger", onsubmit: "callFeature(this, ${runTrigger})",
+                        style: "float: right; margin-right: 100px") {
+                    f.submit(value: _("Run GH PR Trigger"))
+                    div(id: runTrigger)
+                }
+            }
+        }
+
         def buildMap = my.getAllPrBuilds()
         table() {
             for (pr in my.pulls.values()) {
