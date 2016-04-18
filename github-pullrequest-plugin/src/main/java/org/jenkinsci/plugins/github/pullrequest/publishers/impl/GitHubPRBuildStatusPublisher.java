@@ -11,7 +11,9 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
+
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRCheckName;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRMessage;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.publishers.GitHubPRAbstractPublisher;
@@ -22,6 +24,7 @@ import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.github.GHCommitState;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +36,7 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+import static org.jenkinsci.plugins.github.pullrequest.utils.PRHelperFunctions.getCommitStatusContext;
 
 /**
  * Sets build status on GitHub.
@@ -46,6 +50,8 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
     private GitHubPRMessage statusMsg = new GitHubPRMessage("${GITHUB_PR_COND_REF} run ended");
     private GHCommitState unstableAs = GHCommitState.FAILURE;
     private BuildMessage buildMessage = new BuildMessage();
+    private GitHubPRCheckName customCheck;
+    private CommitState forceStatus;
 
     /**
      * Constructor with defaults. Only for groovy UI.
@@ -66,6 +72,16 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
         this.buildMessage = buildMessage;
     }
 
+    @DataBoundSetter
+    public void setCustomCheck(GitHubPRCheckName customCheck) {
+        this.customCheck = customCheck;
+    }
+
+    @DataBoundSetter
+    public void setForceStatus(CommitState state) {
+        this.forceStatus = state;
+    }
+
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher,
                         @Nonnull TaskListener listener) throws InterruptedException, IOException {
@@ -80,7 +96,7 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
             return;
         }
 
-        GHCommitState state = getCommitState(run, unstableAs);
+        GHCommitState state = null == forceStatus ? getCommitState(run, unstableAs) : forceStatus.getState();
 
         GitHubPRCause c = run.getCause(GitHubPRCause.class);
 
@@ -97,9 +113,14 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
             return;
         }
 
+        String stepName = null;
+        if (null != customCheck) {
+            stepName = customCheck.getCheckName();
+        }
+
         try {
             trigger.getRemoteRepo().createCommitStatus(c.getHeadSha(), state, buildUrl, statusMsgValue,
-                    run.getParent().getFullName());
+                   getCommitStatusContext(run.getParent(), stepName));
         } catch (IOException ex) {
             if (nonNull(buildMessage)) {
                 String comment = null;
@@ -136,6 +157,14 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
         return statusMsg;
     }
 
+    public GitHubPRCheckName getCustomCheck() {
+        return customCheck;
+    }
+
+    public CommitState getForceStatus() {
+        return forceStatus;
+    }
+
     @Override
     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl) super.getDescriptor();
@@ -152,6 +181,34 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
         @Override
         public String getDisplayName() {
             return "GitHub PR: set PR status";
+        }
+    }
+
+    public static class CommitState extends AbstractDescribableImpl<CommitState> {
+        private GHCommitState state;
+
+        @DataBoundConstructor
+        public CommitState(GHCommitState state) {
+            this.state = state;
+        }
+
+        public CommitState() {
+        }
+
+        public GHCommitState getState() {
+            return state;
+        }
+
+        public void setState(GHCommitState state) {
+            this.state = state;
+        }
+
+        @Extension
+        public static class DescriptorImpl extends Descriptor<CommitState> {
+            @Override
+            public String getDisplayName() {
+                return "Commit status container";
+            }
         }
     }
 

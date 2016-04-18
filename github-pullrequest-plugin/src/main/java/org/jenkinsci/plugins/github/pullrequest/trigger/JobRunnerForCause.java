@@ -13,6 +13,7 @@ import hudson.model.ParametersAction;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Queue;
 import hudson.model.queue.QueueTaskFuture;
+
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.kohsuke.github.GHCommitState;
@@ -42,6 +43,7 @@ import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TRIGGER_
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TRIGGER_SENDER_EMAIL;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.URL;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static org.jenkinsci.plugins.github.pullrequest.utils.PRHelperFunctions.getCommitStatusContext;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.asParameterizedJobMixIn;
 
@@ -85,7 +87,8 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                                 GHCommitState.PENDING,
                                 job.getAbsoluteUrl(),
                                 sb.toString(),
-                                job.getFullName());
+                                getCommitStatusContext(job,
+                                                       trigger.getPreStatus().getCheckName()));
             }
         } catch (IOException e) {
             LOGGER.error("Can't trigger build ({})", e.getMessage(), e);
