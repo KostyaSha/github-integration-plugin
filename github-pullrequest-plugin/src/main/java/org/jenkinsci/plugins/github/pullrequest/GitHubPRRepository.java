@@ -17,6 +17,7 @@ import hudson.model.queue.QueueTaskFuture;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
 import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.github.pullrequest.utils.JobHelper;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 import org.slf4j.Logger;
@@ -151,6 +152,36 @@ public class GitHubPRRepository implements Action, Saveable {
             LOGGER.error("Can\'t delete repository file '{}', '{}'",
                     configFile.getFile().getAbsolutePath(), e.getMessage());
             result = FormValidation.error("Can't delete: " + e.getMessage());
+        }
+        return result;
+    }
+
+
+    /**
+     * Run trigger from web.
+     */
+    @RequirePOST
+    public FormValidation doRunTrigger() {
+        FormValidation result;
+        try {
+            Jenkins instance = GitHubWebHook.getJenkinsInstance();
+            if (instance.hasPermission(Item.BUILD)) {
+                GitHubPRTrigger trigger = JobHelper.ghPRTriggerFromJob(job);
+                if (trigger != null) {
+                    trigger.run();
+                    result = FormValidation.ok("GitHub PR trigger run");
+                    LOGGER.debug("GitHub PR trigger run for {}", job);
+                } else {
+                    LOGGER.error("GitHub PR trigger not available for {}", job);
+                    result = FormValidation.error("GitHub PR trigger not available");
+                }
+            } else {
+                LOGGER.warn("No permissions to run GitHub PR trigger");
+                result = FormValidation.error("Forbidden");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Can't run trigger", e.getMessage());
+            result = FormValidation.error("Can't run trigger: %s", e.getMessage());
         }
         return result;
     }
