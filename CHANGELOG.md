@@ -1,6 +1,8 @@
 ## Changelog
 
-## next
+## next 0.0.1-rc6
+ * [PR] Show badge in build history instead raw html.
+ * [PR] Post link to project for Pending status when job in queue.
 
 ## 0.0.1-rc5
  * [PR] More job-dsl plugin configuration.
