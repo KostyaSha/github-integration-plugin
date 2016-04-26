@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
 
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromRun;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
@@ -37,27 +36,6 @@ public class GitHubPRBuildListener extends RunListener<Run<?, ?>> {
             //remove all BuildData, because it doesn't work right with pull requests now
             //TODO rework after git-client patching about BuildData usage
             run.getActions().removeAll(run.getActions(BuildData.class));
-        }
-    }
-
-    @Override
-    public void onStarted(Run<?, ?> run, TaskListener listener) {
-        GitHubPRTrigger trigger = ghPRTriggerFromRun(run);
-        if (isNull(trigger)) {
-            return;
-        }
-
-        GitHubPRCause cause = run.getCause(GitHubPRCause.class);
-        if (isNull(cause)) {
-            return;
-        }
-
-        // short build description shown in history
-        try {
-            run.setDescription("<a title=\"" + cause.getTitle() + "\" href=\"" + cause.getHtmlUrl() + "\">PR #"
-                    + cause.getNumber() + "</a>: " + cause.getAbbreviatedTitle());
-        } catch (IOException e) {
-            LOGGER.error("Can't set build description", e);
         }
     }
 }
