@@ -1,29 +1,27 @@
 package org.jenkinsci.plugins.github.pullrequest.pipeline;
 
+import com.coravy.hudson.plugins.github.GithubProjectProperty;
+import com.google.inject.Inject;
+import hudson.AbortException;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import jenkins.model.JenkinsLocationConfiguration;
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
+import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
+import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.kohsuke.github.GHRepository;
+
+import java.io.IOException;
+
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.jenkinsci.plugins.github.pullrequest.pipeline.SetCommitStatusStep.DescriptorImpl.FUNC_NAME;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.triggerFrom;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
-
-import hudson.AbortException;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
-import org.jenkinsci.plugins.github.util.JobInfoHelpers;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.kohsuke.github.GHRepository;
-
-import com.coravy.hudson.plugins.github.GithubProjectProperty;
-import com.google.inject.Inject;
-
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import jenkins.model.JenkinsLocationConfiguration;
-
-import java.io.IOException;
 
 /**
  * Pipeline DSL step to update a GitHub commit status for a pull request.
@@ -89,7 +87,7 @@ public class SetCommitStatusExecution extends AbstractSynchronousNonBlockingStep
     private GHRepository resolveRepository() throws IOException {
         // The trigger already has the ability to look this up, D.R.Y.
         try {
-            GitHubPRTrigger trigger = JobInfoHelpers.triggerFrom(run.getParent(), GitHubPRTrigger.class);
+            GitHubPRTrigger trigger = triggerFrom(run.getParent(), GitHubPRTrigger.class);
             if (trigger != null) {
                 return trigger.getRemoteRepo();
             } else {
