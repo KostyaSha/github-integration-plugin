@@ -121,6 +121,13 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- for pipeline/workflow step extension -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-step-api</artifactId>
+            <version>${workflow.version}</version>
+        </dependency>
+
         <!-- workflow for tests -->
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
@@ -207,6 +214,13 @@
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy</artifactId>
             <version>2.3.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.jayway.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <version>1.7.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
