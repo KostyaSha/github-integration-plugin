@@ -2,6 +2,9 @@ package org.jenkinsci.plugins.github_integration.its.WorkflowITest
 
 
 try {
+    setGitHubPullRequestStatus state: 'PENDING', context: 'custom-context1', message: "Run #${env.BUILD_NUMBER} started"
+    setGitHubPullRequestStatus state: 'PENDING', context: 'custom-context2', message: "Run #${env.BUILD_NUMBER} started"
+
     node('master') {
         step([
                 $class       : 'GitHubPRStatusBuilder',
@@ -9,8 +12,6 @@ try {
                         content: "Run #${env.BUILD_NUMBER} started"
                 ]
         ])
-        setGitHubPullRequestStatus state: 'PENDING', context: 'custom-context1', message: "Run #${env.BUILD_NUMBER} started"
-        setGitHubPullRequestStatus state: 'PENDING', context: 'custom-context2', message: "Run #${env.BUILD_NUMBER} started"
 
         sh 'sleep 10 && env'
 
