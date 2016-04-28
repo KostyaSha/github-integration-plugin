@@ -13,6 +13,8 @@ import hudson.model.ParametersAction;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Queue;
 import hudson.model.queue.QueueTaskFuture;
+import jenkins.model.ParameterizedJobMixIn;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRBadgeAction;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
@@ -137,8 +139,20 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                 NUMBER.param(String.valueOf(cause.getNumber()))
         ));
         GitHubPRBadgeAction gitHubPRBadgeAction = new GitHubPRBadgeAction(cause);
-        //TODO no way to get quietPeriod, so temporary ignore it
-        return asParameterizedJobMixIn(job).scheduleBuild2(0, new CauseAction(cause), new ParametersAction(values),
+
+        ParameterizedJobMixIn parameterizedJobMixIn = asParameterizedJobMixIn(job);
+
+        // remove after switch to newer core
+        int quietPeriod = 0;
+        try {
+            Object mixinJob = FieldUtils.readField(parameterizedJobMixIn, "val$job", true);
+            ParameterizedJobMixIn.ParameterizedJob parameterizedJob = (ParameterizedJobMixIn.ParameterizedJob) mixinJob;
+            quietPeriod = parameterizedJob.getQuietPeriod();
+        } catch (IllegalAccessException e) {
+            LOGGER.error("Couldn't extract quiet period, falling back to {}", quietPeriod, e);
+        }
+
+        return parameterizedJobMixIn.scheduleBuild2(quietPeriod, new CauseAction(cause), new ParametersAction(values),
                 gitHubPRBadgeAction);
     }
 

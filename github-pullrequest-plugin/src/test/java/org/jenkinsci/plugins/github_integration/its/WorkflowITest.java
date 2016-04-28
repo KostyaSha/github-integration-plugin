@@ -18,6 +18,7 @@ public class WorkflowITest extends AbstractPRTest {
         final WorkflowJob workflowJob = j.jenkins.createProject(WorkflowJob.class, JOB_NAME);
         workflowJob.addTrigger(getPreconfiguredTrigger());
         workflowJob.addProperty(getPreconfiguredProperty());
+        workflowJob.setQuietPeriod(10);
 
         workflowJob.setDefinition(
                 new CpsFlowDefinition(classpath(this.getClass(), "workflow-definition.groovy"))
