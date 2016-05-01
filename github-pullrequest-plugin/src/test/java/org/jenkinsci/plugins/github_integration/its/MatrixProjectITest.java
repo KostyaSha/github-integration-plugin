@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.github_integration.its;
 
-import antlr.ANTLRException;
 import hudson.matrix.AxisList;
 import hudson.matrix.MatrixProject;
 import hudson.matrix.TextAxis;
@@ -10,8 +9,6 @@ import org.jenkinsci.plugins.github.pullrequest.builders.GitHubPRStatusBuilder;
 import org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRBuildStatusPublisher;
 import org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRCommentPublisher;
 import org.junit.Test;
-
-import java.io.IOException;
 
 import static org.jenkinsci.plugins.github_integration.junit.GHRule.getPreconfiguredProperty;
 import static org.jenkinsci.plugins.github_integration.junit.GHRule.getPreconfiguredTrigger;
@@ -34,7 +31,6 @@ public class MatrixProjectITest extends AbstractPRTest {
         matrixProject.getPublishersList().add(new GitHubPRBuildStatusPublisher());
         matrixProject.getPublishersList().add(new GitHubPRCommentPublisher(new GitHubPRMessage("Comment"), null, null));
 
-
         matrixProject.setAxes(
                 new AxisList(
                         new TextAxis("first_axis", "first_value1", "first_value2"),
@@ -45,6 +41,5 @@ public class MatrixProjectITest extends AbstractPRTest {
         matrixProject.save();
 
         super.basicTest(matrixProject);
-
     }
 }
