@@ -4,6 +4,10 @@
  * [PR] Show badge in build history instead raw html.
  * [PR] Post link to project for Pending status when job in queue.
  * [PR] Get quiet period from the parameterizable job.
+ * [PR] Support matrix-project job type.
+ * [PR] Workflow step for setting pr statuses.
+ * [PR] Advanced context name resolution for pr statuses.
+ * [PR] Reworked polling log action (sidepanel button/page).
 
 ## 0.0.1-rc5
  * [PR] More job-dsl plugin configuration.
