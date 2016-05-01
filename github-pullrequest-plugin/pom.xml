@@ -5,11 +5,11 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>github-integration-parent</artifactId>
-        <version>0.1.0-rc6</version>
+        <version>0.1.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>github-pullrequest</artifactId>
-    <version>0.1.0-rc6</version>
+    <version>0.1.0-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <name>GitHub Pull Request Plugin</name>
@@ -35,7 +35,7 @@
         <connection>scm:git:ssh://github.com/jenkinsci/github-integration-plugin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/jenkinsci/github-integration-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/github-integration-plugin</url>
-        <tag>github-integration-parent-0.1.0-rc6</tag>
+        <tag>github-pullrequest-0.0.1-beta7</tag>
     </scm>
 
     <properties>
