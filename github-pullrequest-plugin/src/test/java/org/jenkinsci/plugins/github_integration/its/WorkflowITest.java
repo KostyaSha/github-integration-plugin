@@ -74,6 +74,5 @@ public class WorkflowITest extends AbstractPRTest {
         );
         assertThat(statuses, hasItem(commitStatus("custom-context1", GHCommitState.SUCCESS, "Tests passed")));
         assertThat(statuses, hasItem(commitStatus("custom-context2", GHCommitState.SUCCESS, "Tests passed")));
-        j.pause();
     }
 }
