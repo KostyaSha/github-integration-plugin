@@ -115,7 +115,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
     /**
      * Cancel previous builds for specified PR id.
      */
-    private static boolean cancelQueuedBuildByPrNumber(final int id) {
+    protected static boolean cancelQueuedBuildByPrNumber(final int id) {
         Queue queue = getJenkinsInstance().getQueue();
 
         for (Queue.Item item : queue.getApproximateItemsQuickly()) {
@@ -174,7 +174,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
     /**
      * @see jenkins.model.ParameterizedJobMixIn#getDefaultParametersValues()
      */
-    private List<ParameterValue> getDefaultParametersValues() {
+    protected List<ParameterValue> getDefaultParametersValues() {
         ParametersDefinitionProperty paramDefProp = job.getProperty(ParametersDefinitionProperty.class);
         List<ParameterValue> defValues = new ArrayList<>();
 
@@ -197,14 +197,14 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
         return defValues;
     }
 
-    private static class CausesFromAction implements Function<Action, Iterable<Cause>> {
+    protected static class CausesFromAction implements Function<Action, Iterable<Cause>> {
         @Override
         public Iterable<Cause> apply(Action input) {
             return ((CauseAction) input).getCauses();
         }
     }
 
-    private static class CauseHasPRNum implements Predicate<Cause> {
+    protected static class CauseHasPRNum implements Predicate<Cause> {
         private final int id;
 
         CauseHasPRNum(int id) {

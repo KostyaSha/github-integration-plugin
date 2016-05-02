@@ -23,30 +23,37 @@ import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull
 public class GitHubPRCause extends Cause {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRCause.class);
 
-    private final String headSha;
-    private final int number;
-    private final boolean mergeable;
-    private final String targetBranch;
-    private final String sourceBranch;
-    private final String prAuthorEmail;
+    private String headSha;
+    private int number;
+    private boolean mergeable;
+    private String targetBranch;
+    private String sourceBranch;
+    private String prAuthorEmail;
     @CheckForNull
-    private final String title;
-    private final URL htmlUrl;
-    private final String sourceRepoOwner;
+    private String title;
+    private URL htmlUrl;
+    private String sourceRepoOwner;
     private String triggerSenderName = "";
     private String triggerSenderEmail = "";
     private Set<String> labels;
-    private final String reason;
+    private String reason;
     /**
      * In case triggered because of commit.
      * See {@link org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPROpenEvent}
      */
-    private final String commitAuthorName;
-    private final String commitAuthorEmail;
+    private String commitAuthorName;
+    private String commitAuthorEmail;
 
     private boolean skip;
     private String condRef;
     private String pollingLog;
+
+    public GitHubPRCause() {
+    }
+
+    public static GitHubPRCause newGitHubPRCause() {
+        return new GitHubPRCause();
+    }
 
     public GitHubPRCause(GHPullRequest remotePr,
                          String reason,
@@ -103,6 +110,150 @@ public class GitHubPRCause extends Cause {
         }
 
         this.condRef = mergeable ? "merge" : "head";
+    }
+
+    /**
+     * @see #headSha
+     */
+    public GitHubPRCause withHeadSha(String headSha) {
+        this.headSha = headSha;
+        return this;
+    }
+
+    /**
+     * @see #number
+     */
+    public GitHubPRCause withNumber(int number) {
+        this.number = number;
+        return this;
+    }
+
+    /**
+     * @see #mergeable
+     */
+    public GitHubPRCause withMergeable(boolean mergeable) {
+        this.mergeable = mergeable;
+        return this;
+    }
+
+    /**
+     * @see #targetBranch
+     */
+    public GitHubPRCause withTargetBranch(String targetBranch) {
+        this.targetBranch = targetBranch;
+        return this;
+    }
+
+    /**
+     * @see #sourceBranch
+     */
+    public GitHubPRCause withSourceBranch(String sourceBranch) {
+        this.sourceBranch = sourceBranch;
+        return this;
+    }
+
+    /**
+     * @see #prAuthorEmail
+     */
+    public GitHubPRCause withPrAuthorEmail(String prAuthorEmail) {
+        this.prAuthorEmail = prAuthorEmail;
+        return this;
+    }
+
+    /**
+     * @see #title
+     */
+    public GitHubPRCause withTitle(String title) {
+        this.title = title;
+        return this;
+    }
+
+    /**
+     * @see #htmlUrl
+     */
+    public GitHubPRCause withHtmlUrl(URL htmlUrl) {
+        this.htmlUrl = htmlUrl;
+        return this;
+    }
+
+    /**
+     * @see #sourceRepoOwner
+     */
+    public GitHubPRCause withSourceRepoOwner(String sourceRepoOwner) {
+        this.sourceRepoOwner = sourceRepoOwner;
+        return this;
+    }
+
+    /**
+     * @see #triggerSenderName
+     */
+    public GitHubPRCause withTriggerSenderName(String triggerSenderName) {
+        this.triggerSenderName = triggerSenderName;
+        return this;
+    }
+
+    /**
+     * @see #triggerSenderEmail
+     */
+    public GitHubPRCause withTriggerSenderEmail(String triggerSenderEmail) {
+        this.triggerSenderEmail = triggerSenderEmail;
+        return this;
+    }
+
+    /**
+     * @see #labels
+     */
+    public GitHubPRCause withLabels(Set<String> labels) {
+        this.labels = labels;
+        return this;
+    }
+
+    /**
+     * @see #reason
+     */
+    public GitHubPRCause withReason(String reason) {
+        this.reason = reason;
+        return this;
+    }
+
+    /**
+     * @see #commitAuthorName
+     */
+    public GitHubPRCause withCommitAuthorName(String commitAuthorName) {
+        this.commitAuthorName = commitAuthorName;
+        return this;
+    }
+
+    /**
+     * @see #commitAuthorEmail
+     */
+    public GitHubPRCause withCommitAuthorEmail(String commitAuthorEmail) {
+        this.commitAuthorEmail = commitAuthorEmail;
+        return this;
+    }
+
+    /**
+     * @see #skip
+     */
+    public GitHubPRCause withSkip(boolean skip) {
+        this.skip = skip;
+        return this;
+    }
+
+    /**
+     * @see #condRef
+     */
+    public GitHubPRCause withCondRef(String condRef) {
+        this.condRef = condRef;
+        return this;
+    }
+
+    /**
+     * @see #pollingLog
+     */
+    public GitHubPRCause withPollingLog(String pollingLog) {
+        this.pollingLog = pollingLog;
+        return this;
     }
 
     @Override
