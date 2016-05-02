@@ -28,10 +28,11 @@ import org.jvnet.hudson.test.MockFolder;
 
 import java.util.Collections;
 
-import static org.hamcrest.collection.IsArrayWithSize.arrayWithSize;
+import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.core.Is.is;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRCause.newGitHubPRCause;
 import static org.junit.Assert.assertThat;
+
 
 /**
  * @author Kanstantsin Shautsou
