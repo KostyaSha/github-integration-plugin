@@ -1,9 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest.trigger;
 
 import antlr.ANTLRException;
-import hudson.matrix.MatrixProject;
 import hudson.model.CauseAction;
-import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Job;
 import hudson.model.ParameterValue;
@@ -24,12 +22,10 @@ import org.jvnet.hudson.test.JenkinsRule;
 import java.io.IOException;
 import java.util.Collections;
 
-import static java.util.Collections.singletonList;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.collection.IsArrayWithSize.arrayWithSize;
 import static org.hamcrest.core.Is.is;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRCause.newGitHubPRCause;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Kanstantsin Shautsou
