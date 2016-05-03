@@ -122,26 +122,34 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
      */
     protected int cancelQueuedBuildByPrNumber(final int id) {
         Queue queue = getJenkinsInstance().getQueue();
-
+        //todo replace with stream?
         int canceled = 0;
         for (Queue.Item item : queue.getItems()) {
             if (!(item.task instanceof Job)) {
+                LOGGER.debug("Item {} not instanceof job", item);
                 continue;
             }
 
             final Job<?, ?> jobTask = (Job<?, ?>) item.task;
-            if (jobTask.getDisplayName().equals(job.getDisplayName())) {
+            if (!jobTask.getDisplayName().equals(job.getDisplayName())) {
+                LOGGER.debug("{} != {}", jobTask.getFullName(), job.getFullName());
+                continue;
+            }
 
-                Optional<Cause> cause = from(item.getAllActions())
-                        .filter(instanceOf(CauseAction.class))
-                        .transformAndConcat(new CausesFromAction())
-                        .filter(instanceOf(GitHubPRCause.class))
-                        .firstMatch(new CauseHasPRNum(id));
+            final CauseAction action = item.getAction(CauseAction.class);
+            if (isNull(action)) {
+                LOGGER.debug("Cause action is null for {}", jobTask.getFullName());
+                continue;
+            }
 
-                if (cause.isPresent()) {
-                    queue.cancel(item);
-                    canceled++;
-                }
+            Optional<Cause> cause = from(action.getCauses())
+                    .filter(instanceOf(GitHubPRCause.class))
+                    .firstMatch(new CauseHasPRNum(id));
+
+            if (cause.isPresent()) {
+                LOGGER.debug("Cancelling {}", item);
+                queue.cancel(item);
+                canceled++;
             }
         }
 
