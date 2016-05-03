@@ -1,9 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest.trigger;
 
 import antlr.ANTLRException;
-import hudson.matrix.MatrixProject;
 import hudson.model.CauseAction;
-import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Job;
 import hudson.model.ParameterValue;
@@ -20,16 +18,15 @@ import org.jenkinsci.plugins.github.util.JobInfoHelpers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.MockFolder;
 
 import java.io.IOException;
 import java.util.Collections;
 
-import static java.util.Collections.singletonList;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.collection.IsArrayWithSize.arrayWithSize;
 import static org.hamcrest.core.Is.is;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRCause.newGitHubPRCause;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Kanstantsin Shautsou
@@ -42,8 +39,10 @@ public class JobRunnerForCauseTest {
     @Test
     public void testCancelQueued() throws IOException, InterruptedException, ANTLRException {
         Jenkins jenkins = j.getInstance();
+        MockFolder folder = j.createFolder("folder");
 
-        FreeStyleProject project1 = jenkins.createProject(FreeStyleProject.class, "project1");
+        FreeStyleProject project1 = folder.createProject(FreeStyleProject.class, "project1");
+        project1.setDisplayName("project1 display name");
 
         schedule(project1, 10, "cause1_1");
 
@@ -53,10 +52,12 @@ public class JobRunnerForCauseTest {
         //other number for project1
         schedule(project1, 12, "cause1_3");
 
-        FreeStyleProject project2 = jenkins.createProject(FreeStyleProject.class, "project2");
+        FreeStyleProject project2 = folder.createProject(FreeStyleProject.class, "project2");
+        project2.setDisplayName("project2 displayName");
         schedule(project2, 10, "project2");
 
-        FreeStyleProject project3 = jenkins.createProject(FreeStyleProject.class, "project3");
+        FreeStyleProject project3 = folder.createProject(FreeStyleProject.class, "project3");
+        project2.setDisplayName("project3 displayName");
         schedule(project3, 10, "cause1_3/project3");
 
         Thread.sleep(1000);
@@ -68,7 +69,7 @@ public class JobRunnerForCauseTest {
 
         JobRunnerForCause jobRunnerForCause = new JobRunnerForCause(project1, gitHubPRTrigger);
 
-        assertThat("Should cancel something", jobRunnerForCause.cancelQueuedBuildByPrNumber(10), is(2));
+        assertThat("Should cancel project1 with number", jobRunnerForCause.cancelQueuedBuildByPrNumber(10), is(2));
         Thread.sleep(1000);
 
         Queue.Item[] items = jenkins.getQueue().getItems();

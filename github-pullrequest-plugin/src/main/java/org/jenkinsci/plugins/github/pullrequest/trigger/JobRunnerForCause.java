@@ -125,7 +125,12 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
 
         int canceled = 0;
         for (Queue.Item item : queue.getItems()) {
-            if (item.task.getFullDisplayName().equals(job.getFullDisplayName())) {
+            if (!(item.task instanceof Job)) {
+                continue;
+            }
+
+            final Job<?, ?> jobTask = (Job<?, ?>) item.task;
+            if (jobTask.getDisplayName().equals(job.getDisplayName())) {
 
                 Optional<Cause> cause = from(item.getAllActions())
                         .filter(instanceOf(CauseAction.class))
