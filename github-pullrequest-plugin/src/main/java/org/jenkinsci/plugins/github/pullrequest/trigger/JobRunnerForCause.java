@@ -5,9 +5,13 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import hudson.matrix.MatrixConfiguration;
 import hudson.matrix.MatrixProject;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
+import hudson.model.Computer;
+import hudson.model.Executor;
 import hudson.model.Job;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
@@ -48,6 +52,7 @@ import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TRIGGER_
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TRIGGER_SENDER_EMAIL;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.URL;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.asParameterizedJobMixIn;
 
@@ -73,8 +78,49 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
             StringBuilder sb = new StringBuilder();
             sb.append("Jenkins queued the run (").append(cause.getReason()).append(")");
 
-            if (trigger.isCancelQueued() && cancelQueuedBuildByPrNumber(cause.getNumber())) {
-                sb.append(". Queued builds aborted");
+            if (trigger.isCancelQueued()) {
+                int i = cancelQueuedBuildByPrNumber(cause.getNumber());
+                if (i > 0) {
+                    sb.append(". ");
+                    sb.append(i);
+                    sb.append(" queued builds/runs canceled.");
+                }
+            }
+
+            if (trigger.isAbortRunning()) {
+                Computer[] computers = getJenkinsInstance().getComputers();
+                for (Computer computer : computers) {
+                    if (isNull(computer)) {
+                        continue;
+                    }
+
+                    List<Executor> executors = computer.getExecutors();
+
+                    for (Executor executor : executors) {
+                        if (isNull(executor)) {
+                            continue;
+                        }
+
+                        if (executor.isBusy()) {
+                            Queue.Executable executable = executor.getCurrentExecutable();
+
+                            Queue.Task task = executor.getCurrentWorkUnit().work.getOwnerTask();
+                            if (task instanceof AbstractProject<?, ?>) {
+                                AbstractBuild<?, ?> abstractBuild = (AbstractBuild<?, ?>) task;
+                                if (jobTask.getFullDisplayName().equals(job.getFullDisplayName())) {
+                                    jobTask.
+                                }
+                            } else if (task instanceof Job) {
+                                Job<?, ?> jobTask = (Job<?, ?>) task;
+
+                            }
+
+                            // need check that taskJob.equals (job) +
+                            // build/run has mine cause with my pr number
+                            // then abort it
+                        }
+                    }
+                }
             }
 
             QueueTaskFuture<?> queueTaskFuture = startJob(cause);
@@ -115,23 +161,27 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
     /**
      * Cancel previous builds for specified PR id.
      */
-    private static boolean cancelQueuedBuildByPrNumber(final int id) {
+    protected int cancelQueuedBuildByPrNumber(final int id) {
         Queue queue = getJenkinsInstance().getQueue();
 
-        for (Queue.Item item : queue.getApproximateItemsQuickly()) {
-            Optional<Cause> cause = from(item.getAllActions())
-                    .filter(instanceOf(CauseAction.class))
-                    .transformAndConcat(new CausesFromAction())
-                    .filter(instanceOf(GitHubPRCause.class))
-                    .firstMatch(new CauseHasPRNum(id));
+        int canceled = 0;
+        for (Queue.Item item : queue.getItems()) {
+            if (item.task.getFullDisplayName().equals(job.getFullDisplayName())) {
 
-            if (cause.isPresent()) {
-                queue.cancel(item);
-                return true;
+                Optional<Cause> cause = from(item.getAllActions())
+                        .filter(instanceOf(CauseAction.class))
+                        .transformAndConcat(new CausesFromAction())
+                        .filter(instanceOf(GitHubPRCause.class))
+                        .firstMatch(new CauseHasPRNum(id));
+
+                if (cause.isPresent()) {
+                    queue.cancel(item);
+                    canceled++;
+                }
             }
         }
 
-        return false;
+        return canceled;
     }
 
     private QueueTaskFuture<?> startJob(GitHubPRCause cause) {
@@ -174,7 +224,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
     /**
      * @see jenkins.model.ParameterizedJobMixIn#getDefaultParametersValues()
      */
-    private List<ParameterValue> getDefaultParametersValues() {
+    protected List<ParameterValue> getDefaultParametersValues() {
         ParametersDefinitionProperty paramDefProp = job.getProperty(ParametersDefinitionProperty.class);
         List<ParameterValue> defValues = new ArrayList<>();
 
@@ -197,14 +247,14 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
         return defValues;
     }
 
-    private static class CausesFromAction implements Function<Action, Iterable<Cause>> {
+    protected static class CausesFromAction implements Function<Action, Iterable<Cause>> {
         @Override
         public Iterable<Cause> apply(Action input) {
             return ((CauseAction) input).getCauses();
         }
     }
 
-    private static class CauseHasPRNum implements Predicate<Cause> {
+    protected static class CauseHasPRNum implements Predicate<Cause> {
         private final int id;
 
         CauseHasPRNum(int id) {
