@@ -131,7 +131,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
             }
 
             final Job<?, ?> jobTask = (Job<?, ?>) item.task;
-            if (!jobTask.getDisplayName().equals(job.getDisplayName())) {
+            if (!jobTask.getFullName().equals(job.getFullName())) {
                 LOGGER.debug("{} != {}", jobTask.getFullName(), job.getFullName());
                 continue;
             }
