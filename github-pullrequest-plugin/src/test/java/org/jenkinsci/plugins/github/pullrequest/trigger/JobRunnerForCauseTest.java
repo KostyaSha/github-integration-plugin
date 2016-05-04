@@ -15,6 +15,7 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.jenkinsci.plugins.github.util.JobInfoHelpers;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -60,8 +61,45 @@ public class JobRunnerForCauseTest {
         project2.setDisplayName("project3 displayName");
         schedule(project3, 10, "cause1_3/project3");
 
-        Thread.sleep(1000);
         assertThat(jenkins.getQueue().getItems(), arrayWithSize(5));
+
+        GitHubPRTrigger gitHubPRTrigger = new GitHubPRTrigger("", GitHubPRTriggerMode.HEAVY_HOOKS, null);
+        gitHubPRTrigger.setCancelQueued(true);
+
+        JobRunnerForCause jobRunnerForCause = new JobRunnerForCause(project1, gitHubPRTrigger);
+
+        assertThat("Should cancel project1 with number", jobRunnerForCause.cancelQueuedBuildByPrNumber(10), is(2));
+
+        Queue.Item[] items = jenkins.getQueue().getItems();
+        assertThat(items, arrayWithSize(3));
+    }
+
+    @Test
+    public void testCancelQueuedWithWorkflowJob() throws IOException, InterruptedException, ANTLRException {
+        Jenkins jenkins = j.getInstance();
+        Queue queue = jenkins.getQueue();
+        MockFolder folder = j.createFolder("folder");
+
+        WorkflowJob project1 = folder.createProject(WorkflowJob.class, "project1");
+        project1.setDisplayName("project1 display name");
+
+        schedule(project1, 10, "cause1_1");
+
+        // two PR for one project in queue
+        schedule(project1, 10, "cause1_2");
+
+        //other number for project1
+        schedule(project1, 12, "cause1_3");
+
+        WorkflowJob project2 = folder.createProject(WorkflowJob.class, "project2");
+        project2.setDisplayName("project2 displayName");
+        schedule(project2, 10, "project2");
+
+        WorkflowJob project3 = folder.createProject(WorkflowJob.class, "project3");
+        project2.setDisplayName("project3 displayName");
+        schedule(project3, 10, "cause1_3/project3");
+
+        assertThat(queue.getItems(), arrayWithSize(5));
 
 
         GitHubPRTrigger gitHubPRTrigger = new GitHubPRTrigger("", GitHubPRTriggerMode.HEAVY_HOOKS, null);
@@ -70,9 +108,12 @@ public class JobRunnerForCauseTest {
         JobRunnerForCause jobRunnerForCause = new JobRunnerForCause(project1, gitHubPRTrigger);
 
         assertThat("Should cancel project1 with number", jobRunnerForCause.cancelQueuedBuildByPrNumber(10), is(2));
-        Thread.sleep(1000);
+        assertThat("Should cancel project1 with number", jobRunnerForCause.cancelQueuedBuildByPrNumber(10), is(0));
 
-        Queue.Item[] items = jenkins.getQueue().getItems();
+        schedule(project1, 10, "cause_1");
+        assertThat("Should cancel project1 with number", jobRunnerForCause.cancelQueuedBuildByPrNumber(10), is(1));
+
+        Queue.Item[] items = queue.getItems();
         assertThat(items, arrayWithSize(3));
     }
 
