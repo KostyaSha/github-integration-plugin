@@ -168,7 +168,7 @@ public class JobRunnerForCauseTest {
 
         j.jenkins.setAuthorizationStrategy(new AuthorizationStrategy.Unsecured());
 
-        j.configRoundtrip(job);
+//        j.configRoundtrip(job);
 
         j.getInstance().setAuthorizationStrategy(before);
     }
