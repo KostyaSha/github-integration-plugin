@@ -18,11 +18,13 @@ import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Queue;
+import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.model.queue.SubTask;
 import hudson.security.ACL;
 import javaposse.jobdsl.dsl.jobs.WorkflowJob;
+import jenkins.model.CauseOfInterruption;
 import jenkins.model.ParameterizedJobMixIn;
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
@@ -144,7 +146,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
         return true;
     }
 
-    public int abortRunning(int number) {
+    public synchronized int abortRunning(int number) {
         int aborted = 0;
 
         Computer[] computers = getJenkinsInstance().getComputers();
@@ -175,6 +177,11 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                     final WorkflowJob workflowJob = (WorkflowJob) parent;
                 } else if (executable instanceof Run) {
                     final Run executableRun = (Run) executable;
+                    if (executableRun.getResult() == Result.ABORTED) {
+                        continue;
+                    }
+
+
                     if (parent instanceof Job && ((Job) parent).getFullName().equals(job.getFullName())) {
                         if (parent instanceof WorkflowJob) {
 
@@ -184,7 +191,12 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                             final GitHubPRCause causeAction = (GitHubPRCause) executableRun.getCause(GitHubPRCause.class);
                             if (nonNull(causeAction) && causeAction.getNumber() == number) {
                                 LOGGER.info("Aborting {}", executableRun);
-                                executor.abortResult();
+                                executor.interrupt(Result.ABORTED, new CauseOfInterruption() {
+                                    @Override
+                                    public String getShortDescription() {
+                                        return "Newer PR will be scheduled.";
+                                    }
+                                });
                                 aborted++;
                             }
                         }
