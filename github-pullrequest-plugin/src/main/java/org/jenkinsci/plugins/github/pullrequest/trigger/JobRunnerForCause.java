@@ -15,7 +15,10 @@ import hudson.model.ParametersAction;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Queue;
 import hudson.model.queue.QueueTaskFuture;
+import hudson.security.ACL;
 import jenkins.model.ParameterizedJobMixIn;
+import org.acegisecurity.context.SecurityContext;
+import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRBadgeAction;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
@@ -31,6 +34,7 @@ import java.util.List;
 
 import static com.cloudbees.jenkins.GitHubWebHook.getJenkinsInstance;
 import static com.google.common.base.Predicates.instanceOf;
+import static hudson.security.ACL.impersonate;
 import static java.util.Arrays.asList;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.AUTHOR_EMAIL;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.CAUSE_SKIP;
@@ -66,15 +70,22 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
     }
 
     @Override
-    public boolean apply(GitHubPRCause cause) {
+    public boolean apply(final GitHubPRCause cause) {
+        SecurityContext old = ACL.impersonate(ACL.SYSTEM);
+
         try {
             cause.setPollingLog(trigger.getPollingLogAction().getPollingLogFile());
 
             StringBuilder sb = new StringBuilder();
             sb.append("Jenkins queued the run (").append(cause.getReason()).append(")");
 
-            if (trigger.isCancelQueued() && cancelQueuedBuildByPrNumber(cause.getNumber())) {
-                sb.append(". Queued builds aborted");
+            if (trigger.isCancelQueued()) {
+                int i = cancelQueuedBuildByPrNumber(cause.getNumber());
+                if (i > 0) {
+                    sb.append(". ");
+                    sb.append(i);
+                    sb.append(" queued builds/runs canceled.");
+                }
             }
 
             QueueTaskFuture<?> queueTaskFuture = startJob(cause);
@@ -108,6 +119,8 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
         } catch (IOException e) {
             LOGGER.error("Can't trigger build ({})", e.getMessage(), e);
             return false;
+        } finally {
+            SecurityContextHolder.setContext(old);
         }
         return true;
     }
@@ -115,23 +128,47 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
     /**
      * Cancel previous builds for specified PR id.
      */
-    private static boolean cancelQueuedBuildByPrNumber(final int id) {
-        Queue queue = getJenkinsInstance().getQueue();
+    protected int cancelQueuedBuildByPrNumber(final int id) {
+        int canceled = 0;
+        SecurityContext old = impersonate(ACL.SYSTEM);
+        try {
+            final Queue queue = getJenkinsInstance().getQueue();
+            final Queue.Item[] items = queue.getItems();
 
-        for (Queue.Item item : queue.getApproximateItemsQuickly()) {
-            Optional<Cause> cause = from(item.getAllActions())
-                    .filter(instanceOf(CauseAction.class))
-                    .transformAndConcat(new CausesFromAction())
-                    .filter(instanceOf(GitHubPRCause.class))
-                    .firstMatch(new CauseHasPRNum(id));
+            //todo replace with stream?
+            for (Queue.Item item : items) {
+                if (!(item.task instanceof Job)) {
+                    LOGGER.debug("Item {} not instanceof job", item);
+                    continue;
+                }
 
-            if (cause.isPresent()) {
-                queue.cancel(item);
-                return true;
+                final Job<?, ?> jobTask = (Job<?, ?>) item.task;
+                if (!jobTask.getFullName().equals(job.getFullName())) {
+                    LOGGER.debug("{} != {}", jobTask.getFullName(), job.getFullName());
+                    continue;
+                }
+
+                final CauseAction action = item.getAction(CauseAction.class);
+                if (isNull(action)) {
+                    LOGGER.debug("Cause action is null for {}", jobTask.getFullName());
+                    continue;
+                }
+
+                Optional<Cause> cause = from(action.getCauses())
+                        .filter(instanceOf(GitHubPRCause.class))
+                        .firstMatch(new CauseHasPRNum(id));
+
+                if (cause.isPresent()) {
+                    LOGGER.debug("Cancelling {}", item);
+                    queue.cancel(item);
+                    canceled++;
+                }
             }
+        } finally {
+            SecurityContextHolder.setContext(old);
         }
 
-        return false;
+        return canceled;
     }
 
     private QueueTaskFuture<?> startJob(GitHubPRCause cause) {
@@ -174,7 +211,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
     /**
      * @see jenkins.model.ParameterizedJobMixIn#getDefaultParametersValues()
      */
-    private List<ParameterValue> getDefaultParametersValues() {
+    protected List<ParameterValue> getDefaultParametersValues() {
         ParametersDefinitionProperty paramDefProp = job.getProperty(ParametersDefinitionProperty.class);
         List<ParameterValue> defValues = new ArrayList<>();
 
@@ -197,14 +234,14 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
         return defValues;
     }
 
-    private static class CausesFromAction implements Function<Action, Iterable<Cause>> {
+    protected static class CausesFromAction implements Function<Action, Iterable<Cause>> {
         @Override
         public Iterable<Cause> apply(Action input) {
             return ((CauseAction) input).getCauses();
         }
     }
 
-    private static class CauseHasPRNum implements Predicate<Cause> {
+    protected static class CauseHasPRNum implements Predicate<Cause> {
         private final int id;
 
         CauseHasPRNum(int id) {
