@@ -18,8 +18,11 @@ import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Queue;
+import hudson.model.Run;
 import hudson.model.queue.QueueTaskFuture;
+import hudson.model.queue.SubTask;
 import hudson.security.ACL;
+import javaposse.jobdsl.dsl.jobs.WorkflowJob;
 import jenkins.model.ParameterizedJobMixIn;
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
@@ -27,6 +30,8 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRBadgeAction;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
+import org.jenkinsci.plugins.github.pullrequest.utils.JobHelper;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.kohsuke.github.GHCommitState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,38 +99,11 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
             }
 
             if (trigger.isAbortRunning()) {
-                Computer[] computers = getJenkinsInstance().getComputers();
-                for (Computer computer : computers) {
-                    if (isNull(computer)) {
-                        continue;
-                    }
-
-                    List<Executor> executors = computer.getExecutors();
-
-                    for (Executor executor : executors) {
-                        if (isNull(executor)) {
-                            continue;
-                        }
-
-                        if (executor.isBusy()) {
-                            Queue.Executable executable = executor.getCurrentExecutable();
-
-                            Queue.Task task = executor.getCurrentWorkUnit().work.getOwnerTask();
-                            if (task instanceof AbstractProject<?, ?>) {
-                                AbstractBuild<?, ?> abstractBuild = (AbstractBuild<?, ?>) task;
-                                if (jobTask.getFullDisplayName().equals(job.getFullDisplayName())) {
-                                    jobTask.
-                                }
-                            } else if (task instanceof Job) {
-                                Job<?, ?> jobTask = (Job<?, ?>) task;
-
-                            }
-
-                            // need check that taskJob.equals (job) +
-                            // build/run has mine cause with my pr number
-                            // then abort it
-                        }
-                    }
+                final int i = abortRunning(cause.getNumber());
+                if (i > 0) {
+                    sb.append(". ");
+                    sb.append(i);
+                    sb.append(" running builds/runs aborted.");
                 }
             }
 
@@ -164,6 +142,65 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
             SecurityContextHolder.setContext(old);
         }
         return true;
+    }
+
+    public int abortRunning(int number) {
+        int aborted = 0;
+
+        Computer[] computers = getJenkinsInstance().getComputers();
+        for (Computer computer : computers) {
+            if (isNull(computer)) {
+                continue;
+            }
+
+            List<Executor> executors = computer.getExecutors();
+            executors.addAll(computer.getOneOffExecutors());
+
+            for (Executor executor : executors) {
+                if (isNull(executor)) {
+                    continue;
+                }
+
+                if (!executor.isBusy()) {
+                    continue;
+                }
+
+                Queue.Executable executable = executor.getCurrentExecutable();
+                final SubTask parent = executable.getParent();
+
+                if (executable instanceof WorkflowRun) {
+                    // we want interrupt parent run
+                    continue;
+                } else if (executable instanceof WorkflowJob) {
+                    final WorkflowJob workflowJob = (WorkflowJob) parent;
+                } else if (executable instanceof Run) {
+                    final Run executableRun = (Run) executable;
+                    if (parent instanceof Job && ((Job) parent).getFullName().equals(job.getFullName())) {
+                        if (parent instanceof WorkflowJob) {
+
+                        } else if (parent instanceof MatrixConfiguration) {
+
+                        } else {
+                            final GitHubPRCause causeAction = (GitHubPRCause) executableRun.getCause(GitHubPRCause.class);
+                            if (nonNull(causeAction) && causeAction.getNumber() == number) {
+                                LOGGER.info("Aborting {}", executableRun);
+                                executor.abortResult();
+                                aborted++;
+                            }
+                        }
+                    }
+
+
+//                    Queue.Task task = executor.getCurrentWorkUnit().work.getOwnerTask();
+//                    if (task instanceof Job) {
+//                        Job<?, ?> jobTask = (Job<?, ?>) task;
+//
+//                    }
+                }
+            }
+        }
+
+        return aborted;
     }
 
     /**
