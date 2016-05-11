@@ -25,6 +25,7 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.jenkinsci.plugins.github.util.JobInfoHelpers;
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.junit.Rule;
 import org.junit.Test;
@@ -210,6 +211,35 @@ public class JobRunnerForCauseTest {
         testAbortRunning(job1, job2, job3);
     }
 
+    @Test
+    public void testAbortRunningWorkflow() throws Exception {
+
+        MockFolder folder = j.createFolder("folder");
+
+        WorkflowJob job1 = folder.createProject(WorkflowJob.class, "project1");
+        job1.setDisplayName("project1 display name");
+        job1.setConcurrentBuild(true);
+        job1.setDefinition(new SleepFlow());
+        configRoundTripUnsecure(job1);
+        job1.save();
+
+        WorkflowJob job2 = folder.createProject(WorkflowJob.class, "project2");
+        job2.setDisplayName("project1 display name");
+        job2.setConcurrentBuild(true);
+        job2.setDefinition(new SleepFlow());
+        configRoundTripUnsecure(job2);
+        job2.save();
+
+        WorkflowJob job3 = folder.createProject(WorkflowJob.class, "project3");
+        job3.setDisplayName("project1 display name");
+        job3.setConcurrentBuild(true);
+        job3.setDefinition(new SleepFlow());
+        configRoundTripUnsecure(job3);
+        job3.save();
+
+        testAbortRunning(job1, job2, job3);
+    }
+
     private <T extends TopLevelItem> void testAbortRunning(Job<?, ?> job1, Job<?, ?> job2, Job<?, ?> job3) throws Exception {
         Jenkins jenkins = j.getInstance();
 
@@ -299,6 +329,12 @@ public class JobRunnerForCauseTest {
                 throws InterruptedException, IOException {
             TimeUnit.MINUTES.sleep(15);
             return true;
+        }
+    }
+
+    public static class SleepFlow extends CpsFlowDefinition {
+        public SleepFlow() {
+            super("node('master') { sh 'sleep 10000 && env' }");
         }
     }
 }
