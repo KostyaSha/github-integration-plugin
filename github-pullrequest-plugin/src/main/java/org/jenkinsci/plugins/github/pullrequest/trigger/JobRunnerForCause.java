@@ -5,17 +5,26 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import hudson.matrix.MatrixConfiguration;
 import hudson.matrix.MatrixProject;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
+import hudson.model.Computer;
+import hudson.model.Executor;
 import hudson.model.Job;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Queue;
+import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.queue.QueueTaskFuture;
+import hudson.model.queue.SubTask;
 import hudson.security.ACL;
+import javaposse.jobdsl.dsl.jobs.WorkflowJob;
+import jenkins.model.CauseOfInterruption;
 import jenkins.model.ParameterizedJobMixIn;
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
@@ -23,6 +32,8 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRBadgeAction;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
+import org.jenkinsci.plugins.github.pullrequest.utils.JobHelper;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.kohsuke.github.GHCommitState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +63,7 @@ import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TRIGGER_
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TRIGGER_SENDER_EMAIL;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.URL;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.asParameterizedJobMixIn;
 
@@ -85,6 +97,15 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                     sb.append(". ");
                     sb.append(i);
                     sb.append(" queued builds/runs canceled.");
+                }
+            }
+
+            if (trigger.isAbortRunning()) {
+                final int i = abortRunning(cause.getNumber());
+                if (i > 0) {
+                    sb.append(". ");
+                    sb.append(i);
+                    sb.append(" running builds/runs aborted.");
                 }
             }
 
@@ -123,6 +144,75 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
             SecurityContextHolder.setContext(old);
         }
         return true;
+    }
+
+    public synchronized int abortRunning(int number) {
+        int aborted = 0;
+
+        Computer[] computers = getJenkinsInstance().getComputers();
+        for (Computer computer : computers) {
+            if (isNull(computer)) {
+                continue;
+            }
+
+            List<Executor> executors = computer.getExecutors();
+            executors.addAll(computer.getOneOffExecutors());
+
+            for (Executor executor : executors) {
+                if (isNull(executor)) {
+                    continue;
+                }
+
+                if (!executor.isBusy()) {
+                    continue;
+                }
+
+                Queue.Executable executable = executor.getCurrentExecutable();
+                final SubTask parent = executable.getParent();
+
+                if (executable instanceof WorkflowRun) {
+                    // we want interrupt parent run
+                    continue;
+                } else if (executable instanceof WorkflowJob) {
+                    final WorkflowJob workflowJob = (WorkflowJob) parent;
+                } else if (executable instanceof Run) {
+                    final Run executableRun = (Run) executable;
+                    if (executableRun.getResult() == Result.ABORTED) {
+                        continue;
+                    }
+
+
+                    if (parent instanceof Job && ((Job) parent).getFullName().equals(job.getFullName())) {
+                        if (parent instanceof WorkflowJob) {
+
+                        } else if (parent instanceof MatrixConfiguration) {
+
+                        } else {
+                            final GitHubPRCause causeAction = (GitHubPRCause) executableRun.getCause(GitHubPRCause.class);
+                            if (nonNull(causeAction) && causeAction.getNumber() == number) {
+                                LOGGER.info("Aborting {}", executableRun);
+                                executor.interrupt(Result.ABORTED, new CauseOfInterruption() {
+                                    @Override
+                                    public String getShortDescription() {
+                                        return "Newer PR will be scheduled.";
+                                    }
+                                });
+                                aborted++;
+                            }
+                        }
+                    }
+
+
+//                    Queue.Task task = executor.getCurrentWorkUnit().work.getOwnerTask();
+//                    if (task instanceof Job) {
+//                        Job<?, ?> jobTask = (Job<?, ?>) task;
+//
+//                    }
+                }
+            }
+        }
+
+        return aborted;
     }
 
     /**
