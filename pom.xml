@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>github-integration-parent</artifactId>
-    <version>0.1.0-rc7</version>
+    <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>GitHub Integration Parent</name>
@@ -39,7 +39,7 @@
         <connection>scm:git:ssh://github.com/jenkinsci/github-integration-plugin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/jenkinsci/github-integration-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/github-integration-plugin.git</url>
-        <tag>github-integration-parent-0.1.0-rc7</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
