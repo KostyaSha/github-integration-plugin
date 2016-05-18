@@ -4,6 +4,7 @@
 
 ## 0.1.0-rc7
  * [PR] Fixed cancel queued builds.
+ * [PR] New feature: abort running builds.
 
 ## 0.1.0-rc6
  * [PR] Show badge in build history instead raw html.
