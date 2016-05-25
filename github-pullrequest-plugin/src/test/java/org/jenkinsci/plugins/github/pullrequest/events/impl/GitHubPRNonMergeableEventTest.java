@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kohsuke.github.GHCommitPointer;
 import org.kohsuke.github.GHIssue;
+import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
@@ -59,6 +60,7 @@ public class GitHubPRNonMergeableEventTest {
         when(remotePr.getRepository()).thenReturn(ghRepository);
         when(ghRepository.getIssue(0)).thenReturn(ghIssue);
         when(ghIssue.getLabels()).thenReturn(Collections.<GHLabel>emptySet());
+        when(remotePr.getState()).thenReturn(GHIssueState.OPEN);
     }
 
     @Test

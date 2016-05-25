@@ -81,6 +81,7 @@ public class PullRequestToCauseConverterTest {
         when(remotePR.getHead()).thenReturn(commit);
         when(remotePR.getBase()).thenReturn(commit);
         when(remotePR.getRepository()).thenReturn(remoteRepo);
+        when(remotePR.getState()).thenReturn(GHIssueState.OPEN);
         when(remoteRepo.getIssue(Matchers.any(Integer.class))).thenReturn(new GHIssue());
     }
 
