@@ -1,6 +1,7 @@
 ## Changelog
 
 ## next 
+ * [PR] Insert PR state as variable.
 
 ## 0.1.0-rc7
  * [PR] Fixed cancel queued builds.
