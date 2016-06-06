@@ -10,4 +10,4 @@ GitHub Integration Plugin
 
 # Disclaimer
 
-* Backward compatibility may be broken in any time.
+* Backward compatibility may be broken in any time. (But wasn't in the last year.)
