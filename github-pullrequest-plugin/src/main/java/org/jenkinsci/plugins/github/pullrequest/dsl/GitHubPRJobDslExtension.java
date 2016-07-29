@@ -33,7 +33,7 @@ public class GitHubPRJobDslExtension extends ContextExtensionPoint {
     }
 
     @DslExtensionMethod(context = PublisherContext.class)
-    public Object commitStatusOnGH(Runnable closure) throws ANTLRException {
+    public Object commitStatusOnGH(Runnable closure) {
 
         GitHubPRStatusPublisherDslContext context = new GitHubPRStatusPublisherDslContext();
         executeInContext(closure, context);
@@ -48,7 +48,7 @@ public class GitHubPRJobDslExtension extends ContextExtensionPoint {
     }
 
     @DslExtensionMethod(context = StepContext.class)
-    public Object updateStatusOnGH(Runnable closure) throws ANTLRException {
+    public Object updateStatusOnGH(Runnable closure) {
         GitHubPRStatusStepDslContext context = new GitHubPRStatusStepDslContext();
         executeInContext(closure, context);
 
