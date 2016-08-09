@@ -1,0 +1,6 @@
+This was started as rewritten version of https://wiki.jenkins-ci.org/display/JENKINS/GitHub+pull+request+builder+plugin[ghprb-plugin]
+ that after many years was in complex code state when keeping backward compatibility with fixing all bugs almost
+ impossible and makes no sense (IMHO).
+ Code was inspired by github-plugin, git-plugin, ghprb-plugin and others.
+ Other GitHub related features will be made as part of future github-integration-plugin that should also include github-pullrequest-plugin.
+ PR plugin is separate to keep backward compatibility for those who already using it. Experimental features will be in some experimental submodule.
