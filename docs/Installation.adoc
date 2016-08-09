@@ -1,0 +1,7 @@
+== Installation
+
+* Default (main) Update Center from jenkins installation.
+* Experimental releases are in https://jenkins-ci.org/content/experimental-plugins-update-center/[Experimental Update Center].
+Which is also the preferred way of installation.
+* If you don't want to change your Update Center, you can the download the `.hpi` from a mirror
+http://mirrors.jenkins-ci.org/plugins/github-pullrequest/ and upload it to Jenkins Plugin Manager.

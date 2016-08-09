@@ -1,0 +1,10 @@
+== FAQ
+
+==== Environment variables disappeared for triggered build!
+
+Set `-Dhudson.model.ParametersAction.keepUndefinedParameters=true` for jenkins java process. Caused by "ugly" `SECURITY-170` fix.
+
+==== Option `Pipeline script from SCM` doesn't work
+
+Please see https://github.com/KostyaSha/github-integration-plugin/issues/60#issuecomment-200060734
+Example of workaround: https://gist.github.com/kad/4a5a8f669d4a4090b43be1f1c5461df3

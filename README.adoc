@@ -1,0 +1,12 @@
+= GitHub Integration Plugin
+
+== GitHub Pull Request Plugin
+image:https://img.shields.io/sonar/http/sonar.lanwen.ru/org.jenkins-ci.plugins:github-pullrequest/coverage.svg?style=flat[Coverage, link="http://sonar.lanwen.ru/dashboard/index?id=org.jenkins-ci.plugins:github-pullrequest"]
+
+== Documentation
+
+link:/docs[docs subdirectory]
+
+== Disclaimer
+
+* Backward compatibility may be broken in any time. (But wasn't in the last year and kept when it possible)
