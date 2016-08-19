@@ -8,6 +8,7 @@ import javaposse.jobdsl.dsl.helpers.triggers.TriggerContext;
 import javaposse.jobdsl.plugin.ContextExtensionPoint;
 import javaposse.jobdsl.plugin.DslExtensionMethod;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
+import org.jenkinsci.plugins.github.pullrequest.builders.GitHubPRStatusBuilder;
 import org.jenkinsci.plugins.github.pullrequest.dsl.context.GitHubPRTriggerDslContext;
 import org.jenkinsci.plugins.github.pullrequest.dsl.context.publishers.GitHubPRStatusPublisherDslContext;
 import org.jenkinsci.plugins.github.pullrequest.dsl.context.steps.GitHubPRStatusStepDslContext;
@@ -52,12 +53,6 @@ public class GitHubPRJobDslExtension extends ContextExtensionPoint {
         GitHubPRStatusStepDslContext context = new GitHubPRStatusStepDslContext();
         executeInContext(closure, context);
 
-        return new GitHubPRBuildStatusPublisher(
-                context.message(),
-                null,
-                null,
-                null,
-                null
-        );
+        return new GitHubPRStatusBuilder(context.message());
     }
 }
