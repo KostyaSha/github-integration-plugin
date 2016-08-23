@@ -37,6 +37,12 @@ freeStyleJob('gh-pull-request') {
         }
     }
 
+    steps {
+        updateStatusOnGH {
+            message('Building...')
+        }
+    }
+
     publishers {
         commitStatusOnGH {
             unstableAsError()

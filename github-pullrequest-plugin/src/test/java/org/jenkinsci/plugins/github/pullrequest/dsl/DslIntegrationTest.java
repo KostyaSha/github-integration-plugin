@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.github.pullrequest.dsl;
 
 import hudson.model.Descriptor;
 import hudson.model.FreeStyleProject;
+import hudson.tasks.Builder;
 import hudson.tasks.Publisher;
 import hudson.triggers.Trigger;
 import hudson.util.DescribableList;
@@ -11,6 +12,7 @@ import javaposse.jobdsl.plugin.RemovedJobAction;
 import javaposse.jobdsl.plugin.RemovedViewAction;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
+import org.jenkinsci.plugins.github.pullrequest.builders.GitHubPRStatusBuilder;
 import org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRBuildStatusPublisher;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,6 +33,7 @@ public class DslIntegrationTest {
     public static final String JOB_NAME_IN_DSL_SCRIPT = "gh-pull-request";
     public static final String JOB_DSL_GROOVY = "dsl/jobdsl.groovy";
     public static final String JOB_DSL_PUBLISHER_TEXT_CONTENT = "Build finished";
+    public static final String JOB_DSL_BUILDER_TEXT_CONTENT = "Building...";
 
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
@@ -59,6 +62,15 @@ public class DslIntegrationTest {
         FreeStyleProject generated = jenkins.getInstance()
                 .getItemByFullName(JOB_NAME_IN_DSL_SCRIPT, FreeStyleProject.class);
 
+        final DescribableList<Builder, Descriptor<Builder>> builders = generated.getBuildersList();
+
+        assertThat("Should have builder", builders, hasSize(1));
+        assertThat("Should add status builder", builders.get(0), instanceOf(GitHubPRStatusBuilder.class));
+        assertThat("Should add message",
+                ((GitHubPRStatusBuilder) builders.get(0)).getStatusMessage().getContent(),
+                equalTo(JOB_DSL_BUILDER_TEXT_CONTENT));
+
+
         DescribableList<Publisher, Descriptor<Publisher>> publishers = generated.getPublishersList();
 
         assertThat("Should add publisher", publishers, hasSize(1));
@@ -69,11 +81,11 @@ public class DslIntegrationTest {
 
         Collection<Trigger<?>> triggers = generated.getTriggers().values();
         assertThat("Should add trigger", triggers, hasSize(1));
-        GitHubPRTrigger trigger = (GitHubPRTrigger)triggers.toArray()[0];
+        GitHubPRTrigger trigger = (GitHubPRTrigger) triggers.toArray()[0];
         assertThat("Should add trigger of GHPR class", trigger, instanceOf(GitHubPRTrigger.class));
         assertThat("Should have pre status", trigger.isPreStatus(), equalTo(true));
         assertThat("Should have cancel queued", trigger.isCancelQueued(), equalTo(true));
-        assertThat("Should add events", ((GitHubPRTrigger) trigger).getEvents(), hasSize(15));
-        assertThat("Should set mode", ((GitHubPRTrigger) trigger).getTriggerMode(), equalTo(HEAVY_HOOKS_CRON));
+        assertThat("Should add events", trigger.getEvents(), hasSize(15));
+        assertThat("Should set mode", trigger.getTriggerMode(), equalTo(HEAVY_HOOKS_CRON));
     }
 }
