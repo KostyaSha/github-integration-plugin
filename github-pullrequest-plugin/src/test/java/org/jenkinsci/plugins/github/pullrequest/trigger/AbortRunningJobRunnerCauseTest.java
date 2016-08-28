@@ -19,6 +19,7 @@ import org.hamcrest.collection.IsArrayWithSize;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.jvnet.hudson.test.MockFolder;
 import org.jvnet.hudson.test.RandomlyFails;
@@ -37,6 +38,7 @@ import static org.junit.Assert.assertThat;
 /**
  * @author Kanstantsin Shautsou
  */
+@Ignore
 public class AbortRunningJobRunnerCauseTest extends JobRunnerForCauseTest {
     private static final Logger LOG = LoggerFactory.getLogger(AbortRunningJobRunnerCauseTest.class);
 
