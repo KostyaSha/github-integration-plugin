@@ -1,7 +1,8 @@
 ## Changelog
 
-## next 
+## 0.1.0-rc8 
  * [PR] Insert PR state as variable.
+ * [PR] Add job-dsl for BuildStep status updater.
 
 ## 0.1.0-rc7
  * [PR] Fixed cancel queued builds.
