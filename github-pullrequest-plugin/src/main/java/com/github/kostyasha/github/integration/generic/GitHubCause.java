@@ -1,7 +1,6 @@
 package com.github.kostyasha.github.integration.generic;
 
 import hudson.model.Cause;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
