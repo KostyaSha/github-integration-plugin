@@ -19,6 +19,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import javax.annotation.CheckForNull;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -29,13 +30,14 @@ import java.util.List;
 import static org.hamcrest.Matchers.hasSize;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Alina_Karpovich
  */
-@Ignore(value = "Mock issues")
+//@Ignore(value = "Mock issues")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({GithubProjectProperty.class, GithubUrl.class})
 public class GitHubPRRepositoryFactoryTest {
@@ -86,14 +88,15 @@ public class GitHubPRRepositoryFactoryTest {
         createForCommonExpectations(filePath, job, trigger);
 
         GitHubPRRepository repo = getRepo(new GitHubPRRepositoryFactory().createFor(job));
-        Field project = TestUtil.getPrivateField("project", GitHubPRRepository.class);
-        Field configFileField = TestUtil.getPrivateField("configFile", GitHubPRRepository.class);
-        XmlFile configFile = (XmlFile) configFileField.get(repo);
+//        Field project = TestUtil.getPrivateField("job", GitHubPRRepository.class);
+//        Field configFileField = TestUtil.getPrivateField("configFile", GitHubPRRepository.class);
+        XmlFile configFile = repo.getConfigFile();
 
-        Assert.assertEquals(job, project.get(repo));
+        Assert.assertEquals(job, trigger.getJob());
         Assert.assertEquals(new File(filePath), configFile.getFile().getParentFile());
     }
 
+    @CheckForNull
     public static GitHubPRRepository getRepo(Collection<? extends Action> repoCollection) {
         GitHubPRRepository repo = null;
         for (Iterator<GitHubPRRepository> iterator = (Iterator<GitHubPRRepository>) repoCollection.iterator(); iterator.hasNext(); ) {
@@ -108,7 +111,7 @@ public class GitHubPRRepositoryFactoryTest {
      * @param job     mock job.
      * @param trigger mock trigger that is expected to be returned via job.getTrigger(GitHubPRTrigger.class).
      */
-    public static void createForCommonExpectations(Job<?, ?> job, GitHubPRTrigger trigger) {
+    public static void createForCommonExpectations(AbstractProject<?, ?> job, GitHubPRTrigger trigger) {
         createForCommonExpectations(CONFIG_PATH, job, trigger);
     }
 
@@ -120,14 +123,15 @@ public class GitHubPRRepositoryFactoryTest {
      * @param trigger  mock trigger that is expected to be returned via job.getTrigger(GitHubPRTrigger.class).
      */
     public static void createForCommonExpectations(String filePath,
-                                                   Job<?, ?> job,
+                                                   AbstractProject<?, ?> job,
                                                    GitHubPRTrigger trigger) {
         GithubUrl githubUrl = PowerMockito.mock(GithubUrl.class);
         GithubProjectProperty projectProperty = PowerMockito.mock(GithubProjectProperty.class);
 
         File file = new File(filePath);
         when(job.getRootDir()).thenReturn(file);
-        when(ghPRTriggerFromJob(job)).thenReturn(trigger);
+        when(job.getTrigger(GitHubPRTrigger.class)).thenReturn(trigger);
+//        when(ghPRTriggerFromJob(job)).thenReturn(trigger);
         when(trigger.getRepoFullName(job)).thenReturn(mock(GitHubRepositoryName.class));
         when(job.getProperty(GithubProjectProperty.class)).thenReturn(projectProperty);
         when(projectProperty.getProjectUrl()).thenReturn(githubUrl);

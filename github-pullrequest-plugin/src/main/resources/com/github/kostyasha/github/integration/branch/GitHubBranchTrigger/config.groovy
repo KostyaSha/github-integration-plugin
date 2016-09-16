@@ -31,7 +31,7 @@ f.block {
             f.checkbox()
         }
 
-        f.entry(title: "Skip older PRs on first run", field: "skipFirstRun") {
+        f.entry(title: "Skip older branches on first run", field: "skipFirstRun") {
             f.checkbox()
         }
 

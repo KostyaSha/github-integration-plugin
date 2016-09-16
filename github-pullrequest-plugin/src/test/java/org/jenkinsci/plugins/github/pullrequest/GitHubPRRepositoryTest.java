@@ -4,6 +4,7 @@ import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import com.coravy.hudson.plugins.github.GithubUrl;
 import hudson.BulkChange;
 import hudson.Functions;
+import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Cause;
 import hudson.model.Item;
@@ -61,7 +62,7 @@ public class GitHubPRRepositoryTest {
     @Mock
     private ItemGroup<Item> itemGroup;
     @Mock
-    private Job job;
+    private AbstractProject job;
     @Mock
     private GitHubPRTrigger trigger;
     @Mock

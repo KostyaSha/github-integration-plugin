@@ -46,6 +46,7 @@ import static com.github.kostyasha.github.integration.branch.trigger.check.Branc
 import static com.github.kostyasha.github.integration.branch.trigger.check.LocalRepoUpdater.updateLocalRepo;
 import static com.github.kostyasha.github.integration.branch.trigger.check.NotUpdatedBranchFilter.notUpdated;
 import static com.github.kostyasha.github.integration.branch.trigger.check.SkipFirstRunForBranchFilter.ifSkippedFirstRun;
+import static com.github.kostyasha.github.integration.branch.webhook.WebhookInfoBranchPredicates.withHookTriggerMode;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Predicates.and;
 import static com.google.common.base.Predicates.not;
@@ -55,7 +56,6 @@ import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.Descripto
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.LIGHT_HOOKS;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
-import static org.jenkinsci.plugins.github.pullrequest.webhook.WebhookInfoPredicates.withHookTriggerMode;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
 
@@ -259,7 +259,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
 
             GHRateLimit rateLimitAfter = github.getRateLimit();
             int consumed = rateLimitBefore.remaining - rateLimitAfter.remaining;
-            LOG.info("GitHub rate limit after check {}: {}, consumed: {}, checked PRs: {}",
+            LOG.info("GitHub rate limit after check {}: {}, consumed: {}, checked branches: {}",
                     localRepository.getFullName(), rateLimitAfter, consumed, remoteBranches.size());
 
             return causes;
@@ -319,7 +319,6 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
         public List<GitHubBranchEventDescriptor> getEventDescriptors() {
             return GitHubBranchEventDescriptor.all();
         }
-
 
         public static DescriptorImpl get() {
             return Trigger.all().get(DescriptorImpl.class);
