@@ -8,6 +8,7 @@ import com.github.kostyasha.github.integration.generic.GitHubTriggerDescriptor;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.Job;
+import hudson.model.Run;
 import hudson.triggers.Trigger;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;

@@ -10,10 +10,12 @@ import hudson.model.ItemGroup;
 import hudson.model.Job;
 import jenkins.model.ParameterizedJobMixIn;
 import org.jenkinsci.plugins.github.pullrequest.util.TestUtil;
+import org.jenkinsci.plugins.github.pullrequest.utils.JobHelper;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -30,6 +32,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.hasSize;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
 import static org.junit.Assert.assertThat;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -37,9 +40,8 @@ import static org.mockito.Mockito.when;
 /**
  * @author Alina_Karpovich
  */
-//@Ignore(value = "Mock issues")
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({GithubProjectProperty.class, GithubUrl.class})
+@PrepareForTest({GithubProjectProperty.class, GithubUrl.class, JobHelper.class})
 public class GitHubPRRepositoryFactoryTest {
     public static final String CONFIG_PATH = "src/test/resources";
 
@@ -88,8 +90,6 @@ public class GitHubPRRepositoryFactoryTest {
         createForCommonExpectations(filePath, job, trigger);
 
         GitHubPRRepository repo = getRepo(new GitHubPRRepositoryFactory().createFor(job));
-//        Field project = TestUtil.getPrivateField("job", GitHubPRRepository.class);
-//        Field configFileField = TestUtil.getPrivateField("configFile", GitHubPRRepository.class);
         XmlFile configFile = repo.getConfigFile();
 
         Assert.assertEquals(job, trigger.getJob());
@@ -123,15 +123,19 @@ public class GitHubPRRepositoryFactoryTest {
      * @param trigger  mock trigger that is expected to be returned via job.getTrigger(GitHubPRTrigger.class).
      */
     public static void createForCommonExpectations(String filePath,
-                                                   AbstractProject<?, ?> job,
+                                                   Job job,
                                                    GitHubPRTrigger trigger) {
         GithubUrl githubUrl = PowerMockito.mock(GithubUrl.class);
         GithubProjectProperty projectProperty = PowerMockito.mock(GithubProjectProperty.class);
 
         File file = new File(filePath);
         when(job.getRootDir()).thenReturn(file);
-        when(job.getTrigger(GitHubPRTrigger.class)).thenReturn(trigger);
-//        when(ghPRTriggerFromJob(job)).thenReturn(trigger);
+
+        PowerMockito.mockStatic(JobHelper.class);
+        given(JobHelper.triggerFrom(job, GitHubPRTrigger.class))
+                .willReturn(trigger);
+        when(trigger.getJob()).thenReturn(job);
+
         when(trigger.getRepoFullName(job)).thenReturn(mock(GitHubRepositoryName.class));
         when(job.getProperty(GithubProjectProperty.class)).thenReturn(projectProperty);
         when(projectProperty.getProjectUrl()).thenReturn(githubUrl);

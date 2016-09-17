@@ -50,9 +50,9 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
         try {
             GitHub gh = GitHub.connectAnonymously();
 
-            BranchInfo info = extractBranchInfo(event, payload, gh);
+            RefInfo ref = extractRefInfo(event, payload, gh);
 
-            for (Job job : getJobs(info.getRepo())) {
+            for (Job job : getJobs(ref.getRepo())) {
                 GitHubBranchTrigger trigger = triggerFrom(job, GitHubBranchTrigger.class);
                 if (isNull(trigger)) {
                     continue;
@@ -64,8 +64,8 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
                     case HEAVY_HOOKS_CRON:
                     case HEAVY_HOOKS: {
                         LOGGER.debug("Queued check for {} (Branch {}) after heavy hook", job.getName(),
-                                info.getBranchName());
-                        trigger.queueRun(job, info.getBranchName());
+                                ref.getRefName());
+                        trigger.queueRun(job, ref.getRefName());
                         break;
                     }
                     case LIGHT_HOOKS: {
@@ -82,7 +82,7 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
         }
     }
 
-    private BranchInfo extractBranchInfo(GHEvent event, String payload, GitHub gh) throws IOException {
+    private RefInfo extractRefInfo(GHEvent event, String payload, GitHub gh) throws IOException {
         JSONObject json = fromObject(payload);
         switch (event) {
             case CREATE: {
@@ -121,9 +121,13 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
         return ret;
     }
 
-    private BranchInfo fromJson(JSONObject json) {
+    private RefInfo fromJson(JSONObject json) {
         final String repo = json.getJSONObject("repository").getString("full_name");
-        final String ref = json.getString("ref");
-        return new BranchInfo(repo, ref);
+        final String ref_type = json.getString("ref_type");
+        String ref = json.getString("ref");
+        if (ref_type.equals("branch")) {
+            ref = "refs/heads/" + ref;
+        }
+        return new RefInfo(repo, ref_type, ref);
     }
 }

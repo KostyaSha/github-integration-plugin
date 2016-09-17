@@ -46,7 +46,7 @@ public class GitHubPRRepositoryFactory extends GitHubRepositoryFactory<GitHubPRR
     private static GitHubPRRepository forProject(Job<?, ?> job) {
         XmlFile configFile = new XmlFile(new File(job.getRootDir(), GitHubPRRepository.FILE));
 
-        GitHubPRTrigger trigger = JobInfoHelpers.triggerFrom(job, GitHubPRTrigger.class);
+        GitHubPRTrigger trigger = JobHelper.triggerFrom(job, GitHubPRTrigger.class);
         GitHubRepositoryName repo = trigger.getRepoFullName(job);
 
         GithubProjectProperty property = job.getProperty(GithubProjectProperty.class);

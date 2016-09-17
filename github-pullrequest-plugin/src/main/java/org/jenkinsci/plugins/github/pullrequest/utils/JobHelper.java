@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.github.pullrequest.utils;
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixConfiguration;
 import hudson.matrix.MatrixRun;
+import hudson.model.AbstractProject;
 import hudson.model.BuildBadgeAction;
 import hudson.model.CauseAction;
 import hudson.model.Executor;
@@ -62,7 +63,10 @@ public class JobHelper {
             guessJob = job;
         }
 
-        if (guessJob instanceof ParameterizedJobMixIn.ParameterizedJob) {
+        if (guessJob instanceof AbstractProject<?, ?>) {
+            final AbstractProject<?, ?> abstractProject = (AbstractProject<?, ?>) guessJob;
+            return abstractProject.getTrigger(tClass);
+        } else if (guessJob instanceof ParameterizedJobMixIn.ParameterizedJob) {
             ParameterizedJobMixIn.ParameterizedJob pJob = (ParameterizedJobMixIn.ParameterizedJob) guessJob;
 
             for (Trigger candidate : pJob.getTriggers().values()) {
