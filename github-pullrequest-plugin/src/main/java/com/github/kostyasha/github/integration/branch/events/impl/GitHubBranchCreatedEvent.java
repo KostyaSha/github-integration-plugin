@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Triggers when branch didn't exist before and appeared in remote.
@@ -25,7 +26,7 @@ import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
  */
 public class GitHubBranchCreatedEvent extends GitHubBranchEvent {
     private static final String DISPLAY_NAME = "Branch Created";
-    private static final Logger LOG = LoggerFactory.getLogger(GitHubBranchCreatedEvent.class);
+    private static final Logger LOG = getLogger(GitHubBranchCreatedEvent.class);
 
     @DataBoundConstructor
     public GitHubBranchCreatedEvent() {

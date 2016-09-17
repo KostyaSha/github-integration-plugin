@@ -123,11 +123,11 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
 
     private RefInfo fromJson(JSONObject json) {
         final String repo = json.getJSONObject("repository").getString("full_name");
-        final String ref_type = json.getString("ref_type");
+        final String refType = json.getString("ref_type");
         String ref = json.getString("ref");
-        if (ref_type.equals("branch")) {
+        if (refType.equals("branch")) {
             ref = "refs/heads/" + ref;
         }
-        return new RefInfo(repo, ref_type, ref);
+        return new RefInfo(repo, refType, ref);
     }
 }

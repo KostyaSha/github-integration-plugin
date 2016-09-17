@@ -8,7 +8,6 @@ import hudson.XmlFile;
 import hudson.model.Action;
 import hudson.model.Job;
 import org.jenkinsci.plugins.github.pullrequest.utils.JobHelper;
-import org.jenkinsci.plugins.github.util.JobInfoHelpers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 
+import static java.util.Objects.requireNonNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.PRHelperFunctions.asFullRepoName;
 
@@ -47,6 +47,7 @@ public class GitHubPRRepositoryFactory extends GitHubRepositoryFactory<GitHubPRR
         XmlFile configFile = new XmlFile(new File(job.getRootDir(), GitHubPRRepository.FILE));
 
         GitHubPRTrigger trigger = JobHelper.triggerFrom(job, GitHubPRTrigger.class);
+        requireNonNull(trigger, "Can't extract PR trigger from " + job.getFullName());
         GitHubRepositoryName repo = trigger.getRepoFullName(job);
 
         GithubProjectProperty property = job.getProperty(GithubProjectProperty.class);
