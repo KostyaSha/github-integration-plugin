@@ -32,7 +32,11 @@ public class NotUpdatedBranchFilter implements Predicate<GHBranch> {
     }
 
     @Override
-    public boolean apply(GHBranch remoteBranch) {
+    public boolean apply(@CheckForNull GHBranch remoteBranch) {
+        if (isNull(remoteBranch)) {
+            return true; // not sure -> better check
+        }
+
         @CheckForNull GitHubBranch localBranch = localRepo.getBranches().get(remoteBranch.getName());
 
         if (!isUpdated(remoteBranch, localBranch)) { // light check
