@@ -321,7 +321,10 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
             return from(localRepo.getPulls().keySet())
                     // add PRs that was closed on remote
                     .filter(not(in(remotePRNums)))
-                    .transform(fetchRemotePR(remoteRepo)).filter(notNull()).append(remotePulls).toSet();
+                    .transform(fetchRemotePR(remoteRepo))
+                    .filter(notNull())
+                    .append(remotePulls)
+                    .toSet();
         }
     }
 

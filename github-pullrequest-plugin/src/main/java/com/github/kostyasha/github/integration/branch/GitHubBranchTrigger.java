@@ -277,7 +277,10 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
         final LinkedHashSet<GHBranch> ghBranches = new LinkedHashSet<>();
 
         if (branch != null) {
-            ghBranches.add(remoteRepo.getBranches().get(branch));
+            final GHBranch ghBranch = remoteRepo.getBranches().get(branch);
+            if (ghBranch != null) {
+                ghBranches.add(ghBranch);
+            }
         } else {
             ghBranches.addAll(remoteRepo.getBranches().values());
         }
