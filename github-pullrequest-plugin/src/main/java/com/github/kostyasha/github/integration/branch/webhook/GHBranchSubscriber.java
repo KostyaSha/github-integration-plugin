@@ -34,7 +34,7 @@ import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
 @Extension
 public class GHBranchSubscriber extends GHEventsSubscriber {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHBranchSubscriber.class);
-    private static final Set<GHEvent> events = immutableEnumSet(GHEvent.PUSH, GHEvent.CREATE, GHEvent.DELETE);
+    private static final Set<GHEvent> EVENTS = immutableEnumSet(GHEvent.PUSH, GHEvent.CREATE, GHEvent.DELETE);
 
     @Override
     protected boolean isApplicable(Job<?, ?> job) {
@@ -43,7 +43,7 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
 
     @Override
     protected Set<GHEvent> events() {
-        return events;
+        return EVENTS;
     }
 
     @Override
@@ -85,7 +85,7 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
 
     private BranchInfo extractRefInfo(GHEvent event, String payload, GitHub gh) throws IOException {
         JSONObject json = fromObject(payload);
-        if (events.contains(event)) {
+        if (EVENTS.contains(event)) {
             return fromJson(json);
         } else {
             throw new IllegalStateException(format("Did you add event %s in events() method?", event));

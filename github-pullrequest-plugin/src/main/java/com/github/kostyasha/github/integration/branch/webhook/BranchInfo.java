@@ -1,7 +1,5 @@
 package com.github.kostyasha.github.integration.branch.webhook;
 
-import javax.annotation.CheckForNull;
-
 /**
  * Main info from webhook event.
  *
