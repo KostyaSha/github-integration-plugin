@@ -34,6 +34,7 @@ import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
 @Extension
 public class GHBranchSubscriber extends GHEventsSubscriber {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHBranchSubscriber.class);
+    private static final Set<GHEvent> events = immutableEnumSet(GHEvent.PUSH, GHEvent.CREATE, GHEvent.DELETE);
 
     @Override
     protected boolean isApplicable(Job<?, ?> job) {
@@ -42,7 +43,7 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
 
     @Override
     protected Set<GHEvent> events() {
-        return immutableEnumSet(GHEvent.PUSH, GHEvent.CREATE, GHEvent.DELETE);
+        return events;
     }
 
     @Override
@@ -50,7 +51,7 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
         try {
             GitHub gh = GitHub.connectAnonymously();
 
-            RefInfo ref = extractRefInfo(event, payload, gh);
+            BranchInfo ref = extractRefInfo(event, payload, gh);
 
             for (Job job : getJobs(ref.getRepo())) {
                 GitHubBranchTrigger trigger = triggerFrom(job, GitHubBranchTrigger.class);
@@ -64,8 +65,8 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
                     case HEAVY_HOOKS_CRON:
                     case HEAVY_HOOKS: {
                         LOGGER.debug("Queued check for {} (Branch {}) after heavy hook", job.getName(),
-                                ref.getRefName());
-                        trigger.queueRun(job, ref.getRefName());
+                                ref.getBranchName());
+                        trigger.queueRun(job, ref.getBranchName());
                         break;
                     }
                     case LIGHT_HOOKS: {
@@ -82,23 +83,13 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
         }
     }
 
-    private RefInfo extractRefInfo(GHEvent event, String payload, GitHub gh) throws IOException {
+    private BranchInfo extractRefInfo(GHEvent event, String payload, GitHub gh) throws IOException {
         JSONObject json = fromObject(payload);
-        switch (event) {
-            case CREATE: {
-                return fromJson(json);
-            }
+        if (events.contains(event)) {
+            return fromJson(json);
+        } else {
+            throw new IllegalStateException(format("Did you add event %s in events() method?", event));
 
-            case PUSH: {
-                return fromJson(json);
-            }
-
-            case DELETE: {
-                return fromJson(json);
-            }
-
-            default:
-                throw new IllegalStateException(format("Did you add event %s in events() method?", event));
         }
     }
 
@@ -121,13 +112,12 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
         return ret;
     }
 
-    private RefInfo fromJson(JSONObject json) {
+    private BranchInfo fromJson(JSONObject json) {
         final String repo = json.getJSONObject("repository").getString("full_name");
-        final String refType = json.getString("ref_type");
-        String ref = json.getString("ref");
-        if (refType.equals("branch")) {
-            ref = "refs/heads/" + ref;
+        String branch = json.getString("ref");
+        if (branch.startsWith("refs/heads/")) {
+            branch = branch.replace("refs/heads/", "");
         }
-        return new RefInfo(repo, refType, ref);
+        return new BranchInfo(repo, branch);
     }
 }

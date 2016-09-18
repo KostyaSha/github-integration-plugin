@@ -14,16 +14,16 @@ import org.junit.rules.TemporaryFolder;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghBranchTriggerFromJob;
 import static com.jayway.awaitility.Awaitility.await;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.jenkinsci.plugins.github_integration.junit.GHRule.GH_API_DELAY;
-import static org.jenkinsci.plugins.github_integration.junit.GHRule.runBranchTriggerAndWaitUntilEnd;
+import static org.jenkinsci.plugins.github_integration.awaitility.GHTriggerRunAndEnd.ghTriggerRunAndEnd;
 
 /**
  * @author Kanstantsin Shautsou
@@ -53,7 +53,9 @@ public class BranchITest {
             trigger.start(job, true);
         }
 
-        runBranchTriggerAndWaitUntilEnd(trigger, 100 * GH_API_DELAY);
+        await().pollInterval(3, TimeUnit.SECONDS)
+                .timeout(100, SECONDS)
+                .until(ghTriggerRunAndEnd(trigger));
 
         jRule.waitUntilNoActivity();
 
@@ -68,7 +70,9 @@ public class BranchITest {
 
 
         ghRule.commitFileToBranch("branch-4", "someFile", "content", "With this magessage");
-        runBranchTriggerAndWaitUntilEnd(trigger, 100 * GH_API_DELAY);
+        await().pollInterval(3, TimeUnit.SECONDS)
+                .timeout(100, SECONDS)
+                .until(ghTriggerRunAndEnd(trigger));
 
         jRule.waitUntilNoActivity();
 

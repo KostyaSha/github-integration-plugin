@@ -4,6 +4,7 @@ import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import com.coravy.hudson.plugins.github.GithubUrl;
 import hudson.XmlFile;
+import hudson.model.AbstractItem;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.ItemGroup;
@@ -41,7 +42,7 @@ import static org.mockito.Mockito.when;
  * @author Alina_Karpovich
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({GithubProjectProperty.class, GithubUrl.class, JobHelper.class})
+@PrepareForTest({GithubProjectProperty.class, GithubUrl.class, JobHelper.class, AbstractItem.class})
 public class GitHubPRRepositoryFactoryTest {
     public static final String CONFIG_PATH = "src/test/resources";
 
@@ -130,6 +131,7 @@ public class GitHubPRRepositoryFactoryTest {
 
         File file = new File(filePath);
         when(job.getRootDir()).thenReturn(file);
+        when(job.getFullName()).thenReturn("jobFullName");
 
         PowerMockito.mockStatic(JobHelper.class);
         given(JobHelper.triggerFrom(job, GitHubPRTrigger.class))

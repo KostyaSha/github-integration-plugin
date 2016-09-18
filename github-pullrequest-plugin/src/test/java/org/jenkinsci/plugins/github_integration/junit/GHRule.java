@@ -57,6 +57,7 @@ import static org.hamcrest.core.Is.is;
 import static org.jenkinsci.plugins.github.config.GitHubServerConfig.loginToGithub;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 import static org.jenkinsci.plugins.github_integration.awaitility.GHBranchAppeared.ghBranchAppeared;
+import static org.jenkinsci.plugins.github_integration.awaitility.GHFromServerConfigAppeared.ghAppeared;
 import static org.jenkinsci.plugins.github_integration.awaitility.GHRepoAppeared.ghRepoAppeared;
 import static org.jenkinsci.plugins.github_integration.awaitility.GHRepoDeleted.ghRepoDeleted;
 
@@ -136,7 +137,10 @@ public class GHRule implements TestRule {
         //reuse github client for GitHub preparation
         gitHubServerConfig = prepareGitHubPlugin();
         //FIXME no idea why github-plugin doesn't find configuration without delay, try delay
-        gitHub = waitGH(gitHubServerConfig, 20 * GH_API_DELAY);
+        await().timeout(20, SECONDS)
+                .until(ghAppeared(gitHubServerConfig));
+
+        gitHub = loginToGithub().apply(gitHubServerConfig);
 
         assertThat("Specify right GH_TOKEN variable!", gitHub, notNullValue());
         LOG.debug(gitHub.getRateLimit().toString());
@@ -272,93 +276,6 @@ public class GHRule implements TestRule {
         await().pollInterval(3, SECONDS)
                 .timeout(120, SECONDS)
                 .until(ghBranchAppeared(getGhRepo(), branch));
-    }
-
-    public static GitHub waitGH(GitHubServerConfig gitHubServerConfig, long timeout) throws InterruptedException {
-        GitHub gitHub;
-        long startTime = System.currentTimeMillis();
-
-        while (true) {
-            LOG.debug("Waiting for GitHub...");
-            Thread.sleep(2 * 1000);
-            gitHub = loginToGithub().apply(gitHubServerConfig);
-            if (nonNull(gitHub)) {
-                return gitHub;
-            }
-            if (System.currentTimeMillis() - startTime > timeout) {
-                throw new AssertionError("GitHub doesn't appear after " + timeout);
-            }
-        }
-    }
-
-    public static void runTriggerAndWaitUntilEnd(GitHubPRTrigger trigger, long timeout)
-            throws InterruptedException, IOException {
-        final Job<?, ?> job = trigger.getJob();
-        Objects.requireNonNull(job, "Job must exist in trigger, initialise trigger!");
-
-        String oldLog = null;
-        final GitHubPRPollingLogAction oldAction = job.getAction(GitHubPRPollingLogAction.class);
-        if (nonNull(oldAction)) {
-            oldLog = oldAction.getLog();
-        }
-
-        trigger.run();
-
-        // TODO replace with awaitility
-        long startTime = System.currentTimeMillis();
-        while (true) {
-            Thread.sleep(10);
-            final GitHubPRPollingLogAction prLogAction = job.getAction(GitHubPRPollingLogAction.class);
-            try {
-                if (nonNull(prLogAction)) {
-                    final String newLog = prLogAction.getLog();
-                    if (!newLog.equals(oldLog) && newLog.contains(trigger.getFinishMsg())) {
-                        return;
-                    }
-                }
-            } catch (IOException ignore) {
-            }
-
-            if (System.currentTimeMillis() - startTime > timeout) {
-                throw new AssertionError("Trigger didn't started or finished");
-            }
-        }
-    }
-
-    public static void runBranchTriggerAndWaitUntilEnd(GitHubBranchTrigger trigger, long timeout)
-            throws InterruptedException, IOException {
-        final Job<?, ?> job = trigger.getJob();
-        Objects.requireNonNull(job, "Job must exist in trigger, initialise trigger!");
-
-        String oldLog = null;
-        final GitHubBranchPollingLogAction oldAction = job.getAction(GitHubBranchPollingLogAction.class);
-        if (nonNull(oldAction)) {
-            oldLog = oldAction.getLog();
-        }
-
-        trigger.run();
-
-        long startTime = System.currentTimeMillis();
-        boolean found = false;
-        while (true) {
-            Thread.sleep(100);
-            final GitHubBranchPollingLogAction prLogAction = job.getAction(GitHubBranchPollingLogAction.class);
-            try {
-                if (nonNull(prLogAction)) {
-                    final String newLog = prLogAction.getLog();
-                    if (!newLog.equals(oldLog) && newLog.contains(trigger.getFinishMsg())) {
-                        found = true;
-                        return;
-                    }
-                }
-            } catch (IOException ignore) {
-            }
-
-            if (System.currentTimeMillis() - startTime > timeout) {
-                assertThat("Job has no action!", oldAction, notNullValue());
-                assertThat("Trigger didn't started or finished", found, is(true));
-            }
-        }
     }
 
 //    because org.jenkinsci.plugins.github.internal.GitHubLoginFunction$OkHttpConnector is private
