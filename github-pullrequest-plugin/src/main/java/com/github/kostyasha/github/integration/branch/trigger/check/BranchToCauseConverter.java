@@ -76,7 +76,7 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
             //null if local not existed before
             final GitHubBranch localBranch = localRepo.getBranches().get(remoteBranch.getName());
             try {
-                return event.check(trigger, remoteBranch, localBranch, listener);
+                return event.check(trigger, remoteBranch, localBranch, localRepo, listener);
             } catch (IOException e) {
                 LOGGER.warn("Can't check trigger event", e);
                 listener.error("Can't check trigger event, so skipping branch ({})", e.getMessage());

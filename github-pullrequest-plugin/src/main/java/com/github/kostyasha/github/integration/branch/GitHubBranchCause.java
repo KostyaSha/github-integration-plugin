@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import static org.apache.commons.io.FileUtils.writeStringToFile;
 
@@ -23,38 +21,36 @@ public class GitHubBranchCause extends GitHubCause<GitHubBranchCause> {
     private final String branchName;
 
     /**
-     * May not exist for deleted branch.
+     * null for deleted branch.
      */
     @CheckForNull
     private final String headSha;
 
-    public GitHubBranchCause(GHBranch remoteBranch) {
-        this.branchName = remoteBranch.getName();
-        this.headSha = remoteBranch.getSHA1();
-        try {
-            withHtmlUrl(new URL(remoteBranch.getOwner().getHtmlUrl().toString() + "/tree/" + branchName));
-        } catch (MalformedURLException ex) {
-            LOG.error("Can't make URL for {}", remoteBranch, ex);
-        }
-    }
-
-    public GitHubBranchCause(String branch, String headSha, String reason, boolean skip) {
-        withReason(reason);
-        this.branchName = branch;
-        this.headSha = headSha;
-        withSkip(skip);
-    }
-
-    public GitHubBranchCause(GHBranch remoteBranch, String reason, boolean skip) {
+    public GitHubBranchCause(@Nonnull GitHubBranch localBranch, @Nonnull GitHubBranchRepository localRepo,
+                             String reason, boolean skip) {
         withReason(reason);
         withSkip(skip);
+        withLocalRepo(localRepo);
+        this.branchName = localBranch.getName();
+        this.headSha = localBranch.getSHA1();
+    }
+
+    public GitHubBranchCause(@Nonnull GHBranch remoteBranch, @Nonnull GitHubBranchRepository localRepo,
+                             String reason, boolean skip) {
+        withReason(reason);
+        withSkip(skip);
+        withLocalRepo(localRepo);
         this.branchName = remoteBranch.getName();
         this.headSha = remoteBranch.getSHA1();
-        try {
-            withHtmlUrl(new URL(remoteBranch.getOwner().getHtmlUrl().toString() + "/tree/" + branchName));
-        } catch (MalformedURLException ex) {
-            LOG.error("Can't make URL for {}", remoteBranch, ex);
-        }
+    }
+
+    public String getBranchName() {
+        return branchName;
+    }
+
+    @CheckForNull
+    public String getHeadSha() {
+        return headSha;
     }
 
     @Nonnull
@@ -80,12 +76,4 @@ public class GitHubBranchCause extends GitHubCause<GitHubBranchCause> {
         setPollingLog(null);
     }
 
-    public String getBranchName() {
-        return branchName;
-    }
-
-    @CheckForNull
-    public String getHeadSha() {
-        return headSha;
-    }
 }

@@ -35,6 +35,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -261,13 +262,13 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
                                                    LoggingTaskListenerWrapper listener,
                                                    @Nullable Integer prNumber) {
         try {
-            GitHub github = DescriptorImpl.githubFor(URI.create(localRepository.getGithubUrl()));
+            GitHub github = DescriptorImpl.githubFor(localRepository.getGithubUrl().toURI());
             GHRateLimit rateLimitBefore = github.getRateLimit();
             listener.debug("GitHub rate limit before check: {}", rateLimitBefore);
 
             // get local and remote list of PRs
             //FIXME HiddenField: 'remoteRepository' hides a field? renamed to `remoteRepo`
-            GHRepository remoteRepo = getRemoteRepo();
+            GHRepository remoteRepo = getRemoteRepository();
             Set<GHPullRequest> remotePulls = pullRequestsToCheck(prNumber, remoteRepo, localRepository);
 
             Set<GHPullRequest> prepeared = from(remotePulls)
@@ -295,7 +296,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
                     localRepository.getFullName(), rateLimitAfter, consumed, remotePulls.size());
 
             return causes;
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             listener.error("Can't get build causes, because: '{}'", e.getMessage());
             return Collections.emptyList();
         }

@@ -37,9 +37,9 @@
     </properties>
 
     <scm>
-        <connection>scm:git:ssh://github.com/jenkinsci/github-integration-plugin.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/jenkinsci/github-integration-plugin.git</developerConnection>
-        <url>https://github.com/jenkinsci/github-integration-plugin.git</url>
+        <connection>scm:git:ssh://github.com/KostyaSha/github-integration-plugin.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/KostyaSha/github-integration-plugin.git</developerConnection>
+        <url>https://github.com/KostyaSha/github-integration-plugin.git</url>
         <tag>HEAD</tag>
     </scm>
 

@@ -21,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.StaplerRequest;
 import org.mockito.Matchers;
 import org.mockito.Mock;
@@ -30,6 +31,9 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -52,7 +56,7 @@ import static org.mockito.Mockito.when;
 @Ignore(value = "Mock issues")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({GithubProjectProperty.class, GithubUrl.class, BulkChange.class,
-        Functions.class, Jenkins.class, User.class})
+        Functions.class, Jenkins.class, User.class, GHRepository.class})
 public class GitHubPRRepositoryTest {
     private static final int PR_REBUILD_ID = 1;
 
@@ -77,6 +81,8 @@ public class GitHubPRRepositoryTest {
     private StaplerRequest request;
     @Mock
     private User user;
+    @Mock
+    private GHRepository ghRepository;
 
     //mocked final classes
     @Mock
@@ -281,16 +287,17 @@ public class GitHubPRRepositoryTest {
 
     //to increase method coverage rate
     @Test
-    public void checkGetters() {
+    public void checkGetters() throws MalformedURLException {
         String fullName = "fullName";
-        String url = "https://github.com/user/repo/";
+        URL url = new URL("https://github.com/user/repo/");
         String prefix = "prefix";
 
         PowerMockito.mockStatic(Functions.class);
         when(Functions.getResourcePath()).thenReturn(prefix);
+        when(ghRepository.getFullName()).thenReturn("user/repo");
+        when(ghRepository.getHtmlUrl()).thenReturn(url);
 
-        GitHubPRRepository repo = new GitHubPRRepository(fullName, url,
-                new HashMap<Integer, GitHubPRPullRequest>());
+        GitHubPRRepository repo = new GitHubPRRepository(ghRepository);
 
         Assert.assertEquals(fullName, repo.getFullName());
         Assert.assertEquals(url, repo.getGithubUrl());

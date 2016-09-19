@@ -2,9 +2,11 @@ package com.github.kostyasha.github.integration.branch.events.impl;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
+import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
+import com.github.kostyasha.github.integration.generic.GitHubRepository;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import org.kohsuke.github.GHBranch;
@@ -35,6 +37,7 @@ public class GitHubBranchHashChangedEvent extends GitHubBranchEvent {
     public GitHubBranchCause check(GitHubBranchTrigger trigger,
                                    GHBranch remoteBranch,
                                    @CheckForNull GitHubBranch localBranch,
+                                   GitHubBranchRepository localRepo,
                                    TaskListener listener) throws IOException {
         GitHubBranchCause cause = null;
         if (nonNull(localBranch) && nonNull(remoteBranch)) { // didn't exist before
@@ -45,7 +48,7 @@ public class GitHubBranchHashChangedEvent extends GitHubBranchEvent {
                 final PrintStream logger = listener.getLogger();
                 logger.printf("%s: hash has changed '%s' -> '%s'%n", DISPLAY_NAME, localBranchSHA1, remoteBranchSHA1);
                 LOG.debug("{}: hash has changed '{}' -> '{}'", DISPLAY_NAME, localBranchSHA1, remoteBranchSHA1);
-                cause = new GitHubBranchCause(remoteBranch, DISPLAY_NAME, false);
+                cause = new GitHubBranchCause(remoteBranch, localRepo, DISPLAY_NAME, false);
             }
         }
 

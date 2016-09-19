@@ -13,5 +13,5 @@ a(href: my.htmlUrl) {
             width: "16",
             height: "16"
     )
-    text("${my.getRefName}")
+    text("${my.getBranchName()}")
 }

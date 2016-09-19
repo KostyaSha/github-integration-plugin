@@ -3,6 +3,7 @@ package com.github.kostyasha.github.integration.branch.trigger;
 import com.github.kostyasha.github.integration.branch.GitHubBranchBadgeAction;
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
+import com.github.kostyasha.github.integration.generic.GitHubRepoEnv;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -22,11 +23,13 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.cloudbees.jenkins.GitHubWebHook.getJenkinsInstance;
-import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.BRANCH;
+import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.NAME;
 import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.CAUSE_SKIP;
 import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.HEAD_SHA;
 import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.SHORT_DESC;
 import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.URL;
+import static com.github.kostyasha.github.integration.generic.GitHubRepoEnv.GIT_URL;
+import static com.github.kostyasha.github.integration.generic.GitHubRepoEnv.SSH_URL;
 import static com.google.common.base.Predicates.instanceOf;
 import static java.util.Arrays.asList;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getDefaultParametersValues;
@@ -70,7 +73,7 @@ public class JobRunnerForBranchCause implements Predicate<GitHubBranchCause> {
 
             // remote connection
             if (trigger.isPreStatus()) {
-                trigger.getRemoteRepo()
+                trigger.getRemoteRepository()
                         .createCommitStatus(cause.getHeadSha(),
                                 GHCommitState.PENDING,
                                 null,
@@ -109,11 +112,15 @@ public class JobRunnerForBranchCause implements Predicate<GitHubBranchCause> {
     private QueueTaskFuture<?> startJob(GitHubBranchCause cause) {
         List<ParameterValue> values = getDefaultParametersValues(job);
         values.addAll(asList(
-                BRANCH.param(cause.getBranchName()),
+                //GitHubBranchEnv
+                NAME.param(cause.getBranchName()),
                 SHORT_DESC.param(cause.getShortDescription()),
                 URL.param(cause.getHtmlUrl().toString()),
                 HEAD_SHA.param(cause.getHeadSha()),
-                CAUSE_SKIP.param(cause.isSkip())
+                CAUSE_SKIP.param(cause.isSkip()),
+                //GitHubRepoEnv
+                GIT_URL.param(cause.getGitUrl()),
+                SSH_URL.param(cause.getSshUrl())
         ));
         GitHubBranchBadgeAction gitHubBadgeAction = new GitHubBranchBadgeAction(cause);
 

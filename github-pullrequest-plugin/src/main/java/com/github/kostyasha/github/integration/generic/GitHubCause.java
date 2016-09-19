@@ -32,31 +32,58 @@ public abstract class GitHubCause<T extends GitHubCause<T>> extends Cause {
     @CheckForNull
     private String title;
 
+    private String gitUrl;
+    private String sshUrl;
+
     private String pollingLog;
 
+    public GitHubCause withLocalRepo(@Nonnull GitHubRepository localRepo) {
+        withGitUrl(localRepo.getGitUrl());
+        withSshUrl(localRepo.getSshUrl());
+        withHtmlUrl(localRepo.getGithubUrl());
+        return this;
+    }
+
+    /**
+     * When set and event got positive condition says to skip job triggering.
+     */
     public boolean isSkip() {
         return skip;
     }
 
-    /**
-     * @see #skip
-     */
     public GitHubCause<T> withSkip(boolean skip) {
         this.skip = skip;
         return this;
     }
 
-    // for printing branch url on left builds panel (build description)
+    /**
+     * For printing branch url on left builds panel (build description).
+     */
     @CheckForNull
     public URL getHtmlUrl() {
         return htmlUrl;
     }
 
-    /**
-     * @see #htmlUrl
-     */
     public GitHubCause<T> withHtmlUrl(URL htmlUrl) {
         this.htmlUrl = htmlUrl;
+        return this;
+    }
+
+    public String getGitUrl() {
+        return gitUrl;
+    }
+
+    public GitHubCause<T> withGitUrl(String gitUrl) {
+        this.gitUrl = gitUrl;
+        return this;
+    }
+
+    public String getSshUrl() {
+        return sshUrl;
+    }
+
+    public GitHubCause<T> withSshUrl(String sshUrl) {
+        this.sshUrl = sshUrl;
         return this;
     }
 
@@ -81,16 +108,13 @@ public abstract class GitHubCause<T extends GitHubCause<T>> extends Cause {
         return reason;
     }
 
-    /**
-     * @see #reason
-     */
     public GitHubCause<T> withReason(String reason) {
         this.reason = reason;
         return this;
     }
 
     /**
-     * Returns the title of the cause, never null.
+     * @return the title of the cause, never null.
      */
     @Nonnull
     public String getTitle() {
@@ -103,7 +127,7 @@ public abstract class GitHubCause<T extends GitHubCause<T>> extends Cause {
     }
 
     /**
-     * Returns at most the first 30 characters of the title, or
+     * @return at most the first 30 characters of the title, or
      */
     public String getAbbreviatedTitle() {
         return abbreviate(getTitle(), 30);

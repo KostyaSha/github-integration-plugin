@@ -9,12 +9,13 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
+    <!-- historical name -->
     <artifactId>github-pullrequest</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
-    <name>GitHub Pull Request Plugin</name>
-    <description>GitHub Pull Request Plugin for Jenkins</description>
+    <name>GitHub Integration Plugin</name>
+    <description>GitHub Integration Plugin for Jenkins</description>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/GitHub+Integration+Plugin</url>
     <licenses>
         <license>
@@ -33,10 +34,10 @@
     </developers>
 
     <scm>
-        <connection>scm:git:ssh://github.com/jenkinsci/github-integration-plugin.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/jenkinsci/github-integration-plugin.git</developerConnection>
+        <connection>scm:git:ssh://github.com/KostyaSha/github-integration-plugin.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/KostyaSha/github-integration-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/github-integration-plugin</url>
-        <tag>github-pullrequest-0.0.1-beta7</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <properties>
@@ -230,6 +231,41 @@
             <version>1.7.0</version>
             <scope>test</scope>
         </dependency>
+
+        <!--&lt;!&ndash;to mock github&ndash;&gt;-->
+        <!--<dependency>-->
+        <!--<groupId>com.github.tomakehurst</groupId>-->
+        <!--<artifactId>wiremock</artifactId>-->
+        <!--<version>2.1.12</version>-->
+        <!--<scope>test</scope>-->
+        <!--<classifier>standalone</classifier>-->
+        <!--<exclusions>-->
+        <!--<exclusion>-->
+        <!--<groupId>org.mortbay.jetty</groupId>-->
+        <!--<artifactId>jetty</artifactId>-->
+        <!--</exclusion>-->
+        <!--<exclusion>-->
+        <!--<groupId>com.google.guava</groupId>-->
+        <!--<artifactId>guava</artifactId>-->
+        <!--</exclusion>-->
+        <!--<exclusion>-->
+        <!--<groupId>org.apache.httpcomponents</groupId>-->
+        <!--<artifactId>httpclient</artifactId>-->
+        <!--</exclusion>-->
+        <!--<exclusion>-->
+        <!--<groupId>xmlunit</groupId>-->
+        <!--<artifactId>xmlunit</artifactId>-->
+        <!--</exclusion>-->
+        <!--<exclusion>-->
+        <!--<groupId>com.jayway.jsonpath</groupId>-->
+        <!--<artifactId>json-path</artifactId>-->
+        <!--</exclusion>-->
+        <!--<exclusion>-->
+        <!--<groupId>net.sf.jopt-simple</groupId>-->
+        <!--<artifactId>jopt-simple</artifactId>-->
+        <!--</exclusion>-->
+        <!--</exclusions>-->
+        <!--</dependency>-->
     </dependencies>
 
     <build>

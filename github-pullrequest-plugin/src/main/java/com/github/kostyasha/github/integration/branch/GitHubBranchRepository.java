@@ -9,6 +9,7 @@ import hudson.model.Run;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
 import jenkins.model.Jenkins;
+import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 import org.slf4j.Logger;
@@ -35,17 +36,15 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
     public static final String FILE = GitHubBranchRepository.class.getName() + ".runtime.xml";
     private static final Logger LOG = LoggerFactory.getLogger(GitHubBranchRepository.class);
 
-    private Map<String, GitHubBranch> branches;
+    private Map<String, GitHubBranch> branches = new HashMap<>();
 
     /**
      * Object that represent GitHub repository to work with
      *
-     * @param fullName repository full name. for case of changed jobs url
-     * @param branches previous branches states
+     * @param remoteRepository remote repository full name.
      */
-    public GitHubBranchRepository(String fullName, String githubUrl, Map<String, GitHubBranch> branches) {
-        super(fullName, githubUrl);
-        this.branches = branches;
+    public GitHubBranchRepository(GHRepository remoteRepository) {
+        super(remoteRepository);
     }
 
     public Map<String, GitHubBranch> getBranches() {
@@ -103,7 +102,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
             if (instance.hasPermission(Item.DELETE)) {
                 branches = new HashMap<>();
                 save();
-                result = FormValidation.ok("Pulls deleted");
+                result = FormValidation.ok("Branches deleted");
             } else {
                 result = FormValidation.error("Forbidden");
             }
@@ -124,14 +123,14 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
                 GitHubBranchTrigger trigger = ghBranchTriggerFromJob(job);
                 if (trigger != null) {
                     trigger.run();
-                    result = FormValidation.ok("GitHub PR trigger run");
-                    LOG.debug("GitHub PR trigger run for {}", job);
+                    result = FormValidation.ok("GitHub Branch trigger run");
+                    LOG.debug("GitHub Branch trigger run for {}", job);
                 } else {
-                    LOG.error("GitHub PR trigger not available for {}", job);
-                    result = FormValidation.error("GitHub PR trigger not available");
+                    LOG.error("GitHub Branch trigger not available for {}", job);
+                    result = FormValidation.error("GitHub Branch trigger not available");
                 }
             } else {
-                LOG.warn("No permissions to run GitHub PR trigger");
+                LOG.warn("No permissions to run GitHub Branch trigger");
                 result = FormValidation.error("Forbidden");
             }
         } catch (Exception e) {

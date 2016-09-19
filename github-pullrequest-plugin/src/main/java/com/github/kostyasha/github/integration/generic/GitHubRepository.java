@@ -7,11 +7,13 @@ import hudson.model.Job;
 import hudson.model.Saveable;
 import hudson.model.listeners.SaveableListener;
 import hudson.util.FormValidation;
+import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.StaplerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URL;
 
 /**
  * @author Kanstantsin Shautsou
@@ -23,20 +25,41 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
     protected transient Job<?, ?> job;  // for UI
 
     private final String fullName;
-    private final String githubUrl;
+    private final URL githubUrl;
+    private String gitUrl;
+    private String sshUrl;
 
-
-    public GitHubRepository(String fullName, String githubUrl) {
-        this.fullName = fullName;
-        this.githubUrl = githubUrl;
+    public GitHubRepository(GHRepository ghRepository) {
+        fullName = ghRepository.getFullName();
+        githubUrl = ghRepository.getHtmlUrl();
+        gitUrl = ghRepository.getGitTransportUrl();
+        sshUrl = ghRepository.getSshUrl();
     }
 
     public String getFullName() {
         return fullName;
     }
 
-    public String getGithubUrl() {
+    public URL getGithubUrl() {
         return githubUrl;
+    }
+
+    public String getGitUrl() {
+        return gitUrl;
+    }
+
+    public GitHubRepository<T> withGitUrl(String gitUrl) {
+        this.gitUrl = gitUrl;
+        return this;
+    }
+
+    public String getSshUrl() {
+        return sshUrl;
+    }
+
+    public GitHubRepository<T> withSshUrl(String sshUrl) {
+        this.sshUrl = sshUrl;
+        return this;
     }
 
     public Job<?, ?> getJob() {

@@ -2,9 +2,11 @@ package com.github.kostyasha.github.integration.branch.events.impl;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
+import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
+import com.github.kostyasha.github.integration.generic.GitHubRepository;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import org.kohsuke.github.GHBranch;
@@ -35,6 +37,7 @@ public class GitHubBranchCreatedEvent extends GitHubBranchEvent {
     public GitHubBranchCause check(GitHubBranchTrigger trigger,
                                    GHBranch remoteBranch,
                                    @CheckForNull GitHubBranch localBranch,
+                                   GitHubBranchRepository locaRepo,
                                    TaskListener listener) throws IOException {
         if (remoteBranch == null && localBranch == null) {
             // just in case
@@ -50,7 +53,7 @@ public class GitHubBranchCreatedEvent extends GitHubBranchEvent {
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": state has changed (branch was created)");
             LOG.debug("{}: '{}' state has changed (branch was created)", DISPLAY_NAME, remoteBranch.getName());
-            cause = new GitHubBranchCause(remoteBranch, DISPLAY_NAME, false);
+            cause = new GitHubBranchCause(remoteBranch, locaRepo, DISPLAY_NAME, false);
         }
 
         return cause;

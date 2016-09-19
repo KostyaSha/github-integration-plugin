@@ -8,6 +8,7 @@ import hudson.XmlFile;
 import hudson.model.Action;
 import hudson.model.Job;
 import org.jenkinsci.plugins.github.pullrequest.utils.JobHelper;
+import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,27 +44,24 @@ public class GitHubPRRepositoryFactory extends GitHubRepositoryFactory<GitHubPRR
     }
 
     @Nonnull
-    private static GitHubPRRepository forProject(Job<?, ?> job) {
+    private static GitHubPRRepository forProject(Job<?, ?> job) throws IOException {
         XmlFile configFile = new XmlFile(new File(job.getRootDir(), GitHubPRRepository.FILE));
 
         GitHubPRTrigger trigger = JobHelper.triggerFrom(job, GitHubPRTrigger.class);
         requireNonNull(trigger, "Can't extract PR trigger from " + job.getFullName());
-        GitHubRepositoryName repo = trigger.getRepoFullName(job);
 
-        GithubProjectProperty property = job.getProperty(GithubProjectProperty.class);
-        String githubUrl = property.getProjectUrl().toString();
         GitHubPRRepository localRepository;
         if (configFile.exists()) {
             try {
                 localRepository = (GitHubPRRepository) configFile.read();
             } catch (IOException e) {
                 LOGGER.info("Can't read saved repository, creating new one", e);
-                localRepository = new GitHubPRRepository(asFullRepoName(repo), githubUrl,
-                        new HashMap<Integer, GitHubPRPullRequest>());
+                final GHRepository ghRepository = trigger.getRemoteRepository();
+                localRepository = new GitHubPRRepository(ghRepository);
             }
         } else {
-            localRepository = new GitHubPRRepository(asFullRepoName(repo), githubUrl,
-                    new HashMap<Integer, GitHubPRPullRequest>());
+            final GHRepository ghRepository = trigger.getRemoteRepository();
+            localRepository = new GitHubPRRepository(ghRepository);
         }
 
         localRepository.setJob(job);

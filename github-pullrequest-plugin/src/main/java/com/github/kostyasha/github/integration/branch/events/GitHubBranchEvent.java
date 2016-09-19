@@ -1,6 +1,7 @@
 package com.github.kostyasha.github.integration.branch.events;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
+import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import hudson.model.AbstractDescribableImpl;
@@ -24,7 +25,7 @@ public abstract class GitHubBranchEvent extends AbstractDescribableImpl<GitHubBr
      *
      * @param remoteBranch current branch state fetched from GH
      * @param localBranch  branch state from last run saved in jenkins. null when not exist before
-     * @return true if branch should be run
+     * @return true if branch should be run. null when no influence.
      */
     @CheckForNull
     public GitHubBranchCause check(
@@ -33,6 +34,16 @@ public abstract class GitHubBranchEvent extends AbstractDescribableImpl<GitHubBr
             @CheckForNull GitHubBranch localBranch,
             TaskListener listener) throws IOException {
         return null;
+    }
+
+    @CheckForNull
+    public GitHubBranchCause check(
+            GitHubBranchTrigger gitHubBranchTrigger,
+            GHBranch remoteBranch,
+            @CheckForNull GitHubBranch localBranch,
+            GitHubBranchRepository localRepo,
+            TaskListener listener) throws IOException {
+        return check(gitHubBranchTrigger, remoteBranch, localBranch, listener);
     }
 
     /**

@@ -12,6 +12,7 @@ import hudson.util.FormValidation;
 import hudson.util.RunList;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.github.pullrequest.utils.JobHelper;
+import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 import org.slf4j.Logger;
@@ -40,17 +41,15 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
     public static final String FILE = GitHubPRRepository.class.getName() + ".runtime.xml";
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRRepository.class);
 
-    private Map<Integer, GitHubPRPullRequest> pulls;
+    private Map<Integer, GitHubPRPullRequest> pulls = new HashMap<>();
 
     /**
      * Object that represent GitHub repository to work with
      *
-     * @param fullName repository full name. for case of changed jobs url
-     * @param pulls    previous pull request state
+     * @param ghRepository remote repository.
      */
-    public GitHubPRRepository(String fullName, String githubUrl, Map<Integer, GitHubPRPullRequest> pulls) {
-        super(fullName, githubUrl);
-        this.pulls = pulls;
+    public GitHubPRRepository(GHRepository ghRepository) {
+        super(ghRepository);
     }
 
     public Map<Integer, GitHubPRPullRequest> getPulls() {

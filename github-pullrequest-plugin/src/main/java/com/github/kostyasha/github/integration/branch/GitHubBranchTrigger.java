@@ -35,6 +35,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -229,12 +230,12 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
                                                        LoggingTaskListenerWrapper listener,
                                                        @Nullable String branch) {
         try {
-            GitHub github = githubFor(URI.create(localRepository.getGithubUrl()));
+            GitHub github = githubFor(localRepository.getGithubUrl().toURI());
             GHRateLimit rateLimitBefore = github.getRateLimit();
             listener.debug("GitHub rate limit before check: {}", rateLimitBefore);
 
             // get local and remote list of branches
-            GHRepository remoteRepo = getRemoteRepo();
+            GHRepository remoteRepo = getRemoteRepository();
             Set<GHBranch> remoteBranches = branchesToCheck(branch, remoteRepo, localRepository);
 
             Set<GHBranch> prepared = from(remoteBranches)
@@ -263,7 +264,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
                     localRepository.getFullName(), rateLimitAfter, consumed, remoteBranches.size());
 
             return causes;
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             listener.error("Can't get build causes, because: '{}'", e.getMessage());
             return Collections.emptyList();
         }

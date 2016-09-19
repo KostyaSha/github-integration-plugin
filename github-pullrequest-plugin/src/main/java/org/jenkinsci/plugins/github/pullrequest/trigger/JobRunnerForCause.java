@@ -123,7 +123,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                 if (job instanceof MatrixProject) {
                     Collection<? extends MatrixConfiguration> configs = ((MatrixProject) job).getActiveConfigurations();
                     for (MatrixConfiguration config : configs) {
-                        trigger.getRemoteRepo()
+                        trigger.getRemoteRepository()
                                 .createCommitStatus(cause.getHeadSha(),
                                         GHCommitState.PENDING,
                                         config.getAbsoluteUrl(),
@@ -131,7 +131,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                                         config.getFullName());
                     }
                 } else {
-                    trigger.getRemoteRepo()
+                    trigger.getRemoteRepository()
                             .createCommitStatus(cause.getHeadSha(),
                                     GHCommitState.PENDING,
                                     job.getAbsoluteUrl(),

@@ -11,6 +11,8 @@ public class GitHubBranch {
     private String name;
     private String sha1;
     private String htmlUrl;
+    private String gitUrl;
+    private String sshUrl;
 
     public GitHubBranch(GHBranch ghBranch) {
         name = ghBranch.getName();
@@ -44,5 +46,9 @@ public class GitHubBranch {
 
     public static String getIconFileName() {
         return Functions.getResourcePath() + "/plugin/github-pullrequest/git-branch.svg";
+    }
+
+    public String getGitUrl() {
+        return gitUrl;
     }
 }

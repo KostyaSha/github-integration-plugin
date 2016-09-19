@@ -1,4 +1,4 @@
-package com.github.kostyasha.github.integration.branch.data;
+package com.github.kostyasha.github.integration.generic;
 
 import hudson.model.BooleanParameterValue;
 import hudson.model.ParameterValue;
@@ -9,16 +9,11 @@ import static org.apache.commons.lang.StringUtils.trimToEmpty;
 /**
  * @author Kanstantsin Shautsou
  */
-public enum GitHubBranchEnv {
-    NAME,
-    SHORT_DESC,
-    TITLE,
-    URL,
-    HEAD_SHA,
-    CAUSE_SKIP,
-    STATE;
+public enum GitHubRepoEnv {
+    GIT_URL,
+    SSH_URL;
 
-    public static final String PREFIX = "GITHUB_BRANCH_";
+    public static final String PREFIX = "GITHUB_";
 
     public ParameterValue param(String value) {
         return new StringParameterValue(toString(), trimToEmpty(value));

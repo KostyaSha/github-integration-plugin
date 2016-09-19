@@ -97,12 +97,19 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
         this.repoName = repoName;
     }
 
-    public GHRepository getRemoteRepository() {
-        return remoteRepository;
-    }
-
     public void setRemoteRepository(GHRepository remoteRepository) {
         this.remoteRepository = remoteRepository;
+    }
+
+    public GHRepository getRemoteRepository() throws IOException {
+        if (isNull(remoteRepository)) {
+            Iterator<GHRepository> resolved = getRepoFullName(job).resolve().iterator();
+            checkState(resolved.hasNext(), "Can't get remote GH repo for %s", job.getName());
+
+            remoteRepository = resolved.next();
+        }
+
+        return remoteRepository;
     }
 
     @Override
@@ -125,17 +132,6 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
             return Collections.emptyList();
         }
         return Collections.singleton(getPollingLogAction());
-    }
-
-    public GHRepository getRemoteRepo() throws IOException {
-        if (isNull(remoteRepository)) {
-            Iterator<GHRepository> resolved = getRepoFullName(job).resolve().iterator();
-            checkState(resolved.hasNext(), "Can't get remote GH repo for %s", job.getName());
-
-            remoteRepository = resolved.next();
-        }
-
-        return remoteRepository;
     }
 
     @CheckForNull
