@@ -51,8 +51,8 @@ public class GitHubBranchCreatedEvent extends GitHubBranchEvent {
         GitHubBranchCause cause = null;
         if (isNull(localBranch)) { // didn't exist before
             final PrintStream logger = listener.getLogger();
-            logger.println(DISPLAY_NAME + ": state has changed (branch was created)");
-            LOG.debug("{}: '{}' state has changed (branch was created)", DISPLAY_NAME, remoteBranch.getName());
+            logger.println(DISPLAY_NAME + ": '" + remoteBranch.getName() + "'");
+            LOG.debug("{}: '{}'", DISPLAY_NAME, remoteBranch.getName());
             cause = new GitHubBranchCause(remoteBranch, locaRepo, DISPLAY_NAME, false);
         }
 
