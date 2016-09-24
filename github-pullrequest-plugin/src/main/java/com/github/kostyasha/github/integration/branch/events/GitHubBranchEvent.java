@@ -1,9 +1,9 @@
 package com.github.kostyasha.github.integration.branch.events;
 
+import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
-import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.TaskListener;
 import org.kohsuke.github.GHBranch;
@@ -23,8 +23,10 @@ public abstract class GitHubBranchEvent extends AbstractDescribableImpl<GitHubBr
     /**
      * indicates that branch was created
      *
-     * @param remoteBranch current branch state fetched from GH
-     * @param localBranch  branch state from last run saved in jenkins. null when not exist before
+     * @param gitHubBranchTrigger trigger itself.
+     * @param remoteBranch        current branch state fetched from GH.
+     * @param localBranch         branch state from last run saved in jenkins. null when not exist before.
+     * @param localRepo           local repository state. Useful to extract repo URLs for example.
      * @return true if branch should be run. null when no influence.
      */
     @CheckForNull
@@ -32,18 +34,9 @@ public abstract class GitHubBranchEvent extends AbstractDescribableImpl<GitHubBr
             GitHubBranchTrigger gitHubBranchTrigger,
             GHBranch remoteBranch,
             @CheckForNull GitHubBranch localBranch,
-            TaskListener listener) throws IOException {
-        return null;
-    }
-
-    @CheckForNull
-    public GitHubBranchCause check(
-            GitHubBranchTrigger gitHubBranchTrigger,
-            GHBranch remoteBranch,
-            @CheckForNull GitHubBranch localBranch,
             GitHubBranchRepository localRepo,
             TaskListener listener) throws IOException {
-        return check(gitHubBranchTrigger, remoteBranch, localBranch, listener);
+        return null;
     }
 
     /**

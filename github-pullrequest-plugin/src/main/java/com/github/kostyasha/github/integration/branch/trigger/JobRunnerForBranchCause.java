@@ -3,7 +3,6 @@ package com.github.kostyasha.github.integration.branch.trigger;
 import com.github.kostyasha.github.integration.branch.GitHubBranchBadgeAction;
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
-import com.github.kostyasha.github.integration.generic.GitHubRepoEnv;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -23,9 +22,10 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.cloudbees.jenkins.GitHubWebHook.getJenkinsInstance;
-import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.NAME;
 import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.CAUSE_SKIP;
+import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.FULL_REF;
 import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.HEAD_SHA;
+import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.NAME;
 import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.SHORT_DESC;
 import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.URL;
 import static com.github.kostyasha.github.integration.generic.GitHubRepoEnv.GIT_URL;
@@ -74,7 +74,7 @@ public class JobRunnerForBranchCause implements Predicate<GitHubBranchCause> {
             // remote connection
             if (trigger.isPreStatus()) {
                 trigger.getRemoteRepository()
-                        .createCommitStatus(cause.getHeadSha(),
+                        .createCommitStatus(cause.getCommitSha(),
                                 GHCommitState.PENDING,
                                 null,
                                 sb.toString(),
@@ -116,16 +116,20 @@ public class JobRunnerForBranchCause implements Predicate<GitHubBranchCause> {
                 NAME.param(cause.getBranchName()),
                 SHORT_DESC.param(cause.getShortDescription()),
                 URL.param(cause.getHtmlUrl().toString()),
-                HEAD_SHA.param(cause.getHeadSha()),
+                HEAD_SHA.param(cause.getCommitSha()),
                 CAUSE_SKIP.param(cause.isSkip()),
+                FULL_REF.param(cause.getFullRef()),
                 //GitHubRepoEnv
                 GIT_URL.param(cause.getGitUrl()),
                 SSH_URL.param(cause.getSshUrl())
         ));
+
         GitHubBranchBadgeAction gitHubBadgeAction = new GitHubBranchBadgeAction(cause);
 
         //TODO no way to get quietPeriod, so temporary ignore it
-        return asParameterizedJobMixIn(job).scheduleBuild2(0, new CauseAction(cause), new ParametersAction(values),
+        return asParameterizedJobMixIn(job).scheduleBuild2(0,
+                new CauseAction(cause),
+                new ParametersAction(values),
                 gitHubBadgeAction);
     }
 

@@ -18,6 +18,7 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +49,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
      *
      * @param ghRepository remote repository.
      */
-    public GitHubPRRepository(GHRepository ghRepository) {
+    public GitHubPRRepository(@Nonnull GHRepository ghRepository) {
         super(ghRepository);
     }
 

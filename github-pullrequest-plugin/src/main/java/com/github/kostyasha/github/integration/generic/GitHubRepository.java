@@ -12,6 +12,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URL;
 
@@ -29,7 +30,7 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
     private String gitUrl;
     private String sshUrl;
 
-    public GitHubRepository(GHRepository ghRepository) {
+    public GitHubRepository(@Nonnull GHRepository ghRepository) {
         fullName = ghRepository.getFullName();
         githubUrl = ghRepository.getHtmlUrl();
         gitUrl = ghRepository.getGitTransportUrl();

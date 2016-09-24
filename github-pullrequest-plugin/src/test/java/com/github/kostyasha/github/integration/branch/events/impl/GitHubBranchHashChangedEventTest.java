@@ -1,6 +1,7 @@
 package com.github.kostyasha.github.integration.branch.events.impl;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranch;
+import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import hudson.model.TaskListener;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +26,9 @@ import static org.mockito.Mockito.when;
 public class GitHubBranchHashChangedEventTest {
     @Mock
     private GitHubBranch localBranch;
+
+    @Mock
+    private GitHubBranchRepository localRepo;
     @Mock
     private GHRepository repository;
 
@@ -44,7 +48,7 @@ public class GitHubBranchHashChangedEventTest {
         when(remoteBranch.getSHA1()).thenReturn("57uy57u57u57u57u");
 
         assertThat(
-                event.check(null, remoteBranch, localBranch, listener),
+                event.check(null, remoteBranch, localBranch, localRepo, listener),
                 notNullValue()
         );
     }
@@ -54,7 +58,7 @@ public class GitHubBranchHashChangedEventTest {
     public void branchCreated() throws IOException {
         commonExpectations();
         assertThat(
-                event.check(null, remoteBranch, null, listener),
+                event.check(null, remoteBranch, null, localRepo, listener),
                 nullValue()
         );
     }
@@ -63,7 +67,7 @@ public class GitHubBranchHashChangedEventTest {
     public void branchNotChangedExisted() throws IOException {
         commonExpectations();
         assertThat(
-                event.check(null, remoteBranch, localBranch, listener),
+                event.check(null, remoteBranch, localBranch, localRepo, listener),
                 nullValue()
         );
     }
@@ -73,7 +77,7 @@ public class GitHubBranchHashChangedEventTest {
     public void branchNotChangedNotExisted() throws IOException {
         commonExpectations();
         assertThat(
-                event.check(null, null, null, listener),
+                event.check(null, null, null, localRepo, listener),
                 nullValue()
         );
     }
@@ -83,14 +87,14 @@ public class GitHubBranchHashChangedEventTest {
     public void branchDeleted() throws IOException {
         commonExpectations();
         assertThat(
-                event.check(null, null, localBranch, listener),
+                event.check(null, null, localBranch, localRepo, listener),
                 nullValue()
         );
     }
 
     private void commonExpectations() throws IOException {
         when(localBranch.getName()).thenReturn("branch-2");
-        when(localBranch.getSHA1()).thenReturn("341r34r134r314r34r");
+        when(localBranch.getCommitSha()).thenReturn("341r34r134r314r34r");
 
         when(remoteBranch.getName()).thenReturn("branch-1");
         when(remoteBranch.getOwner()).thenReturn(repository);

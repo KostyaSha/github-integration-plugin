@@ -16,6 +16,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.kohsuke.github.GHRepository;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
@@ -31,9 +32,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.isNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -47,9 +50,12 @@ public class GitHubPRRepositoryFactoryTest {
     public static final String CONFIG_PATH = "src/test/resources";
 
     @Mock
+    private GHRepository ghRepository;
+
+    @Mock
     private ItemGroup parent;
     @Mock
-    private AbstractProject<?, ?> job;
+    private Job job;
     @Mock
     private GitHubPRTrigger trigger;
 
@@ -70,7 +76,10 @@ public class GitHubPRRepositoryFactoryTest {
 
     @Test
     public void createForNullTrigger() {
-        when(job.getTrigger(GitHubPRTrigger.class)).thenReturn(null);
+//        when(job.getTrigger(GitHubPRTrigger.class)).thenReturn(null);
+        PowerMockito.mockStatic(JobHelper.class);
+        given(ghPRTriggerFromJob(job))
+                .willReturn(null);
 
         Collection<? extends Action> repoCollection = new GitHubPRRepositoryFactory().createFor(job);
         Assert.assertTrue(repoCollection instanceof List);
@@ -79,7 +88,11 @@ public class GitHubPRRepositoryFactoryTest {
 
     @Test
     public void shouldNotCreateRepoForTriggerWithExc() throws Exception {
-        when(job.getTrigger(GitHubPRTrigger.class)).thenReturn(trigger);
+//        when(job.getTrigger(GitHubPRTrigger.class)).thenReturn(trigger);
+        PowerMockito.mockStatic(JobHelper.class);
+        given(ghPRTriggerFromJob(job))
+                .willReturn(trigger);
+
         when(parent.getFullName()).thenReturn("mocked job");
         when(job.getParent()).thenReturn(parent);
         when(trigger.getRepoFullName(job)).thenThrow(new RuntimeException());
@@ -90,7 +103,10 @@ public class GitHubPRRepositoryFactoryTest {
     private void createForCommonTest(String filePath) throws IOException, NoSuchFieldException, IllegalAccessException {
         createForCommonExpectations(filePath, job, trigger);
 
+        when(trigger.getRemoteRepository()).thenReturn(ghRepository);
+
         GitHubPRRepository repo = getRepo(new GitHubPRRepositoryFactory().createFor(job));
+        assertThat(repo, notNullValue());
         XmlFile configFile = repo.getConfigFile();
 
         Assert.assertEquals(job, trigger.getJob());
@@ -134,7 +150,7 @@ public class GitHubPRRepositoryFactoryTest {
         when(job.getFullName()).thenReturn("jobFullName");
 
         PowerMockito.mockStatic(JobHelper.class);
-        given(JobHelper.triggerFrom(job, GitHubPRTrigger.class))
+        given(ghPRTriggerFromJob(job))
                 .willReturn(trigger);
         when(trigger.getJob()).thenReturn(job);
 

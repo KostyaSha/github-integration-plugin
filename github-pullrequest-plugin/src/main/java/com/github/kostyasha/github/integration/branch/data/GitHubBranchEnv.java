@@ -15,6 +15,7 @@ public enum GitHubBranchEnv {
     TITLE,
     URL,
     HEAD_SHA,
+    FULL_REF,
     CAUSE_SKIP,
     STATE;
 

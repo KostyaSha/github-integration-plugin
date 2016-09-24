@@ -7,6 +7,6 @@ a(href: my.htmlUrl) {
 
 table(width: "1000px") {
     tr() {
-        td("SHA1: " + my.sha1)
+        td("SHA1: " + my.getCommitSha())
     }
 }

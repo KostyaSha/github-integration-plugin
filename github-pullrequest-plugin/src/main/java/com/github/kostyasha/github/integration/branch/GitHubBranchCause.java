@@ -24,7 +24,10 @@ public class GitHubBranchCause extends GitHubCause<GitHubBranchCause> {
      * null for deleted branch.
      */
     @CheckForNull
-    private final String headSha;
+    private final String commitSha;
+
+    @CheckForNull
+    private final String fullRef;
 
     public GitHubBranchCause(@Nonnull GitHubBranch localBranch, @Nonnull GitHubBranchRepository localRepo,
                              String reason, boolean skip) {
@@ -32,16 +35,19 @@ public class GitHubBranchCause extends GitHubCause<GitHubBranchCause> {
         withSkip(skip);
         withLocalRepo(localRepo);
         this.branchName = localBranch.getName();
-        this.headSha = localBranch.getSHA1();
+        this.commitSha = localBranch.getCommitSha();
+        this.fullRef = "refs/heads/" + branchName;
     }
 
-    public GitHubBranchCause(@Nonnull GHBranch remoteBranch, @Nonnull GitHubBranchRepository localRepo,
+    public GitHubBranchCause(@Nonnull GHBranch remoteBranch,
+                             @Nonnull GitHubBranchRepository localRepo,
                              String reason, boolean skip) {
         withReason(reason);
         withSkip(skip);
         withLocalRepo(localRepo);
         this.branchName = remoteBranch.getName();
-        this.headSha = remoteBranch.getSHA1();
+        this.commitSha = remoteBranch.getSHA1();
+        this.fullRef = "refs/heads/" + branchName;
     }
 
     public String getBranchName() {
@@ -49,8 +55,13 @@ public class GitHubBranchCause extends GitHubCause<GitHubBranchCause> {
     }
 
     @CheckForNull
-    public String getHeadSha() {
-        return headSha;
+    public String getCommitSha() {
+        return commitSha;
+    }
+
+    @CheckForNull
+    public String getFullRef() {
+        return fullRef;
     }
 
     @Nonnull

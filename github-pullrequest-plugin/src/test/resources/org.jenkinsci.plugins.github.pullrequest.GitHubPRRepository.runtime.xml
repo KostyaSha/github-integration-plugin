@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository plugin="github-pullrequest@0.0.1-SNAPSHOT">
+<org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository>
   <fullName>user/repo</fullName>
   <githubUrl>https://github.com/user/repo/</githubUrl>
   <pulls>

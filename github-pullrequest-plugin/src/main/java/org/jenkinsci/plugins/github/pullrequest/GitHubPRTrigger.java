@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,6 +81,7 @@ import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
  * - Trigger when PR opened
  * - Trigger when PR closed
  * - Trigger by label
+ * - etc.
  *
  * @author Kanstantsin Shautsou
  */

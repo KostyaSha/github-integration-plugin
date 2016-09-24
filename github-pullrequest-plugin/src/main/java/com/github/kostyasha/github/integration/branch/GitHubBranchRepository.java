@@ -27,6 +27,8 @@ import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.rebuild;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 
 /**
+ * Store local state of remote branches.
+ *
  * @author Kanstantsin Shautsou
  */
 public class GitHubBranchRepository extends GitHubRepository<GitHubBranchRepository> {

@@ -23,7 +23,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.immutableEnumSet;
 import static java.lang.String.format;
-import static org.jenkinsci.plugins.github.pullrequest.webhook.WebhookInfoPredicates.withApplicableTrigger;
+import static org.jenkinsci.plugins.github.pullrequest.webhook.WebhookInfoPredicates.withPRTrigger;
 import static org.jenkinsci.plugins.github.pullrequest.webhook.WebhookInfoPredicates.withRepo;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.triggerFrom;
@@ -41,7 +41,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
 
     @Override
     protected boolean isApplicable(Job<?, ?> job) {
-        return withApplicableTrigger().apply(job);
+        return withPRTrigger().apply(job);
     }
 
     @Override
@@ -109,7 +109,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
         }
     }
 
-    private Set<Job> getJobs(final String repo) {
+    private static Set<Job> getJobs(final String repo) {
         final Set<Job> ret = new HashSet<>();
 
         ACL.impersonate(ACL.SYSTEM, new Runnable() {
@@ -118,7 +118,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                 List<Job> jobs = Jenkins.getActiveInstance().getAllItems(Job.class);
                 ret.addAll(FluentIterableWrapper.from(jobs)
                         .filter(isBuildable())
-                        .filter(withApplicableTrigger())
+                        .filter(withPRTrigger())
                         .filter(withRepo(repo))
                         .toSet()
                 );

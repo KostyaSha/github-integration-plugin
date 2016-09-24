@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,7 +44,6 @@ import java.util.Set;
 
 import static com.github.kostyasha.github.integration.branch.trigger.check.BranchToCauseConverter.toGitHubBranchCause;
 import static com.github.kostyasha.github.integration.branch.trigger.check.LocalRepoUpdater.updateLocalRepo;
-import static com.github.kostyasha.github.integration.branch.trigger.check.NotUpdatedBranchFilter.notUpdated;
 import static com.github.kostyasha.github.integration.branch.trigger.check.SkipFirstRunForBranchFilter.ifSkippedFirstRun;
 import static com.github.kostyasha.github.integration.branch.webhook.WebhookInfoBranchPredicates.withHookTriggerMode;
 import static com.google.common.base.Charsets.UTF_8;
@@ -239,7 +237,6 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
             Set<GHBranch> remoteBranches = branchesToCheck(branch, remoteRepo, localRepository);
 
             Set<GHBranch> prepared = from(remoteBranches)
-                    .filter(notUpdated(localRepository, listener))
 //                    .transform(prepareUserRestrictionFilter(localRepository, this))
                     .toSet();
 
@@ -308,7 +305,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
 
         @Override
         public String getDisplayName() {
-            return "Experimental: Run GitHub Branches";
+            return "Experimental: GitHub Branches";
         }
 
         @Override

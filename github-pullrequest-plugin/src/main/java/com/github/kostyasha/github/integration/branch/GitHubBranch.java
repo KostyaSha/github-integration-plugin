@@ -4,19 +4,20 @@ import hudson.Functions;
 import org.kohsuke.github.GHBranch;
 
 /**
+ * Store local information about branch.
+ *
  * @author Kanstantsin Shautsou
+ * @see GitHubBranchRepository
  */
 public class GitHubBranch {
 
     private String name;
-    private String sha1;
+    private String commitSha;
     private String htmlUrl;
-    private String gitUrl;
-    private String sshUrl;
 
     public GitHubBranch(GHBranch ghBranch) {
         name = ghBranch.getName();
-        sha1 = ghBranch.getSHA1();
+        commitSha = ghBranch.getSHA1();
         htmlUrl = ghBranch.getOwner().getHtmlUrl().toString() + "/tree/" + name;
     }
 
@@ -28,12 +29,12 @@ public class GitHubBranch {
         this.name = name;
     }
 
-    public String getSHA1() {
-        return sha1;
+    public String getCommitSha() {
+        return commitSha;
     }
 
-    public void setSHA1(String sha1) {
-        this.sha1 = sha1;
+    public void setCommitSha(String sha1) {
+        this.commitSha = sha1;
     }
 
     public String getHtmlUrl() {
@@ -48,7 +49,4 @@ public class GitHubBranch {
         return Functions.getResourcePath() + "/plugin/github-pullrequest/git-branch.svg";
     }
 
-    public String getGitUrl() {
-        return gitUrl;
-    }
 }

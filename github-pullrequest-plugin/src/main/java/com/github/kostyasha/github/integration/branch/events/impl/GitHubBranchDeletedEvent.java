@@ -42,7 +42,7 @@ public class GitHubBranchDeletedEvent extends GitHubBranchEvent {
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": state has changed (branch was deleted)");
             LOG.debug("{}: state has changed (branch was deleted)", DISPLAY_NAME);
-            localBranch.setSHA1(null);
+            localBranch.setCommitSha(null);
             cause = new GitHubBranchCause(localBranch, localRepo, DISPLAY_NAME, false);
         }
 

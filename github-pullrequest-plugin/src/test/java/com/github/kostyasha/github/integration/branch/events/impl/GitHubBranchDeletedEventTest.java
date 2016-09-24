@@ -1,6 +1,8 @@
 package com.github.kostyasha.github.integration.branch.events.impl;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranch;
+import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
+import com.github.kostyasha.github.integration.generic.GitHubRepository;
 import hudson.model.TaskListener;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +31,8 @@ public class GitHubBranchDeletedEventTest {
     private GHRepository repository;
 
     @Mock
+    private GitHubBranchRepository localRepo;
+    @Mock
     private GHBranch remoteBranch;
     @Mock
     private TaskListener listener;
@@ -41,7 +45,7 @@ public class GitHubBranchDeletedEventTest {
     public void branchCreated() throws IOException {
         commonExpectations();
         assertThat(
-                event.check(null, remoteBranch, null, listener),
+                event.check(null, remoteBranch, null, localRepo, listener),
                 nullValue()
         );
     }
@@ -50,7 +54,7 @@ public class GitHubBranchDeletedEventTest {
     public void branchNotChangedExisted() throws IOException {
         commonExpectations();
         assertThat(
-                event.check(null, remoteBranch, localBranch, listener),
+                event.check(null, remoteBranch, localBranch, localRepo, listener),
                 nullValue()
         );
     }
@@ -59,7 +63,7 @@ public class GitHubBranchDeletedEventTest {
     public void branchNotChangedNotExisted() throws IOException {
         commonExpectations();
         assertThat(
-                event.check(null, null, null, listener),
+                event.check(null, null, null, localRepo, listener),
                 nullValue()
         );
     }
@@ -68,7 +72,7 @@ public class GitHubBranchDeletedEventTest {
     public void branchDeleted() throws IOException {
         commonExpectations();
         assertThat(
-                event.check(null, null, localBranch, listener),
+                event.check(null, null, localBranch, localRepo, listener),
                 notNullValue()
         );
     }

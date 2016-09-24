@@ -6,7 +6,6 @@ import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
-import com.github.kostyasha.github.integration.generic.GitHubRepository;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import org.kohsuke.github.GHBranch;
@@ -41,7 +40,7 @@ public class GitHubBranchHashChangedEvent extends GitHubBranchEvent {
                                    TaskListener listener) throws IOException {
         GitHubBranchCause cause = null;
         if (nonNull(localBranch) && nonNull(remoteBranch)) { // didn't exist before
-            final String localBranchSHA1 = localBranch.getSHA1();
+            final String localBranchSHA1 = localBranch.getCommitSha();
             final String remoteBranchSHA1 = remoteBranch.getSHA1();
 
             if (!localBranchSHA1.equals(remoteBranchSHA1)) {

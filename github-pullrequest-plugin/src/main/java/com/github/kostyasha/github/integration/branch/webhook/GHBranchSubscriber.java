@@ -10,7 +10,6 @@ import org.jenkinsci.plugins.github.extension.GHEventsSubscriber;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.jenkinsci.plugins.github.util.FluentIterableWrapper;
 import org.kohsuke.github.GHEvent;
-import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +29,7 @@ import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
 
 /**
  * @author Kanstantsin Shautsou
+ * @see org.jenkinsci.plugins.github.pullrequest.webhook.GHPullRequestSubscriber
  */
 @Extension
 public class GHBranchSubscriber extends GHEventsSubscriber {
@@ -49,9 +49,7 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
     @Override
     protected void onEvent(GHEvent event, String payload) {
         try {
-            GitHub gh = GitHub.connectAnonymously();
-
-            BranchInfo ref = extractRefInfo(event, payload, gh);
+            BranchInfo ref = extractRefInfo(event, payload);
 
             for (Job job : getJobs(ref.getRepo())) {
                 GitHubBranchTrigger trigger = triggerFrom(job, GitHubBranchTrigger.class);
@@ -73,8 +71,9 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
                         LOGGER.warn("Unsupported LIGHT_HOOKS trigger mode");
                         break;
                     }
-                    default:
+                    default: {
                         break;
+                    }
                 }
             }
 
@@ -83,17 +82,16 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
         }
     }
 
-    private BranchInfo extractRefInfo(GHEvent event, String payload, GitHub gh) throws IOException {
+    private BranchInfo extractRefInfo(GHEvent event, String payload) throws IOException {
         JSONObject json = fromObject(payload);
         if (EVENTS.contains(event)) {
             return fromJson(json);
         } else {
             throw new IllegalStateException(format("Did you add event %s in events() method?", event));
-
         }
     }
 
-    private Set<Job> getJobs(final String repo) {
+    private static Set<Job> getJobs(final String repo) {
         final Set<Job> ret = new HashSet<>();
 
         ACL.impersonate(ACL.SYSTEM, new Runnable() {
@@ -114,10 +112,13 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
 
     private BranchInfo fromJson(JSONObject json) {
         final String repo = json.getJSONObject("repository").getString("full_name");
-        String branch = json.getString("ref");
-        if (branch.startsWith("refs/heads/")) {
-            branch = branch.replace("refs/heads/", "");
+        String branchName = json.getString("ref");
+        String fullRef = branchName;
+
+        if (branchName.startsWith("refs/heads/")) {
+            branchName = branchName.replace("refs/heads/", "");
         }
-        return new BranchInfo(repo, branch);
+
+        return new BranchInfo(repo, branchName, fullRef);
     }
 }
