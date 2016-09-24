@@ -35,6 +35,10 @@ f.block {
             f.checkbox()
         }
 
+        f.entry(title: "Inject Git SCM Revision Parameter Action", field: "injectRPA") {
+            f.checkbox()
+        }
+
         f.entry(title: _("Trigger Events"), help: descriptor.getHelpFile('events')) {
             f.hetero_list(name: "events",
                     items: instance.events,
