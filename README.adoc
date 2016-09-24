@@ -1,7 +1,12 @@
 = GitHub Integration Plugin
 
-== GitHub Pull Request Plugin
+image:https://img.shields.io/badge/java-1.8-yellow.svg["Minimal java version"]
+//image:https://scan.coverity.com/projects/XXXX/badge.svg?flat=1["Coverity Scan Build Status", link="https://scan.coverity.com/projects/kostyasha-yet-another-docker-plugin"]
+image:https://travis-ci.org/KostyaSha/github-integration-plugin.svg?branch=master["Build Status", link="https://travis-ci.org/KostyaSha/yet-another-docker-plugin"]
+image:https://codecov.io/github/KostyaSha/github-integration-plugin/coverage.svg?branch=master["codecov.io", link="http://codecov.io/github/christiangalsterer/httpbeat?branch=master"]
 image:https://img.shields.io/sonar/http/sonar.lanwen.ru/org.jenkins-ci.plugins:github-pullrequest/coverage.svg?style=flat[Coverage, link="http://sonar.lanwen.ru/dashboard/index?id=org.jenkins-ci.plugins:github-pullrequest"]
+
+== GitHub Pull Request Plugin
 
 == Documentation
 
