@@ -21,7 +21,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static java.lang.String.format;
 import static org.jenkinsci.plugins.github.pullrequest.util.TestUtil.classpath;
-import static org.mortbay.jetty.HttpStatus.ORDINAL_201_Created;
 
 /**
  * Mocks GitHub on localhost with some predefined methods
@@ -165,7 +164,7 @@ public class GHMockRule implements TestRule {
                 service().stubFor(
                         post(urlPathMatching(
                                 format("/repos/%s/%s/statuses/.*", REPO.getUserName(), REPO.getRepositoryName()))
-                        ).willReturn(aResponse().withStatus(ORDINAL_201_Created)));
+                        ).willReturn(aResponse().withStatus(201)));
             }
         });
     }
