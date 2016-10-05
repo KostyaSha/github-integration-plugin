@@ -6,7 +6,7 @@ image:https://travis-ci.org/KostyaSha/github-integration-plugin.svg?branch=maste
 image:https://codecov.io/github/KostyaSha/github-integration-plugin/coverage.svg?branch=master["codecov.io", link="https://codecov.io/github/KostyaSha/github-integration-plugin/?branch=master"]
 image:https://img.shields.io/sonar/http/sonar.lanwen.ru/org.jenkins-ci.plugins:github-pullrequest/coverage.svg?style=flat[Coverage, link="http://sonar.lanwen.ru/dashboard/index?id=org.jenkins-ci.plugins:github-pullrequest"]
 
-== GitHub Pull Request Plugin
+Provides `GitHub Pull Request` and `GitHub Branch` triggers 
 
 == Documentation
 
