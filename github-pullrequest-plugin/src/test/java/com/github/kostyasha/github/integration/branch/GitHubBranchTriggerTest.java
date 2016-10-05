@@ -57,6 +57,7 @@ public class GitHubBranchTriggerTest {
             new WireMockRule(
                     wireMockConfig().dynamicPort().notifier(new Slf4jNotifier(true))
             ))
+            .stubRateLimit()
             .stubUser()
             .stubRepoBranches()
             .stubRepo()

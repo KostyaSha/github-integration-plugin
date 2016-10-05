@@ -102,6 +102,17 @@ public class GHMockRule implements TestRule {
         });
     }
 
+    public GHMockRule stubRateLimit() {
+        return addSetup(new Runnable() {
+            @Override
+            public void run() {
+                service().stubFor(get(urlEqualTo("/rate_limit"))
+                        .willReturn(aResponse()
+                                .withStatus(404)));
+            }
+        });
+    }
+
     /**
      * Stubs /repos/org/repo/branches response with predefined content
      * <p>
