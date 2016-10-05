@@ -21,7 +21,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static java.lang.String.format;
 import static org.jenkinsci.plugins.github.pullrequest.util.TestUtil.classpath;
-import static wiremock.org.mortbay.jetty.HttpStatus.ORDINAL_201_Created;
+import static org.mortbay.jetty.HttpStatus.ORDINAL_201_Created;
 
 /**
  * Mocks GitHub on localhost with some predefined methods
