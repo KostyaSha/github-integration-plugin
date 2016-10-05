@@ -27,6 +27,7 @@ import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEn
 import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.HEAD_SHA;
 import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.NAME;
 import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.SHORT_DESC;
+import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.TITLE;
 import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.URL;
 import static com.github.kostyasha.github.integration.generic.GitHubRepoEnv.GIT_URL;
 import static com.github.kostyasha.github.integration.generic.GitHubRepoEnv.SSH_URL;
@@ -119,6 +120,7 @@ public class JobRunnerForBranchCause implements Predicate<GitHubBranchCause> {
                 HEAD_SHA.param(cause.getCommitSha()),
                 CAUSE_SKIP.param(cause.isSkip()),
                 FULL_REF.param(cause.getFullRef()),
+                TITLE.param(cause.getTitle()),
                 //GitHubRepoEnv
                 GIT_URL.param(cause.getGitUrl()),
                 SSH_URL.param(cause.getSshUrl())

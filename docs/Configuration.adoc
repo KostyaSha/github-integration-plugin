@@ -21,21 +21,42 @@ that is not a build)
 like `Build #${BUILD_NUMBER} started`
 - In `Post-build Actions` add `GitHub PR: set PR status` and configure message to `Build #${BUILD_NUMBER} ended`
 
+==== Available Environment Variables:
+- `GITHUB_PR_TRIGGER_SENDER_AUTHOR` - `Kanstantsin Shautsou`
+- `GITHUB_PR_TRIGGER_SENDER_EMAIL` - `KostyaSha@users.noreply.github.com`
+- `GITHUB_PR_COMMIT_AUTHOR_NAME`
+- `GITHUB_PR_COMMIT_AUTHOR_EMAIL`
+- `GITHUB_PR_TARGET_BRANCH` - `master`
+- `GITHUB_PR_SOURCE_BRANCH` - `KostyaSha-patch-9`
+- `GITHUB_PR_AUTHOR_EMAIL` - `KostyaSha@users.noreply.github.com`
+- `GITHUB_PR_SHORT_DESC` -
+- `GITHUB_PR_TITLE` - `Update README.md`
+- `GITHUB_PR_URL` - `https://github.com/KostyaSha/test-repo/pull/21`
+- `GITHUB_PR_SOURCE_REPO_OWNER` - `KostyaSha`
+- `GITHUB_PR_HEAD_SHA` - `8c8e496391619410bded8bb113d4887443ea3b53`
+- `GITHUB_PR_COND_REF` - `head`
+- `GITHUB_PR_CAUSE_SKIP` - `false`
+- `GITHUB_PR_NUMBER` - `21`
+- `GITHUB_PR_STATE` - `OPEN`
+
 === Branch Trigger
 
 ==== Triggering
 - Configure https://wiki.jenkins-ci.org/display/JENKINS/GitHub+Plugin[github-plugin] according to it's documentation.
 - Set `GitHub project property` with link to your GH repository in Job settings.
 - Configure Git SCM with variables refspec: `refs/heads/${GITHUB_BRANCH_NAME}:refs/remotes/origin/${GITHUB_BRANCH_NAME}`
-url `${GITHUB_GIT_URL}`, branchspec `${GITHUB_BRANCH_NAME}`.
+url `${GITHUB_REPO_GIT_URL}`, branchspec `${GITHUB_BRANCH_NAME}`.
 
 ==== Available Environment Variables
 ===== Specific for branch:
-- `GITHUB_BRANCH_NAME`
+- `GITHUB_BRANCH_NAME` - `KostyaSha-patch-1`
 - `GITHUB_BRANCH_SHORT_DESC`
 - `GITHUB_BRANCH_TITLE`
 - `GITHUB_BRANCH_URL`
-- `GITHUB_BRANCH_HEAD_SHA`
-- `GITHUB_BRANCH_FULL_REF`
-- `GITHUB_BRANCH_CAUSE_SKIP`
-- `GITHUB_BRANCH_STATE`
+- `GITHUB_BRANCH_HEAD_SHA` - `850f36c6e494c5d85c748e61337647f003106bfb`
+- `GITHUB_BRANCH_FULL_REF` - `refs/heads/KostyaSha-patch-1`
+- `GITHUB_BRANCH_CAUSE_SKIP` - `true` or `false`
+
+===== Specific for repo:
+- `GITHUB_REPO_GIT_URL` - `git://github.com/KostyaSha-org/test-branches.git`
+- `GITHUB_REPO_SSH_URL` - `git@github.com:KostyaSha-org/test-branches.git`
