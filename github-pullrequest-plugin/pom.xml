@@ -135,6 +135,14 @@
             <version>${workflow.version}</version>
         </dependency>
 
+        <!-- jucies -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>jucies</artifactId>
+            <version>0.2.1</version>
+            <optional>true</optional>
+        </dependency>
+
         <!-- workflow for tests -->
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
