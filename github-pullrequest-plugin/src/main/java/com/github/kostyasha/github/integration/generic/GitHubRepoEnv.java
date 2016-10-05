@@ -13,7 +13,7 @@ public enum GitHubRepoEnv {
     GIT_URL,
     SSH_URL;
 
-    public static final String PREFIX = "GITHUB_";
+    public static final String PREFIX = "GITHUB_REPO_";
 
     public ParameterValue param(String value) {
         return new StringParameterValue(toString(), trimToEmpty(value));
