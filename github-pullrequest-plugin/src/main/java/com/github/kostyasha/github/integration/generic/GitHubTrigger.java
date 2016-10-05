@@ -144,7 +144,7 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
             checkNotNull(job, "job object is null, race condition?");
             GithubProjectProperty ghpp = job.getProperty(GithubProjectProperty.class);
 
-            checkNotNull(ghpp, "GitHub project property is not defined. Can't setup GitHub PR trigger for job %s",
+            checkNotNull(ghpp, "GitHub project property is not defined. Can't setup GitHub trigger for job %s",
                     job.getName());
             checkNotNull(ghpp.getProjectUrl(), "A GitHub project url is required");
 

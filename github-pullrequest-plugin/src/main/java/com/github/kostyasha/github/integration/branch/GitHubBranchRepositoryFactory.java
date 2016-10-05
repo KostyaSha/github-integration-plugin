@@ -48,10 +48,10 @@ public class GitHubBranchRepositoryFactory
         XmlFile configFile = new XmlFile(new File(job.getRootDir(), GitHubBranchRepository.FILE));
 
         GitHubBranchTrigger trigger = ghBranchTriggerFromJob(job);
-        GitHubRepositoryName repo = trigger.getRepoFullName(job);
-
-        GithubProjectProperty property = job.getProperty(GithubProjectProperty.class);
-        String githubUrl = property.getProjectUrl().toString();
+//        GitHubRepositoryName repo = trigger.getRepoFullName(job);
+//
+//        GithubProjectProperty property = job.getProperty(GithubProjectProperty.class);
+//        String githubUrl = property.getProjectUrl().toString();
         GitHubBranchRepository localRepository;
         if (configFile.exists()) {
             try {
