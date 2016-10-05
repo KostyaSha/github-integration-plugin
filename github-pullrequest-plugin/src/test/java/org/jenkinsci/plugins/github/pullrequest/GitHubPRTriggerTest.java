@@ -73,6 +73,15 @@ public class GitHubPRTriggerTest {
     };
 
     @Test
+    public void rountTrip() throws Exception {
+        final FreeStyleProject p = j.createFreeStyleProject();
+        p.addProperty(new GithubProjectProperty("https://github.com/KostyaSha/test-repo"));
+        p.save();
+
+        j.configRoundtrip(p);
+    }
+
+    @Test
     public void checkBuildDataExistenceAfterBuild() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject("test-job");
         p.getBuildersList().add(new BuildDataBuilder());
