@@ -1,5 +1,10 @@
 ## Changelog
 
+## 0.1.0-rc9
+ * [BRANCH] New `GitHub Branch Trigger`.
+ * [DOC] Updated docs.
+ * Jucies is optional dep.
+
 ## 0.1.0-rc8 
  * [PR] Insert PR state as variable.
  * [PR] Add job-dsl for BuildStep status updater.
