@@ -235,10 +235,9 @@
         <!--to mock github-->
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock</artifactId>
-            <version>1.57</version>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>2.2.1</version>
             <scope>test</scope>
-            <classifier>standalone</classifier>
             <exclusions>
                 <exclusion>
                     <groupId>org.mortbay.jetty</groupId>

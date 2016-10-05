@@ -1,7 +1,5 @@
 package com.github.kostyasha.github.integration.branch;
 
-import com.cloudbees.jenkins.GitHubRepositoryName;
-import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import com.github.kostyasha.github.integration.generic.GitHubRepositoryFactory;
 import hudson.Extension;
 import hudson.XmlFile;
@@ -48,10 +46,7 @@ public class GitHubBranchRepositoryFactory
         XmlFile configFile = new XmlFile(new File(job.getRootDir(), GitHubBranchRepository.FILE));
 
         GitHubBranchTrigger trigger = ghBranchTriggerFromJob(job);
-//        GitHubRepositoryName repo = trigger.getRepoFullName(job);
-//
-//        GithubProjectProperty property = job.getProperty(GithubProjectProperty.class);
-//        String githubUrl = property.getProjectUrl().toString();
+
         GitHubBranchRepository localRepository;
         if (configFile.exists()) {
             try {
