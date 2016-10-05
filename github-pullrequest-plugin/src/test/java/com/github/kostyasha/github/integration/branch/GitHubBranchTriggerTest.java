@@ -96,6 +96,8 @@ public class GitHubBranchTriggerTest {
 
         final GitHubBranchCause cause = lastBuild.getCause(GitHubBranchCause.class);
         assertThat(cause, notNullValue());
+        assertThat(cause.getCommitSha(), is("6dcb09b5b57875f334f61aebed695e2e4193db5e"));
+        assertThat(cause.getBranchName(), is("master"));
     }
 
     @TestExtension
