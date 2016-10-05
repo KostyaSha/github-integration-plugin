@@ -6,10 +6,13 @@ import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import hudson.Functions;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
+import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
+import hudson.model.TopLevelItem;
 import hudson.plugins.git.util.BuildData;
+import org.hamcrest.Matchers;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,6 +20,7 @@ import org.junit.rules.ExternalResource;
 import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
+import org.jvnet.hudson.test.recipes.LocalData;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.File;
@@ -26,9 +30,15 @@ import java.net.URLConnection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.iterableWithSize;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.CRON;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -71,6 +81,42 @@ public class GitHubPRTriggerTest {
             }
         }
     };
+
+    /**
+     * Snapshot of files before Branch trigger refactoring.
+     */
+    @LocalData
+    @Test
+    public void ensureOldValid() {
+        final TopLevelItem item = j.getInstance().getItem("test-job");
+        assertThat(item, notNullValue());
+        final FreeStyleProject project = (FreeStyleProject) item;
+
+        final GitHubPRRepository prRepository = project.getAction(GitHubPRRepository.class);
+        assertThat(project, notNullValue());
+
+        assertThat(prRepository.getFullName(), is("KostyaSha-auto/test"));
+
+        final Map<Integer, GitHubPRPullRequest> pulls = prRepository.getPulls();
+        assertThat(pulls.size(), is(1));
+        final GitHubPRPullRequest pullRequest = pulls.get(1);
+        assertThat(pullRequest, notNullValue());
+        assertThat(pullRequest.getTitle(), is("Update README.md"));
+        assertThat(pullRequest.getHeadRef(), is("KostyaSha-auto-patch-1"));
+        assertThat(pullRequest.isMergeable(), is(true));
+        assertThat(pullRequest.getBaseRef(), is("master"));
+        assertThat(pullRequest.getUserLogin(), is("KostyaSha-auto"));
+        assertThat(pullRequest.getSourceRepoOwner(), is("KostyaSha-auto"));
+        assertThat(pullRequest.getLabels(), Matchers.<String>empty());
+
+        final GitHubPRTrigger trigger = project.getTrigger(GitHubPRTrigger.class);
+        assertThat(trigger, notNullValue());
+        assertThat(trigger.getTriggerMode(), is(CRON));
+        assertThat(trigger.getEvents(), hasSize(2));
+        assertThat(trigger.isPreStatus(), is(false));
+        assertThat(trigger.isCancelQueued(), is(false));
+        assertThat(trigger.isSkipFirstRun(), is(false));
+    }
 
     @Test
     public void checkBuildDataExistenceAfterBuild() throws Exception {
@@ -120,7 +166,7 @@ public class GitHubPRTriggerTest {
     private static GitHubPRTrigger defaultGitHubPRTrigger() throws ANTLRException {
         String spec = "";
         List<GitHubPREvent> events = Collections.emptyList();
-        return new GitHubPRTrigger(spec, GitHubPRTriggerMode.CRON, events);
+        return new GitHubPRTrigger(spec, CRON, events);
     }
 
     private class BuildDataBuilder extends TestBuilder {
