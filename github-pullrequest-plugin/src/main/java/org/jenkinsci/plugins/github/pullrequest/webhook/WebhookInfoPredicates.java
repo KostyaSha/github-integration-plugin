@@ -22,7 +22,7 @@ public final class WebhookInfoPredicates {
     private WebhookInfoPredicates() {
     }
 
-    public static Predicate<Job> withApplicableTrigger() {
+    public static Predicate<Job> withPRTrigger() {
         return Predicates.and(
                 withTrigger(GitHubPRTrigger.class),
                 withHookTriggerMode()

@@ -140,7 +140,7 @@ public class GitHubPRStatusBuilderTest {
 
         urlExpectations();
 
-        when(trigger.getRemoteRepo()).thenThrow(new IllegalStateException("on getting remote repo"));
+        when(trigger.getRemoteRepository()).thenThrow(new IllegalStateException("on getting remote repo"));
         when(listener.getLogger()).thenReturn(logger);
 
         Assert.assertTrue(builder.perform(build, launcher, listener));
@@ -160,7 +160,7 @@ public class GitHubPRStatusBuilderTest {
 
         urlExpectations();
 
-        when(trigger.getRemoteRepo()).thenReturn(remoteRepository);
+        when(trigger.getRemoteRepository()).thenReturn(remoteRepository);
         when(message.expandAll(build, listener)).thenReturn("expanded");
         when(build.getProject()).thenReturn(project);
         when(project.getParent()).thenReturn(itemGroup);

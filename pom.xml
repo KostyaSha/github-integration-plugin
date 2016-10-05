@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.625.3</version>
+        <version>2.16</version>
     </parent>
 
     <artifactId>github-integration-parent</artifactId>
@@ -31,15 +31,15 @@
     </modules>
 
     <properties>
-        <jenkins.parent.version>1.625.3</jenkins.parent.version>
-        <maven-hpi-plugin.version>1.115</maven-hpi-plugin.version>
+        <jenkins.version>1.625.3</jenkins.version>
+        <hpi-plugin.version>1.119</hpi-plugin.version>
         <ignore.random.failures>true</ignore.random.failures>
     </properties>
 
     <scm>
-        <connection>scm:git:ssh://github.com/jenkinsci/github-integration-plugin.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/jenkinsci/github-integration-plugin.git</developerConnection>
-        <url>https://github.com/jenkinsci/github-integration-plugin.git</url>
+        <connection>scm:git:ssh://github.com/KostyaSha/github-integration-plugin.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/KostyaSha/github-integration-plugin.git</developerConnection>
+        <url>https://github.com/KostyaSha/github-integration-plugin.git</url>
         <tag>HEAD</tag>
     </scm>
 

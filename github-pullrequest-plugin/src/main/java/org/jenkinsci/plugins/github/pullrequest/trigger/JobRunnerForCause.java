@@ -12,10 +12,8 @@ import hudson.model.CauseAction;
 import hudson.model.Computer;
 import hudson.model.Executor;
 import hudson.model.Job;
-import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
-import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Queue;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -34,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -58,6 +55,7 @@ import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TITLE;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TRIGGER_SENDER_AUTHOR;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TRIGGER_SENDER_EMAIL;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.URL;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getDefaultParametersValues;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getInterruptCauses;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getInterruptStatus;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
@@ -85,7 +83,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
         SecurityContext old = ACL.impersonate(ACL.SYSTEM);
 
         try {
-            cause.setPollingLog(trigger.getPollingLogAction().getPollingLogFile());
+            cause.setPollingLogFile(trigger.getPollingLogAction().getPollingLogFile());
 
             StringBuilder sb = new StringBuilder();
             sb.append("Jenkins queued the run (").append(cause.getReason()).append(")");
@@ -125,7 +123,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                 if (job instanceof MatrixProject) {
                     Collection<? extends MatrixConfiguration> configs = ((MatrixProject) job).getActiveConfigurations();
                     for (MatrixConfiguration config : configs) {
-                        trigger.getRemoteRepo()
+                        trigger.getRemoteRepository()
                                 .createCommitStatus(cause.getHeadSha(),
                                         GHCommitState.PENDING,
                                         config.getAbsoluteUrl(),
@@ -133,7 +131,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                                         config.getFullName());
                     }
                 } else {
-                    trigger.getRemoteRepo()
+                    trigger.getRemoteRepository()
                             .createCommitStatus(cause.getHeadSha(),
                                     GHCommitState.PENDING,
                                     job.getAbsoluteUrl(),
@@ -215,7 +213,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
     /**
      * Cancel previous builds for specified PR id.
      */
-    protected int cancelQueuedBuildByPrNumber(final int id) {
+    public int cancelQueuedBuildByPrNumber(final int id) {
         int canceled = 0;
         SecurityContext old = impersonate(ACL.SYSTEM);
         try {
@@ -259,7 +257,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
     }
 
     private QueueTaskFuture<?> startJob(GitHubPRCause cause) {
-        List<ParameterValue> values = getDefaultParametersValues();
+        List<ParameterValue> values = getDefaultParametersValues(job);
         values.addAll(asList(
                 TRIGGER_SENDER_AUTHOR.param(cause.getTriggerSenderName()),
                 TRIGGER_SENDER_EMAIL.param(cause.getTriggerSenderEmail()),
@@ -294,32 +292,6 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
 
         return parameterizedJobMixIn.scheduleBuild2(quietPeriod, new CauseAction(cause), new ParametersAction(values),
                 gitHubPRBadgeAction);
-    }
-
-    /**
-     * @see jenkins.model.ParameterizedJobMixIn#getDefaultParametersValues()
-     */
-    protected List<ParameterValue> getDefaultParametersValues() {
-        ParametersDefinitionProperty paramDefProp = job.getProperty(ParametersDefinitionProperty.class);
-        List<ParameterValue> defValues = new ArrayList<>();
-
-        /*
-        * This check is made ONLY if someone will call this method even if isParametrized() is false.
-        */
-        if (paramDefProp == null) {
-            return defValues;
-        }
-
-        /* Scan for all parameter with an associated default values */
-        for (ParameterDefinition paramDefinition : paramDefProp.getParameterDefinitions()) {
-            ParameterValue defaultValue = paramDefinition.getDefaultParameterValue();
-
-            if (defaultValue != null) {
-                defValues.add(defaultValue);
-            }
-        }
-
-        return defValues;
     }
 
     protected static class CausesFromAction implements Function<Action, Iterable<Cause>> {

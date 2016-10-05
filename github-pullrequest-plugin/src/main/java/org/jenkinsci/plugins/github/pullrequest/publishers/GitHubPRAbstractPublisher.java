@@ -92,7 +92,7 @@ public abstract class GitHubPRAbstractPublisher extends Recorder implements Simp
 
     public GHRepository getGhRepository(final Run<?, ?> run) throws IOException {
         if (isNull(ghRepository)) {
-            ghRepository = ghPRTriggerFromRun(run).getRemoteRepo();
+            ghRepository = ghPRTriggerFromRun(run).getRemoteRepository();
         }
         return ghRepository;
     }
@@ -138,7 +138,7 @@ public abstract class GitHubPRAbstractPublisher extends Recorder implements Simp
             if (nonNull(run)) {
                 final GitHubPRTrigger trigger = triggerFrom(run.getParent(), GitHubPRTrigger.class);
 
-                GHRepository ghRepository = trigger.getRemoteRepo();
+                GHRepository ghRepository = trigger.getRemoteRepository();
                 ghRepository.getPullRequest(id).comment(finalComment);
             }
         } catch (IOException ex) {

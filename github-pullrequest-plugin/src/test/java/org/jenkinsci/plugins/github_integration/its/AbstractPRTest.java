@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -26,8 +27,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
 import static org.jenkinsci.plugins.github_integration.awaitility.GHPRAppeared.ghPRAppeared;
-import static org.jenkinsci.plugins.github_integration.junit.GHRule.GH_API_DELAY;
-import static org.jenkinsci.plugins.github_integration.junit.GHRule.runTriggerAndWaitUntilEnd;
+import static org.jenkinsci.plugins.github_integration.awaitility.GHTriggerRunAndEnd.ghTriggerRunAndEnd;
 
 /**
  * @author Kanstantsin Shautsou
@@ -56,7 +56,9 @@ public abstract class AbstractPRTest {
         GitHubPRTrigger trigger = ghPRTriggerFromJob(job);
 //        trigger.start(job, true); // hack configRountrip that doesn't work with workflow
 
-        runTriggerAndWaitUntilEnd(trigger, 10 * GH_API_DELAY);
+        await().pollInterval(3, TimeUnit.SECONDS)
+                .timeout(100, SECONDS)
+                .until(ghTriggerRunAndEnd(trigger));
 
         j.waitUntilNoActivity();
 
@@ -75,7 +77,9 @@ public abstract class AbstractPRTest {
                 .timeout(100, SECONDS)
                 .until(ghPRAppeared(pullRequest1));
 
-        runTriggerAndWaitUntilEnd(trigger, 10 * GH_API_DELAY);
+        await().pollInterval(3, TimeUnit.SECONDS)
+                .timeout(100, SECONDS)
+                .until(ghTriggerRunAndEnd(trigger));
 
         j.waitUntilNoActivity();
 

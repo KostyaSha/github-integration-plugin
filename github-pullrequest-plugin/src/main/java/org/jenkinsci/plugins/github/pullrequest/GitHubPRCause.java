@@ -1,9 +1,8 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
-import hudson.model.Cause;
+import com.github.kostyasha.github.integration.generic.GitHubCause;
 import hudson.model.Run;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -13,9 +12,7 @@ import org.kohsuke.github.GHUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
@@ -24,7 +21,7 @@ import java.util.Set;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
-public class GitHubPRCause extends Cause {
+public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRCause.class);
 
     private String headSha;
@@ -33,14 +30,11 @@ public class GitHubPRCause extends Cause {
     private String targetBranch;
     private String sourceBranch;
     private String prAuthorEmail;
-    @CheckForNull
-    private String title;
-    private URL htmlUrl;
+
     private String sourceRepoOwner;
     private String triggerSenderName = "";
     private String triggerSenderEmail = "";
     private Set<String> labels;
-    private String reason;
     /**
      * In case triggered because of commit.
      * See {@link org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPROpenEvent}
@@ -48,9 +42,7 @@ public class GitHubPRCause extends Cause {
     private String commitAuthorName;
     private String commitAuthorEmail;
 
-    private boolean skip;
     private String condRef;
-    private String pollingLog;
     private String state;
 
     public GitHubPRCause() {
@@ -81,19 +73,19 @@ public class GitHubPRCause extends Cause {
                          GHUser triggerSender, boolean skip, String reason,
                          String commitAuthorName, String commitAuthorEmail,
                          String state) {
-    //CHECKSTYLE:ON
+        //CHECKSTYLE:ON
         this.headSha = headSha;
         this.number = number;
         this.mergeable = mergeable;
         this.targetBranch = targetBranch;
         this.sourceBranch = sourceBranch;
         this.prAuthorEmail = prAuthorEmail;
-        this.title = title;
-        this.htmlUrl = htmlUrl;
+        withTitle(title);
+        withHtmlUrl(htmlUrl);
         this.sourceRepoOwner = sourceRepoOwner;
         this.labels = labels;
-        this.skip = skip;
-        this.reason = reason;
+        withSkip(skip);
+        withReason(reason);
         this.commitAuthorName = commitAuthorName;
         this.commitAuthorEmail = commitAuthorEmail;
 
@@ -115,6 +107,7 @@ public class GitHubPRCause extends Cause {
 
         this.state = state;
     }
+
 
     public static GitHubPRCause newGitHubPRCause() {
         return new GitHubPRCause();
@@ -169,22 +162,6 @@ public class GitHubPRCause extends Cause {
     }
 
     /**
-     * @see #title
-     */
-    public GitHubPRCause withTitle(String title) {
-        this.title = title;
-        return this;
-    }
-
-    /**
-     * @see #htmlUrl
-     */
-    public GitHubPRCause withHtmlUrl(URL htmlUrl) {
-        this.htmlUrl = htmlUrl;
-        return this;
-    }
-
-    /**
      * @see #sourceRepoOwner
      */
     public GitHubPRCause withSourceRepoOwner(String sourceRepoOwner) {
@@ -217,14 +194,6 @@ public class GitHubPRCause extends Cause {
     }
 
     /**
-     * @see #reason
-     */
-    public GitHubPRCause withReason(String reason) {
-        this.reason = reason;
-        return this;
-    }
-
-    /**
      * @see #commitAuthorName
      */
     public GitHubPRCause withCommitAuthorName(String commitAuthorName) {
@@ -239,21 +208,6 @@ public class GitHubPRCause extends Cause {
         this.commitAuthorEmail = commitAuthorEmail;
         return this;
     }
-    /**
-     * @see #state
-     */
-    public GitHubPRCause withState(String state) {
-        this.state = state;
-        return this;
-    }
-
-    /**
-     * @see #skip
-     */
-    public GitHubPRCause withSkip(boolean skip) {
-        this.skip = skip;
-        return this;
-    }
 
     /**
      * @see #condRef
@@ -263,30 +217,9 @@ public class GitHubPRCause extends Cause {
         return this;
     }
 
-    /**
-     * @see #pollingLog
-     */
-    public GitHubPRCause withPollingLog(String pollingLog) {
-        this.pollingLog = pollingLog;
-        return this;
-    }
-
-    @Override
-    public void onAddedTo(@Nonnull Run run) {
-        // move polling log from cause to action
-        try {
-            GitHubPRPollingLogAction action = new GitHubPRPollingLogAction(run);
-            FileUtils.writeStringToFile(action.getPollingLogFile(), pollingLog);
-            run.replaceAction(action);
-        } catch (IOException e) {
-            LOGGER.warn("Failed to persist the polling log", e);
-        }
-        pollingLog = null;
-    }
-
     @Override
     public String getShortDescription() {
-        return "GitHub PR #<a href=\"" + htmlUrl + "\">" + number + "</a>, " + reason;
+        return "GitHub PR #<a href=\"" + getHtmlUrl() + "\">" + number + "</a>, " + getReason();
     }
 
     public String getHeadSha() {
@@ -313,11 +246,6 @@ public class GitHubPRCause extends Cause {
         return prAuthorEmail;
     }
 
-    // for printing PR url on left builds panel (build description)
-    public URL getHtmlUrl() {
-        return htmlUrl;
-    }
-
     public String getSourceRepoOwner() {
         return sourceRepoOwner;
     }
@@ -333,29 +261,6 @@ public class GitHubPRCause extends Cause {
 
     public String getTriggerSenderEmail() {
         return triggerSenderEmail;
-    }
-
-    public boolean isSkip() {
-        return skip;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    /**
-     * Returns the title of the cause, never null.
-     */
-    @Nonnull
-    public String getTitle() {
-        return nonNull(title) ? title : "";
-    }
-
-    /**
-     * Returns at most the first 30 characters of the title, or
-     */
-    public String getAbbreviatedTitle() {
-        return StringUtils.abbreviate(getTitle(), 30);
     }
 
     public String getPrAuthorEmail() {
@@ -379,12 +284,17 @@ public class GitHubPRCause extends Cause {
         return condRef;
     }
 
-    public void setPollingLog(String pollingLog) {
-        this.pollingLog = pollingLog;
-    }
-
-    public void setPollingLog(File logFile) throws IOException {
-        this.pollingLog = FileUtils.readFileToString(logFile);
+    @Override
+    public void onAddedTo(@Nonnull Run run) {
+        // move polling log from cause to action
+        try {
+            GitHubPRPollingLogAction action = new GitHubPRPollingLogAction(run);
+            FileUtils.writeStringToFile(action.getPollingLogFile(), getPollingLog());
+            run.replaceAction(action);
+        } catch (IOException e) {
+            LOGGER.warn("Failed to persist the polling log", e);
+        }
+        setPollingLog(null);
     }
 
     @Override

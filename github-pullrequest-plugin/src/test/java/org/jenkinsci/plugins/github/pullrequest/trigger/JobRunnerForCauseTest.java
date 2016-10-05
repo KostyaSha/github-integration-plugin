@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRCause.newGitHubPRCause;
 
-
 /**
  * @author Kanstantsin Shautsou
  */
@@ -41,6 +40,7 @@ public abstract class JobRunnerForCauseTest {
         );
         return jobMixIn.scheduleBuild2(queuetPeriod, new CauseAction(cause), parametersAction);
     }
+
 
     public void configRoundTripUnsecure(Job job) throws Exception {
         final AuthorizationStrategy before = j.getInstance().getAuthorizationStrategy();

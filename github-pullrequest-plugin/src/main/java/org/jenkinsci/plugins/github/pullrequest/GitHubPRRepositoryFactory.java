@@ -1,13 +1,11 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
-import com.cloudbees.jenkins.GitHubRepositoryName;
-import com.coravy.hudson.plugins.github.GithubProjectProperty;
+import com.github.kostyasha.github.integration.generic.GitHubRepositoryFactory;
 import hudson.Extension;
 import hudson.XmlFile;
 import hudson.model.Action;
 import hudson.model.Job;
-import jenkins.model.TransientActionFactory;
-import org.jenkinsci.plugins.github.util.JobInfoHelpers;
+import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,58 +14,68 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 
+import static java.util.Collections.singleton;
+import static java.util.Objects.requireNonNull;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
-import static org.jenkinsci.plugins.github.pullrequest.utils.PRHelperFunctions.asFullRepoName;
 
 /**
  * @author Kanstantsin Shautsou
  */
 @Extension
-public class GitHubPRRepositoryFactory extends TransientActionFactory<Job> {
+public class GitHubPRRepositoryFactory extends GitHubRepositoryFactory<GitHubPRRepositoryFactory, GitHubPRTrigger> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRRepositoryFactory.class);
 
-    @Nonnull
     @Override
+    @Nonnull
     public Collection<? extends Action> createFor(@Nonnull Job job) {
         try {
-            if (nonNull(JobInfoHelpers.triggerFrom(job, GitHubPRTrigger.class))) {
-                return Collections.singleton(forProject(job));
+            if (nonNull(ghPRTriggerFromJob(job))) {
+                return singleton(forProject(job));
             }
         } catch (Exception ex) {
-            LOGGER.warn("Bad configured project {} - {}", job.getFullName(), ex.getMessage());
-            return Collections.emptyList();
+            LOGGER.error("Bad configured project {} - {}", job.getFullName(), ex.getMessage(), ex);
         }
 
         return Collections.emptyList();
     }
 
     @Nonnull
-    private static GitHubPRRepository forProject(Job<?, ?> job) {
+    private static GitHubPRRepository forProject(Job<?, ?> job) throws IOException {
         XmlFile configFile = new XmlFile(new File(job.getRootDir(), GitHubPRRepository.FILE));
 
-        GitHubPRTrigger trigger = JobInfoHelpers.triggerFrom(job, GitHubPRTrigger.class);
-        GitHubRepositoryName repo = trigger.getRepoFullName(job);
+        GitHubPRTrigger trigger = ghPRTriggerFromJob(job);
+        requireNonNull(trigger, "Can't extract PR trigger from " + job.getFullName());
 
-        GithubProjectProperty property = job.getProperty(GithubProjectProperty.class);
-        String githubUrl = property.getProjectUrl().toString();
         GitHubPRRepository localRepository;
         if (configFile.exists()) {
             try {
                 localRepository = (GitHubPRRepository) configFile.read();
             } catch (IOException e) {
                 LOGGER.info("Can't read saved repository, creating new one", e);
-                localRepository = new GitHubPRRepository(asFullRepoName(repo), githubUrl,
-                        new HashMap<Integer, GitHubPRPullRequest>());
+                final GHRepository ghRepository = trigger.getRemoteRepository();
+                requireNonNull(ghRepository, "Can't get remote GH repository.");
+                localRepository = new GitHubPRRepository(ghRepository);
             }
         } else {
-            localRepository = new GitHubPRRepository(asFullRepoName(repo), githubUrl,
-                    new HashMap<Integer, GitHubPRPullRequest>());
+            final GHRepository ghRepository = trigger.getRemoteRepository();
+            requireNonNull(ghRepository, "Can't get remote GH repository.");
+            localRepository = new GitHubPRRepository(ghRepository);
         }
 
         localRepository.setJob(job);
         localRepository.setConfigFile(configFile);
+
+        if (isNull(localRepository.getGitUrl()) ||
+                isNull(localRepository.getSshUrl())) {
+            final GHRepository remoteRepository = trigger.getRemoteRepository();
+            localRepository.withGitUrl(remoteRepository.getGitTransportUrl())
+                    .withSshUrl(remoteRepository.getSshUrl());
+            localRepository.save();
+        }
+
         return localRepository;
     }
 

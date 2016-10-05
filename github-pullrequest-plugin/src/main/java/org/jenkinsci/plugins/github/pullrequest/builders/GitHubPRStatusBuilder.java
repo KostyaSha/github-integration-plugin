@@ -78,7 +78,7 @@ public class GitHubPRStatusBuilder extends Builder implements SimpleBuildStep {
             if (nonNull(statusMessage)) {
                 String url = trigger.getDescriptor().getJenkinsURL() + run.getUrl();
 
-                trigger.getRemoteRepo().createCommitStatus(
+                trigger.getRemoteRepository().createCommitStatus(
                         cause.getHeadSha(),
                         GHCommitState.PENDING,
                         url,

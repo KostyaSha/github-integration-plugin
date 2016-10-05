@@ -100,7 +100,7 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
         }
 
         try {
-            trigger.getRemoteRepo().createCommitStatus(c.getHeadSha(), state, buildUrl, statusMsgValue,
+            trigger.getRemoteRepository().createCommitStatus(c.getHeadSha(), state, buildUrl, statusMsgValue,
                     run.getParent().getFullName());
         } catch (IOException ex) {
             if (nonNull(buildMessage)) {

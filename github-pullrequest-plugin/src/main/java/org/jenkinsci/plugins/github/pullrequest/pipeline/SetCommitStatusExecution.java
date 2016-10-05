@@ -89,7 +89,7 @@ public class SetCommitStatusExecution extends AbstractSynchronousNonBlockingStep
         try {
             GitHubPRTrigger trigger = triggerFrom(run.getParent(), GitHubPRTrigger.class);
             if (trigger != null) {
-                return trigger.getRemoteRepo();
+                return trigger.getRemoteRepository();
             } else {
                 throw new AbortException("GitHub PullRequest trigger isn't available.");
             }

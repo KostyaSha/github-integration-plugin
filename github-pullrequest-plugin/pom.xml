@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -8,12 +9,13 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
+    <!-- historical name -->
     <artifactId>github-pullrequest</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
-    <name>GitHub Pull Request Plugin</name>
-    <description>GitHub Pull Request Plugin for Jenkins</description>
+    <name>GitHub Integration Plugin</name>
+    <description>GitHub Integration Plugin for Jenkins</description>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/GitHub+Integration+Plugin</url>
     <licenses>
         <license>
@@ -32,10 +34,10 @@
     </developers>
 
     <scm>
-        <connection>scm:git:ssh://github.com/jenkinsci/github-integration-plugin.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/jenkinsci/github-integration-plugin.git</developerConnection>
+        <connection>scm:git:ssh://github.com/KostyaSha/github-integration-plugin.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/KostyaSha/github-integration-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/github-integration-plugin</url>
-        <tag>github-pullrequest-0.0.1-beta7</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <properties>
@@ -67,7 +69,7 @@
         <dependency>
             <groupId>com.coravy.hudson.plugins.github</groupId>
             <artifactId>github</artifactId>
-            <version>1.14.2</version>
+            <version>1.22.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -87,7 +89,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>github-api</artifactId>
-            <version>1.69</version>
+            <version>1.72</version>
         </dependency>
 
         <dependency>
@@ -97,11 +99,16 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>matrix-project</artifactId>
+            <version>1.6</version>
+        </dependency>
+
         <!--for publishers-->
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>email-ext</artifactId>
-            <!--<version>2.39</version>-->
             <version>2.38.2</version>
             <optional>true</optional>
         </dependency>
@@ -119,12 +126,6 @@
             <artifactId>block-queued-job</artifactId>
             <version>0.2.0</version>
             <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>matrix-project</artifactId>
-            <version>1.6</version>
         </dependency>
 
         <!-- for pipeline/workflow step extension -->
@@ -161,6 +162,13 @@
             <artifactId>workflow-cps</artifactId>
             <!-- see https://github.com/jenkinsci/workflow-cps-plugin/pull/7#issuecomment-216587074 -->
             <version>${workflow.version}-beta-1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>matrix-auth</artifactId>
+            <version>1.4</version>
             <scope>test</scope>
         </dependency>
 
@@ -230,20 +238,61 @@
             <version>1.7.0</version>
             <scope>test</scope>
         </dependency>
-    </dependencies>
 
+        <!--to mock github-->
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>2.2.1</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xmlunit</groupId>
+                    <artifactId>xmlunit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.jayway.jsonpath</groupId>
+                    <artifactId>json-path</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.sf.jopt-simple</groupId>
+                    <artifactId>jopt-simple</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!--<dependency>-->
+            <!--<groupId>xml-apis</groupId>-->
+            <!--<artifactId>xml-apis</artifactId>-->
+            <!--<version>1.4.01</version>-->
+            <!--<scope>test</scope>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>com.coravy.hudson.plugins.github</groupId>-->
+            <!--<artifactId>github</artifactId>-->
+            <!--<version>1.21.1</version>-->
+            <!--<classifier>test-jar</classifier>-->
+            <!--<scope>test</scope>-->
+        <!--</dependency>-->
+    </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.jenkins-ci.tools</groupId>
-                <artifactId>maven-hpi-plugin</artifactId>
-                <version>${maven-hpi-plugin.version}</version>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
@@ -291,6 +340,22 @@
                         <goals>
                             <goal>report-integration</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.3</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <additionalparam>-Xdoclint:none</additionalparam>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

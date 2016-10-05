@@ -47,7 +47,7 @@ public class LocalRepoUpdaterTest {
 
     @Before
     public void setUp() throws Exception {
-        localRepo = new GitHubPRRepository("", "", new HashMap<Integer, GitHubPRPullRequest>());
+        localRepo = new GitHubPRRepository(remoteRepo);
 
         when(remotePR.getUser()).thenReturn(new GHUser());
         when(remotePR.getHead()).thenReturn(commit);

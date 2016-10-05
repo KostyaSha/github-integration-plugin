@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <actions/>
+    <description></description>
+    <keepDependencies>false</keepDependencies>
+    <properties>
+        <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.18.1">
+            <projectUrl>https://github.com/KostyaSha-auto/test/</projectUrl>
+            <displayName>display-name</displayName>
+        </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    </properties>
+    <scm class="hudson.scm.NullSCM"/>
+    <canRoam>true</canRoam>
+    <disabled>false</disabled>
+    <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+    <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+    <triggers>
+        <org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger plugin="github-pullrequest@0.0.1-SNAPSHOT">
+            <spec></spec>
+            <triggerMode>CRON</triggerMode>
+            <events>
+                <org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPROpenEvent/>
+                <org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRCommitEvent/>
+            </events>
+            <preStatus>false</preStatus>
+            <cancelQueued>false</cancelQueued>
+            <skipFirstRun>false</skipFirstRun>
+        </org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger>
+    </triggers>
+    <concurrentBuild>false</concurrentBuild>
+    <builders/>
+    <publishers>
+        <org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRCommentPublisher
+                plugin="github-pullrequest@0.0.1-SNAPSHOT">
+            <number>0</number>
+            <comment>
+                <content>${GROOVY_TEMPLATE, scriptlerId=&quot;someId&quot;}</content>
+            </comment>
+        </org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRCommentPublisher>
+    </publishers>
+    <buildWrappers/>
+</project>
