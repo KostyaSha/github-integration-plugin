@@ -50,6 +50,8 @@ public class GitHubPRPullRequest {
     private String sourceRepoOwner;
     private String state;
 
+    private boolean inBadState = false;
+
     /**
      * Save only what we need for next comparison
      */
@@ -73,14 +75,14 @@ public class GitHubPRPullRequest {
             }
             lastCommentCreatedAt = maxDate.getTime() == 0 ? null : new Date(maxDate.getTime());
         } catch (IOException e) {
-            LOGGER.warn("Can't get comments for PR: {}", e.getMessage());
+            LOGGER.error("Can't get comments for PR: {}", e.getMessage());
             lastCommentCreatedAt = null;
         }
 
         try {
             userEmail = pr.getUser().getEmail();
         } catch (Exception e) {
-            LOGGER.warn("Can't get GitHub user email: {}", e.getMessage());
+            LOGGER.error("Can't get GitHub user email: {}", e.getMessage());
             userEmail = "";
         }
 
@@ -90,13 +92,14 @@ public class GitHubPRPullRequest {
             updateLabels(remoteRepo.getIssue(number).getLabels());
         } catch (IOException e) {
             LOGGER.error("Can't retrieve label list: {}", e);
+            inBadState = true;
         }
 
         // see https://github.com/kohsuke/github-api/issues/111
         try {
             mergeable = pr.getMergeable();
         } catch (IOException e) {
-            LOGGER.warn("Can't get mergeable status: {}", e.getMessage());
+            LOGGER.error("Can't get mergeable status: {}", e.getMessage());
             mergeable = false;
         }
 
@@ -173,11 +176,25 @@ public class GitHubPRPullRequest {
         return state;
     }
 
+    /**
+     * as is
+     */
+    public void setLabels(Set<String> labels) {
+        this.labels = labels;
+    }
+
     private void updateLabels(Collection<GHLabel> labels) {
         this.labels = new HashSet<>();
         for (GHLabel label : labels) {
             this.labels.add(label.getName());
         }
+    }
+
+    /**
+     * Indicates that remote PR wasn't fully saved locally during last check.
+     */
+    public boolean isInBadState() {
+        return inBadState || labels == null;
     }
 
     public static String getIconFileName() {
