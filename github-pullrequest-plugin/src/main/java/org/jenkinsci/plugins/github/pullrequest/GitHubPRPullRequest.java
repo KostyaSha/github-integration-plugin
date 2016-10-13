@@ -12,9 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -130,8 +132,9 @@ public class GitHubPRPullRequest {
         return title;
     }
 
+    @Nonnull
     public Set<String> getLabels() {
-        return labels;
+        return isNull(labels) ? Collections.<String>emptySet() : labels;
     }
 
     @CheckForNull
