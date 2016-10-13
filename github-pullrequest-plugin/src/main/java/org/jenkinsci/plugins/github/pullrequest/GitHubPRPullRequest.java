@@ -89,7 +89,7 @@ public class GitHubPRPullRequest {
         try {
             updateLabels(remoteRepo.getIssue(number).getLabels());
         } catch (IOException e) {
-            LOGGER.warn("Can't retrieve label list: {}", e.getMessage());
+            LOGGER.error("Can't retrieve label list: {}", e);
         }
 
         // see https://github.com/kohsuke/github-api/issues/111
