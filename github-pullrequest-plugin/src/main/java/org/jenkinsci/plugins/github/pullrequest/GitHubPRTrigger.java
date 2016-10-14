@@ -273,8 +273,8 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
             Set<GHPullRequest> remotePulls = pullRequestsToCheck(prNumber, remoteRepo, localRepository);
 
             Set<GHPullRequest> prepared = from(remotePulls)
-                    .filter(notUpdated(localRepository, listener))
                     .filter(badState(localRepository, listener))
+                    .filter(notUpdated(localRepository, listener))
                     .transform(prepareUserRestrictionFilter(localRepository, this))
                     .toSet();
 
