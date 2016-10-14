@@ -53,7 +53,7 @@ import static org.jenkinsci.plugins.github.pullrequest.trigger.check.LocalRepoUp
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.NotUpdatedPRFilter.notUpdated;
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.PullRequestToCauseConverter.toGitHubPRCause;
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.SkipFirstRunForPRFilter.ifSkippedFirstRun;
-import static org.jenkinsci.plugins.github.pullrequest.trigger.check.SkipPRInBadState.inBadState;
+import static org.jenkinsci.plugins.github.pullrequest.trigger.check.SkipPRInBadState.badState;
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.UserRestrictionFilter.withUserRestriction;
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.UserRestrictionPopulator.prepareUserRestrictionFilter;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
@@ -272,13 +272,13 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
             GHRepository remoteRepo = getRemoteRepository();
             Set<GHPullRequest> remotePulls = pullRequestsToCheck(prNumber, remoteRepo, localRepository);
 
-            Set<GHPullRequest> prepeared = from(remotePulls)
+            Set<GHPullRequest> prepared = from(remotePulls)
                     .filter(notUpdated(localRepository, listener))
-                    .filter(inBadState(localRepository, listener))
+                    .filter(badState(localRepository, listener))
                     .transform(prepareUserRestrictionFilter(localRepository, this))
                     .toSet();
 
-            List<GitHubPRCause> causes = from(prepeared)
+            List<GitHubPRCause> causes = from(prepared)
                     .filter(and(
                             ifSkippedFirstRun(listener, skipFirstRun),
                             withBranchRestriction(listener, branchRestriction),
@@ -289,7 +289,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
                     .toList();
 
             LOGGER.trace("Causes count for {}: {}", localRepository.getFullName(), causes.size());
-            from(prepeared).transform(updateLocalRepo(localRepository)).toSet();
+            from(prepared).transform(updateLocalRepo(localRepository)).toSet();
 
             saveIfSkipFirstRun();
 

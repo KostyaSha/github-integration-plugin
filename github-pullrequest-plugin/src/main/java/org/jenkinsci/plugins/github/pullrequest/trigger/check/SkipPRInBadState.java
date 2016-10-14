@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
 /**
  * @author Kanstantsin Shautsou
@@ -24,19 +25,23 @@ public class SkipPRInBadState implements Predicate<GHPullRequest> {
         this.logger = logger;
     }
 
-    public static SkipPRInBadState inBadState(GitHubPRRepository localRepo, LoggingTaskListenerWrapper logger) {
+    public static SkipPRInBadState badState(GitHubPRRepository localRepo, LoggingTaskListenerWrapper logger) {
         return new SkipPRInBadState(localRepo, logger);
     }
 
     @Override
-    public boolean apply(GHPullRequest remotePR) {
+    public boolean apply(@Nullable GHPullRequest remotePR) {
+        if (remotePR == null) {
+            return false;
+        }
+
         @CheckForNull GitHubPRPullRequest localPR = localRepo.getPulls().get(remotePR.getNumber());
 
         if (localPR != null && localPR.isInBadState()) {
             logger.error("local PR [#{} {}] is in bad state", remotePR.getNumber(), remotePR.getTitle());
-            return false;
+            return true;
         }
 
-        return true;
+        return false;
     }
 }
