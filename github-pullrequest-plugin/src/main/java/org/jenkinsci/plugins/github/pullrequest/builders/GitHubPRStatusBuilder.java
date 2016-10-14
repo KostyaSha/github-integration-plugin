@@ -25,7 +25,7 @@ import java.io.IOException;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRCauseFromRun;
-import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.triggerFrom;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromRun;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
@@ -62,7 +62,7 @@ public class GitHubPRStatusBuilder extends Builder implements SimpleBuildStep {
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher,
                         @Nonnull TaskListener listener) throws InterruptedException, IOException {
         // No triggers in Run class, but we need it
-        final GitHubPRTrigger trigger = triggerFrom(run.getParent(), GitHubPRTrigger.class);
+        final GitHubPRTrigger trigger = ghPRTriggerFromRun(run);
         if (isNull(trigger)) {
             // silently skip. TODO implement error handler, like in publishers
             return;

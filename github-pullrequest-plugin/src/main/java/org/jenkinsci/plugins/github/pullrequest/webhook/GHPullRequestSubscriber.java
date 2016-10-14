@@ -23,10 +23,10 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.immutableEnumSet;
 import static java.lang.String.format;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
 import static org.jenkinsci.plugins.github.pullrequest.webhook.WebhookInfoPredicates.withPRTrigger;
 import static org.jenkinsci.plugins.github.pullrequest.webhook.WebhookInfoPredicates.withRepo;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
-import static org.jenkinsci.plugins.github.util.JobInfoHelpers.triggerFrom;
 
 /**
  * Uses extension point from github-plugin to get events form standard github-webhook endpoint.
@@ -57,7 +57,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
             PullRequestInfo info = extractPullRequestInfo(event, payload, gh);
 
             for (Job job : getJobs(info.getRepo())) {
-                GitHubPRTrigger trigger = triggerFrom(job, GitHubPRTrigger.class);
+                GitHubPRTrigger trigger = ghPRTriggerFromJob(job);
                 GitHubPRTriggerMode triggerMode = trigger.getTriggerMode();
 
                 switch (triggerMode) {
