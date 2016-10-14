@@ -29,7 +29,6 @@ import static hudson.model.Result.SUCCESS;
 import static hudson.model.Result.UNSTABLE;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRCauseFromRun;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromRun;
-import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.triggerFrom;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
@@ -136,7 +135,7 @@ public abstract class GitHubPRAbstractPublisher extends Recorder implements Simp
 
         try {
             if (nonNull(run)) {
-                final GitHubPRTrigger trigger = triggerFrom(run.getParent(), GitHubPRTrigger.class);
+                final GitHubPRTrigger trigger = ghPRTriggerFromRun(run);
 
                 GHRepository ghRepository = trigger.getRemoteRepository();
                 ghRepository.getPullRequest(id).comment(finalComment);

@@ -15,6 +15,7 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRMessage;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.publishers.GitHubPRAbstractPublisher;
+import org.jenkinsci.plugins.github.pullrequest.utils.JobHelper;
 import org.jenkinsci.plugins.github.pullrequest.utils.PublisherErrorHandler;
 import org.jenkinsci.plugins.github.pullrequest.utils.StatusVerifier;
 import org.kohsuke.accmod.Restricted;
@@ -31,6 +32,7 @@ import java.io.PrintStream;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRCauseFromRun;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromRun;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.triggerFrom;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
@@ -92,7 +94,7 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
                 c.getHeadSha(), state, buildUrl, statusMsgValue);
 
         // TODO check permissions to write human friendly message
-        final GitHubPRTrigger trigger = triggerFrom(run.getParent(), GitHubPRTrigger.class);
+        final GitHubPRTrigger trigger = ghPRTriggerFromRun(run);
         if (isNull(trigger)) {
             listener.error("Can't get trigger for this run! Silently skipping. " +
                     "TODO implement error handler, like in publishers");

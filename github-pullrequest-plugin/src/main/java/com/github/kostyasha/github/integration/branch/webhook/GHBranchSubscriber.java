@@ -18,12 +18,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghBranchTriggerFromJob;
 import static com.github.kostyasha.github.integration.branch.webhook.WebhookInfoBranchPredicates.withBranchTrigger;
 import static com.github.kostyasha.github.integration.branch.webhook.WebhookInfoBranchPredicates.withBranchTriggerRepo;
 import static com.google.common.collect.Sets.immutableEnumSet;
 import static java.lang.String.format;
 import static net.sf.json.JSONObject.fromObject;
-import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.triggerFrom;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
 
@@ -52,7 +52,7 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
             BranchInfo ref = extractRefInfo(event, payload);
 
             for (Job job : getJobs(ref.getRepo())) {
-                GitHubBranchTrigger trigger = triggerFrom(job, GitHubBranchTrigger.class);
+                GitHubBranchTrigger trigger = ghBranchTriggerFromJob(job);
                 if (isNull(trigger)) {
                     continue;
                 }
