@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
@@ -67,5 +68,17 @@ public class SkipPRInBadStateTest {
                 is(true));
     }
 
+    @Test
+    public void ignoreLocalPRNotinBadState() {
+        when(remotePR.getNumber()).thenReturn(10);
+        when(localPR.getLabels()).thenReturn(new HashSet<String>());
+
+        Map<Integer, GitHubPRPullRequest> pulls = new HashMap<>();
+        pulls.put(10, localPR);
+        when(localRepo.getPulls()).thenReturn(pulls);
+
+        assertThat(badState(localRepo, tlRule.getListener()).apply(remotePR),
+                is(false));
+    }
 
 }
