@@ -46,6 +46,7 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
      * TODO migrate to java8 and cleanup.
      * @return only real trigger cause if matched trigger (not skip) event found for this remotePr.
      */
+    @CheckForNull
     @Override
     public GitHubPRCause apply(final GHPullRequest remotePR) {
         final GitHubPRCause gitHubPRCause = from(trigger.getEvents())
