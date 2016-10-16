@@ -277,9 +277,9 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
 
             List<GitHubPRCause> causes = from(prepeared)
                     .filter(and(
-                            ifSkippedFirstRun(listener, skipFirstRun),
-                            withBranchRestriction(listener, branchRestriction),
-                            withUserRestriction(listener, userRestriction)
+                            ifSkippedFirstRun(listener, isSkipFirstRun()),
+                            withBranchRestriction(listener, getBranchRestriction()),
+                            withUserRestriction(listener, getUserRestriction())
                     ))
                     .transform(toGitHubPRCause(localRepository, listener, this))
                     .filter(notNull())
