@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
  * @author Kanstantsin Shautsou
  */
 @RunWith(MockitoJUnitRunner.class)
-public class GitHubPRSkipMatchNumberTest {
+public class GitHubPRSkipUnmatchNumberTest {
     @Mock
     private GHPullRequest remotePr;
     @Mock
@@ -61,7 +61,7 @@ public class GitHubPRSkipMatchNumberTest {
         commonExpectations();
         causeCreationExpectations();
 
-        final GitHubPRSkipMatchNumber event = new GitHubPRSkipMatchNumber(null);
+        final GitHubPRSkipUnmatchNumber event = new GitHubPRSkipUnmatchNumber(null);
 
         final GitHubPRCause cause = event.check(null, remotePr, null, listener);
         assertThat(cause, notNullValue());
