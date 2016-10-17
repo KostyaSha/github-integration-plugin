@@ -19,6 +19,7 @@ import java.io.PrintStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public class GitHubPRLabelAddedEvent extends GitHubPREvent {
     private static final String DISPLAY_NAME = "Labels added";
-    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRLabelAddedEvent.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GitHubPRLabelAddedEvent.class);
 
     private final GitHubPRLabel label;
 
@@ -49,6 +50,11 @@ public class GitHubPRLabelAddedEvent extends GitHubPREvent {
                                @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
         if (remotePR.getState().equals(GHIssueState.CLOSED)) {
             return null; // already closed, skip check?
+        }
+
+        if (label == null) {
+            LOG.error("Label is null. Bad configured event: {}", getDescriptor().getDisplayName());
+            throw new IllegalStateException("Label is null. Bad configured event: " + getDescriptor().getDisplayName());
         }
 
         //localPR exists before, checking for changes
