@@ -8,6 +8,7 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.jenkinsci.plugins.github.pullrequest.dsl.context.GitHubPRTriggerModeDslContext;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -19,6 +20,8 @@ public class GitHubBranchTriggerDslContext implements Context {
     private boolean setPreStatus;
     private boolean cancelQueued;
     private boolean abortRunning;
+
+    private List<String> whitelistedBranches = new ArrayList<>();
     private List<GitHubBranchEvent> events = new ArrayList<>();
 
 
@@ -53,6 +56,10 @@ public class GitHubBranchTriggerDslContext implements Context {
         events.addAll(eventsContext.events());
     }
 
+    public void whitelistedBranches(String... branches) {
+        whitelistedBranches.addAll(Arrays.asList(branches));
+    }
+
     public String cron() {
         return cron;
     }
@@ -77,4 +84,7 @@ public class GitHubBranchTriggerDslContext implements Context {
         return events;
     }
 
+    public List<String> whitelistedBranches() {
+        return whitelistedBranches;
+    }
 }

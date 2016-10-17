@@ -1,19 +1,22 @@
 package org.jenkinsci.plugins.github.pullrequest.restrictions;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+import com.google.common.base.Joiner;
+
+import org.kohsuke.github.GHPullRequest;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hudson.Extension;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
 import jenkins.model.Jenkins;
-import org.kohsuke.github.GHPullRequest;
-import org.kohsuke.stapler.DataBoundConstructor;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.regex.Pattern;
 
 /**
  * Restriction by target branch (one or many).
@@ -21,16 +24,18 @@ import java.util.regex.Pattern;
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRBranchRestriction implements Describable<GitHubPRBranchRestriction> {
+    private static final String LINE_SEPARATOR = System.lineSeparator();
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRBranchRestriction.class);
 
-    private final String targetBranch;
     private final Set<String> targetBranchList;
 
     @DataBoundConstructor
     public GitHubPRBranchRestriction(String targetBranch) {
-        this.targetBranch = targetBranch.trim();
-        //TODO check if System.lineSeparator() is correct separator
-        this.targetBranchList = new HashSet<String>(Arrays.asList(targetBranch.split(System.lineSeparator())));
+        this(split(targetBranch));
+    }
+
+    public GitHubPRBranchRestriction(List<String> targetBranches) {
+        this.targetBranchList = new HashSet<>(targetBranches);
         targetBranchList.remove("");
     }
 
@@ -57,11 +62,16 @@ public class GitHubPRBranchRestriction implements Describable<GitHubPRBranchRest
     }
 
     public String getTargetBranch() {
-        return targetBranch;
+        // TODO check if System.lineSeparator() is correct separator
+        return Joiner.on("\n").skipNulls().join(targetBranchList);
     }
 
     public Descriptor<GitHubPRBranchRestriction> getDescriptor() {
         return (DescriptorImpl) Jenkins.getInstance().getDescriptor(GitHubPRBranchRestriction.class);
+    }
+
+    private static List<String> split(String targetBranch) {
+        return Arrays.asList(targetBranch.trim().split(LINE_SEPARATOR));
     }
 
     @Extension
