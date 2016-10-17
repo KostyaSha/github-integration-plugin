@@ -1,5 +1,9 @@
 ## Changelog
 
+## 0.1.0-rc10
+ * Support more job types.
+ * Survive GH outages/bad fetched PR/Issues.
+
 ## 0.1.0-rc9
  * [BRANCH] New `GitHub Branch Trigger`.
  * [DOC] Updated docs.
