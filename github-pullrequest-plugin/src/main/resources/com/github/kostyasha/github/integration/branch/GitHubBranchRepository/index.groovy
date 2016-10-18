@@ -19,11 +19,11 @@ def makeBuildItem(def runs) {
 }
 
 
-l.layout(title: "GitHub Branch Statuses") {
+l.layout(title: "GitHub Branch Status") {
     st.include(page: "sidepanel", it: my.job)
     script(src:"${rootURL}${h.getResourcePath()}/plugin/github-pullrequest/scripts/featureButton.js")
     l.main_panel() {
-        h1("GitHub Branch Statuses");
+        h1("GitHub Branch Status");
         text("Repository: ")
         a(href:my.githubUrl, my.fullName)
 
