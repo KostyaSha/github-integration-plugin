@@ -3,6 +3,8 @@ package com.github.kostyasha.github.integration.generic;
 import antlr.ANTLRException;
 import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
+import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider;
+import com.google.common.annotations.Beta;
 import hudson.model.Action;
 import hudson.model.Job;
 import hudson.triggers.Trigger;
@@ -17,7 +19,6 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -40,6 +41,9 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
     protected boolean cancelQueued = false;
     private boolean abortRunning = false;
     protected boolean skipFirstRun = false;
+
+    @Beta
+    protected GitHubRepoProvider repoProvider = new GitHubPluginRepoProvider(); // default
 
     // for performance
     private transient GitHubRepositoryName repoName;
@@ -101,12 +105,20 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
         this.remoteRepository = remoteRepository;
     }
 
+    public GitHubRepoProvider getRepoProvider() {
+        return isNull(repoProvider) ? new GitHubPluginRepoProvider() : repoProvider;
+    }
+
+    @DataBoundSetter
+    public void setRepoProvider(GitHubRepoProvider repoProvider) {
+        this.repoProvider = repoProvider;
+    }
+
+    @Nonnull
     public GHRepository getRemoteRepository() throws IOException {
         if (isNull(remoteRepository)) {
-            Iterator<GHRepository> resolved = getRepoFullName(job).resolve().iterator();
-            checkState(resolved.hasNext(), "Can't get remote GH repo for %s", job.getName());
-
-            remoteRepository = resolved.next();
+            remoteRepository = getRepoProvider().getGHRepository(this);
+            checkState(nonNull(remoteRepository), "Can't get remote GH repo for %s", job.getName());
         }
 
         return remoteRepository;
@@ -139,6 +151,10 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
         return job;
     }
 
+    public GitHubRepositoryName getRepoFullName() {
+        return getRepoFullName(getJob());
+    }
+
     public GitHubRepositoryName getRepoFullName(Job<?, ?> job) {
         if (isNull(repoName)) {
             checkNotNull(job, "job object is null, race condition?");
@@ -152,7 +168,7 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
 
             checkNotNull(repo, "Invalid GitHub project url: %s", ghpp.getProjectUrl().baseUrl());
 
-            repoName = repo;
+            setRepoName(repo);
         }
 
         return repoName;

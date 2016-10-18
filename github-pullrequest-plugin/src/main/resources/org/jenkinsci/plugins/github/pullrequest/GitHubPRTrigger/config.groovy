@@ -1,10 +1,12 @@
 package org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger
 
+import com.github.kostyasha.github.integration.generic.GitHubRepoProvider
 import hudson.triggers.TimerTrigger
 import lib.FormTagLib
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger
 
 def f = namespace(FormTagLib);
+def st = namespace("jelly:stapler")
 
 if (instance == null) {
     instance = new GitHubPRTrigger();
@@ -50,5 +52,30 @@ f.block {
         f.optionalProperty(title: "Experimental: User Restriction", field: "userRestriction")
 
         f.optionalProperty(title: "Experimental: Branch Restriction", field: "branchRestriction")
+
+        f.advanced(title: "Experimental") {
+            f.dropdownList(name: "repoProvider", title: _("GitHub Connection Repo Provider")) {
+                GitHubRepoProvider.GitHubRepoProviderDescriptor.allRepoProviders().each() { d ->
+                    if (d != null) {
+
+                        f.dropdownListBlock(
+                                value: d.clazz.name,
+                                name: d.displayName,
+                                selected: instance.repoProvider == null ?
+                                        false : instance.repoProvider.descriptor.equals(d),
+                                title: d.displayName) {
+                            descriptor = d
+                            if (instance.repoProvider != null && instance.repoProvider.descriptor.equals(d)) {
+                                instance = instance.repoProvider
+                            }
+                            f.invisibleEntry() {
+                                input(type: "hidden", name: "stapler-class", value: d.clazz.name)
+                            }
+                            st.include(from: d, page: d.configPage, optional: "true")
+                        }
+                    }
+                }
+            }
+        }
     }
 }

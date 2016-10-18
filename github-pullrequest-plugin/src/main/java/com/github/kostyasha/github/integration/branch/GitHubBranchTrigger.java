@@ -2,7 +2,6 @@ package com.github.kostyasha.github.integration.branch;
 
 import antlr.ANTLRException;
 
-import com.cloudbees.jenkins.GitHubWebHook;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
 import com.github.kostyasha.github.integration.branch.trigger.JobRunnerForBranchCause;
@@ -15,7 +14,6 @@ import hudson.triggers.Trigger;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
 import net.sf.json.JSONObject;
-import org.jenkinsci.plugins.github.GitHubPlugin;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRBranchRestriction;
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction;
@@ -37,7 +35,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -51,7 +48,6 @@ import static com.github.kostyasha.github.integration.branch.trigger.check.Branc
 import static com.github.kostyasha.github.integration.branch.trigger.check.LocalRepoUpdater.updateLocalRepo;
 import static com.github.kostyasha.github.integration.branch.trigger.check.SkipFirstRunForBranchFilter.ifSkippedFirstRun;
 import static com.github.kostyasha.github.integration.branch.webhook.WebhookInfoBranchPredicates.withHookTriggerMode;
-import static com.github.kostyasha.github.integration.generic.GitHubTriggerDescriptor.githubFor;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Predicates.not;
 import static java.text.DateFormat.getDateTimeInstance;
@@ -120,12 +116,13 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
     }
 
     @Override
-    public void start(Job<?, ?> project, boolean newInstance) {
-        LOG.info("Starting GitHub Branch trigger for project {}", project.getName());
-        super.start(project, newInstance);
+    public void start(Job<?, ?> job, boolean newInstance) {
+        LOG.info("Starting GitHub Branch trigger for project {}", job.getFullName());
+        super.start(job, newInstance);
 
-        if (newInstance && GitHubPlugin.configuration().isManageHooks() && withHookTriggerMode().apply(project)) {
-            GitHubWebHook.get().registerHookFor(project);
+        if (newInstance && getRepoProvider().isManageHooks(this) &&
+                withHookTriggerMode().apply(job)) {
+            getRepoProvider().registerHookFor(this);
         }
     }
 
@@ -156,12 +153,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
      */
     public void queueRun(Job<?, ?> job, final String branch) {
         this.job = job;
-        getDescriptor().getQueue().execute(new Runnable() {
-            @Override
-            public void run() {
-                doRun(branch);
-            }
-        });
+        getDescriptor().getQueue().execute(() -> doRun(branch));
     }
 
     /**
@@ -216,7 +208,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
                                                        LoggingTaskListenerWrapper listener,
                                                        @Nullable String branch) {
         try {
-            GitHub github = githubFor(localRepository.getGithubUrl().toURI());
+            GitHub github = getRepoProvider().getGitHub(this);
             GHRateLimit rateLimitBefore = github.getRateLimit();
             listener.debug("GitHub rate limit before check: {}", rateLimitBefore);
 
@@ -239,7 +231,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
                     localRepository.getFullName(), rateLimitAfter, consumed, remoteBranches.size());
 
             return causes;
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             listener.error("Can't get build causes: '{}'", e);
             return Collections.emptyList();
         }
