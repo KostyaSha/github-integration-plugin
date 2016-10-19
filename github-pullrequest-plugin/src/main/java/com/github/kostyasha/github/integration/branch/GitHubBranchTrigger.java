@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -270,7 +271,8 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
     /**
      * Remote branch for future analysing. null - all remote branches.
      */
-    private Set<GHBranch> branchesToCheck(String branch, GHRepository remoteRepo, GitHubBranchRepository localRepository)
+    private Set<GHBranch> branchesToCheck(String branch, @Nonnull GHRepository remoteRepo,
+                                          GitHubBranchRepository localRepository)
             throws IOException {
         final LinkedHashSet<GHBranch> ghBranches = new LinkedHashSet<>();
 
