@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -259,8 +260,8 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
      * @param prNumber        pull request number to fetch only required num. Can be null
      * @return causes which ready to be converted to job-starts. One cause per repo.
      */
-    private List<GitHubPRCause> readyToBuildCauses(GitHubPRRepository localRepository,
-                                                   LoggingTaskListenerWrapper listener,
+    private List<GitHubPRCause> readyToBuildCauses(@Nonnull GitHubPRRepository localRepository,
+                                                   @Nonnull LoggingTaskListenerWrapper listener,
                                                    @Nullable Integer prNumber) {
         try {
             GitHub github = DescriptorImpl.githubFor(localRepository.getGithubUrl().toURI());
@@ -315,8 +316,8 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
      * @return remote pull requests for future analysing.
      */
     private static Set<GHPullRequest> pullRequestsToCheck(@Nullable Integer prNumber,
-                                                          GHRepository remoteRepo,
-                                                          GitHubPRRepository localRepo) throws IOException {
+                                                          @Nonnull GHRepository remoteRepo,
+                                                          @Nonnull GitHubPRRepository localRepo) throws IOException {
         if (prNumber != null) {
             return Collections.singleton(remoteRepo.getPullRequest(prNumber));
         } else {
