@@ -28,6 +28,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
 import static org.jenkinsci.plugins.github_integration.awaitility.GHPRAppeared.ghPRAppeared;
 import static org.jenkinsci.plugins.github_integration.awaitility.GHTriggerRunAndEnd.ghTriggerRunAndEnd;
+import static org.jenkinsci.plugins.github_integration.junit.GHRule.BRANCH1;
 
 /**
  * @author Kanstantsin Shautsou
@@ -91,5 +92,28 @@ public abstract class AbstractPRTest {
         assertThat("Pull request 1 should appear in action storage", pulls.entrySet(), Matchers.hasSize(1));
 
         j.assertBuildStatusSuccess(job.getLastBuild());
+        assertThat(job.getBuilds().size(), is(1));
+
+
+        // now push changes that should trigger again
+        ghRule.commitFileToBranch(BRANCH1, BRANCH1 + ".file2", "content", "commit 2 for " + BRANCH1);
+
+        await().pollInterval(3, TimeUnit.SECONDS)
+                .timeout(100, SECONDS)
+                .until(ghTriggerRunAndEnd(trigger));
+
+        j.waitUntilNoActivity();
+
+        // refresh objects
+        ghPRRepository = job.getAction(GitHubPRRepository.class);
+        assertThat("Action storage should be available", ghPRRepository, notNullValue());
+
+        pulls = ghPRRepository.getPulls();
+        assertThat("Pull request 1 should appear in action storage", pulls.entrySet(), Matchers.hasSize(1));
+
+        j.assertBuildStatusSuccess(job.getLastBuild());
+        assertThat(job.getBuilds().size(), is(2));
+
+
     }
 }

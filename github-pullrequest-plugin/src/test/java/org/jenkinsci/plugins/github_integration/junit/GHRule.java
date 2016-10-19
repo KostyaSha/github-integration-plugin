@@ -185,6 +185,10 @@ public class GHRule implements TestRule {
 
         git.checkout().setName("master").call();
 
+        pushAll();
+    }
+
+    public void pushAll() throws GitAPIException {
         git.push()
                 .setPushAll()
                 .setProgressMonitor(new TextProgressMonitor())
