@@ -289,7 +289,9 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
                     .toList();
 
             LOGGER.trace("Causes count for {}: {}", localRepository.getFullName(), causes.size());
-            from(prepared).transform(updateLocalRepo(localRepository)).toSet();
+
+            // refresh all PRs because user may add events that may trigger unexpected builds.
+            from(remotePulls).transform(updateLocalRepo(localRepository)).toSet();
 
             saveIfSkipFirstRun();
 
