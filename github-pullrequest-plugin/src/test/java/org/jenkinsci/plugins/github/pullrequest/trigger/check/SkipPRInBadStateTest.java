@@ -40,7 +40,7 @@ public class SkipPRInBadStateTest {
     @Test
     public void ignoreNullRemotePR() {
         assertThat(badState(null, null).apply(null),
-                is(false));
+                is(true));
     }
 
     @Test
@@ -52,7 +52,7 @@ public class SkipPRInBadStateTest {
         when(localRepo.getPulls()).thenReturn(pulls);
 
         assertThat(badState(localRepo, tlRule.getListener()).apply(remotePR),
-                is(false));
+                is(true));
     }
 
     @Test
@@ -65,7 +65,7 @@ public class SkipPRInBadStateTest {
         when(localRepo.getPulls()).thenReturn(pulls);
 
         assertThat(badState(localRepo, tlRule.getListener()).apply(remotePR),
-                is(true));
+                is(false));
     }
 
     @Test
@@ -78,7 +78,7 @@ public class SkipPRInBadStateTest {
         when(localRepo.getPulls()).thenReturn(pulls);
 
         assertThat(badState(localRepo, tlRule.getListener()).apply(remotePR),
-                is(false));
+                is(true));
     }
 
 }
