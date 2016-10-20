@@ -82,7 +82,7 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
                 return event.check(trigger, remotePR, localPR, listener);
             } catch (IOException e) {
                 LOGGER.warn("Can't check trigger event", e);
-                listener.error("Can't check trigger event, so skipping PR ({})", e.getMessage());
+                listener.error("Can't check trigger event, so skipping PR #{}. {}", remotePR.getNumber(), e);
                 return null;
             }
         }

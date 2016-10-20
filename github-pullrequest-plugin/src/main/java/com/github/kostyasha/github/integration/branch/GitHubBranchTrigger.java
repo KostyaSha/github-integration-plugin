@@ -215,7 +215,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
             listener.info(FINISH_MSG + " for {} at {}. Duration: {}ms",
                     localRepository.getFullName(), getDateTimeInstance().format(new Date()), duration);
         } catch (Exception e) {
-            LOG.error("Can't process check ({})", e.getMessage(), e);
+            LOG.error("Can't process check: {}", e);
             return;
         }
 
@@ -263,7 +263,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
 
             return causes;
         } catch (IOException | URISyntaxException e) {
-            listener.error("Can't get build causes, because: '{}'", e.getMessage());
+            listener.error("Can't get build causes: '{}'", e);
             return Collections.emptyList();
         }
     }

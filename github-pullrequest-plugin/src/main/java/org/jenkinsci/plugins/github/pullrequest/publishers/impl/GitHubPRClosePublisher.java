@@ -51,7 +51,7 @@ public class GitHubPRClosePublisher extends GitHubPRAbstractPublisher {
                     }
                 }
             } catch (IOException ex) {
-                listener.getLogger().println("Can't close pull request \n" + ex.getMessage());
+                listener.getLogger().println("Can't close pull request \n" + ex);
                 handlePublisherError(run);
             }
         }

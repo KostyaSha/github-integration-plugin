@@ -59,7 +59,8 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
                 }
             }
         } catch (IOException e) {
-            LOGGER.warn("Couldn't obtain comments: {}", e.getMessage());
+            LOGGER.warn("Couldn't obtain comments: {}", e);
+            listener.error("Couldn't obtain comments", e);
         }
         return cause;
     }
