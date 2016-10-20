@@ -41,8 +41,8 @@ public class GitHubPRNonMergeableEvent extends GitHubPREvent {
         try {
             mergeable = remotePR.getMergeable();
         } catch (IOException e) {
-            logger.println(DISPLAY_NAME + ": can't get mergeable status");
-            LOGGER.warn("Can't get mergeable status: {}", e.getMessage());
+            listener.error(DISPLAY_NAME + ": can't get mergeable status {}", e);
+            LOGGER.warn("Can't get mergeable status: {}", e);
             mergeable = false;
         }
         mergeable = mergeable != null ? mergeable : false;

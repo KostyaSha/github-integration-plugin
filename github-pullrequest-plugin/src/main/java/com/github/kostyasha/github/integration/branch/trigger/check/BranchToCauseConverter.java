@@ -79,7 +79,7 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
                 return event.check(trigger, remoteBranch, localBranch, localRepo, listener);
             } catch (IOException e) {
                 LOGGER.warn("Can't check trigger event", e);
-                listener.error("Can't check trigger event, so skipping branch ({})", e.getMessage());
+                listener.error("Can't check trigger event, so skipping branch: {}", e);
                 return null;
             }
         }

@@ -75,14 +75,14 @@ public class GitHubPRPullRequest {
             }
             lastCommentCreatedAt = maxDate.getTime() == 0 ? null : new Date(maxDate.getTime());
         } catch (IOException e) {
-            LOGGER.error("Can't get comments for PR: {}", e.getMessage());
+            LOGGER.error("Can't get comments for PR: {}", pr.getNumber(), e);
             lastCommentCreatedAt = null;
         }
 
         try {
             userEmail = pr.getUser().getEmail();
         } catch (Exception e) {
-            LOGGER.error("Can't get GitHub user email: {}", e.getMessage());
+            LOGGER.error("Can't get GitHub user email.", e);
             userEmail = "";
         }
 
@@ -99,7 +99,7 @@ public class GitHubPRPullRequest {
         try {
             mergeable = pr.getMergeable();
         } catch (IOException e) {
-            LOGGER.error("Can't get mergeable status: {}", e.getMessage());
+            LOGGER.error("Can't get mergeable status.", e);
             mergeable = false;
         }
 

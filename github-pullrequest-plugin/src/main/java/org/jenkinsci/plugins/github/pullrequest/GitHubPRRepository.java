@@ -112,9 +112,9 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
                 result = FormValidation.error("Forbidden");
             }
         } catch (Exception e) {
-            LOGGER.error("Can\'t delete repository file '{}', '{}'",
-                    configFile.getFile().getAbsolutePath(), e.getMessage());
-            result = FormValidation.error("Can't delete: " + e.getMessage());
+            LOGGER.error("Can\'t delete repository file '{}'",
+                    configFile.getFile().getAbsolutePath(), e);
+            result = FormValidation.error(e, "Can't delete: %s", e.getMessage());
         }
         return result;
     }
@@ -142,8 +142,8 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
                 result = FormValidation.error("Forbidden");
             }
         } catch (Exception e) {
-            LOGGER.error("Can't run trigger", e.getMessage());
-            result = FormValidation.error("Can't run trigger: %s", e.getMessage());
+            LOGGER.error("Can't run trigger", e);
+            result = FormValidation.error(e, "Can't run trigger: %s", e.getMessage());
         }
         return result;
     }
@@ -166,8 +166,8 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
                 result = FormValidation.error("Forbidden");
             }
         } catch (Exception e) {
-            LOGGER.error("Can't start rebuild", e.getMessage());
-            result = FormValidation.error("Can't start rebuild: %s", e.getMessage());
+            LOGGER.error("Can't start rebuild", e);
+            result = FormValidation.error(e, "Can't start rebuild: %s", e.getMessage());
         }
         return result;
     }
@@ -200,8 +200,8 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
                 result = FormValidation.warning("Build not found");
             }
         } catch (Exception e) {
-            LOGGER.error("Can't start rebuild", e.getMessage());
-            result = FormValidation.error("Can't start rebuild: " + e.getMessage());
+            LOGGER.error("Can't start rebuild", e);
+            result = FormValidation.error(e, "Can't start rebuild: " + e.getMessage());
         }
         return result;
     }

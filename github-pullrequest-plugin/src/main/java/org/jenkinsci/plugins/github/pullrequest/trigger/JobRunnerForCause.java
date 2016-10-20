@@ -140,7 +140,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                 }
             }
         } catch (IOException e) {
-            LOGGER.error("Can't trigger build ({})", e.getMessage(), e);
+            LOGGER.error("Can't trigger build:", e);
             return false;
         } finally {
             SecurityContextHolder.setContext(old);

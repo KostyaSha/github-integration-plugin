@@ -109,9 +109,9 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
                 result = FormValidation.error("Forbidden");
             }
         } catch (Exception e) {
-            LOG.error("Can't delete repository file '{}', '{}'",
-                    configFile.getFile().getAbsolutePath(), e.getMessage());
-            result = FormValidation.error("Can't delete: " + e.getMessage());
+            LOG.error("Can't delete repository file '{}'.",
+                    configFile.getFile().getAbsolutePath(), e);
+            result = FormValidation.error(e, "Can't delete: " + e.getMessage());
         }
         return result;
     }
@@ -137,7 +137,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
             }
         } catch (Exception e) {
             LOG.error("Can't run trigger", e.getMessage());
-            result = FormValidation.error("Can't run trigger: %s", e.getMessage());
+            result = FormValidation.error(e, "Can't run trigger: %s", e.getMessage());
         }
         return result;
     }
@@ -161,7 +161,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
             }
         } catch (Exception e) {
             LOG.error("Can't start rebuild", e.getMessage());
-            result = FormValidation.error("Can't start rebuild: %s", e.getMessage());
+            result = FormValidation.error(e, "Can't start rebuild: %s", e.getMessage());
         }
         return result;
     }
@@ -195,7 +195,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
             }
         } catch (Exception e) {
             LOG.error("Can't start rebuild", e.getMessage());
-            result = FormValidation.error("Can't start rebuild: " + e.getMessage());
+            result = FormValidation.error(e, "Can't start rebuild: " + e.getMessage());
         }
         return result;
     }

@@ -303,7 +303,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
 
             return causes;
         } catch (IOException | URISyntaxException e) {
-            listener.error("Can't get build causes, because: '{}'", e.getMessage());
+            listener.error("Can't get build causes: ", e);
             return Collections.emptyList();
         }
     }

@@ -53,7 +53,7 @@ public class GitHubPRLabelRemovePublisher extends GitHubPRAbstractPublisher {
             listener.getLogger().println("Removing labels: " + getLabelProperty().getLabelsSet());
             getGhIssue(run).setLabels(remoteLabels.toArray(new String[remoteLabels.size()]));
         } catch (IOException ex) {
-            listener.getLogger().println("Couldn't remove label for PR #" + getNumber(run) + " " + ex.getMessage());
+            listener.getLogger().println("Couldn't remove label for PR #" + getNumber(run) + " " + ex);
             LOGGER.error("Couldn't remove label for PR #{}", getNumber(), ex);
             handlePublisherError(run);
         }
