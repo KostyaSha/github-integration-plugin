@@ -1,8 +1,15 @@
 ## Changelog
 
+## 0.1.0-rc11 Next
+
 ## 0.1.0-rc10
+ * Verbose logging for exceptions.
+ * Java 8 required as it was written in docs for a long time.
  * Support more job types.
- * Survive GH outages/bad fetched PR/Issues.
+ * Update all local PRs with fresh information on every check.
+ * Fixed non chrome browsers support for clicking buttons.
+ * Survive GH outages/bad fetched PR/Issues (NPE in event).
+ * Clean-up test class.
 
 ## 0.1.0-rc9
  * [BRANCH] New `GitHub Branch Trigger`.
