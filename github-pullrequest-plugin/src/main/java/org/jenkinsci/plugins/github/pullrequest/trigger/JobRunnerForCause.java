@@ -103,6 +103,10 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                     i = abortRunning(cause.getNumber());
                 } catch (IllegalAccessException e) {
                     LOGGER.error("Can't abort runs/builds for {}", job.getFullName(), e);
+                    sb.append("Can't abort runs/builds for '")
+                            .append(job.getFullName())
+                            .append("'. Error: ")
+                            .append(e);
                 }
                 if (i > 0) {
                     sb.append(". ");
@@ -114,6 +118,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
             QueueTaskFuture<?> queueTaskFuture = startJob(cause);
             if (isNull(queueTaskFuture)) {
                 LOGGER.error("{} job didn't start", job.getFullName());
+                sb.append(job.getFullName() + " didn't start");
             }
 
             LOGGER.info(sb.toString());
