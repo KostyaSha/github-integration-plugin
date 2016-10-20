@@ -14,7 +14,3 @@ f.entry(field: "skip", title: "Skip with matching pattern?") {
 f.entry(title: "Message Patterns") {
     f.textarea(field: "matchPatternsStr")
 }
-
-f.entry(field: "maxCommits", title: "Max history search") {
-    f.number()
-}

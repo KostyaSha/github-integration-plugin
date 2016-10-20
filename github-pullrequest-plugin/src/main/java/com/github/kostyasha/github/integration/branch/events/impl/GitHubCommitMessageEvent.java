@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -33,12 +32,6 @@ public class GitHubCommitMessageEvent extends GitHubBranchEvent {
     private static final String DISPLAY_NAME = "Commit Message Pattern";
     private static final Logger LOG = LoggerFactory.getLogger(GitHubBranchHashChangedEvent.class);
 
-    /**
-     * Max number of commits for checking. Critical in case of force-pushes
-     * when we can't know the depth of search.
-     */
-    private int maxCommits = 1000;
-
     private boolean skip = false;
 
     private String matchPatternsStr = "";
@@ -48,16 +41,6 @@ public class GitHubCommitMessageEvent extends GitHubBranchEvent {
 
     @DataBoundConstructor
     public GitHubCommitMessageEvent() {
-    }
-
-    // max commits
-    public int getMaxCommits() {
-        return maxCommits;
-    }
-
-    @DataBoundSetter
-    public void setMaxCommits(int maxCommits) {
-        this.maxCommits = maxCommits;
     }
 
     // skip
@@ -84,8 +67,6 @@ public class GitHubCommitMessageEvent extends GitHubBranchEvent {
     @Nonnull
     public Set<String> getMatchPatterns() {
         if (isNull(matchPatterns)) {
-            final HashSet<String> patterns = new HashSet<>();
-
             final Iterable<String> split = Splitter.on(System.lineSeparator())
                     .trimResults()
                     .omitEmptyStrings()
@@ -105,26 +86,23 @@ public class GitHubCommitMessageEvent extends GitHubBranchEvent {
                                    @CheckForNull GitHubBranch localBranch,
                                    GitHubBranchRepository localRepo,
                                    TaskListener listener) throws IOException {
-        GitHubBranchCause cause = null;
         final String prev = localBranch.getCommitSha();
         final String current = remoteBranch.getSHA1();
 
         final GHCompare compare = remoteBranch.getOwner().getCompare(current, prev);
         final GHCompare.Commit[] commits = compare.getCommits();
 
-        boolean matched = false;
         for (GHCompare.Commit commit : commits) {
             final String message = commit.getCommit().getMessage();
             for (String match : getMatchPatterns()) {
                 //if branch name matches to pattern, allow build
-                matched = Pattern.compile(match).matcher(message).matches();
-                if (matched) {
+                if (Pattern.compile(match).matcher(message).matches()) {
                     return new GitHubBranchCause(remoteBranch, localRepo, "Message " + message + " matched", skip);
                 }
             }
         }
 
-        return cause;
+        return null;
     }
 
     @Extension
