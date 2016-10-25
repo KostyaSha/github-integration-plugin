@@ -2,7 +2,9 @@
 
 ## 0.1.0-rc11 Next
 
+
 ## 0.1.0-rc10
+  :question: Possible regression https://github.com/KostyaSha/github-integration-plugin/issues/141
  * Verbose logging for exceptions.
  * Java 8 required as it was written in docs for a long time.
  * Support more job types.
