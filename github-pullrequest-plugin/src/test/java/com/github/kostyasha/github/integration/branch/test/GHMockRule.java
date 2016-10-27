@@ -169,6 +169,57 @@ public class GHMockRule implements TestRule {
         });
     }
 
+
+    public GHMockRule stubPulls() {
+        return addSetup(new Runnable() {
+            @Override
+            public void run() {
+                service().stubFor(
+                        get(urlEqualTo(
+                                format("/repos/%s/%s/pulls?state=open", REPO.getUserName(), REPO.getRepositoryName()))
+                        ).willReturn(aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type", "application/json; charset=utf-8")
+                                .withBody(classpath(GHMockRule.class, "pulls.json"))
+                        )
+                );
+            }
+        });
+    }
+    public GHMockRule stubIssues1() {
+        return addSetup(new Runnable() {
+            @Override
+            public void run() {
+                service().stubFor(
+                        get(urlEqualTo(
+                                format("/repos/%s/%s/issues/1", REPO.getUserName(), REPO.getRepositoryName()))
+                        ).willReturn(aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type", "application/json; charset=utf-8")
+                                .withBody(classpath(GHMockRule.class, "issues1.json"))
+                        )
+                );
+            }
+        });
+    }
+
+    public GHMockRule stubComments1() {
+        return addSetup(new Runnable() {
+            @Override
+            public void run() {
+                service().stubFor(
+                        get(urlEqualTo(
+                                format("/repos/%s/%s/issues/1/comments", REPO.getUserName(), REPO.getRepositoryName()))
+                        ).willReturn(aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type", "application/json; charset=utf-8")
+                                .withBody(classpath(GHMockRule.class, "comments1.json"))
+                        )
+                );
+            }
+        });
+    }
+
     /**
      * When we call one of predefined stub* methods, wiremock is not not started yet, so we need to create a closure
      *

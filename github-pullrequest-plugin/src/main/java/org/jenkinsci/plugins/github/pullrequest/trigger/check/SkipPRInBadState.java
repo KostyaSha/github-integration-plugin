@@ -32,16 +32,16 @@ public class SkipPRInBadState implements Predicate<GHPullRequest> {
     @Override
     public boolean apply(@Nullable GHPullRequest remotePR) {
         if (remotePR == null) {
-            return false;
+            return true;
         }
 
         @CheckForNull GitHubPRPullRequest localPR = localRepo.getPulls().get(remotePR.getNumber());
 
         if (localPR != null && localPR.isInBadState()) {
             logger.error("local PR [#{} {}] is in bad state", remotePR.getNumber(), remotePR.getTitle());
-            return true;
+            return false;
         }
 
-        return false;
+        return true;
     }
 }
