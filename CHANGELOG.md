@@ -1,16 +1,16 @@
 ## Changelog
 
 ## 0.1.0-rc11 Next
-
+- [PR] Fixed (?) triggering regression.
 
 ## 0.1.0-rc10
-  :question: Possible regression https://github.com/KostyaSha/github-integration-plugin/issues/141
+  :question: [PR] Regression https://github.com/KostyaSha/github-integration-plugin/issues/141
  * Verbose logging for exceptions.
  * Java 8 required as it was written in docs for a long time.
  * Support more job types.
- * Update all local PRs with fresh information on every check.
+ * [PR] Update all local PRs with fresh information on every check.
  * Fixed non chrome browsers support for clicking buttons.
- * Survive GH outages/bad fetched PR/Issues (NPE in event).
+ * [PR] Survive GH outages/bad fetched PR/Issues (NPE in event).
  * Clean-up test class.
 
 ## 0.1.0-rc9
