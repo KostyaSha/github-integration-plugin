@@ -1,7 +1,5 @@
 package com.github.kostyasha.github.integration.branch;
 
-import antlr.ANTLRException;
-import com.cloudbees.jenkins.GitHubPushTrigger;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchCreatedEvent;
@@ -12,20 +10,14 @@ import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import hudson.model.Result;
-import org.eclipse.jgit.lib.ObjectId;
 import org.jenkinsci.plugins.github.config.GitHubPluginConfig;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExternalResource;
 import org.junit.rules.RuleChain;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestExtension;
 
 import javax.inject.Inject;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,10 +26,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.CRON;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.isNotNull;
-import static org.mockito.Matchers.notNull;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Kanstantsin Shautsou
