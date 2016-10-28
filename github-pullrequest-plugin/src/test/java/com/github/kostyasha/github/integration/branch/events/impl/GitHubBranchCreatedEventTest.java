@@ -2,7 +2,6 @@ package com.github.kostyasha.github.integration.branch.events.impl;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
-import com.github.kostyasha.github.integration.generic.GitHubRepository;
 import hudson.model.TaskListener;
 import org.junit.Test;
 import org.junit.runner.RunWith;
