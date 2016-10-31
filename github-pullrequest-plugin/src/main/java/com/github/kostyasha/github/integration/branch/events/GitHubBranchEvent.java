@@ -7,7 +7,6 @@ import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.TaskListener;
 import org.kohsuke.github.GHBranch;
-import org.kohsuke.github.GHEventPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,15 +35,6 @@ public abstract class GitHubBranchEvent extends AbstractDescribableImpl<GitHubBr
             @CheckForNull GitHubBranch localBranch,
             GitHubBranchRepository localRepo,
             TaskListener listener) throws IOException {
-        return null;
-    }
-
-    /**
-     * Check that is used for lightweight hooks (pure GitHub hooks).
-     */
-    public GitHubBranchCause checkHook(GitHubBranchTrigger githubTrigger,
-                                       GHEventPayload payload,
-                                       TaskListener listener) {
         return null;
     }
 
