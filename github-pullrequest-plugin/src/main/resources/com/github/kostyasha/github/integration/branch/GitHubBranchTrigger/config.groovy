@@ -43,8 +43,9 @@ f.block {
             )
         }
 
-        f.optionalProperty(title: "Experimental: User Restriction", field: "userRestriction")
+        // disable until it's working otherwise ppl will think it is
+        //f.optionalProperty(title: "Experimental: User Restriction", field: "userRestriction")
+        //f.optionalProperty(title: "Experimental: Branch Restriction", field: "branchRestriction")
 
-        f.optionalProperty(title: "Experimental: Branch Restriction", field: "branchRestriction")
     }
 }
