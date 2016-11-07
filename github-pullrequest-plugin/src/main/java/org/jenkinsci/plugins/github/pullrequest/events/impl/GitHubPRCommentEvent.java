@@ -44,7 +44,7 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
     @Override
     public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
                                @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) {
-        if (isNull(localPR) || isNull(localPR.getLastCommentCreatedAt())) {
+        if (isNull(localPR)) {
             return null; // nothing to compare
         }
         final PrintStream logger = listener.getLogger();
@@ -52,7 +52,8 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
         GitHubPRCause cause = null;
         try {
             for (GHIssueComment issueComment : remotePR.getComments()) {
-                if (localPR.getLastCommentCreatedAt().compareTo(issueComment.getCreatedAt()) < 0) {
+                if (isNull(localPR.getLastCommentCreatedAt())
+                        || localPR.getLastCommentCreatedAt().compareTo(issueComment.getCreatedAt()) < 0) {
                     logger.println(DISPLAY_NAME + ": state has changed (new comment found - \""
                             + issueComment.getBody() + "\")");
                     cause = checkComment(issueComment, gitHubPRTrigger.getUserRestriction(), remotePR);
