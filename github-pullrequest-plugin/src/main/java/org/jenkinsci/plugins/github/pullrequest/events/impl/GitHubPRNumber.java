@@ -18,7 +18,8 @@ import static java.util.Objects.nonNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 
 /**
- * Skip PR checks when un-matched to PR number.
+ * Check that PR number #isMatch() to event configured number.
+ * When this happen #isSkip() defines whether PR should be skipped or trigger.
  *
  * @author Kanstantsin Shautsou
  */
