@@ -14,7 +14,6 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
-import static java.util.Objects.nonNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 
 /**
