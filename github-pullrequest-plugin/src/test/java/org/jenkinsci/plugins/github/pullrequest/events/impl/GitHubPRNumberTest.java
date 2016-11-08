@@ -19,9 +19,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collections;
-import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyInt;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
  * @author Kanstantsin Shautsou
  */
 @RunWith(MockitoJUnitRunner.class)
-public class GitHubPRSkipUnmatchNumberTest {
+public class GitHubPRNumberTest {
     @Mock
     private GHPullRequest remotePr;
     @Mock
@@ -61,11 +61,64 @@ public class GitHubPRSkipUnmatchNumberTest {
         commonExpectations();
         causeCreationExpectations();
 
-        final GitHubPRSkipUnmatchNumber event = new GitHubPRSkipUnmatchNumber(null);
+        final GitHubPRNumber event = new GitHubPRNumber(null, true, true);
 
         final GitHubPRCause cause = event.check(null, remotePr, null, listener);
         assertThat(cause, notNullValue());
         assertThat(cause.isSkip(), is(true));
+    }
+
+    @Test
+    public void numberNotMatchSkip() throws IOException {
+        commonExpectations();
+        causeCreationExpectations();
+
+        final GitHubPRNumber event = new GitHubPRNumber(15, false, true);
+
+        final GitHubPRCause cause = event.check(null, remotePr, null, listener);
+        assertThat(cause, notNullValue());
+        assertThat(cause.isSkip(), is(true));
+    }
+
+    @Test
+    public void numberMatchSkip() throws IOException {
+        commonExpectations();
+        causeCreationExpectations();
+
+        when(remotePr.getNumber()).thenReturn(16);
+
+        final GitHubPRNumber event = new GitHubPRNumber(16, true, true);
+
+        final GitHubPRCause cause = event.check(null, remotePr, null, listener);
+        assertThat(cause, notNullValue());
+        assertThat(cause.isSkip(), is(true));
+    }
+
+    @Test
+    public void numberMatchTrigger() throws IOException {
+        commonExpectations();
+        causeCreationExpectations();
+
+        when(remotePr.getNumber()).thenReturn(16);
+
+        final GitHubPRNumber event = new GitHubPRNumber(16, true, false);
+
+        final GitHubPRCause cause = event.check(null, remotePr, null, listener);
+        assertThat(cause, notNullValue());
+        assertThat(cause.isSkip(), is(false));
+    }
+
+    @Test
+    public void otherNumberMatchTrigger() throws IOException {
+        commonExpectations();
+        causeCreationExpectations();
+
+        when(remotePr.getNumber()).thenReturn(17);
+
+        final GitHubPRNumber event = new GitHubPRNumber(16, true, false);
+
+        final GitHubPRCause cause = event.check(null, remotePr, null, listener);
+        assertThat(cause, nullValue());
     }
 
 

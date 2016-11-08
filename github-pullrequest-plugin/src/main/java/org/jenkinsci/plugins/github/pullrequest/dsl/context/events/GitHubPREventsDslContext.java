@@ -14,7 +14,7 @@ import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRLabelPattern
 import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRLabelRemovedEvent;
 import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRNonMergeableEvent;
 import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPROpenEvent;
-import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRSkipUnmatchNumber;
+import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRNumber;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,8 +85,12 @@ public class GitHubPREventsDslContext implements Context {
         events.add(new GitHubPRNonMergeableEvent(true));
     }
 
-    public void skipUmnatchedPRNumber(int prNumber) {
-        events.add(new GitHubPRSkipUnmatchNumber(prNumber));
+    public void number(int prNumber, boolean match) {
+        events.add(new GitHubPRNumber(prNumber, match, false));
+    }
+
+    public void skipNumber(int prNumber, boolean match) {
+        events.add(new GitHubPRNumber(prNumber, match, true));
     }
 
     public List<GitHubPREvent> events() {
