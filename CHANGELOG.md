@@ -2,6 +2,9 @@
 
 ## Next
 
+## 0.1.0-rc12
+- [PR] Comment event: do not skip the first comment.
+
 ## 0.1.0-rc11 
 - [PR] Fixed (?) triggering regression.
 
