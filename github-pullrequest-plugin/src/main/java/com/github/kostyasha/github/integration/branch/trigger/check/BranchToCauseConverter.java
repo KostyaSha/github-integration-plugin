@@ -5,17 +5,16 @@ import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
 import org.jenkinsci.plugins.github.pullrequest.utils.LoggingTaskListenerWrapper;
 import org.kohsuke.github.GHBranch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-
-import static com.google.common.base.Predicates.notNull;
-import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author Kanstantsin Shautsou
@@ -28,61 +27,72 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
     private final GitHubBranchTrigger trigger;
 
     private BranchToCauseConverter(GitHubBranchRepository localRepo,
-                                   LoggingTaskListenerWrapper listener,
+                                   LoggingTaskListenerWrapper pollingLog,
                                    GitHubBranchTrigger trigger) {
         this.localRepo = localRepo;
-        this.listener = listener;
+        this.listener = pollingLog;
         this.trigger = trigger;
     }
 
     public static BranchToCauseConverter toGitHubBranchCause(GitHubBranchRepository localRepo,
-                                                             LoggingTaskListenerWrapper listener,
+                                                             LoggingTaskListenerWrapper pollingLog,
                                                              GitHubBranchTrigger trigger) {
-        return new BranchToCauseConverter(localRepo, listener, trigger);
+        return new BranchToCauseConverter(localRepo, pollingLog, trigger);
     }
 
     @Override
     public GitHubBranchCause apply(final GHBranch remoteBranch) {
+        List<GitHubBranchCause> causes = trigger.getEvents().stream()
+                .map(event -> toCause(event, remoteBranch))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
-        final GitHubBranchCause cause = from(trigger.getEvents())
-                .transform(toCause(remoteBranch))
-                .filter(notNull())
-                .first()
-                .orNull();
-
-        if (cause == null || cause.isSkip()) {
+        String name = remoteBranch.getName();
+        if (causes.isEmpty()) {
+            LOGGER.debug("No build trigger causes found for branch [{}].", name);
             return null;
-        } else {
-            return cause;
-        }
-    }
-
-
-    @VisibleForTesting
-    /* package */ EventToCauseConverter toCause(GHBranch ghBranch) {
-        return new EventToCauseConverter(ghBranch);
-    }
-
-    @VisibleForTesting
-    /* package */ class EventToCauseConverter implements Function<GitHubBranchEvent, GitHubBranchCause> {
-        private final GHBranch remoteBranch;
-
-        EventToCauseConverter(GHBranch remoteBranch) {
-            this.remoteBranch = remoteBranch;
         }
 
-        @Override
-        public GitHubBranchCause apply(GitHubBranchEvent event) {
-            //null if local not existed before
-            final GitHubBranch localBranch = localRepo.getBranches().get(remoteBranch.getName());
-            try {
-                return event.check(trigger, remoteBranch, localBranch, localRepo, listener);
-            } catch (IOException e) {
-                LOGGER.warn("Can't check trigger event", e);
-                listener.error("Can't check trigger event, so skipping branch: {}", e);
-                return null;
-            }
+        LOGGER.debug("All matched events for branch [{}] : {}.", name, causes);
+
+        GitHubBranchCause cause = skipTrigger(causes);
+        if (cause != null) {
+            listener.info("Build of branch [{}] skipped: {}.", name, cause.getReason());
+            return null;
         }
+
+        // use the first cause from the list
+        cause = causes.get(0);
+        LOGGER.debug("Using build cause [{}] as trigger for branch [{}].", cause, name);
+
+        return cause;
     }
 
+    private GitHubBranchCause skipTrigger(List<GitHubBranchCause> causes) {
+        GitHubBranchCause cause = causes.stream()
+                .filter(GitHubBranchCause::isSkip)
+                .findFirst()
+                .orElse(null);
+
+        if (cause == null) {
+            return null;
+        }
+
+        LOGGER.debug("Cause [{}] indicated build should be skipped.", cause);
+        return cause;
+    }
+
+    private GitHubBranchCause toCause(GitHubBranchEvent event, GHBranch remoteBranch) {
+        String branchName = remoteBranch.getName();
+        GitHubBranch localBranch = localRepo.getBranches().get(branchName);
+
+        try {
+            return event.check(trigger, remoteBranch, localBranch, localRepo, listener);
+        } catch (IOException e) {
+            LOGGER.error("Event check failed, skipping branch [{}].", branchName, e);
+            listener.error("Event check failed, skipping branch [{}] {}", branchName, e);
+
+            return null;
+        }
+    }
 }
