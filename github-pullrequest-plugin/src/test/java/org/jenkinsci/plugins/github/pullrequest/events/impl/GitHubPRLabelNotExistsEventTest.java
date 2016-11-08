@@ -56,8 +56,6 @@ public class GitHubPRLabelNotExistsEventTest {
     @Mock
     private PrintStream logger;
 
-    private Set<String> checkedLabels = new HashSet<>(asList(MERGE, REVIEWED, LOCALLY_TESTED));
-
     /**
      * Case when there is three checked labels and there is one that exists.
      */
