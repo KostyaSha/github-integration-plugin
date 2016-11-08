@@ -16,5 +16,5 @@ f.entry(field: "matchAsPattern", title: "Match branches against pattern criteria
 }
 
 f.entry(title: "Branch Names or Patterns") {
-    f.textarea(field: "matchCriteria")
+    f.textarea(field: "matchCriteriaStr")
 }

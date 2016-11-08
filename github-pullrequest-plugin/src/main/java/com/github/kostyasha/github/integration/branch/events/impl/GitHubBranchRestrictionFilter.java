@@ -38,16 +38,19 @@ public class GitHubBranchRestrictionFilter extends GitHubBranchEvent {
     public GitHubBranchRestrictionFilter() {
     }
 
-    public String getMatchCriteria() {
+    public String getMatchCriteriaStr() {
         return String.join(LINE_SEPARATOR, matchCriteria);
+    }
+
+    @DataBoundSetter
+    public void setMatchCriteriaStr(String matchCriteria) {
+        this.matchCriteria = Stream.of(matchCriteria
+                .split(LINE_SEPARATOR))
+                .collect(Collectors.toSet());
     }
 
     public boolean isExclude() {
         return exclude;
-    }
-
-    public boolean isMatchAsPattern() {
-        return matchAsPattern;
     }
 
     @DataBoundSetter
@@ -55,21 +58,18 @@ public class GitHubBranchRestrictionFilter extends GitHubBranchEvent {
         this.exclude = exclude;
     }
 
+    public boolean isMatchAsPattern() {
+        return matchAsPattern;
+    }
+
     @DataBoundSetter
     public void setMatchAsPattern(boolean matchAsPattern) {
         this.matchAsPattern = matchAsPattern;
     }
 
-    @DataBoundSetter
-    public void setMatchCriteria(String matchCriteria) {
-        this.matchCriteria = Stream.of(matchCriteria
-                .split(LINE_SEPARATOR))
-                .collect(Collectors.toSet());
-    }
-
     @Override
     public GitHubBranchCause check(GitHubBranchTrigger gitHubBranchTrigger, GHBranch remoteBranch, GitHubBranch localBranch,
-            GitHubBranchRepository localRepo, TaskListener listener) {
+                                   GitHubBranchRepository localRepo, TaskListener listener) {
         String name = remoteBranch.getName();
         if (matchCriteria.isEmpty() || branchIsAllowed(name)) {
             if (matchCriteria.isEmpty()) {
@@ -112,8 +112,8 @@ public class GitHubBranchRestrictionFilter extends GitHubBranchEvent {
         }
     }
 
-    private GitHubBranchCause toCause(GHBranch remoteBranch, GitHubBranchRepository localRepo, boolean skip, String message,
-            Object... args) {
+    private GitHubBranchCause toCause(GHBranch remoteBranch, GitHubBranchRepository localRepo, boolean skip,
+                                      String message, Object... args) {
         return new GitHubBranchCause(remoteBranch, localRepo, String.format(message, args), skip);
     }
 
