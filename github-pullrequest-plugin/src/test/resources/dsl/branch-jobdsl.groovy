@@ -15,6 +15,8 @@ freeStyleJob('gh-branch') {
                 hashChanged()
                 deleted()
             }
+
+            whitelistedBranches('master')
         }
 
     }

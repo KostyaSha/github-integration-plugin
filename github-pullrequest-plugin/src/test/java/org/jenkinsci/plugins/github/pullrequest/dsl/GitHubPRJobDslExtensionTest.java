@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.HEAVY_HOOKS_CRON;
 import static org.junit.Assert.*;
 
@@ -73,6 +74,8 @@ public class GitHubPRJobDslExtensionTest {
         assertThat("Should have cancel queued", trigger.isCancelQueued(), equalTo(true));
         assertThat("Should add events", trigger.getEvents(), hasSize(3));
         assertThat("Should set mode", trigger.getTriggerMode(), equalTo(HEAVY_HOOKS_CRON));
+        assertThat("Branch restriction set", trigger.getBranchRestriction(), is(notNullValue()));
+        assertThat("Restricted is master", trigger.getBranchRestriction().getTargetBranch(), equalTo("master"));
     }
 
 }
