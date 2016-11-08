@@ -3,9 +3,6 @@ package com.github.kostyasha.github.integration.branch.dsl;
 import antlr.ANTLRException;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.dsl.context.GitHubBranchTriggerDslContext;
-
-import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRBranchRestriction;
-
 import hudson.Extension;
 import javaposse.jobdsl.dsl.helpers.triggers.TriggerContext;
 import javaposse.jobdsl.plugin.ContextExtensionPoint;
@@ -27,7 +24,6 @@ public class GitHubBranchJobDslExtenstion extends ContextExtensionPoint {
         trigger.setPreStatus(context.isSetPreStatus());
         trigger.setCancelQueued(context.isCancelQueued());
         trigger.setAbortRunning(context.isAbortRunning());
-        trigger.setBranchRestriction(new GitHubPRBranchRestriction(context.whitelistedBranches()));
 
         return trigger;
     }
