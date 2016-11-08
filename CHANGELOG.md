@@ -3,6 +3,8 @@
 ## Next
 
 ## 0.1.0-rc12
+- [BRANCH] Refactor code to use java8 functions. 
+- [BRANCH] Allow whitelist branches via SkipEvent. 
 - [PR] Job-dsl: support whitelist branches definitiion.
 - [PR] Comment event: do not skip the first comment.
 
