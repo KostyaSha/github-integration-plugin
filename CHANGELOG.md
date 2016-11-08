@@ -3,6 +3,7 @@
 ## Next
 
 ## 0.1.0-rc12
+- [PR] Job-dsl: support whitelist branches definitiion.
 - [PR] Comment event: do not skip the first comment.
 
 ## 0.1.0-rc11 
