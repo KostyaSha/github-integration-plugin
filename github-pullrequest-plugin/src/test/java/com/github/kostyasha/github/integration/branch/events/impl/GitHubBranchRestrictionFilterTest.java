@@ -121,12 +121,12 @@ public class GitHubBranchRestrictionFilterTest {
     }
 
     private void givenMatchAsExact() {
-        filter.setMatchCriteria(createTestInput(MASTER, BRANCH1, BRANCH2, BRANCH3));
+        filter.setMatchCriteriaStr(createTestInput(MASTER, BRANCH1, BRANCH2, BRANCH3));
     }
 
     private void givenMatchAsPatterns() {
         filter.setMatchAsPattern(true);
-        filter.setMatchCriteria(createTestInput(PATTERN1, PATTERN2));
+        filter.setMatchCriteriaStr(createTestInput(PATTERN1, PATTERN2));
     }
 
     private void givenRemoteBranchName(String name) {
