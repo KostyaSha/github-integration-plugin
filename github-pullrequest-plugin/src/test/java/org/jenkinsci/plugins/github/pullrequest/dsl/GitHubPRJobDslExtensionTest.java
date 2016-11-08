@@ -74,8 +74,6 @@ public class GitHubPRJobDslExtensionTest {
         assertThat("Should have cancel queued", trigger.isCancelQueued(), equalTo(true));
         assertThat("Should add events", trigger.getEvents(), hasSize(3));
         assertThat("Should set mode", trigger.getTriggerMode(), equalTo(HEAVY_HOOKS_CRON));
-        assertThat("Branch restriction set", trigger.getBranchRestriction(), is(notNullValue()));
-        assertThat("Restricted is master", trigger.getBranchRestriction().getTargetBranch(), equalTo("master"));
     }
 
 }
