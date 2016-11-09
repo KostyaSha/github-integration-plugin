@@ -13,12 +13,15 @@ import javaposse.jobdsl.plugin.RemovedViewAction;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.builders.GitHubPRStatusBuilder;
+import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
+import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRNumber;
 import org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRBuildStatusPublisher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.util.Collection;
+import java.util.List;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -85,7 +88,21 @@ public class DslIntegrationTest {
         assertThat("Should add trigger of GHPR class", trigger, instanceOf(GitHubPRTrigger.class));
         assertThat("Should have pre status", trigger.isPreStatus(), equalTo(true));
         assertThat("Should have cancel queued", trigger.isCancelQueued(), equalTo(true));
-        assertThat("Should add events", trigger.getEvents(), hasSize(15));
         assertThat("Should set mode", trigger.getTriggerMode(), equalTo(HEAVY_HOOKS_CRON));
+
+        final List<GitHubPREvent> events = trigger.getEvents();
+        assertThat("Should add events", events, hasSize(17));
+
+
+        GitHubPREvent event = events.get(15);
+        assertThat(event, instanceOf(GitHubPRNumber.class));
+        assertThat(((GitHubPRNumber) event).isSkip(), is(false));
+        assertThat(((GitHubPRNumber) event).isMatch(), is(true));
+
+
+        event = events.get(16);
+        assertThat(event, instanceOf(GitHubPRNumber.class));
+        assertThat(((GitHubPRNumber) event).isSkip(), is(true));
+        assertThat(((GitHubPRNumber) event).isMatch(), is(true));
     }
 }

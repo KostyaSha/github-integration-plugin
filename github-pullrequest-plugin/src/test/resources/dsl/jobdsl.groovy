@@ -10,6 +10,7 @@ freeStyleJob('gh-pull-request') {
                 heavyHooks()
                 heavyHooksCron()
             }
+
             events {
                 opened()
                 closed()
@@ -33,6 +34,9 @@ freeStyleJob('gh-pull-request') {
 
                 nonMergeable()
                 skipNonMergeable()
+
+                number(18, true)
+                skipNumber(18, true)
             }
         }
     }
