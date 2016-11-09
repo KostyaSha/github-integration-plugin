@@ -19,7 +19,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.cloudbees.jenkins.GitHubWebHook.getJenkinsInstance;
 import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.CAUSE_SKIP;
@@ -111,8 +116,9 @@ public class JobRunnerForBranchCause implements Predicate<GitHubBranchCause> {
     }
 
     private QueueTaskFuture<?> startJob(GitHubBranchCause cause) {
-        List<ParameterValue> values = getDefaultParametersValues(job);
-        values.addAll(asList(
+        ParametersAction parametersAction;
+        List<ParameterValue> parameters = getDefaultParametersValues(job);
+        final List<ParameterValue> pluginParameters = asList(
                 //GitHubBranchEnv
                 NAME.param(cause.getBranchName()),
                 SHORT_DESC.param(cause.getShortDescription()),
@@ -124,14 +130,27 @@ public class JobRunnerForBranchCause implements Predicate<GitHubBranchCause> {
                 //GitHubRepoEnv
                 GIT_URL.param(cause.getGitUrl()),
                 SSH_URL.param(cause.getSshUrl())
-        ));
+        );
+        parameters.addAll(pluginParameters);
+
+        try {
+            Constructor<ParametersAction> constructor = ParametersAction.class.getConstructor(List.class, Collection.class);
+            Set<String> names = new HashSet<>();
+            for (ParameterValue param : parameters) {
+                names.add(param.getName());
+            }
+            parametersAction = constructor.newInstance(parameters, names);
+        } catch (NoSuchMethodException | IllegalAccessException | InstantiationException
+                | InvocationTargetException ex) {
+            parametersAction = new ParametersAction(parameters);
+        }
 
         GitHubBranchBadgeAction gitHubBadgeAction = new GitHubBranchBadgeAction(cause);
 
         //TODO no way to get quietPeriod, so temporary ignore it
         return asParameterizedJobMixIn(job).scheduleBuild2(0,
                 new CauseAction(cause),
-                new ParametersAction(values),
+                parametersAction,
                 gitHubBadgeAction);
     }
 

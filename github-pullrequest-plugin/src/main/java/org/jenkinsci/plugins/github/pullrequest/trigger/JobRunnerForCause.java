@@ -32,8 +32,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.cloudbees.jenkins.GitHubWebHook.getJenkinsInstance;
 import static com.google.common.base.Predicates.instanceOf;
@@ -257,8 +261,9 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
     }
 
     private QueueTaskFuture<?> startJob(GitHubPRCause cause) {
-        List<ParameterValue> values = getDefaultParametersValues(job);
-        values.addAll(asList(
+        ParametersAction parametersAction;
+        List<ParameterValue> parameters = getDefaultParametersValues(job);
+        final List<ParameterValue> pluginParameters = asList(
                 TRIGGER_SENDER_AUTHOR.param(cause.getTriggerSenderName()),
                 TRIGGER_SENDER_EMAIL.param(cause.getTriggerSenderEmail()),
                 COMMIT_AUTHOR_NAME.param(cause.getCommitAuthorName()),
@@ -275,7 +280,21 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                 CAUSE_SKIP.param(cause.isSkip()),
                 NUMBER.param(String.valueOf(cause.getNumber())),
                 STATE.param(String.valueOf(cause.getState()))
-        ));
+        );
+        parameters.addAll(pluginParameters);
+
+        try {
+            Constructor<ParametersAction> constructor = ParametersAction.class.getConstructor(List.class, Collection.class);
+            Set<String> names = new HashSet<>();
+            for (ParameterValue param : pluginParameters) {
+                names.add(param.getName());
+            }
+            parametersAction = constructor.newInstance(parameters, names);
+        } catch (NoSuchMethodException | IllegalAccessException | InstantiationException
+                | InvocationTargetException ex) {
+            parametersAction = new ParametersAction(parameters);
+        }
+
         GitHubPRBadgeAction gitHubPRBadgeAction = new GitHubPRBadgeAction(cause);
 
         ParameterizedJobMixIn parameterizedJobMixIn = asParameterizedJobMixIn(job);
@@ -290,8 +309,12 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
             LOGGER.error("Couldn't extract quiet period, falling back to {}", quietPeriod, e);
         }
 
-        return parameterizedJobMixIn.scheduleBuild2(quietPeriod, new CauseAction(cause), new ParametersAction(values),
-                gitHubPRBadgeAction);
+        return parameterizedJobMixIn.scheduleBuild2(
+                quietPeriod,
+                new CauseAction(cause),
+                parametersAction,
+                gitHubPRBadgeAction
+        );
     }
 
     protected static class CausesFromAction implements Function<Action, Iterable<Cause>> {
