@@ -14,6 +14,8 @@ import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
 import hudson.model.Queue;
 import hudson.model.queue.QueueTaskFuture;
+import jenkins.model.ParameterizedJobMixIn;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.kohsuke.github.GHCommitState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +42,7 @@ import static com.google.common.base.Predicates.instanceOf;
 import static java.util.Arrays.asList;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getDefaultParametersValues;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.asParameterizedJobMixIn;
 
@@ -115,7 +118,11 @@ public class JobRunnerForBranchCause implements Predicate<GitHubBranchCause> {
         return false;
     }
 
-    private QueueTaskFuture<?> startJob(GitHubBranchCause cause) {
+    public QueueTaskFuture<?> startJob(GitHubBranchCause cause) {
+        return startJob(cause, null);
+    }
+
+    public QueueTaskFuture<?> startJob(GitHubBranchCause cause, Cause additionalCause) {
         ParametersAction parametersAction;
         List<ParameterValue> parameters = getDefaultParametersValues(job);
         final List<ParameterValue> pluginParameters = asList(
@@ -147,11 +154,30 @@ public class JobRunnerForBranchCause implements Predicate<GitHubBranchCause> {
 
         GitHubBranchBadgeAction gitHubBadgeAction = new GitHubBranchBadgeAction(cause);
 
-        //TODO no way to get quietPeriod, so temporary ignore it
-        return asParameterizedJobMixIn(job).scheduleBuild2(0,
-                new CauseAction(cause),
+        ParameterizedJobMixIn parameterizedJobMixIn = asParameterizedJobMixIn(job);
+
+        // remove after switch to newer core
+        int quietPeriod = 0;
+        try {
+            Object mixinJob = FieldUtils.readField(parameterizedJobMixIn, "val$job", true);
+            ParameterizedJobMixIn.ParameterizedJob parameterizedJob = (ParameterizedJobMixIn.ParameterizedJob) mixinJob;
+            quietPeriod = parameterizedJob.getQuietPeriod();
+        } catch (IllegalAccessException e) {
+            LOGGER.error("Couldn't extract quiet period, falling back to {}", quietPeriod, e);
+        }
+
+        CauseAction causeAction;
+        if (nonNull(additionalCause)) {
+            causeAction = new CauseAction(cause, additionalCause);
+        } else {
+            causeAction = new CauseAction(cause);
+        }
+
+        return asParameterizedJobMixIn(job).scheduleBuild2(quietPeriod,
+                causeAction,
                 parametersAction,
-                gitHubBadgeAction);
+                gitHubBadgeAction
+        );
     }
 
     private static class CausesFromAction implements Function<Action, Iterable<Cause>> {

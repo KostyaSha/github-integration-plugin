@@ -260,7 +260,11 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
         return canceled;
     }
 
-    private QueueTaskFuture<?> startJob(GitHubPRCause cause) {
+    public QueueTaskFuture<?> startJob(GitHubPRCause cause) {
+        return startJob(cause, null);
+    }
+
+    public QueueTaskFuture<?> startJob(GitHubPRCause cause, Cause additionalCause) {
         ParametersAction parametersAction;
         List<ParameterValue> parameters = getDefaultParametersValues(job);
         final List<ParameterValue> pluginParameters = asList(
@@ -309,9 +313,16 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
             LOGGER.error("Couldn't extract quiet period, falling back to {}", quietPeriod, e);
         }
 
+        CauseAction causeAction;
+        if (nonNull(additionalCause)) {
+            causeAction = new CauseAction(cause, additionalCause);
+        } else {
+            causeAction = new CauseAction(cause);
+        }
+
         return parameterizedJobMixIn.scheduleBuild2(
                 quietPeriod,
-                new CauseAction(cause),
+                causeAction,
                 parametersAction,
                 gitHubPRBadgeAction
         );
