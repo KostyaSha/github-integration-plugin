@@ -66,10 +66,10 @@ public class GitHubPRNumber extends GitHubPREvent {
 
         if (remotePR.getNumber() == getNumber()) {
             if (match) {
-                return new GitHubPRCause(remotePR, "Number is matching" + remotePR.getNumber(), isSkip());
+                return new GitHubPRCause(remotePR, "Number is matching " + remotePR.getNumber(), isSkip());
             }
         } else if (!match) {
-            return new GitHubPRCause(remotePR, "Number is not matching" + remotePR.getNumber(), isSkip());
+            return new GitHubPRCause(remotePR, "Number is not matching " + remotePR.getNumber(), isSkip());
         }
 
         return null;
