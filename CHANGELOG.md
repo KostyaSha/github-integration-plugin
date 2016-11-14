@@ -4,6 +4,8 @@
 
 ## 0.1.0-rc13
 - [PR] Skip PR number.
+- Text enhancements.
+- Few public java APIs for rebuild actions.
 
 ## 0.1.0-rc12
 - [PR] [BRANCH] whitelist params for security-170.
