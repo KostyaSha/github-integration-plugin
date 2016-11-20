@@ -18,6 +18,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
@@ -55,8 +56,8 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
             for (GHIssueComment issueComment : remotePR.getComments()) {
                 if (isNull(localPR.getLastCommentCreatedAt())
                         || localPR.getLastCommentCreatedAt().compareTo(issueComment.getCreatedAt()) < 0) {
-                    logger.println(DISPLAY_NAME + ": state has changed (new comment found - \""
-                            + issueComment.getBody() + "\")");
+                    logger.printf("%s: state has changed (new comment found - '%s')%n",
+                            DISPLAY_NAME, issueComment.getBody());
                     cause = checkComment(issueComment, gitHubPRTrigger.getUserRestriction(), remotePR, listener);
                 }
             }
@@ -75,11 +76,17 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
         try {
             String body = issueComment.getBody();
 
-            if ((isNull(userRestriction) || userRestriction.isWhitelisted(issueComment.getUser()))
-                    && Pattern.compile(comment).matcher(body).matches()) {
-                listener.getLogger().println(DISPLAY_NAME + ": matching comment " + body);
-                LOGGER.trace("Event matches comment '{}'", body);
-                cause = new GitHubPRCause(remotePR, "Comment matches to criteria.", false);
+            if (isNull(userRestriction) || userRestriction.isWhitelisted(issueComment.getUser())) {
+                final Matcher matcher = Pattern.compile(comment).matcher(body);
+                if (matcher.matches()) {
+                    listener.getLogger().println(DISPLAY_NAME + ": matching comment " + body);
+                    LOGGER.trace("Event matches comment '{}'", body);
+                    cause = new GitHubPRCause(remotePR, "Comment matches to criteria.", false);
+                    cause.withCommentBody(body);
+                    if (matcher.groupCount() > 0) {
+                        cause.withCommentBodyMatch(matcher.group(1));
+                    }
+                }
             }
         } catch (IOException ex) {
             LOGGER.error("Couldn't check comment #{}, skipping it.", issueComment.getId(), ex);
