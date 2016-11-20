@@ -5,6 +5,7 @@ import hudson.model.ParameterValue;
 import hudson.model.StringParameterValue;
 
 import static org.apache.commons.lang.StringUtils.trimToEmpty;
+import static org.apache.commons.lang3.StringEscapeUtils.escapeJava;
 
 /**
  * @author lanwen (Merkushev Kirill)
@@ -32,7 +33,7 @@ public enum GitHubPREnv {
     public static final String PREFIX = "GITHUB_PR_";
 
     public ParameterValue param(String value) {
-        return new StringParameterValue(toString(), trimToEmpty(value));
+        return new StringParameterValue(toString(), escapeJava(trimToEmpty(value)));
     }
 
     public ParameterValue param(boolean value) {
