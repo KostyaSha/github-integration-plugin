@@ -26,8 +26,10 @@ import java.util.Set;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -37,10 +39,6 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class GitHubPRCommentEventTest {
-
-    private static final String MERGE = "merge";
-    private static final String REVIEWED = "reviewed";
-    private static final String LOCALLY_TESTED = "locally tested";
 
     @Mock
     private GHPullRequest remotePr;
@@ -89,16 +87,20 @@ public class GitHubPRCommentEventTest {
         commonExpectations(emptySet());
         causeCreationExpectations();
 
+        final String body = "test foo, bar tags please.";
         when(issue.getCreatedAt()).thenReturn(new Date());
         when(comment.getCreatedAt()).thenReturn(new Date());
-        when(comment.getBody()).thenReturn("body");
+        when(comment.getBody()).thenReturn(body);
 
         final ArrayList<GHIssueComment> ghIssueComments = new ArrayList<>();
         ghIssueComments.add(comment);
         when(remotePr.getComments()).thenReturn(ghIssueComments);
 
-        GitHubPRCause cause = new GitHubPRCommentEvent("body").check(trigger, remotePr, localPR, listener);
+        GitHubPRCause cause = new GitHubPRCommentEvent("test ([A-Za-z0-9 ,!]+) tags please.")
+                .check(trigger, remotePr, localPR, listener);
 
+        assertThat(cause.getCommentBody(), is(body));
+        assertThat(cause.getCommentBodyMatch(), is("foo, bar"));
         assertNotNull(cause);
     }
 

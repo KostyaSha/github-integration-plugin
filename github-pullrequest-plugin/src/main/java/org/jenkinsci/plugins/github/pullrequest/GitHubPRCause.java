@@ -44,6 +44,8 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
 
     private String condRef;
     private String state;
+    private String commentBody;
+    private String commentBodyMatch;
 
     public GitHubPRCause() {
     }
@@ -217,6 +219,16 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
         return this;
     }
 
+    public GitHubPRCause withCommentBody(String commentBody) {
+        this.commentBody = commentBody;
+        return this;
+    }
+
+    public GitHubPRCause withCommentBodyMatch(String commentBodyMatch) {
+        this.commentBodyMatch = commentBodyMatch;
+        return this;
+    }
+
     @Override
     public String getShortDescription() {
         return "GitHub PR #<a href=\"" + getHtmlUrl() + "\">" + number + "</a>, " + getReason();
@@ -284,6 +296,20 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
         return condRef;
     }
 
+    /**
+     * When trigger by comment, body of comment.
+     */
+    public String getCommentBody() {
+        return commentBody;
+    }
+
+    /**
+     * When trigger by comment, string matched to pattern.
+     */
+    public String getCommentBodyMatch() {
+        return commentBodyMatch;
+    }
+
     @Override
     public void onAddedTo(@Nonnull Run run) {
         // move polling log from cause to action
@@ -311,4 +337,5 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
+
 }

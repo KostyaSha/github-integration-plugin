@@ -25,7 +25,9 @@ public enum GitHubPREnv {
     COND_REF,
     CAUSE_SKIP,
     NUMBER,
-    STATE;
+    STATE,
+    COMMENT_BODY,
+    COMMENT_BODY_MATCH;
 
     public static final String PREFIX = "GITHUB_PR_";
 

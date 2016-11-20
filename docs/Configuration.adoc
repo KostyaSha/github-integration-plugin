@@ -38,6 +38,8 @@ like `Build #${BUILD_NUMBER} started`
 - `GITHUB_PR_CAUSE_SKIP` - `false`
 - `GITHUB_PR_NUMBER` - `21`
 - `GITHUB_PR_STATE` - `OPEN`
+- `GITHUB_PR_COMMENT_BODY` - `test foo, bar tags please.` When PR was triggered by comment.
+- `GITHUB_PR_COMMENT_BODY_MATCH` - `foo, bar` When PR wass triggered by comment and had group match.
 
 === Branch Trigger
 

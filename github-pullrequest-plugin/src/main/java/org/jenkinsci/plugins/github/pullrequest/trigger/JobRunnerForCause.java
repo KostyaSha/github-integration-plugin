@@ -45,6 +45,8 @@ import static hudson.security.ACL.impersonate;
 import static java.util.Arrays.asList;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.AUTHOR_EMAIL;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.CAUSE_SKIP;
+import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.COMMENT_BODY;
+import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.COMMENT_BODY_MATCH;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.COMMIT_AUTHOR_EMAIL;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.COMMIT_AUTHOR_NAME;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.COND_REF;
@@ -283,7 +285,9 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                 COND_REF.param(cause.getCondRef()),
                 CAUSE_SKIP.param(cause.isSkip()),
                 NUMBER.param(String.valueOf(cause.getNumber())),
-                STATE.param(String.valueOf(cause.getState()))
+                STATE.param(String.valueOf(cause.getState())),
+                COMMENT_BODY.param(String.valueOf(cause.getCommentBody())),
+                COMMENT_BODY_MATCH.param(String.valueOf(cause.getCommentBodyMatch()))
         );
         parameters.addAll(pluginParameters);
 
