@@ -4,7 +4,6 @@ import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
-import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchRestrictionFilter;
 
 import org.jenkinsci.plugins.github.pullrequest.utils.LoggingTaskListenerWrapper;
 import org.junit.Before;
@@ -13,8 +12,9 @@ import org.kohsuke.github.GHBranch;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 public class GitHubBranchRestrictionFilterTest {
@@ -138,11 +138,11 @@ public class GitHubBranchRestrictionFilterTest {
     }
 
     private void thenBranchWasFiltered() {
-        assertTrue("buildable filtered", result.isSkip());
+        assertThat("buildable filtered", result.isSkip(), is(true));
     }
 
     private void thenBranchWasNotFiltered() {
-        assertFalse("buildable not filtered", result.isSkip());
+        assertThat("buildable not filtered", result, nullValue());
     }
 
     private void whenApplyBranchFilter() {
