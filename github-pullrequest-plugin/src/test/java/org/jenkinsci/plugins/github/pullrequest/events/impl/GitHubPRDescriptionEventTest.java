@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -68,6 +69,22 @@ public class GitHubPRDescriptionEventTest {
 
         assertNotNull(cause);
         assertThat(cause.isSkip(), is(true));
+    }
+
+    @Test
+    public void skipDescriptionNotExist() throws IOException {
+        commonExpectations();
+        causeCreationExpectations();
+
+        when(listener.getLogger()).thenReturn(logger);
+
+        when(issue.getCreatedAt()).thenReturn(new Date());
+        when(remotePr.getBody()).thenReturn("unmatched comment");
+
+        GitHubPRCause cause = new GitHubPRDescriptionEvent(".*skip ci.*")
+                .check(trigger, remotePr, null, listener);
+
+        assertThat(cause, nullValue());
     }
 
     private void commonExpectations() throws IOException {
