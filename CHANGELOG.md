@@ -7,6 +7,7 @@
 - [PR] Inject comment body and matched group.
 - Escape strings for env variables.
 - [PR] Test and logging for PR description body.
+- [BRANCH] name restriction event shouldn't trigger on match.
 
 ## 0.1.0-rc13
 - [PR] Skip PR number.
