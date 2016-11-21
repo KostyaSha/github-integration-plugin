@@ -63,8 +63,8 @@ public class NotUpdatedPRFilter implements Predicate<GHPullRequest> {
             boolean updated = prUpd || issueUpd || headUpd;
 
             if (updated) {
-                LOGGER.info("Pull request #{} was updated at: {} by {}",
-                        localPR.getNumber(), localPR.getPrUpdatedAt(), localPR.getUserLogin());
+                LOGGER.info("Pull request #{} was created by {}, last updated: {}",
+                        localPR.getNumber(), localPR.getUserLogin(), localPR.getPrUpdatedAt());
             }
 
             return updated;
