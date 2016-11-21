@@ -75,7 +75,8 @@ public class GitHubBranchRestrictionFilter extends GitHubBranchEvent {
             if (matchCriteria.isEmpty()) {
                 LOGGER.warn("Branch restriction filter added but no match criteria set, all branches allowed");
             }
-            return toCause(remoteBranch, localRepo, false, "Branch [%s] allowed by branch name restriction filter", name);
+            // filter allows checking other events
+            return null;
         }
 
         return toCause(remoteBranch, localRepo, true, "Branch [%s] filtered by branch name restriction filter", name);
