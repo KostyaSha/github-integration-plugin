@@ -15,6 +15,7 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghB
 import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghBranchTriggerFromJob;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.rebuild;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
 /**
  * Store local state of remote branches.
@@ -49,8 +51,9 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
         super(remoteRepository);
     }
 
+    @Nonnull
     public Map<String, GitHubBranch> getBranches() {
-        return branches;
+        return nonNull(branches) ? branches : new HashMap<>();
     }
 
     @Override
