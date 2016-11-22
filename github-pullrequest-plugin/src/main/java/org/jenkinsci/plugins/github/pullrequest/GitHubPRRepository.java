@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Objects.nonNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRCauseFromRun;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.rebuild;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
@@ -53,8 +54,9 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
         super(ghRepository);
     }
 
+    @Nonnull
     public Map<Integer, GitHubPRPullRequest> getPulls() {
-        return pulls;
+        return nonNull(pulls) ? pulls : new HashMap<>();
     }
 
     /**
@@ -62,6 +64,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
      *
      * @return map with keys - numbers of built PRs and values - lists of related builds.
      */
+    @Nonnull
     public Map<Integer, List<Run<?, ?>>> getAllPrBuilds() {
 
         Map<Integer, List<Run<?, ?>>> map = new HashMap<>();
