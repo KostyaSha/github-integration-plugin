@@ -53,7 +53,7 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
         if (client.isPresent()) {
             return client.get();
         } else {
-            throw new GHPluginConfigException("Can't find appropriate client for github repo <%s>",
+            throw new GHPluginConfigException("GitHubPluginRepoProvider can't find appropriate client for github repo <%s>",
                     repoFullName.getHost());
         }
     }

@@ -8,6 +8,7 @@ import com.google.common.annotations.Beta;
 import hudson.model.Action;
 import hudson.model.Job;
 import hudson.triggers.Trigger;
+import org.jenkinsci.plugins.github.internal.GHPluginConfigException;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -19,9 +20,11 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static org.codehaus.groovy.runtime.InvokerHelper.asList;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.CRON;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
@@ -43,7 +46,8 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
     protected boolean skipFirstRun = false;
 
     @Beta
-    protected GitHubRepoProvider repoProvider = new GitHubPluginRepoProvider(); // default
+    private List<GitHubRepoProvider> repoProviders = asList(new GitHubPluginRepoProvider()); // default
+    private transient GitHubRepoProvider repoProvider= null;
 
     // for performance
     private transient GitHubRepositoryName repoName;
@@ -105,19 +109,42 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
         this.remoteRepository = remoteRepository;
     }
 
-    public GitHubRepoProvider getRepoProvider() {
-        return isNull(repoProvider) ? new GitHubPluginRepoProvider() : repoProvider;
+    @Beta
+    @Nonnull
+    public List<GitHubRepoProvider> getRepoProviders() {
+        return isNull(repoProviders) ? asList(new GitHubPluginRepoProvider()) : repoProviders;
     }
 
+    @Beta
     @DataBoundSetter
-    public void setRepoProvider(GitHubRepoProvider repoProvider) {
-        this.repoProvider = repoProvider;
+    public void setRepoProviders(List<GitHubRepoProvider> repoProviders) {
+        this.repoProviders = repoProviders;
+    }
+
+    public GitHubRepoProvider getRepoProvider() {
+        if (isNull(repoProvider)) {
+            boolean failed = false;
+            for (GitHubRepoProvider repoProvider : getRepoProviders()) {
+                try {
+                    repoProvider.getGHRepository(this);
+                } catch (Exception ignore){
+                    failed = true;
+                }
+            }
+            if (failed) {
+                LOG.error("Can't find repo provider for GitHubBranchTrigger job: {}", getJob().getFullName());
+                checkState(nonNull(repoProvider), "Can't get repo provider for GH repo %s for %s", job.getName());
+            }
+        }
+        return repoProvider;
     }
 
     @Nonnull
     public GHRepository getRemoteRepository() throws IOException {
         if (isNull(remoteRepository)) {
-            remoteRepository = getRepoProvider().getGHRepository(this);
+            for (GitHubRepoProvider repoProvider : getRepoProviders()) {
+                remoteRepository = repoProvider.getGHRepository(this);
+            }
             checkState(nonNull(remoteRepository), "Can't get remote GH repo for %s", job.getName());
         }
 

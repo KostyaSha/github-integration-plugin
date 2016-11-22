@@ -5,6 +5,7 @@ import antlr.ANTLRException;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
 import com.github.kostyasha.github.integration.branch.trigger.JobRunnerForBranchCause;
+import com.github.kostyasha.github.integration.generic.GitHubRepoProvider;
 import com.github.kostyasha.github.integration.generic.GitHubTrigger;
 import com.github.kostyasha.github.integration.generic.GitHubTriggerDescriptor;
 import hudson.Extension;
@@ -258,7 +259,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
     }
 
     private List<GitHubBranchCause> checkBranches(Set<GHBranch> remoteBranches,
-            GitHubBranchRepository localRepository, LoggingTaskListenerWrapper listener) {
+                                                  GitHubBranchRepository localRepository, LoggingTaskListenerWrapper listener) {
         List<GitHubBranchCause> causes = remoteBranches.stream()
                 // TODO: update user whitelist filter
                 .filter(ifSkippedFirstRun(listener, skipFirstRun))
