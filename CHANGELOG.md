@@ -2,6 +2,9 @@
 
 ## Next
 
+## 0.1.0-rc15
+- Null safe in repositories.
+
 ## 0.1.0-rc14
 
 - [PR] Inject comment body and matched group.
