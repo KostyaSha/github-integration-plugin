@@ -2,6 +2,10 @@
 
 ## Next
 
+## 0.1.0-rc16
+- Fix fix null safe in repositories.
+- GitHubRepository Provider API for not using global connection.
+
 ## 0.1.0-rc15
 - Null safe in repositories.
 
