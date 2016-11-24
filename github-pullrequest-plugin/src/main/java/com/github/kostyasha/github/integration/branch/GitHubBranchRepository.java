@@ -24,9 +24,8 @@ import java.util.Map;
 
 import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghBranchCauseFromRun;
 import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghBranchTriggerFromJob;
+import static java.util.Objects.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.rebuild;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
 /**
  * Store local state of remote branches.
@@ -53,7 +52,10 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
 
     @Nonnull
     public Map<String, GitHubBranch> getBranches() {
-        return nonNull(branches) ? branches : new HashMap<>();
+        if (isNull(branches)) {
+            branches = new HashMap<>();
+        }
+        return branches;
     }
 
     @Override
