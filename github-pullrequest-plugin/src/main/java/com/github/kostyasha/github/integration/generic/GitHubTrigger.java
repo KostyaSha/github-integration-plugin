@@ -123,6 +123,12 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
         this.repoProviders = repoProviders;
     }
 
+    @Beta
+    public void setRepoProvider(@Nonnull GitHubRepoProvider prov) {
+        repoProviders = asList(prov);
+    }
+
+    @Beta
     public GitHubRepoProvider getRepoProvider() {
         if (isNull(repoProvider)) {
             boolean failed = false;
