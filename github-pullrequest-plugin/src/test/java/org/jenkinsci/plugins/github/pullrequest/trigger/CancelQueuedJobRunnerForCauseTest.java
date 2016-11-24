@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.github.pullrequest.trigger;
 
+import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import hudson.matrix.MatrixProject;
 import hudson.model.FreeStyleProject;
 import hudson.model.Job;
@@ -23,6 +24,7 @@ import static org.junit.Assert.assertThat;
  * @author Kanstantsin Shautsou
  */
 public class CancelQueuedJobRunnerForCauseTest extends JobRunnerForCauseTest {
+    GithubProjectProperty ghProperty = new GithubProjectProperty("https://github.com/org/repo");
 
     @Test
     public void testCancelQueuedFreestyleProject() throws Exception {
@@ -50,6 +52,7 @@ public class CancelQueuedJobRunnerForCauseTest extends JobRunnerForCauseTest {
 
         Job job1 = (Job) folder.createProject(tClass, "project1");
         job1.setDisplayName("project1 display name");
+        job1.addProperty(ghProperty);
 
         configRoundTripUnsecure(job1);
 
@@ -70,6 +73,7 @@ public class CancelQueuedJobRunnerForCauseTest extends JobRunnerForCauseTest {
 
         Job job2 = (Job) folder.createProject(tClass, "project2");
         job2.setDisplayName("project2 displayName");
+        job2.addProperty(ghProperty);
         job2.save();
         configRoundTripUnsecure(job2);
         schedule(job2, 10, "job2", 10000);
@@ -82,6 +86,7 @@ public class CancelQueuedJobRunnerForCauseTest extends JobRunnerForCauseTest {
 
         Job job3 = (Job) folder.createProject(tClass, "project3");
         job3.setDisplayName("project3 displayName");
+        job3.addProperty(ghProperty);
         job3.save();
         configRoundTripUnsecure(job3);
         schedule(job3, 10, "cause1_3/project3", 10000);

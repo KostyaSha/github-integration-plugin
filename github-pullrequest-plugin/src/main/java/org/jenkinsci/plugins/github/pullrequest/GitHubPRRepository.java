@@ -25,10 +25,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRCauseFromRun;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.rebuild;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 
 /**
  * GitHub Repository local state = last trigger run() state.
@@ -56,7 +55,10 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
 
     @Nonnull
     public Map<Integer, GitHubPRPullRequest> getPulls() {
-        return nonNull(pulls) ? pulls : new HashMap<>();
+        if (isNull(pulls)) {
+            pulls = new HashMap<>();
+        }
+        return pulls;
     }
 
     /**

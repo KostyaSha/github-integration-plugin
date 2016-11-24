@@ -1,10 +1,12 @@
 package org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger
 
+import com.github.kostyasha.github.integration.generic.GitHubRepoProvider
 import hudson.triggers.TimerTrigger
 import lib.FormTagLib
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger
 
 def f = namespace(FormTagLib);
+def st = namespace("jelly:stapler")
 
 if (instance == null) {
     instance = new GitHubPRTrigger();
@@ -50,5 +52,15 @@ f.block {
         f.optionalProperty(title: "Experimental: User Restriction", field: "userRestriction")
 
         f.optionalProperty(title: "Experimental: Branch Restriction", field: "branchRestriction")
+
+        f.advanced(title: "Experimental") {
+            f.entry(title: "Repo providers") {
+                f.hetero_list(name: "repoProviders",
+                        items: instance.repoProviders,
+                        descriptors: GitHubRepoProvider.GitHubRepoProviderDescriptor.allRepoProviders(),
+                        hasHeader: true
+                )
+            }
+        }
     }
 }
