@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -112,7 +113,10 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
     @Beta
     @Nonnull
     public List<GitHubRepoProvider> getRepoProviders() {
-        return isNull(repoProviders) ? asList(new GitHubPluginRepoProvider()) : repoProviders;
+        if (isNull(repoProviders)) {
+            repoProviders = asList(new GitHubPluginRepoProvider()); // old default behaviour
+        }
+        return repoProviders;
     }
 
     @Beta
@@ -124,18 +128,19 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
     public GitHubRepoProvider getRepoProvider() {
         if (isNull(repoProvider)) {
             boolean failed = false;
-            for (GitHubRepoProvider repoProvider : getRepoProviders()) {
+            for (GitHubRepoProvider prov : getRepoProviders()) {
                 try {
-                    repoProvider.getGHRepository(this);
+                    prov.getGHRepository(this);
+                    repoProvider = prov;
                 } catch (Exception ignore){
                     failed = true;
                 }
             }
             if (failed) {
                 LOG.error("Can't find repo provider for GitHubBranchTrigger job: {}", getJob().getFullName());
-                checkState(nonNull(repoProvider), "Can't get repo provider for GH repo %s for %s", job.getName());
             }
         }
+        checkState(nonNull(repoProvider), "Can't get repo provider for GH repo %s for %s", job.getName());
         return repoProvider;
     }
 
