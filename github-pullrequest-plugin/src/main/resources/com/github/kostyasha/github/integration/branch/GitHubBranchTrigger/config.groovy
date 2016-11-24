@@ -50,27 +50,13 @@ f.block {
         //f.optionalProperty(title: "Experimental: Branch Restriction", field: "branchRestriction")
 
         f.advanced(title: "Experimental") {
-            f.dropdownList(name: "repoProvider", title: _("GitHub Connection Repo Provider")) {
-                GitHubRepoProvider.GitHubRepoProviderDescriptor.allRepoProviders().each() { d ->
-                    if (d != null) {
+            f.entry(title: "Repo providers") {
+                f.hetero_list(name: "repoProviders",
+                        items: instance.repoProviders,
+                        descriptors: GitHubRepoProvider.GitHubRepoProviderDescriptor.allRepoProviders(),
+                        hasHeader: true
 
-                        f.dropdownListBlock(
-                                value: d.clazz.name,
-                                name: d.displayName,
-                                selected: instance.repoProvider == null ?
-                                        false : instance.repoProvider.descriptor.equals(d),
-                                title: d.displayName) {
-                            descriptor = d
-                            if (instance.repoProvider != null && instance.repoProvider.descriptor.equals(d)) {
-                                instance = instance.repoProvider
-                            }
-                            f.invisibleEntry() {
-                                input(type: "hidden", name: "stapler-class", value: d.clazz.name)
-                            }
-                            st.include(from: d, page: d.configPage, optional: "true")
-                        }
-                    }
-                }
+                )
             }
         }
     }
