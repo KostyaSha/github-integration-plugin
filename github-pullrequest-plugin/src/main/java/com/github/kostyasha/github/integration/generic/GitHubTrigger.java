@@ -48,7 +48,7 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
 
     @Beta
     private List<GitHubRepoProvider> repoProviders = asList(new GitHubPluginRepoProvider()); // default
-    private transient GitHubRepoProvider repoProvider= null;
+    private transient GitHubRepoProvider repoProvider = null;
 
     // for performance
     private transient GitHubRepositoryName repoName;
@@ -132,7 +132,7 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
                 try {
                     prov.getGHRepository(this);
                     repoProvider = prov;
-                } catch (Exception ignore){
+                } catch (Exception ignore) {
                     failed = true;
                 }
             }
@@ -147,12 +147,9 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
     @Nonnull
     public GHRepository getRemoteRepository() throws IOException {
         if (isNull(remoteRepository)) {
-            for (GitHubRepoProvider repoProvider : getRepoProviders()) {
-                remoteRepository = repoProvider.getGHRepository(this);
-            }
-            checkState(nonNull(remoteRepository), "Can't get remote GH repo for %s", job.getName());
+            remoteRepository = getRepoProvider().getGHRepository(this);
         }
-
+        checkState(nonNull(remoteRepository), "Can't get remote GH repo for %s", job.getName());
         return remoteRepository;
     }
 
