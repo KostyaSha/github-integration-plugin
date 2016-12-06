@@ -6,7 +6,6 @@ import com.github.kostyasha.github.integration.generic.GitHubRepoProvider;
 import com.github.kostyasha.github.integration.generic.GitHubTrigger;
 import com.google.common.base.Optional;
 import hudson.Extension;
-import org.apache.commons.lang3.BooleanUtils;
 import org.jenkinsci.plugins.github.GitHubPlugin;
 import org.jenkinsci.plugins.github.internal.GHPluginConfigException;
 import org.kohsuke.github.GHRepository;
