@@ -54,9 +54,11 @@ public class GitHubPRLabelAddPublisher extends GitHubPRAbstractPublisher {
             HashSet<String> remoteLabels = new HashSet<>();
             final GHIssue ghIssue = getGhIssue(run);
             //remote labels List -> Set
-            remoteLabels.addAll(ghIssue.getLabels().stream()
+            ghIssue.getLabels().stream()
                     .map(GHLabel::getName)
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList())
+                    .forEach(remoteLabels::add);
+
             remoteLabels.addAll(getLabelProperty().getLabelsSet());
             ghIssue.setLabels(remoteLabels.toArray(new String[remoteLabels.size()]));
         } catch (IOException ex) {

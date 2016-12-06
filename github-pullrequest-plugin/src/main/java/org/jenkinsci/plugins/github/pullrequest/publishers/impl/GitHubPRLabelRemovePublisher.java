@@ -53,6 +53,7 @@ public class GitHubPRLabelRemovePublisher extends GitHubPRAbstractPublisher {
             HashSet<String> remoteLabels = getGhIssue(run).getLabels().stream()
                     .map(GHLabel::getName)
                     .collect(Collectors.toCollection(HashSet::new));
+
             //remote labels List -> Set
             remoteLabels.removeAll(getLabelProperty().getLabelsSet());
             // TODO print only really removing

@@ -22,7 +22,6 @@ import javax.annotation.CheckForNull;
  * @author Alina Karpovich
  */
 public abstract class GitHubPRAbstractPublisher extends Recorder implements SimpleBuildStep {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRAbstractPublisher.class);
 
     @CheckForNull
     private StatusVerifier statusVerifier;
