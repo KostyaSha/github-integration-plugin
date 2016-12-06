@@ -50,8 +50,6 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
 
     // for performance
     private transient GitHubRepositoryName repoName;
-    private transient GHRepository remoteRepository;
-
     protected GitHubTrigger(String cronTabSpec) throws ANTLRException {
         super(cronTabSpec);
     }
@@ -103,11 +101,6 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
     public void setRepoName(GitHubRepositoryName repoName) {
         this.repoName = repoName;
     }
-
-    public void setRemoteRepository(GHRepository remoteRepository) {
-        this.remoteRepository = remoteRepository;
-    }
-
     @Beta
     @Nonnull
     public List<GitHubRepoProvider> getRepoProviders() {
@@ -150,9 +143,7 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
 
     @Nonnull
     public GHRepository getRemoteRepository() throws IOException {
-        if (isNull(remoteRepository)) {
-            remoteRepository = getRepoProvider().getGHRepository(this);
-        }
+        GHRepository remoteRepository = getRepoProvider().getGHRepository(this);
         checkState(nonNull(remoteRepository), "Can't get remote GH repo for %s", job.getName());
         return remoteRepository;
     }
