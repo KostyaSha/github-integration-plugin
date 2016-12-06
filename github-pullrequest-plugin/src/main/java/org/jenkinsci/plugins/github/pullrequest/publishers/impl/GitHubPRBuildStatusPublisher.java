@@ -30,6 +30,8 @@ import java.io.PrintStream;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.addComment;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getCommitState;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRCauseFromRun;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromRun;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;

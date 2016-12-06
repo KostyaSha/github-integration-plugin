@@ -17,6 +17,10 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.stream.Collectors;
+
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getGhIssue;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getPRNumberFromPRCause;
 
 /**
  * Implements removing of labels (one or many) from GitHub.
@@ -43,18 +47,20 @@ public class GitHubPRLabelRemovePublisher extends GitHubPRAbstractPublisher {
         if (getStatusVerifier() != null && !getStatusVerifier().isRunAllowed(run)) {
             return;
         }
+
+        final int number = getPRNumberFromPRCause(run);
         try {
-            HashSet<String> remoteLabels = new HashSet<String>();
-            for (GHLabel label : getGhIssue(run).getLabels()) { //remote labels List -> Set
-                remoteLabels.add(label.getName());
-            }
+            HashSet<String> remoteLabels = getGhIssue(run).getLabels().stream()
+                    .map(GHLabel::getName)
+                    .collect(Collectors.toCollection(HashSet::new));
+            //remote labels List -> Set
             remoteLabels.removeAll(getLabelProperty().getLabelsSet());
             // TODO print only really removing
             listener.getLogger().println("Removing labels: " + getLabelProperty().getLabelsSet());
             getGhIssue(run).setLabels(remoteLabels.toArray(new String[remoteLabels.size()]));
         } catch (IOException ex) {
-            listener.getLogger().println("Couldn't remove label for PR #" + getNumber(run) + " " + ex);
-            LOGGER.error("Couldn't remove label for PR #{}", getNumber(), ex);
+            listener.getLogger().println("Couldn't remove label for PR #" + number + ex);
+            LOGGER.error("Couldn't remove label for PR #{}", number, ex);
             handlePublisherError(run);
         }
     }
