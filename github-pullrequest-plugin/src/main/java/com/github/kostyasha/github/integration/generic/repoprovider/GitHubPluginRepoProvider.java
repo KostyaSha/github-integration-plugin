@@ -6,6 +6,7 @@ import com.github.kostyasha.github.integration.generic.GitHubRepoProvider;
 import com.github.kostyasha.github.integration.generic.GitHubTrigger;
 import com.google.common.base.Optional;
 import hudson.Extension;
+import org.apache.commons.lang3.BooleanUtils;
 import org.jenkinsci.plugins.github.GitHubPlugin;
 import org.jenkinsci.plugins.github.internal.GHPluginConfigException;
 import org.kohsuke.github.GHRepository;
@@ -17,7 +18,9 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.util.Iterator;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isNotFalse;
 import static org.jenkinsci.plugins.github.config.GitHubServerConfig.withHost;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 
@@ -30,7 +33,7 @@ import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 public class GitHubPluginRepoProvider extends GitHubRepoProvider {
     // possible cache connection/repo here
 
-    protected boolean cacheConnection = true;
+    protected Boolean cacheConnection = true;
 
     private transient GHRepository remoteRepository;
     private transient GitHub gitHub;
@@ -40,7 +43,7 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
     }
 
     public boolean isCacheConnection() {
-        return cacheConnection;
+        return isNotFalse(cacheConnection);
     }
 
     @DataBoundSetter
@@ -93,6 +96,11 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
         }
 
         return null;
+    }
+
+    protected Object readResolve() {
+        if (isNull(cacheConnection)) cacheConnection = true;
+        return this;
     }
 
     @Extension

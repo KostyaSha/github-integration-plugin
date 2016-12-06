@@ -1,6 +1,7 @@
 package com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider
 
 import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider
+import lib.FormTagLib
 
 def f = namespace(FormTagLib);
 def st = namespace("jelly:stapler")
