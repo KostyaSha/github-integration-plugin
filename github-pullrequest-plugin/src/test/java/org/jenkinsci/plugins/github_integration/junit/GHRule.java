@@ -69,8 +69,7 @@ public class GHRule implements TestRule {
     public static final String BRANCH1 = "branch-1";
     public static final String BRANCH2 = "branch-2";
 
-    public static final String GH_TOKEN = System.getenv("GH_TOKEN");
-    public static final long GH_API_DELAY = 1000;
+    public static final String GH_TOKEN = System.getProperty("GH_TOKEN", System.getenv("GH_TOKEN"));
 
     private GHRepository ghRepo;
     private GitHub gitHub;
