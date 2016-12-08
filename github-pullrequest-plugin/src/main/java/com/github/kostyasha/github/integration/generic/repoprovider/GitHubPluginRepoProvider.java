@@ -20,6 +20,7 @@ import java.util.Iterator;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isNotFalse;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.jenkinsci.plugins.github.config.GitHubServerConfig.withHost;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 
@@ -31,7 +32,6 @@ import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
  */
 public class GitHubPluginRepoProvider extends GitHubRepoProvider {
     // possible cache connection/repo here
-
     protected Boolean cacheConnection = true;
 
     private transient GHRepository remoteRepository;
@@ -64,7 +64,7 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
     @Nonnull
     @Override
     public GitHub getGitHub(GitHubTrigger trigger) {
-        if (cacheConnection && nonNull(gitHub)) {
+        if (isTrue(cacheConnection) && nonNull(gitHub)) {
             return gitHub;
         }
 
@@ -84,7 +84,7 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
     @CheckForNull
     @Override
     public GHRepository getGHRepository(GitHubTrigger trigger) {
-        if (cacheConnection && nonNull(remoteRepository)) {
+        if (isTrue(cacheConnection) && nonNull(remoteRepository)) {
             return remoteRepository;
         }
         // first matched from global config
