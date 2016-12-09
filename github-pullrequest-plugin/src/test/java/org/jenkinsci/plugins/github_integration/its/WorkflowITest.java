@@ -30,8 +30,8 @@ public class WorkflowITest extends AbstractPRTest {
     public void workflowTest() throws Exception {
         final WorkflowJob workflowJob = j.jenkins.createProject(WorkflowJob.class, "it-job");
 
-        workflowJob.addTrigger(getPreconfiguredPRTrigger());
         workflowJob.addProperty(getPreconfiguredProperty(ghRule.getGhRepo()));
+        workflowJob.addTrigger(getPreconfiguredPRTrigger());
         workflowJob.setQuietPeriod(10);
 
         workflowJob.setDefinition(
@@ -39,22 +39,23 @@ public class WorkflowITest extends AbstractPRTest {
         );
         workflowJob.save();
 
-        super.basicTest(workflowJob);
+        basicTest(workflowJob);
     }
 
     @Test
     public void testContextStatuses() throws Exception {
         final WorkflowJob workflowJob = j.jenkins.createProject(WorkflowJob.class, "testContextStatuses");
 
-        workflowJob.addTrigger(getPreconfiguredPRTrigger());
         workflowJob.addProperty(getPreconfiguredProperty(ghRule.getGhRepo()));
+        workflowJob.addTrigger(getPreconfiguredPRTrigger());
 
         workflowJob.setDefinition(
                 new CpsFlowDefinition(classpath(this.getClass(), "testContextStatuses.groovy"))
         );
         workflowJob.save();
 
-        super.basicTest(workflowJob);
+        basicTest(workflowJob);
+
         GHPullRequest pullRequest = ghRule.getGhRepo().getPullRequest(1);
         assertThat(pullRequest, notNullValue());
 
@@ -64,13 +65,15 @@ public class WorkflowITest extends AbstractPRTest {
         GitHubPRCause cause = lastBuild.getCause(GitHubPRCause.class);
         assertThat(cause, notNullValue());
 
-        List<GHCommitStatus> statuses = pullRequest.getRepository().listCommitStatuses(cause.getHeadSha()).asList();
+        List<GHCommitStatus> statuses = pullRequest.getRepository()
+                .listCommitStatuses(cause.getHeadSha())
+                .asList();
         assertThat(statuses, hasSize(7));
 
         // final statuses
         assertThat("workflow Run.getResult() strange",
                 statuses,
-                hasItem(commitStatus("testContextStatuses", GHCommitState.ERROR, "Run #1 ended normally"))
+                hasItem(commitStatus("testContextStatuses", GHCommitState.ERROR, "Run #2 ended normally"))
         );
         assertThat(statuses, hasItem(commitStatus("custom-context1", GHCommitState.SUCCESS, "Tests passed")));
         assertThat(statuses, hasItem(commitStatus("custom-context2", GHCommitState.SUCCESS, "Tests passed")));

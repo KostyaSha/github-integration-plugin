@@ -20,6 +20,10 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getGhIssue;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getGhPullRequest;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getPRNumberFromPRCause;
+
 /**
  * Closes pull request after build.
  *
@@ -47,7 +51,7 @@ public class GitHubPRClosePublisher extends GitHubPRAbstractPublisher {
                     try {
                         getGhPullRequest(run).close();
                     } catch (IOException ex) {
-                        LOGGER.error("Couldn't close the pull request #{}:", getNumber(run), ex);
+                        LOGGER.error("Couldn't close the pull request #{}:", getPRNumberFromPRCause(run), ex);
                     }
                 }
             } catch (IOException ex) {

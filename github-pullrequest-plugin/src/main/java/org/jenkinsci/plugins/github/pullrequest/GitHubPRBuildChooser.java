@@ -45,7 +45,7 @@
 //            if (cause == null) {
 //                continue;
 //            }
-//            if (cause.getNumber() != currCause.getNumber()){
+//            if (cause.getPRNumberFromPRCause() != currCause.getPRNumberFromPRCause()){
 //                continue;
 //            }
 //            return r.getAction(BuildData.class);

@@ -20,6 +20,9 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getGhPullRequest;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getPRNumberFromPRCause;
+
 /**
  * Adds specified text to comments after build.
  *
@@ -66,7 +69,7 @@ public class GitHubPRCommentPublisher extends GitHubPRAbstractPublisher {
             try {
                 getGhPullRequest(run).comment(message);
             } catch (IOException ex) {
-                LOGGER.error("Couldn't add comment to pull request #{}: '{}'", getNumber(run), message, ex);
+                LOGGER.error("Couldn't add comment to pull request #{}: '{}'", getPRNumberFromPRCause(run), message, ex);
                 handlePublisherError(run);
             }
             listener.getLogger().println(message);

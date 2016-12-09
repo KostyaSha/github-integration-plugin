@@ -22,8 +22,8 @@ public class MatrixProjectITest extends AbstractPRTest {
     public void testChildStatuses() throws Exception {
         final MatrixProject matrixProject = j.jenkins.createProject(MatrixProject.class, "matrix-project");
 
-        matrixProject.addTrigger(getPreconfiguredPRTrigger());
         matrixProject.addProperty(getPreconfiguredProperty(ghRule.getGhRepo()));
+        matrixProject.addTrigger(getPreconfiguredPRTrigger());
 
         matrixProject.getBuildersList().add(new GitHubPRStatusBuilder());
         matrixProject.getBuildersList().add(new Shell("sleep 10"));

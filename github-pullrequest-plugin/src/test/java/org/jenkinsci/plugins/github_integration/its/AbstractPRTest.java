@@ -8,6 +8,7 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github_integration.junit.GHRule;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.junit.Rule;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TemporaryFolder;
@@ -55,7 +56,9 @@ public abstract class AbstractPRTest {
 
         // update trigger (maybe useless)
         GitHubPRTrigger trigger = ghPRTriggerFromJob(job);
-//        trigger.start(job, true); // hack configRountrip that doesn't work with workflow
+        if (job instanceof WorkflowJob) {
+            trigger.start(job, true); // hack configRountrip that doesn't work with workflow
+        }
 
         await().pollInterval(3, TimeUnit.SECONDS)
                 .timeout(100, SECONDS)
@@ -98,7 +101,7 @@ public abstract class AbstractPRTest {
         // now push changes that should trigger again
         ghRule.commitFileToBranch(BRANCH1, BRANCH1 + ".file2", "content", "commit 2 for " + BRANCH1);
 
-        await().pollInterval(3, TimeUnit.SECONDS)
+        await().pollInterval(5, TimeUnit.SECONDS)
                 .timeout(100, SECONDS)
                 .until(ghTriggerRunAndEnd(trigger));
 

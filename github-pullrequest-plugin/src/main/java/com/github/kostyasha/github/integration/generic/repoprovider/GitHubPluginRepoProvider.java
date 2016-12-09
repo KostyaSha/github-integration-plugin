@@ -11,11 +11,16 @@ import org.jenkinsci.plugins.github.internal.GHPluginConfigException;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.util.Iterator;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isNotFalse;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.jenkinsci.plugins.github.config.GitHubServerConfig.withHost;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 
@@ -27,9 +32,22 @@ import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
  */
 public class GitHubPluginRepoProvider extends GitHubRepoProvider {
     // possible cache connection/repo here
+    protected Boolean cacheConnection = true;
+
+    private transient GHRepository remoteRepository;
+    private transient GitHub gitHub;
 
     @DataBoundConstructor
     public GitHubPluginRepoProvider() {
+    }
+
+    public boolean isCacheConnection() {
+        return isNotFalse(cacheConnection);
+    }
+
+    @DataBoundSetter
+    public void setCacheConnection(boolean cacheConnection) {
+        this.cacheConnection = cacheConnection;
     }
 
     @Override
@@ -46,12 +64,17 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
     @Nonnull
     @Override
     public GitHub getGitHub(GitHubTrigger trigger) {
+        if (isTrue(cacheConnection) && nonNull(gitHub)) {
+            return gitHub;
+        }
+
         final GitHubRepositoryName repoFullName = trigger.getRepoFullName();
 
         Optional<GitHub> client = from(GitHubPlugin.configuration().findGithubConfig(withHost(repoFullName.getHost())))
                 .first();
         if (client.isPresent()) {
-            return client.get();
+            gitHub = client.get();
+            return gitHub;
         } else {
             throw new GHPluginConfigException("GitHubPluginRepoProvider can't find appropriate client for github repo <%s>",
                     repoFullName.getHost());
@@ -61,13 +84,22 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
     @CheckForNull
     @Override
     public GHRepository getGHRepository(GitHubTrigger trigger) {
+        if (isTrue(cacheConnection) && nonNull(remoteRepository)) {
+            return remoteRepository;
+        }
         // first matched from global config
         Iterator<GHRepository> resolved = trigger.getRepoFullName().resolve().iterator();
         if (resolved.hasNext()) {
-            return resolved.next();
+            remoteRepository = resolved.next();
+            return remoteRepository;
         }
 
         return null;
+    }
+
+    protected Object readResolve() {
+        if (isNull(cacheConnection)) cacheConnection = true;
+        return this;
     }
 
     @Extension

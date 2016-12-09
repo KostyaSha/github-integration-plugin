@@ -11,6 +11,7 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
 import org.jenkinsci.plugins.github.pullrequest.publishers.GitHubPRAbstractPublisher;
 import org.jenkinsci.plugins.github.pullrequest.utils.PublisherErrorHandler;
 import org.jenkinsci.plugins.github.pullrequest.utils.StatusVerifier;
+import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHLabel;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
@@ -19,6 +20,10 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.stream.Collectors;
+
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getGhIssue;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getPRNumberFromPRCause;
 
 /**
  * Implements addition of labels (one or many) to GitHub.
@@ -47,14 +52,19 @@ public class GitHubPRLabelAddPublisher extends GitHubPRAbstractPublisher {
         }
         try {
             HashSet<String> remoteLabels = new HashSet<>();
-            for (GHLabel label : getGhIssue(run).getLabels()) { //remote labels List -> Set
-                remoteLabels.add(label.getName());
-            }
+            final GHIssue ghIssue = getGhIssue(run);
+            //remote labels List -> Set
+            ghIssue.getLabels().stream()
+                    .map(GHLabel::getName)
+                    .collect(Collectors.toList())
+                    .forEach(remoteLabels::add);
+
             remoteLabels.addAll(getLabelProperty().getLabelsSet());
-            getGhIssue(run).setLabels(remoteLabels.toArray(new String[remoteLabels.size()]));
+            ghIssue.setLabels(remoteLabels.toArray(new String[remoteLabels.size()]));
         } catch (IOException ex) {
-            listener.getLogger().println("Couldn't add label for PR #" + getNumber(run) + " " + ex.getMessage());
-            LOGGER.error("Couldn't add label for PR #{}", getNumber(), ex);
+            final int number = getPRNumberFromPRCause(run);
+            listener.getLogger().println("Couldn't add label for PR #" + number + ex.getMessage());
+            LOGGER.error("Couldn't add label for PR #{}", number, ex);
             handlePublisherError(run);
         }
     }
