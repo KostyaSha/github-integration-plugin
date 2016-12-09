@@ -2,6 +2,10 @@
 
 ## Next
 
+## 0.1.0-rc17
+- Don't cache repo connection in trigger.
+- Don't cache PR number/repo in publishers.
+
 ## 0.1.0-rc16
 - Fix fix null safe in repositories.
 - GitHubRepository Provider API for not using global connection.
