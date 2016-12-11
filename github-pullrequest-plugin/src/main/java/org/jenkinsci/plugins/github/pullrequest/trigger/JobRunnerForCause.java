@@ -50,6 +50,7 @@ import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.COMMENT_
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.COMMIT_AUTHOR_EMAIL;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.COMMIT_AUTHOR_NAME;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.COND_REF;
+import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.BODY;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.HEAD_SHA;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.NUMBER;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.SHORT_DESC;
@@ -277,6 +278,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                 TARGET_BRANCH.param(cause.getTargetBranch()),
                 SOURCE_BRANCH.param(cause.getSourceBranch()),
                 AUTHOR_EMAIL.param(cause.getPRAuthorEmail()),
+                BODY.param(cause.getBody()),
                 SHORT_DESC.param(cause.getShortDescription()),
                 TITLE.param(cause.getTitle()),
                 URL.param(cause.getHtmlUrl().toString()),

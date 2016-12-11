@@ -1,9 +1,13 @@
+:imagesdir: images
 == GitHub integration plugin
+
+=== Triggers common configuration:
+- Configure https://wiki.jenkins-ci.org/display/JENKINS/GitHub+Plugin[github-plugin] according to it's documentation.
+- Set `GitHub project property` with link to your GitHub repository in Job settings.
+image::github-project-property.png[]
 
 === Pull Requests Trigger
 ==== Triggering
-- Configure https://wiki.jenkins-ci.org/display/JENKINS/GitHub+Plugin[github-plugin] according to it's documentation.
-- Set `GitHub project property` with link to your GitHub repository in Job settings.
 - Configure https://wiki.jenkins-ci.org/display/JENKINS/Git+Plugin[git-plugin]: add any repo name i.e. 'origin-pull' and set refspec to
 `+refs/pull/${GITHUB_PR_NUMBER}/merge:refs/remotes/origin-pull/pull/${GITHUB_PR_NUMBER}/merge` if you want run
 build for merged state or '/head' for building exact PR commits, or `$GITHUB_PR_COND_REF` if you want 'head' state
@@ -29,6 +33,7 @@ like `Build #${BUILD_NUMBER} started`
 - `GITHUB_PR_TARGET_BRANCH` - `master`
 - `GITHUB_PR_SOURCE_BRANCH` - `KostyaSha-patch-9`
 - `GITHUB_PR_AUTHOR_EMAIL` - `KostyaSha@users.noreply.github.com`
+- `GITHUB_PR_BODY` -
 - `GITHUB_PR_SHORT_DESC` -
 - `GITHUB_PR_TITLE` - `Update README.md`
 - `GITHUB_PR_URL` - `https://github.com/KostyaSha/test-repo/pull/21`
@@ -44,8 +49,6 @@ like `Build #${BUILD_NUMBER} started`
 === Branch Trigger
 
 ==== Triggering
-- Configure https://wiki.jenkins-ci.org/display/JENKINS/GitHub+Plugin[github-plugin] according to it's documentation.
-- Set `GitHub project property` with link to your GH repository in Job settings.
 - Configure Git SCM with variables refspec: `refs/heads/${GITHUB_BRANCH_NAME}:refs/remotes/origin/${GITHUB_BRANCH_NAME}`
 url `${GITHUB_REPO_GIT_URL}`, branchspec `${GITHUB_BRANCH_NAME}`.
 

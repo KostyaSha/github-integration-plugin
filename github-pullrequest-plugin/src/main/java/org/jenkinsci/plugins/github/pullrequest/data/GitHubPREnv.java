@@ -18,6 +18,7 @@ public enum GitHubPREnv {
     TARGET_BRANCH,
     SOURCE_BRANCH,
     AUTHOR_EMAIL,
+    BODY,
     SHORT_DESC,
     TITLE,
     URL,
