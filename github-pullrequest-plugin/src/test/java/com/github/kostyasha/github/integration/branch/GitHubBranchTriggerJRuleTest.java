@@ -37,7 +37,7 @@ public class GitHubBranchTriggerJRuleTest {
         project.addProperty(new GithubProjectProperty("https://github.com/KostyaSha/test-repo/"));
 
         final GitHubBranchTrigger trigger = new GitHubBranchTrigger("", HEAVY_HOOKS, emptyList());
-        trigger.setRepoProvider(new TestRepoProvider());
+        trigger.setRepoProvider(new FailingGitHubRepoProvider());
         project.addTrigger(trigger);
 
         project.save();
@@ -49,10 +49,10 @@ public class GitHubBranchTriggerJRuleTest {
         assertThat(repository, notNullValue());
     }
 
-    public static final class TestRepoProvider extends GitHubRepoProvider {
+    public static final class FailingGitHubRepoProvider extends GitHubRepoProvider {
 
         @DataBoundConstructor
-        public TestRepoProvider() {
+        public FailingGitHubRepoProvider() {
         }
 
         @Override

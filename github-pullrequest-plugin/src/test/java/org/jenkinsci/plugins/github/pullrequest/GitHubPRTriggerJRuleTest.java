@@ -37,7 +37,7 @@ public class GitHubPRTriggerJRuleTest {
         project.addProperty(new GithubProjectProperty("https://github.com/KostyaSha/test-repo/"));
 
         final GitHubPRTrigger prTrigger = new GitHubPRTrigger("", HEAVY_HOOKS, emptyList());
-        prTrigger.setRepoProvider(new GitHubBranchTriggerJRuleTest.TestRepoProvider());
+        prTrigger.setRepoProvider(new GitHubBranchTriggerJRuleTest.FailingGitHubRepoProvider());
         project.addTrigger(prTrigger);
 
         project.save();
@@ -48,40 +48,4 @@ public class GitHubPRTriggerJRuleTest {
 
         assertThat(repository, notNullValue());
     }
-
-    public static final class TestRepoProvider extends GitHubRepoProvider {
-
-        @DataBoundConstructor
-        public TestRepoProvider() {
-        }
-
-        @Override
-        public void registerHookFor(GitHubTrigger trigger) {
-            throw new GHPluginConfigException("test provider exception");
-        }
-
-        @Override
-        public boolean isManageHooks(GitHubTrigger trigger) {
-            return false;
-        }
-
-        @Override
-        public GitHub getGitHub(GitHubTrigger trigger) {
-            throw new GHPluginConfigException("test provider exception");
-        }
-
-        @Override
-        public GHRepository getGHRepository(GitHubTrigger trigger) {
-            throw new GHPluginConfigException("test provider exception for getGHRepository");
-        }
-
-        @TestExtension
-        public static final class DescriptorImpl extends GitHubRepoProviderDescriptor {
-            @Override
-            public String getDisplayName() {
-                return "Test GitHub Repo Provider";
-            }
-        }
-    }
-
 }

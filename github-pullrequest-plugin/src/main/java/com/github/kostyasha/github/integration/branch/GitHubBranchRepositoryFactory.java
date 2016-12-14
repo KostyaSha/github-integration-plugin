@@ -22,6 +22,9 @@ import static java.util.Objects.requireNonNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
 /**
+ * Create GitHubBranchRepository.
+ * Don't depend on remote connection because updateTransientActions() called only once and connection may appear later.
+ *
  * @author Kanstantsin Shautsou
  */
 @Extension
