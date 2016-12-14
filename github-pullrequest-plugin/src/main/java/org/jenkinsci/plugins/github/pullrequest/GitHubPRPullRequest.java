@@ -36,6 +36,7 @@ public class GitHubPRPullRequest {
     // https://github.com/kohsuke/github-api/issues/178
     private final Date issueUpdatedAt;
     private String title;
+    private String body;
     private Date prUpdatedAt;
     private String headSha;
     private String headRef;
@@ -105,6 +106,7 @@ public class GitHubPRPullRequest {
 
         sourceRepoOwner = remoteRepo.getOwnerName();
         state = pr.getState().toString();
+        body = pr.getBody();
     }
 
     public int getNumber() {
@@ -133,6 +135,10 @@ public class GitHubPRPullRequest {
 
     public String getTitle() {
         return title;
+    }
+
+    public String getBody() {
+        return body;
     }
 
     @Nonnull

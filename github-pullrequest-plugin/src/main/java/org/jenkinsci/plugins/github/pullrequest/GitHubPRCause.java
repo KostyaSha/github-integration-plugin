@@ -30,6 +30,7 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
     private String targetBranch;
     private String sourceBranch;
     private String prAuthorEmail;
+    private String body;
 
     private String sourceRepoOwner;
     private String triggerSenderName = "";
@@ -65,6 +66,7 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
                 pr.getUserEmail(), pr.getTitle(), pr.getHtmlUrl(), pr.getSourceRepoOwner(),
                 pr.getLabels(),
                 triggerSender, skip, reason, "", "", pr.getState());
+        this.body = pr.getBody();
     }
 
     //FIXME (sizes) ParameterNumber: More than 7 parameters (found 15).
@@ -226,6 +228,15 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
 
     public GitHubPRCause withCommentBodyMatch(String commentBodyMatch) {
         this.commentBodyMatch = commentBodyMatch;
+        return this;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public GitHubPRCause withBody(String body) {
+        this.body = body;
         return this;
     }
 
