@@ -226,20 +226,26 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
             long startTime = System.currentTimeMillis();
             listener.debug("Running GitHub Pull Request trigger check for {} on {}",
                     getDateTimeInstance().format(new Date(startTime)), localRepository.getFullName());
+            try {
+                localRepository.actualise(getRemoteRepository());
 
-            causes = readyToBuildCauses(localRepository, listener, prNumber);
+                causes = readyToBuildCauses(localRepository, listener, prNumber);
 
-            localRepository.saveQuietly();
+                localRepository.saveQuietly();
+
+                // TODO print triggering to listener?
+                from(causes).filter(new JobRunnerForCause(job, this)).toSet();
+            } catch (Throwable t) {
+                listener.error("Can't end trigger check", t);
+            }
 
             long duration = System.currentTimeMillis() - startTime;
             listener.info(FINISH_MSG + " for {} at {}. Duration: {}ms",
                     localRepository.getFullName(), getDateTimeInstance().format(new Date()), duration);
         } catch (Exception e) {
+            // out of UI/user viewable error
             LOGGER.error("Can't process check ({})", e.getMessage(), e);
-            return;
         }
-
-        from(causes).filter(new JobRunnerForCause(job, this)).toSet();
     }
 
     /**

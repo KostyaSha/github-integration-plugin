@@ -5,5 +5,8 @@ before_install:
  - pip install --user codecov
 after_success:
  - codecov
+after_failure:
+ - pwd
+ - cat /home/travis/build/KostyaSha/github-integration-plugin/github-pullrequest-plugin/target/surefire-reports/*.txt
 install: true
 script: ./travis.sh

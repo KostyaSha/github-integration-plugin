@@ -184,19 +184,25 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
             listener.debug("Running GitHub Branch trigger check for {} on {}",
                     getDateTimeInstance().format(new Date(startTime)), localRepository.getFullName());
 
-            causes = readyToBuildCauses(localRepository, listener, branch);
+            try {
+                localRepository.actualise(getRemoteRepository());
 
-            localRepository.saveQuietly();
+                causes = readyToBuildCauses(localRepository, listener, branch);
+
+                localRepository.saveQuietly();
+
+                // TODO print triggering to listener?
+                from(causes).filter(new JobRunnerForBranchCause(job, this)).toSet();
+            } catch (Throwable t) {
+                listener.error("Can't end trigger check", t);
+            }
 
             long duration = System.currentTimeMillis() - startTime;
             listener.info(FINISH_MSG + " for {} at {}. Duration: {}ms",
                     localRepository.getFullName(), getDateTimeInstance().format(new Date()), duration);
         } catch (Exception e) {
             LOG.error("Can't process check: {}", e);
-            return;
         }
-
-        from(causes).filter(new JobRunnerForBranchCause(job, this)).toSet();
     }
 
     /**

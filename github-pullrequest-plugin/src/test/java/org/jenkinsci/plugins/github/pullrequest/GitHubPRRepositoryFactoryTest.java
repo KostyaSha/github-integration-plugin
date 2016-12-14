@@ -143,6 +143,7 @@ public class GitHubPRRepositoryFactoryTest {
                                                    Job job,
                                                    GitHubPRTrigger trigger) {
         GithubUrl githubUrl = PowerMockito.mock(GithubUrl.class);
+        when(githubUrl.toString()).thenReturn("http://blaur");
         GithubProjectProperty projectProperty = PowerMockito.mock(GithubProjectProperty.class);
 
         File file = new File(filePath);

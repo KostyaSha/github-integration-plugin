@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +49,10 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
      */
     public GitHubBranchRepository(GHRepository remoteRepository) {
         super(remoteRepository);
+    }
+
+    public GitHubBranchRepository(String repoFullName, URL url) {
+        super(repoFullName, url);
     }
 
     @Nonnull
