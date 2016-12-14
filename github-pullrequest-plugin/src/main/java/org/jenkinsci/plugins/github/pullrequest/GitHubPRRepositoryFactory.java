@@ -1,27 +1,31 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
+import com.cloudbees.jenkins.GitHubRepositoryName;
+import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import com.github.kostyasha.github.integration.generic.GitHubRepositoryFactory;
 import hudson.Extension;
 import hudson.XmlFile;
 import hudson.model.Action;
 import hudson.model.Job;
-import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
 /**
+ * Create GitHubPRRepository.
+ * Don't depend on remote connection because updateTransientActions() called only once and connection may appear later.
+ *
  * @author Kanstantsin Shautsou
  */
 @Extension
@@ -49,31 +53,29 @@ public class GitHubPRRepositoryFactory extends GitHubRepositoryFactory<GitHubPRR
         GitHubPRTrigger trigger = ghPRTriggerFromJob(job);
         requireNonNull(trigger, "Can't extract PR trigger from " + job.getFullName());
 
+        final GitHubRepositoryName repoFullName = trigger.getRepoFullName(job); // ask with job because trigger may not yet be started
+        GithubProjectProperty property = job.getProperty(GithubProjectProperty.class);
+        String githubUrl = property.getProjectUrl().toString();
+
         GitHubPRRepository localRepository;
         if (configFile.exists()) {
             try {
                 localRepository = (GitHubPRRepository) configFile.read();
             } catch (IOException e) {
-                LOGGER.info("Can't read saved repository, creating new one", e);
-                final GHRepository ghRepository = trigger.getRemoteRepository();
-                requireNonNull(ghRepository, "Can't get remote GH repository.");
-                localRepository = new GitHubPRRepository(ghRepository);
+                LOGGER.info("Can't read saved repository, re-creating new one", e);
+                localRepository = new GitHubPRRepository(repoFullName.toString(), new URL(githubUrl));
             }
         } else {
-            final GHRepository ghRepository = trigger.getRemoteRepository();
-            requireNonNull(ghRepository, "Can't get remote GH repository.");
-            localRepository = new GitHubPRRepository(ghRepository);
+            localRepository = new GitHubPRRepository(repoFullName.toString(), new URL(githubUrl));
         }
 
         localRepository.setJob(job);
         localRepository.setConfigFile(configFile);
 
-        if (isNull(localRepository.getGitUrl()) ||
-                isNull(localRepository.getSshUrl())) {
-            final GHRepository remoteRepository = trigger.getRemoteRepository();
-            localRepository.withGitUrl(remoteRepository.getGitTransportUrl())
-                    .withSshUrl(remoteRepository.getSshUrl());
-            localRepository.save();
+        try {
+            localRepository.actualise(trigger.getRemoteRepository());
+        } catch (Throwable ignore) {
+            //silently try actualise
         }
 
         return localRepository;

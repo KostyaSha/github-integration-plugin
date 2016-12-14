@@ -12,9 +12,12 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URL;
+
+import static java.util.Objects.isNull;
 
 /**
  * @author Kanstantsin Shautsou
@@ -25,24 +28,61 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
     protected transient XmlFile configFile; // for save()
     protected transient Job<?, ?> job;  // for UI
 
-    private final String fullName;
-    private final URL githubUrl;
+    @CheckForNull
+    private String fullName;
+    @CheckForNull
+    private URL githubUrl;
+
+    @CheckForNull
     private String gitUrl;
+    @CheckForNull
     private String sshUrl;
 
     public GitHubRepository(@Nonnull GHRepository ghRepository) {
-        fullName = ghRepository.getFullName();
-        githubUrl = ghRepository.getHtmlUrl();
-        gitUrl = ghRepository.getGitTransportUrl();
-        sshUrl = ghRepository.getSshUrl();
+        actualise(ghRepository);
+    }
+
+    public GitHubRepository(String repoFullName, URL githubUrl) {
+        this.fullName = repoFullName;
+        this.githubUrl = githubUrl;
+    }
+
+    /**
+     * Repository may be created without gh connection, but trigger logic expects this fields.
+     * Should be called before trigger logic starts checks.
+     */
+    public void actualise(@Nonnull GHRepository ghRepository) {
+        if (isNull(fullName)) {
+            fullName = ghRepository.getFullName();
+        }
+        if (isNull(githubUrl)) {
+            githubUrl = ghRepository.getHtmlUrl();
+        }
+        if (isNull(gitUrl)) {
+            gitUrl = ghRepository.getGitTransportUrl();
+        }
+        if (isNull(sshUrl)) {
+            sshUrl = ghRepository.getSshUrl();
+        }
+        saveQuietly();
     }
 
     public String getFullName() {
         return fullName;
     }
 
+    public GitHubRepository<T> withFullName(String fullName) {
+        this.fullName = fullName;
+        return this;
+    }
+
     public URL getGithubUrl() {
         return githubUrl;
+    }
+
+    public GitHubRepository<T> withGithubUrl(URL githubUrl) {
+        this.githubUrl = githubUrl;
+        return this;
     }
 
     public String getGitUrl() {
