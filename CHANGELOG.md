@@ -2,6 +2,10 @@
 
 ## Next
 
+## 0.1.0-rc18
+- inject pr body in variable
+- Create internal repository without remote connection.
+ 
 ## 0.1.0-rc17
 - Don't cache repo connection in trigger.
 - Don't cache PR number/repo in publishers.
