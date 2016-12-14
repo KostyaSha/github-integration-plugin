@@ -74,6 +74,7 @@ public class GitHubPRRepositoryFactory extends GitHubRepositoryFactory<GitHubPRR
 
         try {
             localRepository.actualise(trigger.getRemoteRepository());
+            localRepository.save();
         } catch (Throwable ignore) {
             //silently try actualise
         }

@@ -64,7 +64,6 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
         if (isNull(sshUrl)) {
             sshUrl = ghRepository.getSshUrl();
         }
-        saveQuietly();
     }
 
     public String getFullName() {
