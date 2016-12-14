@@ -2,17 +2,10 @@ package org.jenkinsci.plugins.github.pullrequest;
 
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTriggerJRuleTest;
-import com.github.kostyasha.github.integration.generic.GitHubRepoProvider;
-import com.github.kostyasha.github.integration.generic.GitHubTrigger;
 import hudson.model.FreeStyleProject;
-import org.jenkinsci.plugins.github.internal.GHPluginConfigException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.TestExtension;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GitHub;
-import org.kohsuke.stapler.DataBoundConstructor;
 
 import static java.util.Collections.emptyList;
 import static org.hamcrest.MatcherAssert.assertThat;
