@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.github.pullrequest.dsl;
 
 import hudson.model.Descriptor;
 import hudson.model.FreeStyleProject;
+import hudson.model.Result;
 import hudson.tasks.Builder;
 import hudson.tasks.Publisher;
 import hudson.triggers.Trigger;
@@ -16,6 +17,7 @@ import org.jenkinsci.plugins.github.pullrequest.builders.GitHubPRStatusBuilder;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRNumber;
 import org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRBuildStatusPublisher;
+import org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRCommentPublisher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -73,14 +75,7 @@ public class DslIntegrationTest {
                 ((GitHubPRStatusBuilder) builders.get(0)).getStatusMessage().getContent(),
                 equalTo(JOB_DSL_BUILDER_TEXT_CONTENT));
 
-
-        DescribableList<Publisher, Descriptor<Publisher>> publishers = generated.getPublishersList();
-
-        assertThat("Should add publisher", publishers, hasSize(1));
-        assertThat("Should add status publisher", publishers.get(0), instanceOf(GitHubPRBuildStatusPublisher.class));
-        assertThat("Should add 2 packages",
-                ((GitHubPRBuildStatusPublisher) publishers.get(0)).getStatusMsg().getContent(),
-                equalTo(JOB_DSL_PUBLISHER_TEXT_CONTENT));
+        verifyPublishers(generated.getPublishersList());
 
         Collection<Trigger<?>> triggers = generated.getTriggers().values();
         assertThat("Should add trigger", triggers, hasSize(1));
@@ -104,5 +99,21 @@ public class DslIntegrationTest {
         assertThat(event, instanceOf(GitHubPRNumber.class));
         assertThat(((GitHubPRNumber) event).isSkip(), is(true));
         assertThat(((GitHubPRNumber) event).isMatch(), is(true));
+    }
+
+    private void verifyPublishers(DescribableList<Publisher, Descriptor<Publisher>> publishers) {
+        assertThat("Should add publisher", publishers, hasSize(2));
+
+        assertThat("Should add status publisher", publishers.get(0), instanceOf(GitHubPRBuildStatusPublisher.class));
+        assertThat("Should add 2 packages",
+                ((GitHubPRBuildStatusPublisher) publishers.get(0)).getStatusMsg().getContent(),
+                equalTo(JOB_DSL_PUBLISHER_TEXT_CONTENT));
+
+        assertThat("Has comment publisher", publishers.get(1), instanceOf(GitHubPRCommentPublisher.class));
+        GitHubPRCommentPublisher commentPublisher = (GitHubPRCommentPublisher) publishers.get(1);
+
+        assertThat("Comment matches", commentPublisher.getComment().getContent(), equalTo("comment"));
+        assertThat("Only failed builds", commentPublisher.getStatusVerifier().getBuildStatus(), equalTo(Result.FAILURE));
+        assertThat("Publish marked as failure", commentPublisher.getErrorHandler().getBuildStatus(), equalTo(Result.FAILURE));
     }
 }
