@@ -10,6 +10,7 @@ import javaposse.jobdsl.plugin.DslExtensionMethod;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.builders.GitHubPRStatusBuilder;
 import org.jenkinsci.plugins.github.pullrequest.dsl.context.GitHubPRTriggerDslContext;
+import org.jenkinsci.plugins.github.pullrequest.dsl.context.publishers.GitHubCommentPublisherDslContext;
 import org.jenkinsci.plugins.github.pullrequest.dsl.context.publishers.GitHubPRStatusPublisherDslContext;
 import org.jenkinsci.plugins.github.pullrequest.dsl.context.steps.GitHubPRStatusStepDslContext;
 import org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRBuildStatusPublisher;
@@ -44,8 +45,20 @@ public class GitHubPRJobDslExtension extends ContextExtensionPoint {
                 context.unstableAs(),
                 null,
                 null,
-                null
-        );
+                null);
+    }
+
+    @DslExtensionMethod(context = PublisherContext.class)
+    public Object postCommentOnGH() {
+        return GitHubCommentPublisherDslContext.DEFAULT_PUBLISHER;
+    }
+
+    @DslExtensionMethod(context = PublisherContext.class)
+    public Object postCommentOnGH(Runnable closure) {
+        GitHubCommentPublisherDslContext context = new GitHubCommentPublisherDslContext();
+        executeInContext(closure, context);
+
+        return context.getPublisher();
     }
 
     @DslExtensionMethod(context = StepContext.class)
