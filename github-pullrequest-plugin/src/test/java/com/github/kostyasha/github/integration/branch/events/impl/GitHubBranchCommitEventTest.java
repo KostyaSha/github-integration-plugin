@@ -5,7 +5,6 @@ import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheck;
-
 import org.jenkinsci.plugins.github.pullrequest.utils.LoggingTaskListenerWrapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -37,6 +37,9 @@ public class GitHubBranchCommitEventTest {
 
     @Mock
     private LoggingTaskListenerWrapper mockListener;
+
+    @Mock
+    private PrintStream lloger;
 
     @Mock
     private GitHubBranch mockLocalBranch;
@@ -88,6 +91,7 @@ public class GitHubBranchCommitEventTest {
 
     @Test
     public void testFirstCommit() throws Exception {
+        when(mockListener.getLogger()).thenReturn(lloger);
         givenTheFirstCommit();
         whenCheckCommits();
         thenNoCauseReturned();
