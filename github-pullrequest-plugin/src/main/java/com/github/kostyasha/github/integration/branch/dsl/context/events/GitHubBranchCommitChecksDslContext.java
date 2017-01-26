@@ -12,7 +12,7 @@ import javaposse.jobdsl.plugin.ContextExtensionPoint;
 
 public class GitHubBranchCommitChecksDslContext implements Context {
 
-    private GitHubBranchCommitEvent check = new GitHubBranchCommitEvent();
+    private GitHubBranchCommitEvent event = new GitHubBranchCommitEvent();
     private List<GitHubBranchCommitCheck> checks = new ArrayList<>();
 
     public void commitMessagePattern(Runnable closure) {
@@ -22,8 +22,8 @@ public class GitHubBranchCommitChecksDslContext implements Context {
         checks.add(commitContext.getCheck());
     }
 
-    public GitHubBranchCommitEvent getCheck() {
-        check.setChecks(checks);
-        return check;
+    public GitHubBranchCommitEvent getEvent() {
+        event.setChecks(checks);
+        return event;
     }
 }

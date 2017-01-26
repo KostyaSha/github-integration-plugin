@@ -28,7 +28,7 @@ public class GitHubBranchEventsDslContext implements Context {
         GitHubBranchCommitChecksDslContext checksContext = new GitHubBranchCommitChecksDslContext();
         ContextExtensionPoint.executeInContext(closure, checksContext);
 
-        events.add(checksContext.getCheck());
+        events.add(checksContext.getEvent());
     }
 
     public void created() {
