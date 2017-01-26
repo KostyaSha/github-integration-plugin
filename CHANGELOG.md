@@ -1,6 +1,9 @@
 ## Changelog
 
-## Next
+## Next 0.1.0-rc19
+- [branch] Commit message triggering
+- [branch] DSL support
+- [PR] comment publisher DSL
 
 ## 0.1.0-rc18
 - inject pr body in variable
