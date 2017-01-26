@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.github.pullrequest.events;
 
+import hudson.ExtensionPoint;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
@@ -7,26 +8,25 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.kohsuke.github.GHEventPayload;
 import org.kohsuke.github.GHPullRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
 import java.io.IOException;
 
 /**
- * Extension point for various GH events that triggers job
+ * Extension point for various GH PR events that may trigger run.
  *
  * @author Kanstantsin Shautsou
  */
-public abstract class GitHubPREvent extends AbstractDescribableImpl<GitHubPREvent> {
-    private static final Logger LOG = LoggerFactory.getLogger(GitHubPREvent.class);
+public abstract class GitHubPREvent extends AbstractDescribableImpl<GitHubPREvent> implements ExtensionPoint {
 
     /**
      * indicates that PR was changed
      *
      * @param remotePR current PR state fetched from GH
      * @param localPR  PR state from last run saved in jenkins. null when not exist before
-     * @return true if PR should be run
+     * @return cause object. null when no influence (other events will be checked.
+     * If cause.isSkip() == true, then other checks wouldn't influence. And triggering for this branch will be skipped.
+     * If cause.isSkip() == false, indicates that branch build should be run.
      */
     @CheckForNull
     public GitHubPRCause check(
