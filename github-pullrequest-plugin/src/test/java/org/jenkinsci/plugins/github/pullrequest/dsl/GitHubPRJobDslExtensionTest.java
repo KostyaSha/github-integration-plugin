@@ -2,8 +2,8 @@ package org.jenkinsci.plugins.github.pullrequest.dsl;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
-import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchCommitChecks;
-import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchCommitMessageCheck;
+import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchCommitEvent;
+import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.impl.GitHubBranchCommitMessageCheck;
 import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchRestrictionFilter;
 
 import hudson.model.FreeStyleProject;
@@ -86,7 +86,7 @@ public class GitHubPRJobDslExtensionTest {
     }
 
     private void verifyCommitChecks(GitHubBranchEvent gitHubBranchEvent) {
-        GitHubBranchCommitChecks commitChecks = (GitHubBranchCommitChecks) gitHubBranchEvent;
+        GitHubBranchCommitEvent commitChecks = (GitHubBranchCommitEvent) gitHubBranchEvent;
         assertThat("Has commit checks", commitChecks.getChecks(), hasSize(1));
 
         GitHubBranchCommitMessageCheck messageCheck = (GitHubBranchCommitMessageCheck) commitChecks.getChecks().get(0);

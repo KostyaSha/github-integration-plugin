@@ -4,7 +4,7 @@ import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
-import com.github.kostyasha.github.integration.branch.events.GitHubBranchCommitCheck;
+import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheck;
 
 import org.jenkinsci.plugins.github.pullrequest.utils.LoggingTaskListenerWrapper;
 import org.junit.Before;
@@ -23,11 +23,11 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
-public class GitHubBranchCommitChecksTest {
+public class GitHubBranchCommitEventTest {
 
     private GHCompare.Commit[] commits;
 
-    private GitHubBranchCommitChecks check;
+    private GitHubBranchCommitEvent check;
 
     @Mock
     private GitHubBranchCause mockCause;
@@ -57,7 +57,7 @@ public class GitHubBranchCommitChecksTest {
         MockitoAnnotations.initMocks(this);
 
         commits = new GHCompare.Commit[0];
-        check = new GitHubBranchCommitChecks(Arrays.asList(mockCommitCheck)) {
+        check = new GitHubBranchCommitEvent(Arrays.asList(mockCommitCheck)) {
             @Override
             GHCompare.Commit[] getComparedCommits(GitHubBranch localBranch, GHBranch remoteBranch) throws IOException {
                 return commits;

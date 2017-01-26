@@ -1,8 +1,8 @@
 package com.github.kostyasha.github.integration.branch.dsl.context.events;
 
 
-import com.github.kostyasha.github.integration.branch.events.GitHubBranchCommitCheck;
-import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchCommitChecks;
+import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheck;
+import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchCommitEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ import javaposse.jobdsl.plugin.ContextExtensionPoint;
 
 public class GitHubBranchCommitChecksDslContext implements Context {
 
-    private GitHubBranchCommitChecks check = new GitHubBranchCommitChecks();
+    private GitHubBranchCommitEvent check = new GitHubBranchCommitEvent();
     private List<GitHubBranchCommitCheck> checks = new ArrayList<>();
 
     public void commitMessagePattern(Runnable closure) {
@@ -22,7 +22,7 @@ public class GitHubBranchCommitChecksDslContext implements Context {
         checks.add(commitContext.getCheck());
     }
 
-    public GitHubBranchCommitChecks getCheck() {
+    public GitHubBranchCommitEvent getCheck() {
         check.setChecks(checks);
         return check;
     }

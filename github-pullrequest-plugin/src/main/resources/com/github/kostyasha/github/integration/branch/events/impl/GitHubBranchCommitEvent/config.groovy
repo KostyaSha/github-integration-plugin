@@ -1,8 +1,6 @@
-package com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchCommitChecks
+package com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchCommitEvent
 
-import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchCommitChecks
-
-import groovy.swing.factory.TitledBorderFactory
+import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchCommitEvent
 import lib.FormTagLib
 import lib.LayoutTagLib
 
@@ -11,7 +9,7 @@ def f = namespace(FormTagLib)
 def j = namespace("jelly:core")
 
 if (instance == null) {
-    instance = new GitHubBranchCommitChecks()
+    instance = new GitHubBranchCommitEvent()
 }
 
 f.block {

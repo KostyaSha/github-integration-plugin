@@ -1,10 +1,11 @@
-package com.github.kostyasha.github.integration.branch.events.impl;
+package com.github.kostyasha.github.integration.branch.events.impl.commitchecks.impl;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
-import com.github.kostyasha.github.integration.branch.events.GitHubBranchCommitCheck;
-import com.github.kostyasha.github.integration.branch.events.GitHubBranchCommitCheckDescriptor;
+import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheck;
+import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheckDescriptor;
 import hudson.Extension;
+import hudson.ExtensionPoint;
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHCompare.Commit;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -22,7 +23,7 @@ import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class GitHubBranchCommitMessageCheck extends GitHubBranchCommitCheck {
+public class GitHubBranchCommitMessageCheck extends GitHubBranchCommitCheck implements ExtensionPoint {
     private static final String DISPLAY_NAME = "Commit Message Pattern";
 
     private static final String LINE_SEPARATOR = System.lineSeparator();
@@ -116,7 +117,7 @@ public class GitHubBranchCommitMessageCheck extends GitHubBranchCommitCheck {
     }
 
     private GitHubBranchCause toCause(GHBranch remoteBranch, GitHubBranchRepository localRepo, boolean skip, String message,
-            Object... args) {
+                                      Object... args) {
         return new GitHubBranchCause(remoteBranch, localRepo, String.format(message, args), skip);
     }
 

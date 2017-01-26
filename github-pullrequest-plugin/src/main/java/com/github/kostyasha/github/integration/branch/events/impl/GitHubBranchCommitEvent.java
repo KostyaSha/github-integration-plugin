@@ -4,8 +4,8 @@ import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
-import com.github.kostyasha.github.integration.branch.events.GitHubBranchCommitCheck;
-import com.github.kostyasha.github.integration.branch.events.GitHubBranchCommitCheckDescriptor;
+import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheck;
+import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheckDescriptor;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
 
@@ -29,30 +29,27 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * This branch event acts as a wrapper around checks that can be performed against commit data that requires an additional round trip to
- * GitHub to retrieve.
+ * This branch event acts as a wrapper around checks that can be performed against commit data that requires
+ * an additional round trip to GitHub to retrieve.
  * <p>
- * Commit data is retrieved and then passed to each implementing instance of <code>GitHubBranchCommitCheck</code> to determine information
- * about the commit should trigger a build.
- * </p>
- * <p>
- * The implementation itself should return a <code>GitHubBranchCause</code> object indicating the build should be skipped, otherwise
- * it should return <code>null</code>.
+ * Commit data is retrieved and then passed to each implementing instance of <code>GitHubBranchCommitCheck</code>
+ * to determine information about the commit should trigger a build.
  * </p>
  *
  * @author Kanstantsin Shautsou
  * @author Jae Gangemi
  */
-public class GitHubBranchCommitChecks extends GitHubBranchEvent {
+public class GitHubBranchCommitEvent extends GitHubBranchEvent {
     private static final String DISPLAY_NAME = "Commit Checks";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubBranchCommitChecks.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GitHubBranchCommitEvent.class);
 
     private List<GitHubBranchCommitCheck> checks = new ArrayList<>();
 
@@ -60,20 +57,23 @@ public class GitHubBranchCommitChecks extends GitHubBranchEvent {
      * For groovy UI
      */
     @Restricted(value = NoExternalUse.class)
-    public GitHubBranchCommitChecks() {
+    public GitHubBranchCommitEvent() {
     }
 
     @DataBoundConstructor
-    public GitHubBranchCommitChecks(List<GitHubBranchCommitCheck> checks) {
+    public GitHubBranchCommitEvent(List<GitHubBranchCommitCheck> checks) {
         this.checks = checks;
     }
 
     @Override
     public GitHubBranchCause check(GitHubBranchTrigger trigger, GHBranch remoteBranch, @CheckForNull GitHubBranch localBranch,
-            GitHubBranchRepository localRepo, TaskListener listener)
-        throws IOException {
+                                   GitHubBranchRepository localRepo, TaskListener listener)
+            throws IOException {
+        final PrintStream lloger = listener.getLogger();
+
         if (localBranch == null) {
-            LOGGER.debug("First build of branch [%s] detected.", remoteBranch.getName());
+            LOG.debug("First build of branch '%s' detected, skipping check.", remoteBranch.getName());
+            lloger.println("First build of branch '" + remoteBranch.getName() + "' detected, skipping check.");
             return null;
         }
 
@@ -85,12 +85,12 @@ public class GitHubBranchCommitChecks extends GitHubBranchEvent {
 
         String name = remoteBranch.getName();
         if (causes.isEmpty()) {
-            LOGGER.debug("Commits for branch [{}] had no effect no triggering build.", name);
+            LOG.debug("Commits for branch [{}] had no effect, not triggering run.", name);
             return null;
         }
 
         GitHubBranchCause cause = causes.get(0);
-        LOGGER.info("Building branch [{}] skipped due to commit check: {}", name, cause.getReason());
+        LOG.info("Building branch [{}] skipped due to commit check: {}", name, cause.getReason());
 
         return cause;
     }
@@ -100,7 +100,7 @@ public class GitHubBranchCommitChecks extends GitHubBranchEvent {
         String previous = localBranch.getCommitSha();
         String current = remoteBranch.getSHA1();
 
-        LOGGER.debug("Comparing previous hash [{}] with current hash [{}]", previous, current);
+        LOG.debug("Comparing previous hash [{}] with current hash [{}]", previous, current);
         return remoteBranch.getOwner()
                 .getCompare(previous, current)
                 .getCommits();

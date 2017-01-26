@@ -1,14 +1,20 @@
-package com.github.kostyasha.github.integration.branch.events;
+package com.github.kostyasha.github.integration.branch.events.impl.commitchecks;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 
+import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchCommitEvent;
+import hudson.ExtensionPoint;
 import hudson.model.AbstractDescribableImpl;
 
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHCompare.Commit;
 
-public abstract class GitHubBranchCommitCheck extends AbstractDescribableImpl<GitHubBranchCommitCheck> {
+/**
+ * @see GitHubBranchCommitEvent
+ */
+public abstract class GitHubBranchCommitCheck extends AbstractDescribableImpl<GitHubBranchCommitCheck>
+        implements ExtensionPoint {
 
     @Override
     public GitHubBranchCommitCheckDescriptor getDescriptor() {
