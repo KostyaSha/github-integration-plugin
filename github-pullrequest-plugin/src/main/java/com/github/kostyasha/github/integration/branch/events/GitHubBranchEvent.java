@@ -9,8 +9,6 @@ import hudson.model.AbstractDescribableImpl;
 import hudson.model.TaskListener;
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHEventPayload;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
 import java.io.IOException;
