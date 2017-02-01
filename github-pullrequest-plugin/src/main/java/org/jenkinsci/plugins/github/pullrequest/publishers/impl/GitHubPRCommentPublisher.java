@@ -30,9 +30,11 @@ import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getPRNumb
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRCommentPublisher extends GitHubPRAbstractPublisher {
+    public static final GitHubPRMessage DEFAULT_COMMENT = new GitHubPRMessage("Build ${BUILD_NUMBER} ${BUILD_STATUS}");
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRCommentPublisher.class);
 
-    private GitHubPRMessage comment = new GitHubPRMessage("Build ${BUILD_NUMBER} ${BUILD_RESULT}");
+    private GitHubPRMessage comment = DEFAULT_COMMENT;
 
     /**
      * Constructor with defaults. Only for groovy UI.

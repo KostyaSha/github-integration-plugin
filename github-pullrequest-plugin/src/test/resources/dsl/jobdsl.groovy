@@ -52,5 +52,11 @@ freeStyleJob('gh-pull-request') {
             unstableAsError()
             message('Build finished')
         }
+
+        commentPullRequestOnGH() {
+            message("comment")
+            onlyFailedBuilds()
+            commentErrorIsFailure()
+        }
     }
 }
