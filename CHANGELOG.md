@@ -1,6 +1,11 @@
 ## Changelog
 
-## Next 0.1.0-rc19
+## Next 
+
+## 0.1.0-rc20
+- [PR] Retry comments retrieval
+ 
+## 0.1.0-rc19
 - [branch] Commit message triggering
 - [branch] DSL support
 - [PR] comment publisher DSL
