@@ -8,7 +8,7 @@ import com.google.common.base.Optional;
 import hudson.Extension;
 import org.jenkinsci.plugins.github.GitHubPlugin;
 import org.jenkinsci.plugins.github.internal.GHPluginConfigException;
-import org.jenkinsci.plugins.github.util.FluentIterableWrapper;
+import org.jenkinsci.plugins.github.util.misc.NullSafePredicate;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -21,7 +21,6 @@ import java.util.Iterator;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static jenkins.scm.api.SCMHeadObserver.first;
 import static org.apache.commons.lang3.BooleanUtils.isNotFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.jenkinsci.plugins.github.config.GitHubServerConfig.withHost;
@@ -73,22 +72,28 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
 
         final GitHubRepositoryName repoFullName = trigger.getRepoFullName();
 
-        final FluentIterableWrapper<GitHub> gitHubs = from(GitHubPlugin.configuration()
-            .findGithubConfig(withHost(repoFullName.getHost())));
-
-        for (GitHub gh : gitHubs) {
-            try {
-                if (gh.getRepository(repoFullName.getUserName() + "/" + repoFullName.getRepositoryName()).hasAdminAccess()) {
-                    gitHub = gh;
-                    return gitHub;
-                }
-            } catch (IOException ignore) {
-            }
-
+        Optional<GitHub> client = from(GitHubPlugin.configuration().findGithubConfig(withHost(repoFullName.getHost())))
+            .firstMatch(withAdminAccess(repoFullName));
+        if (client.isPresent()) {
+            gitHub = client.get();
+            return gitHub;
         }
 
         throw new GHPluginConfigException("GitHubPluginRepoProvider can't find appropriate client for github repo <%s>",
-            repoFullName.getHost());
+            repoFullName.toString());
+    }
+
+    private NullSafePredicate<GitHub> withAdminAccess(final GitHubRepositoryName name) {
+        return new NullSafePredicate<GitHub>() {
+            @Override
+            protected boolean applyNullSafe(@Nonnull GitHub gh) {
+                try {
+                    return gh.getRepository(name.getUserName() + "/" + name.getRepositoryName()).hasAdminAccess();
+                } catch (IOException e) {
+                    return false;
+                }
+            }
+        };
     }
 
     @CheckForNull
