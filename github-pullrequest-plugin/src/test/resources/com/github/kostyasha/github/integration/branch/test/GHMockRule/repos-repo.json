@@ -21,6 +21,11 @@
     "type": "User",
     "site_admin": false
   },
+  "permissions": {
+    "admin": true,
+    "push": true,
+    "pull": true
+  },
   "private": false,
   "html_url": "http://localhost/org/repo",
   "description": "for repo purposes",
