@@ -79,7 +79,9 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
             return gitHub;
         }
 
-        throw new GHPluginConfigException("GitHubPluginRepoProvider can't find appropriate client for github repo <%s>",
+        throw new GHPluginConfigException("GitHubPluginRepoProvider can't find appropriate client for github repo " +
+            "<%s>. Probably you didn't configure 'GitHub Plugin' global 'GitHub Server Settings'.or there is no tokens" +
+            "with admin access to this repo.",
             repoFullName.toString());
     }
 
