@@ -137,7 +137,7 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
                 LOG.error("Can't find repo provider for GitHubBranchTrigger job: {}", getJob().getFullName());
             }
         }
-        checkState(nonNull(repoProvider), "Can't get repo provider for GH repo %s for %s", job.getName());
+        checkState(nonNull(repoProvider), "Can't find repo provider for %s", job.getName());
         return repoProvider;
     }
 

@@ -8,6 +8,7 @@ import com.google.common.base.Optional;
 import hudson.Extension;
 import org.jenkinsci.plugins.github.GitHubPlugin;
 import org.jenkinsci.plugins.github.internal.GHPluginConfigException;
+import org.jenkinsci.plugins.github.util.FluentIterableWrapper;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -15,10 +16,12 @@ import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.util.Iterator;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static jenkins.scm.api.SCMHeadObserver.first;
 import static org.apache.commons.lang3.BooleanUtils.isNotFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.jenkinsci.plugins.github.config.GitHubServerConfig.withHost;
@@ -70,15 +73,22 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
 
         final GitHubRepositoryName repoFullName = trigger.getRepoFullName();
 
-        Optional<GitHub> client = from(GitHubPlugin.configuration().findGithubConfig(withHost(repoFullName.getHost())))
-                .first();
-        if (client.isPresent()) {
-            gitHub = client.get();
-            return gitHub;
-        } else {
-            throw new GHPluginConfigException("GitHubPluginRepoProvider can't find appropriate client for github repo <%s>",
-                    repoFullName.getHost());
+        final FluentIterableWrapper<GitHub> gitHubs = from(GitHubPlugin.configuration()
+            .findGithubConfig(withHost(repoFullName.getHost())));
+
+        for (GitHub gh : gitHubs) {
+            try {
+                if (gh.getRepository(repoFullName.getUserName() + "/" + repoFullName.getRepositoryName()).hasAdminAccess()) {
+                    gitHub = gh;
+                    return gitHub;
+                }
+            } catch (IOException ignore) {
+            }
+
         }
+
+        throw new GHPluginConfigException("GitHubPluginRepoProvider can't find appropriate client for github repo <%s>",
+            repoFullName.getHost());
     }
 
     @CheckForNull

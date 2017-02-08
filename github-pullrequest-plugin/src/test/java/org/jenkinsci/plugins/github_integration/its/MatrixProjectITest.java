@@ -1,7 +1,9 @@
 package org.jenkinsci.plugins.github_integration.its;
 
 import hudson.matrix.AxisList;
+import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixProject;
+import hudson.matrix.MatrixRun;
 import hudson.matrix.TextAxis;
 import hudson.tasks.Shell;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRMessage;
@@ -41,5 +43,11 @@ public class MatrixProjectITest extends AbstractPRTest {
         matrixProject.save();
 
         super.basicTest(matrixProject);
+
+        for (MatrixBuild build : matrixProject.getBuilds()) {
+            for (MatrixRun matrixRun : build.getRuns()) {
+                j.assertLogNotContains("\tat", matrixRun);
+            }
+        }
     }
 }
