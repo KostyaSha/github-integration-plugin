@@ -53,7 +53,6 @@ import static org.jenkinsci.plugins.github.pullrequest.trigger.check.PullRequest
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.SkipFirstRunForPRFilter.ifSkippedFirstRun;
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.SkipPRInBadState.badState;
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.UserRestrictionFilter.withUserRestriction;
-import static org.jenkinsci.plugins.github.pullrequest.trigger.check.UserRestrictionPopulator.prepareUserRestrictionFilter;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.PRHelperFunctions.extractPRNumber;
@@ -281,7 +280,6 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
             Set<GHPullRequest> prepared = from(remotePulls)
                     .filter(badState(localRepository, listener))
                     .filter(notUpdated(localRepository, listener))
-                    .transform(prepareUserRestrictionFilter(localRepository, this))
                     .toSet();
 
             List<GitHubPRCause> causes = from(prepared)
