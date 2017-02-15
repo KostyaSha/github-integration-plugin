@@ -5,108 +5,52 @@ import hudson.model.Describable;
 import hudson.model.Descriptor;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang3.StringUtils;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
-import org.kohsuke.github.GHIssueComment;
-import org.kohsuke.github.GHOrganization;
-import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GitHub;
-import org.kohsuke.github.PagedIterable;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.DescriptorImpl.githubFor;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 
 /**
+ * Whether it allowed this user or org with users to do something.
+ *
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRUserRestriction implements Describable<GitHubPRUserRestriction> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRUserRestriction.class);
-    private final Set<String> orgsSet;
-    private final Set<String> usersSet;
-    private final String whitelistUserMsg;
     private final String orgs;
-
+    private final Set<String> orgsSet;
     private final String users;
-    private transient volatile Pattern whitelistUserPattern;
+    private final Set<String> usersSet;
 
     @DataBoundConstructor
-    public GitHubPRUserRestriction(final String orgs, final String users, final String whitelistUserMsg) {
+    public GitHubPRUserRestriction(final String orgs, final String users) {
         //TODO check if System.lineSeparator() is correct separator (2 usages)
         this.orgs = orgs;
         this.orgsSet = new HashSet<>(Arrays.asList(orgs.split(System.lineSeparator())));
+
         this.users = users;
         this.usersSet = new HashSet<>(Arrays.asList(users.split(System.lineSeparator())));
-        this.whitelistUserMsg = whitelistUserMsg;
     }
-
-    /**
-     * Add/remove users/orgs internal state
-     */
-    public void updateUsers(GHPullRequest remotePr) throws IOException {
-        PagedIterable<GHIssueComment> ghIssueComments = remotePr.listComments();
-        //TODO check
-        for (GHIssueComment comment : ghIssueComments) {
-            if (isNull(whitelistUserPattern)) {
-                whitelistUserPattern = Pattern.compile(whitelistUserMsg);
-            }
-
-        }
-    }
-
-    public void addUserToWhitelist(String author, GitHubPRTrigger gitHubPRTrigger) {
-        LOGGER.info("Adding {} to whitelist", author);
-        usersSet.add(author);
-        gitHubPRTrigger.trySave();
-    }
-
 
     /**
      * Checks that user is allowed to control
      *
      * @param user commented user
-     *
      * @return true if user/org whitelisted
      */
     public boolean isWhitelisted(GHUser user) {
         return !isMyselfUser(user) && usersSet.contains(user.getLogin()) || isInWhitelistedOrg(user);
-    }
-
-    /**
-     * Method that updates local whitelist with new users.
-     */
-    public void populate(GHPullRequest remotePR, GitHubPRPullRequest localPR, GitHubPRTrigger gitHubPRTrigger) {
-        try {
-            for (GHIssueComment remoteComment : remotePR.getComments()) {
-                String remoteCommentBody = remoteComment.getBody();
-                if (localPR.getLastCommentCreatedAt().compareTo(remoteComment.getCreatedAt()) < 0) {
-                    //this remote comment is new
-                    GHUser remoteCommentAuthor = remoteComment.getUser();
-                    if (!isMyselfUser(remoteCommentAuthor) && whitelistUserPattern.matcher(remoteCommentBody).matches()) {
-                        /* author is not bot, he is admin and there is code phrase for whitelisting users
-                         * in the comment body, so add PR author to whitelist*/
-                        addUserToWhitelist(remotePR.getUser().getName(), gitHubPRTrigger);
-                    }
-                }
-            }
-
-        } catch (IOException e) {
-            LOGGER.error("Can't connect retrieve comment data from GitHub", e);
-        }
-    }
-
-    public String getWhitelistUserMsg() {
-        return whitelistUserMsg;
     }
 
     public String getOrgs() {
@@ -117,29 +61,22 @@ public class GitHubPRUserRestriction implements Describable<GitHubPRUserRestrict
         return users;
     }
 
-    public boolean isUserMemberOfOrganization(String organisation, GHUser member) {
-        boolean orgHasMember = false;
-        try {
-            //TODO check for null member
-            GitHub github = githubFor(URI.create(member.getHtmlUrl().toString()));
-            orgHasMember = github.getOrganization(organisation).hasMember(member);
-            LOGGER.debug("org.hasMember(member)? user:'{}' org: '{}' == '{}'",
-                    member.getLogin(), organisation, orgHasMember ? "yes" : "no");
+    public boolean isUserMemberOfOrganization(String organisation, GHUser member) throws IOException {
+        boolean orgHasMember;
+        //TODO check for null member
+        GitHub github = githubFor(URI.create(member.getHtmlUrl().toString()));
+        orgHasMember = github.getOrganization(organisation).hasMember(member);
+        LOGGER.debug("org.hasMember(member)? user:'{}' org: '{}' == '{}'",
+            member.getLogin(), organisation, orgHasMember ? "yes" : "no");
 
-        } catch (IOException ex) {
-            LOGGER.error("Can't get organization data", ex);
-        }
         return orgHasMember;
     }
 
-    private boolean isInWhitelistedOrg(GHUser user) {
+    private boolean isInWhitelistedOrg(@Nonnull GHUser user) {
         boolean ret = false;
         for (String organisation : orgsSet) {
             try {
-                //TODO check for null user
-                GitHub github = githubFor(URI.create(user.getHtmlUrl().toString()));
-                GHOrganization ghOrganization = github.getOrganization(organisation);
-                ret = ghOrganization.hasMember(user);
+                ret = isUserMemberOfOrganization(organisation, user);
                 if (ret) {
                     break;
                 }
