@@ -22,7 +22,7 @@ public class MatrixProjectITest extends AbstractPRTest {
 
     @Test
     public void testChildStatuses() throws Exception {
-        final MatrixProject matrixProject = j.jenkins.createProject(MatrixProject.class, "matrix-project");
+        final MatrixProject matrixProject = jRule.jenkins.createProject(MatrixProject.class, "matrix-project");
 
         matrixProject.addProperty(getPreconfiguredProperty(ghRule.getGhRepo()));
         matrixProject.addTrigger(getPreconfiguredPRTrigger());
@@ -46,7 +46,7 @@ public class MatrixProjectITest extends AbstractPRTest {
 
         for (MatrixBuild build : matrixProject.getBuilds()) {
             for (MatrixRun matrixRun : build.getRuns()) {
-                j.assertLogNotContains("\tat", matrixRun);
+                jRule.assertLogNotContains("\tat", matrixRun);
             }
         }
     }

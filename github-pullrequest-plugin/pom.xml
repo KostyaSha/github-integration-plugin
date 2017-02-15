@@ -46,6 +46,7 @@
         <powermock.version>1.6.0</powermock.version>
         <logback.version>1.1.3</logback.version>
         <workflow.version>1.14</workflow.version>
+        <matrix.version>1.6</matrix.version>
         <excluded.tests>**/its/*.java</excluded.tests>
         <java.level>8</java.level>
     </properties>
@@ -102,7 +103,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>matrix-project</artifactId>
-            <version>1.6</version>
+            <version>${matrix.version}</version>
         </dependency>
 
         <!--for publishers-->
@@ -219,19 +220,19 @@
         </dependency>
 
         <!-- tests logging -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>${logback.version}</version>
-            <scope>test</scope>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>ch.qos.logback</groupId>-->
+            <!--<artifactId>logback-core</artifactId>-->
+            <!--<version>${logback.version}</version>-->
+            <!--<scope>test</scope>-->
+        <!--</dependency>-->
 
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
-            <scope>test</scope>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>ch.qos.logback</groupId>-->
+            <!--<artifactId>logback-classic</artifactId>-->
+            <!--<version>${logback.version}</version>-->
+            <!--<scope>test</scope>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>org.codehaus.groovy</groupId>

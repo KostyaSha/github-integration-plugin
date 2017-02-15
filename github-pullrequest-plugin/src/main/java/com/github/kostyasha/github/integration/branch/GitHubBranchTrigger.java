@@ -113,8 +113,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
         LOG.info("Starting GitHub Branch trigger for project {}", job.getFullName());
         super.start(job, newInstance);
 
-        if (newInstance && getRepoProvider().isManageHooks(this) &&
-                withHookTriggerMode().apply(job)) {
+        if (newInstance) {
             getRepoProvider().registerHookFor(this);
         }
     }
