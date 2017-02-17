@@ -4,9 +4,12 @@ import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheck;
 import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheckDescriptor;
+
 import hudson.Extension;
 import hudson.ExtensionPoint;
+
 import org.kohsuke.github.GHBranch;
+import org.kohsuke.github.GHCommit;
 import org.kohsuke.github.GHCompare.Commit;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -15,9 +18,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
@@ -39,23 +45,18 @@ public class GitHubBranchCommitMessageCheck extends GitHubBranchCommitCheck impl
     }
 
     @Override
+    public GitHubBranchCause doCheck(GHBranch remoteBranch, GitHubBranchRepository localRepo, GHCommit commit) throws IOException {
+        List<String> messages = Arrays.asList(commit.getCommitShortInfo().getMessage());
+        return check(remoteBranch, localRepo, () -> messages);
+    }
+
+    @Override
     public GitHubBranchCause check(GHBranch remoteBranch, GitHubBranchRepository localRepo, Commit[] commits) {
-        String name = remoteBranch.getName();
-        if (matchCriteria.isEmpty()) {
-            LOG.warn("Commit message event added but no match criteria set, all commits are allowed.");
-            return null;
-        }
-
-        List<String> messages = Stream.of(commits)
-                .map(commit -> commit.getCommit().getMessage())
-                .collect(Collectors.toList());
-
-        if (commitsAreAllowed(messages)) {
-            LOG.debug("Commit messages {} for branch [{}] allowed, commit ignored.", messages, name);
-            return null;
-        }
-
-        return toCause(remoteBranch, localRepo, true, "Commit messages %s for branch [%s] not allowed by check.", messages, name);
+        return check(remoteBranch, localRepo, () -> {
+            return Stream.of(commits)
+                    .map(commit -> commit.getCommit().getMessage())
+                    .collect(Collectors.toList());
+        });
     }
 
     public String getMatchCriteria() {
@@ -77,6 +78,22 @@ public class GitHubBranchCommitMessageCheck extends GitHubBranchCommitCheck impl
         this.matchCriteria = Stream.of(matchCriteria
                 .split(LINE_SEPARATOR))
                 .collect(Collectors.toSet());
+    }
+
+    private <T> GitHubBranchCause check(GHBranch remoteBranch, GitHubBranchRepository localRepo, Supplier<List<String>> supplier) {
+        if (matchCriteria.isEmpty()) {
+            LOG.warn("Commit message event added but no match criteria set, all commits are allowed.");
+            return null;
+        }
+
+        String name = remoteBranch.getName();
+        List<String> messages = supplier.get();
+        if (commitsAreAllowed(messages)) {
+            LOG.debug("Commit messages {} for branch [{}] allowed, commit ignored.", messages, name);
+            return null;
+        }
+
+        return toCause(remoteBranch, localRepo, true, "Commit messages %s for branch [%s] not allowed by check.", messages, name);
     }
 
     private boolean commitsAreAllowed(List<String> messages) {
@@ -117,7 +134,7 @@ public class GitHubBranchCommitMessageCheck extends GitHubBranchCommitCheck impl
     }
 
     private GitHubBranchCause toCause(GHBranch remoteBranch, GitHubBranchRepository localRepo, boolean skip, String message,
-                                      Object... args) {
+            Object... args) {
         return new GitHubBranchCause(remoteBranch, localRepo, String.format(message, args), skip);
     }
 
