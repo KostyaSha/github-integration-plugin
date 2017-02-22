@@ -1,14 +1,11 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
 import antlr.ANTLRException;
-import com.github.kostyasha.github.integration.generic.errors.GitHubErrorsAction;
 import com.github.kostyasha.github.integration.generic.GitHubTrigger;
 import com.github.kostyasha.github.integration.generic.GitHubTriggerDescriptor;
 import com.github.kostyasha.github.integration.generic.errors.impl.GitHubHookRegistrationError;
-import com.github.kostyasha.github.integration.generic.errors.impl.GitHubRepoProviderError;
 import hudson.Extension;
 import hudson.Util;
-import hudson.model.Action;
 import hudson.model.Job;
 import hudson.triggers.Trigger;
 import jenkins.model.Jenkins;
@@ -35,7 +32,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;

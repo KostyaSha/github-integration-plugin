@@ -3,9 +3,7 @@ package com.github.kostyasha.github.integration.generic.errors;
 import hudson.model.ProminentProjectAction;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static java.util.Collections.synchronizedSet;
