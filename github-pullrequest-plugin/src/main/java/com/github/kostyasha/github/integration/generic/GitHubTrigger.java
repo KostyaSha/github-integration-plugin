@@ -3,7 +3,6 @@ package com.github.kostyasha.github.integration.generic;
 import antlr.ANTLRException;
 import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
-import com.github.kostyasha.github.integration.generic.errors.GitHubError;
 import com.github.kostyasha.github.integration.generic.errors.GitHubErrorsAction;
 import com.github.kostyasha.github.integration.generic.errors.impl.GitHubRepoProviderError;
 import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider;
@@ -22,9 +21,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -54,10 +51,11 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
     private transient GitHubRepoProvider repoProvider = null;
 
     @CheckForNull
-    private GitHubErrorsAction errorActions;
+    private GitHubErrorsAction errorsAction;
 
     // for performance
     private transient GitHubRepositoryName repoName;
+
     protected GitHubTrigger(String cronTabSpec) throws ANTLRException {
         super(cronTabSpec);
     }
@@ -109,6 +107,7 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
     public void setRepoName(GitHubRepositoryName repoName) {
         this.repoName = repoName;
     }
+
     @Beta
     @Nonnull
     public List<GitHubRepoProvider> getRepoProviders() {
@@ -145,17 +144,19 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
             }
             if (failed) {
                 LOG.error("Can't find repo provider for GitHubBranchTrigger job: {}. All repo providers failed: {}",
-                    getJob().getFullName(), throwables
+                        getJob().getFullName(), throwables
                 );
             }
         }
+
         if (isNull(repoProvider)) {
-            getErrorActions().addOrReplaceError(new GitHubRepoProviderError(
-                String.format("Can't find repo provider for %s.<br/> All providers failed: %s", job.getName(), throwables)
+            getErrorsAction().addOrReplaceError(new GitHubRepoProviderError(
+                    String.format("Can't find repo provider for %s.<br/> All providers failed: %s", job.getName(), throwables)
             ));
         }
+
         checkState(nonNull(repoProvider), "Can't find repo provider for %s", job.getName());
-        getErrorActions().removeErrors(GitHubRepoProviderError.class);
+        getErrorsAction().removeErrors(GitHubRepoProviderError.class);
 
         return repoProvider;
     }
@@ -167,15 +168,12 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
         return remoteRepository;
     }
 
-    /**
-     * initialise errorAction storage.
-     */
-    public abstract GitHubErrorsAction initErrorActions();
-
     @Nonnull
-    public GitHubErrorsAction getErrorActions() {
-        if (isNull(errorActions)) errorActions = initErrorActions();
-        return errorActions;
+    public GitHubErrorsAction getErrorsAction() {
+        if (isNull(errorsAction)) {
+            errorsAction = new GitHubErrorsAction(getDescriptor().getDisplayName() + " Trigger Errors");
+        }
+        return errorsAction;
     }
 
     @Override
@@ -194,10 +192,13 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
     @Nonnull
     @Override
     public Collection<? extends Action> getProjectActions() {
-        if (isNull(getPollingLogAction())) {
-            return Collections.emptyList();
+        final ArrayList<Action> actions = new ArrayList<>();
+
+        if (nonNull(getPollingLogAction())) {
+            actions.add(getPollingLogAction());
         }
-        return Collections.singleton(getPollingLogAction());
+        actions.add(getErrorsAction());
+        return actions;
     }
 
     @CheckForNull

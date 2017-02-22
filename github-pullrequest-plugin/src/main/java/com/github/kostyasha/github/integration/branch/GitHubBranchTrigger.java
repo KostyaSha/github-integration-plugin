@@ -4,9 +4,9 @@ import antlr.ANTLRException;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
 import com.github.kostyasha.github.integration.branch.trigger.JobRunnerForBranchCause;
-import com.github.kostyasha.github.integration.generic.errors.GitHubErrorsAction;
 import com.github.kostyasha.github.integration.generic.GitHubTrigger;
 import com.github.kostyasha.github.integration.generic.GitHubTriggerDescriptor;
+import com.github.kostyasha.github.integration.generic.errors.impl.GitHubHookRegistrationError;
 import hudson.Extension;
 import hudson.model.Job;
 import hudson.triggers.Trigger;
@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 import static com.github.kostyasha.github.integration.branch.trigger.check.BranchToCauseConverter.toGitHubBranchCause;
 import static com.github.kostyasha.github.integration.branch.trigger.check.LocalRepoUpdater.updateLocalRepo;
 import static com.github.kostyasha.github.integration.branch.trigger.check.SkipFirstRunForBranchFilter.ifSkippedFirstRun;
+import static com.github.kostyasha.github.integration.branch.webhook.WebhookInfoBranchPredicates.withHookTriggerMode;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Predicates.not;
 import static java.text.DateFormat.getDateTimeInstance;
@@ -113,11 +114,15 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
         LOG.info("Starting GitHub Branch trigger for project {}", job.getFullName());
         super.start(job, newInstance);
 
-        if (newInstance) {
+        if (newInstance && getRepoProvider().isManageHooks(this) && withHookTriggerMode().apply(job)) {
             try {
                 getRepoProvider().registerHookFor(this);
-            } catch (Throwable error){
-                // report error
+                getErrorsAction().removeErrors(GitHubHookRegistrationError.class);
+            } catch (Throwable error) {
+                getErrorsAction().addOrReplaceError(new GitHubHookRegistrationError(
+                        String.format("Failed register hook for %s. <br/> Because %s",
+                                job.getFullName(), error.toString())
+                ));
                 throw error;
             }
         }
@@ -138,11 +143,6 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
         }
 
         return pollingLogAction;
-    }
-
-    @Override
-    public GitHubErrorsAction initErrorActions() {
-        return new GitHubErrorsAction("GitHub Branch Trigger Errors");
     }
 
     @Override
@@ -299,7 +299,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
 
         @Override
         public String getDisplayName() {
-            return "Experimental: GitHub Branches";
+            return "GitHub Branches";
         }
 
         // list all available descriptors for choosing in job configuration

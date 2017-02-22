@@ -155,11 +155,6 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
     }
 
     @Override
-    public GitHubErrorsAction initErrorActions() {
-        return new GitHubErrorsAction("GitHub Pull Request Trigger Errors");
-    }
-
-    @Override
     public void start(Job<?, ?> job, boolean newInstance) {
         LOGGER.info("Starting GitHub Pull Request trigger for project {}", job.getFullName());
         super.start(job, newInstance);
@@ -167,21 +162,15 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
         if (newInstance && getRepoProvider().isManageHooks(this) && withHookTriggerMode().apply(job)) {
             try {
                 getRepoProvider().registerHookFor(this);
-                getErrorActions().removeErrors(GitHubHookRegistrationError.class);
+                getErrorsAction().removeErrors(GitHubHookRegistrationError.class);
             } catch (Throwable error) {
-                getErrorActions().getErrors().add(new GitHubHookRegistrationError());
+                getErrorsAction().addOrReplaceError(new GitHubHookRegistrationError(
+                        String.format("Failed register hook for %s. <br/> Because %s",
+                                job.getFullName(), error.toString())
+                ));
                 throw error;
             }
         }
-    }
-
-    @Nonnull
-    @Override
-    public Collection<? extends Action> getProjectActions() {
-        final ArrayList<Action> actions = new ArrayList<>();
-        actions.addAll(super.getProjectActions());
-        actions.add(getErrorActions());
-        return actions;
     }
 
     @Override
@@ -367,7 +356,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
 
         @Override
         public String getDisplayName() {
-            return "Build GitHub Pull Requests";
+            return "GitHub Pull Requests";
         }
 
         // list all available descriptors for choosing in job configuration
