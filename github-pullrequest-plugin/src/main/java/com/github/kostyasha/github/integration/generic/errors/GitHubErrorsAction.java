@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static java.util.Collections.synchronizedSet;
+import static java.util.Objects.isNull;
 
 /**
  * Action that reports errors on job view page. Consists of sinle Actions.
@@ -32,11 +33,10 @@ public class GitHubErrorsAction implements ProminentProjectAction {
         return errors;
     }
 
-    public boolean addOrReplaceError(GitHubError a) {
-        if (a == null) {
+    public boolean addOrReplaceError(@Nonnull GitHubError a) {
+        if (isNull(a)) {
             throw new IllegalArgumentException("Action must be non-null");
         }
-        // CopyOnWriteArrayList does not support Iterator.remove, so need to do it this way:
         Set<GitHubError> old = new HashSet<>(1);
         Set<GitHubError> current = getErrors();
         boolean found = false;
@@ -55,10 +55,9 @@ public class GitHubErrorsAction implements ProminentProjectAction {
     }
 
     public boolean removeErrors(@Nonnull Class<? extends GitHubError> clazz) {
-        if (clazz == null) {
+        if (isNull(clazz)) {
             throw new IllegalArgumentException("Action type must be non-null");
         }
-        // CopyOnWriteArrayList does not support Iterator.remove, so need to do it this way:
         Set<GitHubError> old = new HashSet<>();
         Set<GitHubError> current = getErrors();
         for (GitHubError err : current) {

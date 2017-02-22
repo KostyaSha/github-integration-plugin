@@ -5,6 +5,8 @@ import com.github.kostyasha.github.integration.generic.errors.GitHubError;
 import javax.annotation.Nonnull;
 
 /**
+ * When hook registration in trigger fails.
+ *
  * @author Kanstantsin Shautsou
  */
 public class GitHubHookRegistrationError extends GitHubError {

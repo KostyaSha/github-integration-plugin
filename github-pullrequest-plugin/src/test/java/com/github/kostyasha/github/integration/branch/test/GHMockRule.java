@@ -13,12 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static java.lang.String.format;
 import static org.jenkinsci.plugins.github.pullrequest.util.TestUtil.classpath;
 
@@ -160,6 +155,7 @@ public class GHMockRule implements TestRule {
                 )
         ));
     }
+
     public GHMockRule stubIssues1() {
         return addSetup(() -> service().stubFor(
                 get(urlEqualTo(

@@ -36,17 +36,6 @@ import static org.jenkinsci.plugins.github_integration.junit.GHRule.BRANCH1;
  * @author Kanstantsin Shautsou
  */
 public abstract class AbstractPRTest {
-//    private static final Logger PLUGIN_LOGGER = Logger.getLogger("org.jenkinsci.plugins.github.pullrequest");
-
-//    static {
-////        final MemoryHandler memoryHandler = new MemoryHandler(new RingBufferLogHandler(), 1000, Level.ALL);
-//        PLUGIN_LOGGER.addHandler(new RingBufferLogHandler());
-//        PLUGIN_LOGGER.setLevel(Level.WARNING);
-//        PLUGIN_LOGGER.setFilter(record -> {
-//            assertThat("shouldn't have exception", record.getThrown(), notNullValue());
-//            return true;
-//        });
-//    }
 
     public JenkinsRule jRule = new JenkinsRule();
 
@@ -60,27 +49,6 @@ public abstract class AbstractPRTest {
         .around(ghRule);
 
     public void basicTest(Job job) throws Exception {
-//        final LogRecorderManager recorderManager = jRule.getInstance().getLog();
-//
-//        LogRecorder logRecorder = recorderManager.getLogRecorder("plugin");
-//        if (isNull(logRecorder)) {
-//            logRecorder = new LogRecorder("plugin");
-//            recorderManager.logRecorders.put("plugin", logRecorder);
-//        }
-//
-//        LogRecorder finalLogRecorder = logRecorder;
-//        Arrays.asList("org.jenkinsci.plugins.github.pullrequest",
-//            "com.github.kostyasha.github.integration").forEach(s -> {
-//                final LogRecorder.Target target = new LogRecorder.Target(s, Level.ALL);
-//                finalLogRecorder.targets.add(target);
-//                target.enable();
-//                recorderManager.logRecorders.put(s, finalLogRecorder);
-//            }
-//        );
-//
-//        jRule.getInstance().save();
-
-
         // fails with workflow
         if (job instanceof FreeStyleProject || job instanceof MatrixProject) {
             jRule.configRoundtrip(job); // activate trigger
@@ -119,12 +87,6 @@ public abstract class AbstractPRTest {
 
         jRule.waitUntilNoActivity();
 
-//        final RingBufferLogHandler handler = (RingBufferLogHandler) PLUGIN_LOGGER.getHandlers()[0];
-//
-//        for (LogRecord record : handler.getView()) {
-//            assertThat(record.getThrown(), notNullValue());
-//        }
-
         // refresh objects
         ghPRRepository = job.getAction(GitHubPRRepository.class);
         assertThat("Action storage should be available", ghPRRepository, notNullValue());
@@ -156,6 +118,5 @@ public abstract class AbstractPRTest {
         jRule.assertBuildStatusSuccess(job.getLastBuild());
         assertThat(job.getBuilds().size(), is(2));
     }
-
-
+    
 }
