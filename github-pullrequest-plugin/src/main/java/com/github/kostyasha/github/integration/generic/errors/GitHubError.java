@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 /**
  * Custom errors that participate in list of {@link GitHubErrorsAction}.
  * index.groovy
+ *
  * @author Kanstantsin Shautsou
  */
 public abstract class GitHubError implements ExtensionPoint {
@@ -23,7 +24,7 @@ public abstract class GitHubError implements ExtensionPoint {
      * Raw displayed html content as description.
      */
     @Nonnull
-    public String getHtmlDescription(){
+    public String getHtmlDescription() {
         return description;
     }
 }
