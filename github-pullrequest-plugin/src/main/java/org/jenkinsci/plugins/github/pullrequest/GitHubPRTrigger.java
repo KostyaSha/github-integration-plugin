@@ -1,11 +1,14 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
 import antlr.ANTLRException;
-import com.cloudbees.jenkins.GitHubRepositoryName;
+import com.github.kostyasha.github.integration.generic.errors.GitHubErrorsAction;
 import com.github.kostyasha.github.integration.generic.GitHubTrigger;
 import com.github.kostyasha.github.integration.generic.GitHubTriggerDescriptor;
+import com.github.kostyasha.github.integration.generic.errors.impl.GitHubHookRegistrationError;
+import com.github.kostyasha.github.integration.generic.errors.impl.GitHubRepoProviderError;
 import hudson.Extension;
 import hudson.Util;
+import hudson.model.Action;
 import hudson.model.Job;
 import hudson.triggers.Trigger;
 import jenkins.model.Jenkins;
@@ -32,6 +35,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -99,10 +103,6 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
     @CheckForNull
     private GitHubPRBranchRestriction branchRestriction;
 
-    // for performance
-    private transient GitHubRepositoryName repoName;
-    private transient GHRepository remoteRepository;
-
     @CheckForNull
     private transient GitHubPRPollingLogAction pollingLogAction;
 
@@ -155,15 +155,33 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
     }
 
     @Override
+    public GitHubErrorsAction initErrorActions() {
+        return new GitHubErrorsAction("GitHub Pull Request Trigger Errors");
+    }
+
+    @Override
     public void start(Job<?, ?> job, boolean newInstance) {
         LOGGER.info("Starting GitHub Pull Request trigger for project {}", job.getFullName());
         super.start(job, newInstance);
 
-        if (newInstance
-                && getRepoProvider().isManageHooks(this)
-                && withHookTriggerMode().apply(job)) {
-            getRepoProvider().registerHookFor(this);
+        if (newInstance && getRepoProvider().isManageHooks(this) && withHookTriggerMode().apply(job)) {
+            try {
+                getRepoProvider().registerHookFor(this);
+                getErrorActions().removeErrors(GitHubHookRegistrationError.class);
+            } catch (Throwable error) {
+                getErrorActions().getErrors().add(new GitHubHookRegistrationError());
+                throw error;
+            }
         }
+    }
+
+    @Nonnull
+    @Override
+    public Collection<? extends Action> getProjectActions() {
+        final ArrayList<Action> actions = new ArrayList<>();
+        actions.addAll(super.getProjectActions());
+        actions.add(getErrorActions());
+        return actions;
     }
 
     @Override

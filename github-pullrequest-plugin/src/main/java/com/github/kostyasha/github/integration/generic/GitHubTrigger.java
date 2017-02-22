@@ -3,6 +3,9 @@ package com.github.kostyasha.github.integration.generic;
 import antlr.ANTLRException;
 import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
+import com.github.kostyasha.github.integration.generic.errors.GitHubError;
+import com.github.kostyasha.github.integration.generic.errors.GitHubErrorsAction;
+import com.github.kostyasha.github.integration.generic.errors.impl.GitHubRepoProviderError;
 import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider;
 import com.google.common.annotations.Beta;
 import hudson.model.Action;
@@ -17,9 +20,11 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -47,6 +52,9 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
     @Beta
     private List<GitHubRepoProvider> repoProviders = asList(new GitHubPluginRepoProvider()); // default
     private transient GitHubRepoProvider repoProvider = null;
+
+    @CheckForNull
+    private GitHubErrorsAction errorActions;
 
     // for performance
     private transient GitHubRepositoryName repoName;
@@ -123,21 +131,32 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
 
     @Beta
     public GitHubRepoProvider getRepoProvider() {
+        final ArrayList<Throwable> throwables = new ArrayList<>();
         if (isNull(repoProvider)) {
             boolean failed = false;
             for (GitHubRepoProvider prov : getRepoProviders()) {
                 try {
                     prov.getGHRepository(this);
                     repoProvider = prov;
-                } catch (Exception ignore) {
+                } catch (Exception ex) {
+                    throwables.add(ex);
                     failed = true;
                 }
             }
             if (failed) {
-                LOG.error("Can't find repo provider for GitHubBranchTrigger job: {}", getJob().getFullName());
+                LOG.error("Can't find repo provider for GitHubBranchTrigger job: {}. All repo providers failed: {}",
+                    getJob().getFullName(), throwables
+                );
             }
         }
+        if (isNull(repoProvider)) {
+            getErrorActions().addOrReplaceError(new GitHubRepoProviderError(
+                String.format("Can't find repo provider for %s.<br/> All providers failed: %s", job.getName(), throwables)
+            ));
+        }
         checkState(nonNull(repoProvider), "Can't find repo provider for %s", job.getName());
+        getErrorActions().removeErrors(GitHubRepoProviderError.class);
+
         return repoProvider;
     }
 
@@ -146,6 +165,17 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
         GHRepository remoteRepository = getRepoProvider().getGHRepository(this);
         checkState(nonNull(remoteRepository), "Can't get remote GH repo for %s", job.getName());
         return remoteRepository;
+    }
+
+    /**
+     * initialise errorAction storage.
+     */
+    public abstract GitHubErrorsAction initErrorActions();
+
+    @Nonnull
+    public GitHubErrorsAction getErrorActions() {
+        if (isNull(errorActions)) errorActions = initErrorActions();
+        return errorActions;
     }
 
     @Override

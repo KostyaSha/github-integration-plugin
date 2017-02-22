@@ -58,8 +58,6 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
 
     @Override
     public void registerHookFor(GitHubTrigger trigger) {
-        if (!withHookTriggerMode().apply(trigger.getJob())) return;
-
         GitHubWebHook.get().registerHookFor(trigger.getJob());
     }
 

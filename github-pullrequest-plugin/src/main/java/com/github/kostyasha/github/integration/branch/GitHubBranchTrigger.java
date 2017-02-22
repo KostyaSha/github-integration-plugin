@@ -4,6 +4,7 @@ import antlr.ANTLRException;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
 import com.github.kostyasha.github.integration.branch.trigger.JobRunnerForBranchCause;
+import com.github.kostyasha.github.integration.generic.errors.GitHubErrorsAction;
 import com.github.kostyasha.github.integration.generic.GitHubTrigger;
 import com.github.kostyasha.github.integration.generic.GitHubTriggerDescriptor;
 import hudson.Extension;
@@ -40,7 +41,6 @@ import java.util.stream.Collectors;
 import static com.github.kostyasha.github.integration.branch.trigger.check.BranchToCauseConverter.toGitHubBranchCause;
 import static com.github.kostyasha.github.integration.branch.trigger.check.LocalRepoUpdater.updateLocalRepo;
 import static com.github.kostyasha.github.integration.branch.trigger.check.SkipFirstRunForBranchFilter.ifSkippedFirstRun;
-import static com.github.kostyasha.github.integration.branch.webhook.WebhookInfoBranchPredicates.withHookTriggerMode;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Predicates.not;
 import static java.text.DateFormat.getDateTimeInstance;
@@ -114,7 +114,12 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
         super.start(job, newInstance);
 
         if (newInstance) {
-            getRepoProvider().registerHookFor(this);
+            try {
+                getRepoProvider().registerHookFor(this);
+            } catch (Throwable error){
+                // report error
+                throw error;
+            }
         }
     }
 
@@ -133,6 +138,11 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
         }
 
         return pollingLogAction;
+    }
+
+    @Override
+    public GitHubErrorsAction initErrorActions() {
+        return new GitHubErrorsAction("GitHub Branch Trigger Errors");
     }
 
     @Override
