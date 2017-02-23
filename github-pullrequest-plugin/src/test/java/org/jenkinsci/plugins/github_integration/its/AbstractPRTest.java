@@ -118,5 +118,5 @@ public abstract class AbstractPRTest {
         jRule.assertBuildStatusSuccess(job.getLastBuild());
         assertThat(job.getBuilds().size(), is(2));
     }
-    
+
 }

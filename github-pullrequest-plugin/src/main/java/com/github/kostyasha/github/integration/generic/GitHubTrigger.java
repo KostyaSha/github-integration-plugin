@@ -138,6 +138,7 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
                     prov.getGHRepository(this);
                     repoProvider = prov;
                 } catch (Exception ex) {
+                    LOG.debug("Provider failed:", ex);
                     throwables.add(ex);
                     failed = true;
                 }
