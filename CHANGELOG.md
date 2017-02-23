@@ -2,6 +2,10 @@
 
 ## Next 
 
+## 0.1.0-rc21
+- Try iterate in global server configs and pick token with admin access
+- Report repo provider search errors to job page.
+
 ## 0.1.0-rc20
 - Make icons not so ugly
 - [PR] Retry comments retrieval
