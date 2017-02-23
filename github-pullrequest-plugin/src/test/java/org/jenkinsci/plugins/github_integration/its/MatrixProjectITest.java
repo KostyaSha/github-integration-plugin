@@ -1,7 +1,9 @@
 package org.jenkinsci.plugins.github_integration.its;
 
 import hudson.matrix.AxisList;
+import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixProject;
+import hudson.matrix.MatrixRun;
 import hudson.matrix.TextAxis;
 import hudson.tasks.Shell;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRMessage;
@@ -20,7 +22,7 @@ public class MatrixProjectITest extends AbstractPRTest {
 
     @Test
     public void testChildStatuses() throws Exception {
-        final MatrixProject matrixProject = j.jenkins.createProject(MatrixProject.class, "matrix-project");
+        final MatrixProject matrixProject = jRule.jenkins.createProject(MatrixProject.class, "matrix-project");
 
         matrixProject.addProperty(getPreconfiguredProperty(ghRule.getGhRepo()));
         matrixProject.addTrigger(getPreconfiguredPRTrigger());
@@ -41,5 +43,11 @@ public class MatrixProjectITest extends AbstractPRTest {
         matrixProject.save();
 
         super.basicTest(matrixProject);
+
+        for (MatrixBuild build : matrixProject.getBuilds()) {
+            for (MatrixRun matrixRun : build.getRuns()) {
+                jRule.assertLogNotContains("\tat", matrixRun);
+            }
+        }
     }
 }

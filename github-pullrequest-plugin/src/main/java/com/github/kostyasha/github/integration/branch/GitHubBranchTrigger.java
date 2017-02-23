@@ -6,6 +6,7 @@ import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDe
 import com.github.kostyasha.github.integration.branch.trigger.JobRunnerForBranchCause;
 import com.github.kostyasha.github.integration.generic.GitHubTrigger;
 import com.github.kostyasha.github.integration.generic.GitHubTriggerDescriptor;
+import com.github.kostyasha.github.integration.generic.errors.impl.GitHubHookRegistrationError;
 import hudson.Extension;
 import hudson.model.Job;
 import hudson.triggers.Trigger;
@@ -113,9 +114,17 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
         LOG.info("Starting GitHub Branch trigger for project {}", job.getFullName());
         super.start(job, newInstance);
 
-        if (newInstance && getRepoProvider().isManageHooks(this) &&
-                withHookTriggerMode().apply(job)) {
-            getRepoProvider().registerHookFor(this);
+        if (newInstance && getRepoProvider().isManageHooks(this) && withHookTriggerMode().apply(job)) {
+            try {
+                getRepoProvider().registerHookFor(this);
+                getErrorsAction().removeErrors(GitHubHookRegistrationError.class);
+            } catch (Throwable error) {
+                getErrorsAction().addOrReplaceError(new GitHubHookRegistrationError(
+                        String.format("Failed register hook for %s. <br/> Because %s",
+                                job.getFullName(), error.toString())
+                ));
+                throw error;
+            }
         }
     }
 
@@ -290,7 +299,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
 
         @Override
         public String getDisplayName() {
-            return "Experimental: GitHub Branches";
+            return "GitHub Branches";
         }
 
         // list all available descriptors for choosing in job configuration

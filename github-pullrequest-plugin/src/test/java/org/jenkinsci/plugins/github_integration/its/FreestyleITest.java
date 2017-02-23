@@ -19,7 +19,7 @@ public class FreestyleITest extends AbstractPRTest {
     @Test
     public void freestyleTest() throws Exception {
         // create job
-        FreeStyleProject job = j.createFreeStyleProject("freestyle-job");
+        FreeStyleProject job = jRule.createFreeStyleProject("freestyle-job");
 
         job.addProperty(getPreconfiguredProperty(ghRule.getGhRepo()));
 

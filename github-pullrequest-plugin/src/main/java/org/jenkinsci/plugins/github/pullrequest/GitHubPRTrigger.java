@@ -1,9 +1,9 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
 import antlr.ANTLRException;
-import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.github.kostyasha.github.integration.generic.GitHubTrigger;
 import com.github.kostyasha.github.integration.generic.GitHubTriggerDescriptor;
+import com.github.kostyasha.github.integration.generic.errors.impl.GitHubHookRegistrationError;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.Job;
@@ -100,10 +100,6 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
     @CheckForNull
     private GitHubPRBranchRestriction branchRestriction;
 
-    // for performance
-    private transient GitHubRepositoryName repoName;
-    private transient GHRepository remoteRepository;
-
     @CheckForNull
     private transient GitHubPRPollingLogAction pollingLogAction;
 
@@ -160,10 +156,17 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
         LOGGER.info("Starting GitHub Pull Request trigger for project {}", job.getFullName());
         super.start(job, newInstance);
 
-        if (newInstance
-                && getRepoProvider().isManageHooks(this)
-                && withHookTriggerMode().apply(job)) {
-            getRepoProvider().registerHookFor(this);
+        if (newInstance && getRepoProvider().isManageHooks(this) && withHookTriggerMode().apply(job)) {
+            try {
+                getRepoProvider().registerHookFor(this);
+                getErrorsAction().removeErrors(GitHubHookRegistrationError.class);
+            } catch (Throwable error) {
+                getErrorsAction().addOrReplaceError(new GitHubHookRegistrationError(
+                        String.format("Failed register hook for %s. <br/> Because %s",
+                                job.getFullName(), error.toString())
+                ));
+                throw error;
+            }
         }
     }
 
@@ -351,7 +354,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
 
         @Override
         public String getDisplayName() {
-            return "Build GitHub Pull Requests";
+            return "GitHub Pull Requests";
         }
 
         // list all available descriptors for choosing in job configuration

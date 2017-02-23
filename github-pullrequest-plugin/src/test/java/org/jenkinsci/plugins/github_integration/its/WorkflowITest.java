@@ -28,7 +28,7 @@ public class WorkflowITest extends AbstractPRTest {
 
     @Test
     public void workflowTest() throws Exception {
-        final WorkflowJob workflowJob = j.jenkins.createProject(WorkflowJob.class, "it-job");
+        final WorkflowJob workflowJob = jRule.jenkins.createProject(WorkflowJob.class, "it-job");
 
         workflowJob.addProperty(getPreconfiguredProperty(ghRule.getGhRepo()));
         workflowJob.addTrigger(getPreconfiguredPRTrigger());
@@ -44,7 +44,7 @@ public class WorkflowITest extends AbstractPRTest {
 
     @Test
     public void testContextStatuses() throws Exception {
-        final WorkflowJob workflowJob = j.jenkins.createProject(WorkflowJob.class, "testContextStatuses");
+        final WorkflowJob workflowJob = jRule.jenkins.createProject(WorkflowJob.class, "testContextStatuses");
 
         workflowJob.addProperty(getPreconfiguredProperty(ghRule.getGhRepo()));
         workflowJob.addTrigger(getPreconfiguredPRTrigger());

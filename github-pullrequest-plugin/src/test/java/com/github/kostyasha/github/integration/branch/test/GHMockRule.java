@@ -13,12 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static java.lang.String.format;
 import static org.jenkinsci.plugins.github.pullrequest.util.TestUtil.classpath;
 
@@ -89,27 +84,17 @@ public class GHMockRule implements TestRule {
      * More info: https://developer.github.com/v3/users/#get-the-authenticated-user
      */
     public GHMockRule stubUser() {
-        return addSetup(new Runnable() {
-            @Override
-            public void run() {
-                service().stubFor(get(urlPathEqualTo("/user"))
-                        .willReturn(aResponse()
-                                .withStatus(200)
-                                .withHeader("Content-Type", "application/json; charset=utf-8")
-                                .withBody(classpath(GHMockRule.class, "user.json"))));
-            }
-        });
+        return addSetup(() -> service().stubFor(get(urlPathEqualTo("/user"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json; charset=utf-8")
+                        .withBody(classpath(GHMockRule.class, "user.json")))));
     }
 
     public GHMockRule stubRateLimit() {
-        return addSetup(new Runnable() {
-            @Override
-            public void run() {
-                service().stubFor(get(urlEqualTo("/rate_limit"))
-                        .willReturn(aResponse()
-                                .withStatus(404)));
-            }
-        });
+        return addSetup(() -> service().stubFor(get(urlEqualTo("/rate_limit"))
+                .willReturn(aResponse()
+                        .withStatus(404))));
     }
 
     /**
@@ -118,17 +103,14 @@ public class GHMockRule implements TestRule {
      * More info: https://developer.github.com/v3/repos/branches/#list-branches
      */
     public GHMockRule stubRepoBranches() {
-        return addSetup(new Runnable() {
-            @Override
-            public void run() {
-                String repo = format("/repos/%s/%s/branches", REPO.getUserName(), REPO.getRepositoryName());
-                service().stubFor(
-                        get(urlEqualTo(repo))
-                                .willReturn(aResponse()
-                                        .withStatus(200)
-                                        .withHeader("Content-Type", "application/json; charset=utf-8")
-                                        .withBody(classpath(GHMockRule.class, "org-repo-branches.json"))));
-            }
+        return addSetup(() -> {
+            String repo = format("/repos/%s/%s/branches", REPO.getUserName(), REPO.getRepositoryName());
+            service().stubFor(
+                    get(urlEqualTo(repo))
+                            .willReturn(aResponse()
+                                    .withStatus(200)
+                                    .withHeader("Content-Type", "application/json; charset=utf-8")
+                                    .withBody(classpath(GHMockRule.class, "org-repo-branches.json"))));
         });
     }
 
@@ -138,17 +120,14 @@ public class GHMockRule implements TestRule {
      * More info: https://developer.github.com/v3/repos/#get
      */
     public GHMockRule stubRepo() {
-        return addSetup(new Runnable() {
-            @Override
-            public void run() {
-                String repo = format("/repos/%s/%s", REPO.getUserName(), REPO.getRepositoryName());
-                service().stubFor(
-                        get(urlEqualTo(repo))
-                                .willReturn(aResponse()
-                                        .withStatus(200)
-                                        .withHeader("Content-Type", "application/json; charset=utf-8")
-                                        .withBody(classpath(GHMockRule.class, "repos-repo.json"))));
-            }
+        return addSetup(() -> {
+            String repo = format("/repos/%s/%s", REPO.getUserName(), REPO.getRepositoryName());
+            service().stubFor(
+                    get(urlEqualTo(repo))
+                            .willReturn(aResponse()
+                                    .withStatus(200)
+                                    .withHeader("Content-Type", "application/json; charset=utf-8")
+                                    .withBody(classpath(GHMockRule.class, "repos-repo.json"))));
         });
     }
 
@@ -158,66 +137,47 @@ public class GHMockRule implements TestRule {
      * More info: https://developer.github.com/v3/repos/statuses/
      */
     public GHMockRule stubStatuses() {
-        return addSetup(new Runnable() {
-            @Override
-            public void run() {
-                service().stubFor(
-                        post(urlPathMatching(
-                                format("/repos/%s/%s/statuses/.*", REPO.getUserName(), REPO.getRepositoryName()))
-                        ).willReturn(aResponse().withStatus(201)));
-            }
-        });
+        return addSetup(() -> service().stubFor(
+                post(urlPathMatching(
+                        format("/repos/%s/%s/statuses/.*", REPO.getUserName(), REPO.getRepositoryName()))
+                ).willReturn(aResponse().withStatus(201))));
     }
 
 
     public GHMockRule stubPulls() {
-        return addSetup(new Runnable() {
-            @Override
-            public void run() {
-                service().stubFor(
-                        get(urlEqualTo(
-                                format("/repos/%s/%s/pulls?state=open", REPO.getUserName(), REPO.getRepositoryName()))
-                        ).willReturn(aResponse()
-                                .withStatus(200)
-                                .withHeader("Content-Type", "application/json; charset=utf-8")
-                                .withBody(classpath(GHMockRule.class, "pulls.json"))
-                        )
-                );
-            }
-        });
+        return addSetup(() -> service().stubFor(
+                get(urlEqualTo(
+                        format("/repos/%s/%s/pulls?state=open", REPO.getUserName(), REPO.getRepositoryName()))
+                ).willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json; charset=utf-8")
+                        .withBody(classpath(GHMockRule.class, "pulls.json"))
+                )
+        ));
     }
+
     public GHMockRule stubIssues1() {
-        return addSetup(new Runnable() {
-            @Override
-            public void run() {
-                service().stubFor(
-                        get(urlEqualTo(
-                                format("/repos/%s/%s/issues/1", REPO.getUserName(), REPO.getRepositoryName()))
-                        ).willReturn(aResponse()
-                                .withStatus(200)
-                                .withHeader("Content-Type", "application/json; charset=utf-8")
-                                .withBody(classpath(GHMockRule.class, "issues1.json"))
-                        )
-                );
-            }
-        });
+        return addSetup(() -> service().stubFor(
+                get(urlEqualTo(
+                        format("/repos/%s/%s/issues/1", REPO.getUserName(), REPO.getRepositoryName()))
+                ).willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json; charset=utf-8")
+                        .withBody(classpath(GHMockRule.class, "issues1.json"))
+                )
+        ));
     }
 
     public GHMockRule stubComments1() {
-        return addSetup(new Runnable() {
-            @Override
-            public void run() {
-                service().stubFor(
-                        get(urlEqualTo(
-                                format("/repos/%s/%s/issues/1/comments", REPO.getUserName(), REPO.getRepositoryName()))
-                        ).willReturn(aResponse()
-                                .withStatus(200)
-                                .withHeader("Content-Type", "application/json; charset=utf-8")
-                                .withBody(classpath(GHMockRule.class, "comments1.json"))
-                        )
-                );
-            }
-        });
+        return addSetup(() -> service().stubFor(
+                get(urlEqualTo(
+                        format("/repos/%s/%s/issues/1/comments", REPO.getUserName(), REPO.getRepositoryName()))
+                ).willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json; charset=utf-8")
+                        .withBody(classpath(GHMockRule.class, "comments1.json"))
+                )
+        ));
     }
 
     /**

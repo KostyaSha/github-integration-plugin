@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.github_integration.its;
 import hudson.matrix.MatrixProject;
 import hudson.model.FreeStyleProject;
 import hudson.model.Job;
+import hudson.util.RingBufferLogHandler;
 import org.hamcrest.Matchers;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
@@ -14,11 +15,10 @@ import org.junit.rules.RuleChain;
 import org.junit.rules.TemporaryFolder;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.kohsuke.github.GHPullRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.LogRecord;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -26,6 +26,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.core.IsNot.not;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
 import static org.jenkinsci.plugins.github_integration.awaitility.GHPRAppeared.ghPRAppeared;
 import static org.jenkinsci.plugins.github_integration.awaitility.GHTriggerRunAndEnd.ghTriggerRunAndEnd;
@@ -35,23 +36,22 @@ import static org.jenkinsci.plugins.github_integration.junit.GHRule.BRANCH1;
  * @author Kanstantsin Shautsou
  */
 public abstract class AbstractPRTest {
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractPRTest.class);
 
-    public static JenkinsRule j = new JenkinsRule();
+    public JenkinsRule jRule = new JenkinsRule();
 
-    public static TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    public static GHRule ghRule = new GHRule(j, temporaryFolder);
+    public GHRule ghRule = new GHRule(jRule, temporaryFolder);
 
     @Rule
     public RuleChain ruleChain = RuleChain.outerRule(temporaryFolder)
-            .around(j)
-            .around(ghRule);
+        .around(jRule)
+        .around(ghRule);
 
     public void basicTest(Job job) throws Exception {
         // fails with workflow
         if (job instanceof FreeStyleProject || job instanceof MatrixProject) {
-            j.configRoundtrip(job); // activate trigger
+            jRule.configRoundtrip(job); // activate trigger
         }
 
         // update trigger (maybe useless)
@@ -64,7 +64,7 @@ public abstract class AbstractPRTest {
                 .timeout(100, SECONDS)
                 .until(ghTriggerRunAndEnd(trigger));
 
-        j.waitUntilNoActivity();
+        jRule.waitUntilNoActivity();
 
         assertThat(job.getLastBuild(), is(nullValue()));
 
@@ -85,7 +85,7 @@ public abstract class AbstractPRTest {
                 .timeout(100, SECONDS)
                 .until(ghTriggerRunAndEnd(trigger));
 
-        j.waitUntilNoActivity();
+        jRule.waitUntilNoActivity();
 
         // refresh objects
         ghPRRepository = job.getAction(GitHubPRRepository.class);
@@ -94,9 +94,8 @@ public abstract class AbstractPRTest {
         pulls = ghPRRepository.getPulls();
         assertThat("Pull request 1 should appear in action storage", pulls.entrySet(), Matchers.hasSize(1));
 
-        j.assertBuildStatusSuccess(job.getLastBuild());
+        jRule.assertBuildStatusSuccess(job.getLastBuild());
         assertThat(job.getBuilds().size(), is(1));
-
 
         // now push changes that should trigger again
         ghRule.commitFileToBranch(BRANCH1, BRANCH1 + ".file2", "content", "commit 2 for " + BRANCH1);
@@ -107,7 +106,7 @@ public abstract class AbstractPRTest {
                 .timeout(100, SECONDS)
                 .until(ghTriggerRunAndEnd(trigger));
 
-        j.waitUntilNoActivity();
+        jRule.waitUntilNoActivity();
 
         // refresh objects
         ghPRRepository = job.getAction(GitHubPRRepository.class);
@@ -116,9 +115,8 @@ public abstract class AbstractPRTest {
         pulls = ghPRRepository.getPulls();
         assertThat("Pull request 1 should appear in action storage", pulls.entrySet(), Matchers.hasSize(1));
 
-        j.assertBuildStatusSuccess(job.getLastBuild());
+        jRule.assertBuildStatusSuccess(job.getLastBuild());
         assertThat(job.getBuilds().size(), is(2));
-
-
     }
+
 }

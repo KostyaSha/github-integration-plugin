@@ -60,7 +60,10 @@ public class CancelQueuedJobRunnerForCauseTest extends JobRunnerForCauseTest {
 
         final GitHubPRTrigger gitHubPRTrigger1 = new GitHubPRTrigger("", GitHubPRTriggerMode.HEAVY_HOOKS, null);
         gitHubPRTrigger1.setCancelQueued(true);
-        gitHubPRTrigger1.start(job1, true); // to have working polling log files
+        try {
+            gitHubPRTrigger1.start(job1, true); // to have working polling log files
+        } catch (Throwable ignore) {
+        }
         final JobRunnerForCause job1RunnerForCause = new JobRunnerForCause(job1, gitHubPRTrigger1);
 
         schedule(job1, 10, "cause1_1", 10000);
@@ -80,7 +83,10 @@ public class CancelQueuedJobRunnerForCauseTest extends JobRunnerForCauseTest {
 
         final GitHubPRTrigger gitHubPRTrigger2 = new GitHubPRTrigger("", GitHubPRTriggerMode.HEAVY_HOOKS, null);
         gitHubPRTrigger2.setCancelQueued(true);
-        gitHubPRTrigger2.start(job2, true); // to have working polling log files
+        try {
+            gitHubPRTrigger2.start(job2, true); // to have working polling log files
+        } catch (Throwable ignore) {
+        }
         final JobRunnerForCause job2RunnerForCause = new JobRunnerForCause(job2, gitHubPRTrigger2);
 
 
@@ -93,7 +99,10 @@ public class CancelQueuedJobRunnerForCauseTest extends JobRunnerForCauseTest {
 
         final GitHubPRTrigger gitHubPRTrigger3 = new GitHubPRTrigger("", GitHubPRTriggerMode.HEAVY_HOOKS, null);
         gitHubPRTrigger3.setCancelQueued(true);
-        gitHubPRTrigger3.start(job3, true); // to have working polling log files
+        try {
+            gitHubPRTrigger3.start(job3, true); // to have working polling log files
+        } catch (Throwable ignore) {
+        }
         final JobRunnerForCause job3RunnerForCause = new JobRunnerForCause(job3, gitHubPRTrigger3);
 
 
@@ -101,45 +110,33 @@ public class CancelQueuedJobRunnerForCauseTest extends JobRunnerForCauseTest {
         assertThat(jenkins.getQueue().getItems(), arrayWithSize(5));
 
 
-        ACL.impersonate(Jenkins.ANONYMOUS, new Runnable() {
-            @Override
-            public void run() {
-                assertThat("Should cancel job1 -> number 10", job1RunnerForCause.cancelQueuedBuildByPrNumber(10), is(2));
-                assertThat("Should not cancel more job1 -> number 10", job1RunnerForCause.cancelQueuedBuildByPrNumber(10), is(0));
-            }
+        ACL.impersonate(Jenkins.ANONYMOUS, () -> {
+            assertThat("Should cancel job1 -> number 10", job1RunnerForCause.cancelQueuedBuildByPrNumber(10), is(2));
+            assertThat("Should not cancel more job1 -> number 10", job1RunnerForCause.cancelQueuedBuildByPrNumber(10), is(0));
         });
 
         assertThat(jenkins.getQueue().getItems(), arrayWithSize(3));
 
-        ACL.impersonate(Jenkins.ANONYMOUS, new Runnable() {
-            @Override
-            public void run() {
-                assertThat("Should cancel job2 -> number 10", job2RunnerForCause.cancelQueuedBuildByPrNumber(10), is(1));
-                assertThat("Should not cancel more job2 -> number 10", job2RunnerForCause.cancelQueuedBuildByPrNumber(10), is(0));
-            }
+        ACL.impersonate(Jenkins.ANONYMOUS, () -> {
+            assertThat("Should cancel job2 -> number 10", job2RunnerForCause.cancelQueuedBuildByPrNumber(10), is(1));
+            assertThat("Should not cancel more job2 -> number 10", job2RunnerForCause.cancelQueuedBuildByPrNumber(10), is(0));
         });
 
         assertThat(jenkins.getQueue().getItems(), arrayWithSize(2));
 
-        ACL.impersonate(Jenkins.ANONYMOUS, new Runnable() {
-            @Override
-            public void run() {
-                assertThat("Should cancel job3 -> number 10", job3RunnerForCause.cancelQueuedBuildByPrNumber(10), is(1));
-                assertThat("Should not cancel more job3 -> number 10", job3RunnerForCause.cancelQueuedBuildByPrNumber(10), is(0));
-            }
+        ACL.impersonate(Jenkins.ANONYMOUS, () -> {
+            assertThat("Should cancel job3 -> number 10", job3RunnerForCause.cancelQueuedBuildByPrNumber(10), is(1));
+            assertThat("Should not cancel more job3 -> number 10", job3RunnerForCause.cancelQueuedBuildByPrNumber(10), is(0));
         });
 
         assertThat(jenkins.getQueue().getItems(), arrayWithSize(1));
 
-        ACL.impersonate(Jenkins.ANONYMOUS, new Runnable() {
-            @Override
-            public void run() {
-                assertThat("Should cancel job1 -> number 12", job1RunnerForCause.cancelQueuedBuildByPrNumber(12), is(1));
-                assertThat("Should not cancel more job1 -> number 12", job1RunnerForCause.cancelQueuedBuildByPrNumber(12), is(0));
-            }
+        ACL.impersonate(Jenkins.ANONYMOUS, () -> {
+            assertThat("Should cancel job1 -> number 12", job1RunnerForCause.cancelQueuedBuildByPrNumber(12), is(1));
+            assertThat("Should not cancel more job1 -> number 12", job1RunnerForCause.cancelQueuedBuildByPrNumber(12), is(0));
         });
 
-        assertThat(jenkins.getQueue().getItems(), IsArrayWithSize.<Queue.Item>emptyArray());
+        assertThat(jenkins.getQueue().getItems(), IsArrayWithSize.emptyArray());
     }
 
 }
