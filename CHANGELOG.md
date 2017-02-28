@@ -2,7 +2,7 @@
 
 ## Next 
 
-## 0.1.0-rc21
+## 0.1.0-rc22
 - [branch] Don't trigger on new branch when expecting commit changes 
 - [pr] fix user restriction.
 
