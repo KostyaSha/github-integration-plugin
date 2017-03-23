@@ -291,7 +291,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                 STATE.param(String.valueOf(cause.getState())),
                 COMMENT_BODY.param(String.valueOf(cause.getCommentBody())),
                 COMMENT_BODY_MATCH.param(String.valueOf(cause.getCommentBodyMatch())),
-                LABELS.param(String.join(",",cause.getLabels()))
+                LABELS.param(String.join(",", cause.getLabels()))
         );
         parameters.addAll(pluginParameters);
 
