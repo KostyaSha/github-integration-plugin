@@ -4,6 +4,8 @@ package org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository
 import hudson.model.Item
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause
 
+import static org.apache.commons.lang3.StringEscapeUtils.escapeEcmaScript
+
 def f = namespace(lib.FormTagLib);
 def l = namespace(lib.LayoutTagLib);
 def t = namespace("/lib/hudson")
@@ -53,13 +55,29 @@ l.layout(title: "GitHub Pull Request Status") {
                 tr() {
                     td() { makeBuildItem(buildMap.get(pr.number)) }
                 }
+                // build local Branch button
+                if (h.hasPermission(Item.BUILD)) {
+                    tr() {
+                        td() {
+                            def buildResultId = "buildResult" + pr.number;
+                            // escape anything that isn't alphanumeric
+                            def escaped = escapeEcmaScript(branch.name);
+                            form(method: "post", action: "build",
+                                    onsubmit: "return callFeature(this, ${buildResultId}, {'prNumber' : '${pr.number}' })") {
+                                f.submit(value: _("Build"))
+                                div(id: buildResultId) // some text from responce
+                            }
+                        }
+                    }
+                }
+                // rebuild
                 if (h.hasPermission(Item.BUILD)) {
                     tr() {
                         td() {
                             def rebuildId = "rebuildResult" + pr.number;
                             form(method: "post", action: "rebuild",
                                     onsubmit: "return callFeature(this, ${rebuildId}, {'prNumber' : ${pr.number} })") {
-                                f.submit(value: _("Rebuild"))
+                                f.submit(value: _("Rebuild last build"))
                                 div(id: rebuildId)
                             }
                         }

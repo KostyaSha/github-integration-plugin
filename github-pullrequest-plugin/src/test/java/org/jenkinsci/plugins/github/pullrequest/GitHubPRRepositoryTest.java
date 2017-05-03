@@ -5,11 +5,8 @@ import com.coravy.hudson.plugins.github.GithubUrl;
 import hudson.BulkChange;
 import hudson.Functions;
 import hudson.model.AbstractProject;
-import hudson.model.Action;
-import hudson.model.Cause;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
-import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.User;
@@ -23,7 +20,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.StaplerRequest;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.stubbing.OngoingStubbing;
 import org.powermock.api.mockito.PowerMockito;
@@ -32,9 +28,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +38,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -163,7 +156,7 @@ public class GitHubPRRepositoryTest {
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
 
         GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
-        FormValidation formValidation = repo.doRebuildFailed();
+        FormValidation formValidation = repo.doRebuildAllFailed();
 
         Assert.assertEquals(FormValidation.Kind.OK, formValidation.kind);
     }
@@ -179,7 +172,7 @@ public class GitHubPRRepositoryTest {
         when(run.getParent()).thenReturn(job);
 
         GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
-        FormValidation formValidation = repo.doRebuildFailed();
+        FormValidation formValidation = repo.doRebuildAllFailed();
 
         Assert.assertEquals(FormValidation.Kind.OK, formValidation.kind);
     }
@@ -194,7 +187,7 @@ public class GitHubPRRepositoryTest {
         when(run.getResult()).thenThrow(new RuntimeException("run.getResult() test exception"));
 
         GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
-        FormValidation formValidation = repo.doRebuildFailed();
+        FormValidation formValidation = repo.doRebuildAllFailed();
 
         Assert.assertEquals(FormValidation.Kind.ERROR, formValidation.kind);
     }
@@ -205,7 +198,7 @@ public class GitHubPRRepositoryTest {
         hasPermissionExpectation(Item.BUILD, false);
 
         GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
-        FormValidation formValidation = repo.doRebuildFailed();
+        FormValidation formValidation = repo.doRebuildAllFailed();
 
         Assert.assertEquals(FormValidation.Kind.ERROR, formValidation.kind);
     }

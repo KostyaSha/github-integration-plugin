@@ -1,11 +1,13 @@
 package com.github.kostyasha.github.integration.branch;
 
 import com.cloudbees.jenkins.GitHubWebHook;
+import com.github.kostyasha.github.integration.branch.trigger.JobRunnerForBranchCause;
 import com.github.kostyasha.github.integration.generic.GitHubRepository;
 import hudson.Functions;
 import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.Run;
+import hudson.model.queue.QueueTaskFuture;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
 import jenkins.model.Jenkins;
@@ -26,7 +28,9 @@ import java.util.Map;
 import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghBranchCauseFromRun;
 import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghBranchTriggerFromJob;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.rebuild;
+import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 
 /**
  * Store local state of remote branches.
@@ -82,7 +86,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
     /**
      * Searches for all builds performed in the runs of current job.
      *
-     * @return map with keys - string branch names and values - lists of related builds.
+     * @return map with key - string branch names; value - lists of related builds.
      */
     public Map<String, List<Run<?, ?>>> getAllBranchBuilds() {
 
@@ -109,6 +113,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
     @Override
     @RequirePOST
     public FormValidation doClearRepo() throws IOException {
+        LOG.debug("Got clear GitHub Branch repo request for {}", getJob().getFullName());
         FormValidation result;
         try {
             Jenkins instance = GitHubWebHook.getJenkinsInstance();
@@ -156,7 +161,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
 
     @Override
     @RequirePOST
-    public FormValidation doRebuildFailed() throws IOException {
+    public FormValidation doRebuildAllFailed() throws IOException {
         FormValidation result;
         try {
             Jenkins instance = GitHubWebHook.getJenkinsInstance();
@@ -176,6 +181,44 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
             LOG.error("Can't start rebuild", e.getMessage());
             result = FormValidation.error(e, "Can't start rebuild: %s", e.getMessage());
         }
+        return result;
+    }
+
+    @RequirePOST
+    public FormValidation doBuild(StaplerRequest req) throws IOException {
+        FormValidation result;
+
+        try {
+            Jenkins instance = GitHubWebHook.getJenkinsInstance();
+            if (!instance.hasPermission(Item.BUILD)) {
+                return FormValidation.error("Forbidden");
+            }
+
+            final String param = "branchName";
+            String branchName = null;
+            if (req.hasParameter(param)) {
+                branchName = req.getParameter(param);
+            }
+            if (isNull(branchName) || !getBranches().containsKey(branchName)) {
+                return FormValidation.error("No branch to build");
+            }
+
+            final GitHubBranch localBranch = getBranches().get(branchName);
+            final GitHubBranchCause cause = new GitHubBranchCause(localBranch, this, "Manual run", false);
+            final JobRunnerForBranchCause runner = new JobRunnerForBranchCause(getJob(),
+                    ghBranchTriggerFromJob(getJob()));
+            final QueueTaskFuture<?> queueTaskFuture = runner.startJob(cause);
+
+            if (nonNull(queueTaskFuture)) {
+                result = FormValidation.ok("Build scheduled");
+            } else {
+                result = FormValidation.warning("Build not scheduled");
+            }
+        } catch (Exception e) {
+            LOG.error("Can't start build", e.getMessage());
+            result = FormValidation.error(e, "Can't start build: " + e.getMessage());
+        }
+
         return result;
     }
 

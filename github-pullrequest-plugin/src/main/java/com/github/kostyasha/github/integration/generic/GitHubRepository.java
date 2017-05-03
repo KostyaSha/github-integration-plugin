@@ -140,8 +140,16 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
 
     public abstract FormValidation doRunTrigger() throws IOException;
 
-    public abstract FormValidation doRebuildFailed() throws IOException;
+    public abstract FormValidation doRebuildAllFailed() throws IOException;
 
+    /**
+     * Build using local PR state.
+     */
+    public abstract FormValidation doBuild(StaplerRequest req) throws IOException;
+
+    /**
+     * Rebuild latest built build. Actions copied.
+     */
     public abstract FormValidation doRebuild(StaplerRequest req) throws IOException;
 
 }
