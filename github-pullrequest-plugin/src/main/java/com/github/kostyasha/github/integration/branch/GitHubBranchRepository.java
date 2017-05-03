@@ -30,7 +30,6 @@ import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghB
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.rebuild;
-import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 
 /**
  * Store local state of remote branches.
