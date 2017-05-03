@@ -74,27 +74,26 @@ l.layout(title: "GitHub Branch Status") {
                         td() {
                             def buildResultId = makeBuildResultId(branch.name);
                             // escape anything that isn't alphanumeric
-                            def escaped = escapeEcmaScript(branch.name);
+                            def escapedBuild = escapeEcmaScript(branch.name);
                             form(method: "post", action: "build",
-                                    onsubmit: "return callFeature(this, ${buildResultId}, {'branchName' : '${escaped}' })") {
+                                    onsubmit: "return callFeature(this, ${buildResultId}, {'branchName' : '${escapedBuild}' })",
+                                    style: "float:left") {
                                 f.submit(value: _("Build"))
                                 div(id: buildResultId) // some text from responce
                             }
-                        }
-                    }
-                }
-                // rebuild button
-                if (h.hasPermission(Item.BUILD) && !branchBuilds.isEmpty()) {
-                    tr() {
-                        td() {
-                            def rebuildResultId = makeRebuildResultId(branch.name);
-                            // escape anything that isn't alphanumeric
-                            def escaped = escapeEcmaScript(branch.name);
-                            form(method: "post",
-                                    action: "rebuild",
-                                    onsubmit: "return callFeature(this, ${rebuildResultId}, {'branchName' : '${escaped}' })") {
-                                f.submit(value: _("Rebuild last branch build"))
-                                div(id: rebuildResultId) // some text from responce
+
+                            // rebuild button
+                            if (!branchBuilds.isEmpty()) {
+                                def rebuildResultId = makeRebuildResultId(branch.name);
+                                // escape anything that isn't alphanumeric
+                                def escapedRebuild = escapeEcmaScript(branch.name);
+                                form(method: "post",
+                                        action: "rebuild",
+                                        onsubmit: "return callFeature(this, ${rebuildResultId}, {'branchName' : '${escapedRebuild}' })",
+                                        style: "float: left; margin-right: 100px") {
+                                    f.submit(value: _("Rebuild last branch build"))
+                                    div(id: rebuildResultId) // some text from responce
+                                }
                             }
                         }
                     }
