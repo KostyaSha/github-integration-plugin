@@ -45,6 +45,7 @@ like `Build #${BUILD_NUMBER} started`
 - `GITHUB_PR_STATE` - `OPEN`
 - `GITHUB_PR_COMMENT_BODY` - `test foo, bar tags please.` When PR was triggered by comment.
 - `GITHUB_PR_COMMENT_BODY_MATCH` - `foo, bar` When PR wass triggered by comment and had group match.
+- `GITHUB_PR_LABELS` - `label1,label2` Comma-separated list of labels that the PR has. Empty if the PR has no labels.
 
 === Branch Trigger
 
