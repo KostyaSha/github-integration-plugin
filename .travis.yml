@@ -9,4 +9,4 @@ after_failure:
  - pwd
  - cat /home/travis/build/KostyaSha/github-integration-plugin/github-pullrequest-plugin/target/surefire-reports/*.txt
 install: true
-script: travis_wait 20 ./travis.sh
+script: ./travis.sh
