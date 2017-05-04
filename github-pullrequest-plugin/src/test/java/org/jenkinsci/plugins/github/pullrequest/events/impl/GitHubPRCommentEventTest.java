@@ -27,10 +27,13 @@ import java.util.Set;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.isNotNull;
+import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -63,8 +66,11 @@ public class GitHubPRCommentEventTest {
 
     @Mock
     private GitHubPRTrigger trigger;
+
     @Mock
     private GHIssueComment comment;
+    @Mock
+    private GHIssueComment comment2;
 
     @Test
     public void testNullLocalComment() throws IOException {
@@ -77,7 +83,7 @@ public class GitHubPRCommentEventTest {
         ghIssueComments.add(comment);
         when(remotePr.getComments()).thenReturn(ghIssueComments);
 
-        GitHubPRCause cause = new GitHubPRCommentEvent("Comment").check(trigger, remotePr, localPR, listener);
+        GitHubPRCause cause = new GitHubPRCommentEvent("Comment").check(trigger, remotePr, null, listener);
 
         assertNull(cause);
     }
@@ -105,8 +111,39 @@ public class GitHubPRCommentEventTest {
     }
 
     @Test
+    public void firstCommentMatchSecondDont() throws IOException {
+        commonExpectations(emptySet());
+        causeCreationExpectations();
+
+        when(issue.getCreatedAt()).thenReturn(new Date());
+
+        final String body = "test foo, bar tags please.";
+        when(comment.getBody()).thenReturn(body);
+        when(comment.getCreatedAt()).thenReturn(new Date());
+
+        final String body2 = "no matching in second comment";
+        when(comment2.getBody()).thenReturn(body2);
+        when(comment2.getCreatedAt()).thenReturn(new Date());
+
+
+        final ArrayList<GHIssueComment> ghIssueComments = new ArrayList<>();
+        ghIssueComments.add(comment);
+        ghIssueComments.add(comment2);
+        when(remotePr.getComments()).thenReturn(ghIssueComments);
+
+        GitHubPRCause cause = new GitHubPRCommentEvent("test ([A-Za-z0-9 ,!]+) tags please.")
+                .check(trigger, remotePr, localPR, listener);
+
+        assertThat(cause, notNullValue());
+        assertThat(cause.getCommentBody(), is(body));
+        assertThat(cause.getCommentBodyMatch(), is("foo, bar"));
+    }
+
+    @Test
     public void testNoComments() throws IOException {
         when(remotePr.getComments()).thenReturn(emptyList());
+        when(remotePr.getNumber()).thenReturn(14);
+        when(listener.getLogger()).thenReturn(logger);
 
         GitHubPRCause cause = new GitHubPRCommentEvent("Comment").check(null, remotePr, localPR, listener);
 
@@ -114,10 +151,25 @@ public class GitHubPRCommentEventTest {
     }
 
     @Test
-    public void testNullLocalPR() {
-        GitHubPRCause cause = new GitHubPRCommentEvent("").check(null, null, null, listener);
+    public void testNullLocalPR() throws IOException {
+        commonExpectations(emptySet());
+        causeCreationExpectations();
 
-        assertNull(cause);
+        final String body = "test foo, bar tags please.";
+        when(issue.getCreatedAt()).thenReturn(new Date());
+        when(comment.getCreatedAt()).thenReturn(new Date());
+        when(comment.getBody()).thenReturn(body);
+
+        final ArrayList<GHIssueComment> ghIssueComments = new ArrayList<>();
+        ghIssueComments.add(comment);
+        when(remotePr.getComments()).thenReturn(ghIssueComments);
+
+        GitHubPRCause cause = new GitHubPRCommentEvent("test ([A-Za-z0-9 ,!]+) tags please.")
+                .check(trigger, remotePr, null, listener); // localPR is null
+
+        assertThat(cause.getCommentBody(), is(body));
+        assertThat(cause.getCommentBodyMatch(), is("foo, bar"));
+        assertNotNull(cause);
     }
 
     private void commonExpectations(Set<String> localLabels) throws IOException {
