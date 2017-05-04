@@ -1,32 +1,37 @@
-
 package org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository
 
 import hudson.model.Item
+import lib.FormTagLib
+import lib.LayoutTagLib
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause
 
-def f = namespace(lib.FormTagLib);
-def l = namespace(lib.LayoutTagLib);
-def t = namespace("/lib/hudson")
+def f = namespace(FormTagLib);
+def l = namespace(LayoutTagLib);
 def st = namespace("jelly:stapler");
+
 def makeBuildItem(def builds) {
-    a("Related builds: ")
-    for (build in builds) {
-        a(href: rootURL + "/" + build.url + "console/") {
-            img(src: rootURL + "/images/16x16/" + build.buildStatusUrl)
+    if (builds != null && !builds.isEmpty()) {
+        a("Related builds: ")
+        for (build in builds) {
+            a(href: rootURL + "/" + build.url + "console/") {
+                img(src: rootURL + "/images/16x16/" + build.buildStatusUrl)
+            }
+            a(href: rootURL + "/" + build.url, build.displayName, title: build.getCause(GitHubPRCause.class).reason)
+            text(" ")
         }
-        a(href: rootURL + "/" + build.url, build.displayName, title:build.getCause(GitHubPRCause.class).reason)
-        text(" ")
+    } else {
+        a("No related builds.")
     }
 }
 
 
 l.layout(title: "GitHub Pull Request Status") {
     st.include(page: "sidepanel", it: my.job)
-    script(src:"${rootURL}${h.getResourcePath()}/plugin/github-pullrequest/scripts/featureButton.js")
+    script(src: "${rootURL}${h.getResourcePath()}/plugin/github-pullrequest/scripts/featureButton.js")
     l.main_panel() {
         h1("GitHub Pull Request Status");
         text("Repository: ")
-        a(href:my.githubUrl, my.fullName)
+        a(href: my.githubUrl, my.fullName)
 
         br()
         br()
@@ -44,6 +49,7 @@ l.layout(title: "GitHub Pull Request Status") {
         def buildMap = my.getAllPrBuilds()
         table() {
             for (pr in my.pulls.values()) {
+                def builds = buildMap.get(pr.number);
                 tr() {
                     td() {
                         br()
@@ -51,16 +57,33 @@ l.layout(title: "GitHub Pull Request Status") {
                     }
                 }
                 tr() {
-                    td() { makeBuildItem(buildMap.get(pr.number)) }
+                    td() { makeBuildItem(builds) }
                 }
+
+
                 if (h.hasPermission(Item.BUILD)) {
                     tr() {
                         td() {
-                            def rebuildId = "rebuildResult" + pr.number;
-                            form(method: "post", action: "rebuild",
-                                    onsubmit: "return callFeature(this, ${rebuildId}, {'prNumber' : ${pr.number} })") {
-                                f.submit(value: _("Rebuild"))
-                                div(id: rebuildId)
+                            div(style: "display: inline-block") {
+                                // build local PR button
+                                def buildResultId = "buildResult" + pr.number;
+                                form(method: "post", action: "build",
+                                        onsubmit: "return callFeature(this, ${buildResultId}, {'prNumber' : '${pr.number}' })",
+                                        style: "float: left; ") {
+                                    f.submit(value: _("Build"))
+                                    div(id: buildResultId) // some text from responce
+                                }
+
+                                // rebuild button
+                                if (builds != null && !builds.isEmpty()) {
+                                    def rebuildId = "rebuildResult" + pr.number;
+                                    form(method: "post", action: "rebuild",
+                                            onsubmit: "return callFeature(this, ${rebuildId}, {'prNumber' : ${pr.number} })",
+                                            style: "float: right; margin-right: 100px") {
+                                        f.submit(value: _("Rebuild last build"))
+                                        div(id: rebuildId)
+                                    }
+                                }
                             }
                         }
                     }
@@ -72,7 +95,9 @@ l.layout(title: "GitHub Pull Request Status") {
         div(style: "display: inline-block") {
             if (h.hasPermission(Item.BUILD)) {
                 def rebuildFailedId = "rebuildFailedResult";
-                form(method: "post", action: "rebuildFailed", onsubmit: "return callFeature(this, ${rebuildFailedId})",
+                form(method: "post",
+                        action: "rebuildFailed",
+                        onsubmit: "return callFeature(this, ${rebuildFailedId})",
                         style: "float: right; margin-right: 100px") {
                     f.submit(value: _("Rebuild all failed builds"))
                     div(id: rebuildFailedId)

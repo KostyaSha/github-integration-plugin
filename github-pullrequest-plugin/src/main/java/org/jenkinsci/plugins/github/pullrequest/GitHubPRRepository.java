@@ -8,9 +8,11 @@ import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
+import hudson.model.queue.QueueTaskFuture;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
 import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.github.pullrequest.trigger.JobRunnerForCause;
 import org.jenkinsci.plugins.github.pullrequest.utils.JobHelper;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.StaplerRequest;
@@ -27,7 +29,9 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRCauseFromRun;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.rebuild;
 
 /**
@@ -41,7 +45,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
      * Store constantly changing information in job directory with .runtime.xml tail
      */
     public static final String FILE = GitHubPRRepository.class.getName() + ".runtime.xml";
-    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRRepository.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GitHubPRRepository.class);
 
     private Map<Integer, GitHubPRPullRequest> pulls = new HashMap<>();
 
@@ -76,7 +80,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
 
         Map<Integer, List<Run<?, ?>>> map = new HashMap<>();
         final RunList<?> runs = job.getBuilds();
-        LOGGER.debug("Got builds for job {}", job.getFullName());
+        LOG.debug("Got builds for job {}", job.getFullName());
 
         for (Run<?, ?> run : runs) {
             GitHubPRCause cause = ghPRCauseFromRun(run);
@@ -122,7 +126,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
                 result = FormValidation.error("Forbidden");
             }
         } catch (Exception e) {
-            LOGGER.error("Can\'t delete repository file '{}'",
+            LOG.error("Can\'t delete repository file '{}'",
                     configFile.getFile().getAbsolutePath(), e);
             result = FormValidation.error(e, "Can't delete: %s", e.getMessage());
         }
@@ -142,24 +146,24 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
                 if (trigger != null) {
                     trigger.run();
                     result = FormValidation.ok("GitHub PR trigger run");
-                    LOGGER.debug("GitHub PR trigger run for {}", job);
+                    LOG.debug("GitHub PR trigger run for {}", job);
                 } else {
-                    LOGGER.error("GitHub PR trigger not available for {}", job);
+                    LOG.error("GitHub PR trigger not available for {}", job);
                     result = FormValidation.error("GitHub PR trigger not available");
                 }
             } else {
-                LOGGER.warn("No permissions to run GitHub PR trigger");
+                LOG.warn("No permissions to run GitHub PR trigger");
                 result = FormValidation.error("Forbidden");
             }
         } catch (Exception e) {
-            LOGGER.error("Can't run trigger", e);
+            LOG.error("Can't run trigger", e);
             result = FormValidation.error(e, "Can't run trigger: %s", e.getMessage());
         }
         return result;
     }
 
     @RequirePOST
-    public FormValidation doRebuildFailed() throws IOException {
+    public FormValidation doRebuildAllFailed() throws IOException {
         FormValidation result;
         try {
             Jenkins instance = GitHubWebHook.getJenkinsInstance();
@@ -176,9 +180,48 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
                 result = FormValidation.error("Forbidden");
             }
         } catch (Exception e) {
-            LOGGER.error("Can't start rebuild", e);
+            LOG.error("Can't start rebuild", e);
             result = FormValidation.error(e, "Can't start rebuild: %s", e.getMessage());
         }
+        return result;
+    }
+
+    @Override
+    public FormValidation doBuild(StaplerRequest req) throws IOException {
+        FormValidation result;
+
+        try {
+            Jenkins instance = GitHubWebHook.getJenkinsInstance();
+            if (!instance.hasPermission(Item.BUILD)) {
+                return FormValidation.error("Forbidden");
+            }
+
+            final String prNumberParam = "prNumber";
+            int prId = 0;
+            if (req.hasParameter(prNumberParam)) {
+                prId = Integer.valueOf(req.getParameter(prNumberParam));
+            }
+
+            if (prId == 0 || !getPulls().containsKey(prId)) {
+                return FormValidation.error("No branch to build");
+            }
+
+            final GitHubPRPullRequest localPR = getPulls().get(prId);
+            final GitHubPRCause cause = new GitHubPRCause(localPR, null, false, "Manual run.");
+
+            final JobRunnerForCause runner = new JobRunnerForCause(getJob(), ghPRTriggerFromJob(getJob()));
+            final QueueTaskFuture<?> queueTaskFuture = runner.startJob(cause);
+
+            if (nonNull(queueTaskFuture)) {
+                result = FormValidation.ok("Build scheduled");
+            } else {
+                result = FormValidation.warning("Build not scheduled");
+            }
+        } catch (Exception e) {
+            LOG.error("Can't start build", e.getMessage());
+            result = FormValidation.error(e, "Can't start build: " + e.getMessage());
+        }
+
         return result;
     }
 
@@ -210,7 +253,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
                 result = FormValidation.warning("Build not found");
             }
         } catch (Exception e) {
-            LOGGER.error("Can't start rebuild", e);
+            LOG.error("Can't start rebuild", e);
             result = FormValidation.error(e, "Can't start rebuild: " + e.getMessage());
         }
         return result;
