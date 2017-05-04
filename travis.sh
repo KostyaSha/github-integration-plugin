@@ -7,4 +7,4 @@ sudo apt-get update && sudo apt-get install oracle-java8-installer
 java -version
 
 ./mvnw -v
-./mvnw -Dignore.random.failures=true clean verify -Ptravis  | grep -v Download
+travis_wait ./mvnw -Dignore.random.failures=true clean verify -Ptravis  | grep -v Download
