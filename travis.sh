@@ -6,5 +6,5 @@ set -o pipefail
 sudo apt-get update && sudo apt-get install oracle-java8-installer
 java -version
 
-./mvwn -v
+./mvnw -v
 ./mvnw -Dignore.random.failures=true clean verify -Ptravis  | grep -v Download
