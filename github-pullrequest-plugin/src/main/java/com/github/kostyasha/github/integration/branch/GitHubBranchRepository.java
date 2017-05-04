@@ -203,7 +203,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
             }
 
             final GitHubBranch localBranch = getBranches().get(branchName);
-            final GitHubBranchCause cause = new GitHubBranchCause(localBranch, this, "Manual run", false);
+            final GitHubBranchCause cause = new GitHubBranchCause(localBranch, this, "Manual run.", false);
             final JobRunnerForBranchCause runner = new JobRunnerForBranchCause(getJob(),
                     ghBranchTriggerFromJob(getJob()));
             final QueueTaskFuture<?> queueTaskFuture = runner.startJob(cause);
