@@ -12,7 +12,7 @@ def l = namespace(LayoutTagLib);
 def st = namespace("jelly:stapler");
 
 def printRelatedBuilds(def runs) {
-    if (!runs.isEmpty()) {
+    if (runs != null && !runs.isEmpty()) {
         a("Related builds: ")
         for (build in runs) {
             a(href: rootURL + "/" + build.url + "console/") {
@@ -21,6 +21,8 @@ def printRelatedBuilds(def runs) {
             a(href: rootURL + "/" + build.url, build.displayName, title: build.getCause(GitHubBranchCause.class).reason)
             text(" ")
         }
+    } else {
+        a("No related builds.")
     }
 }
 
@@ -83,7 +85,7 @@ l.layout(title: "GitHub Branch Status") {
                             }
 
                             // rebuild button
-                            if (!branchBuilds.isEmpty()) {
+                            if (branchBuilds != null && !branchBuilds.isEmpty()) {
                                 def rebuildResultId = makeRebuildResultId(branch.name);
                                 // escape anything that isn't alphanumeric
                                 def escapedRebuild = escapeEcmaScript(branch.name);

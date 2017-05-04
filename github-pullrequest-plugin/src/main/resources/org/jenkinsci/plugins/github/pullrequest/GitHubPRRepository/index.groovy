@@ -7,17 +7,20 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause
 
 def f = namespace(FormTagLib);
 def l = namespace(LayoutTagLib);
-def t = namespace("/lib/hudson")
 def st = namespace("jelly:stapler");
 
 def makeBuildItem(def builds) {
-    a("Related builds: ")
-    for (build in builds) {
-        a(href: rootURL + "/" + build.url + "console/") {
-            img(src: rootURL + "/images/16x16/" + build.buildStatusUrl)
+    if (builds != null && !builds.isEmpty()) {
+        a("Related builds: ")
+        for (build in builds) {
+            a(href: rootURL + "/" + build.url + "console/") {
+                img(src: rootURL + "/images/16x16/" + build.buildStatusUrl)
+            }
+            a(href: rootURL + "/" + build.url, build.displayName, title: build.getCause(GitHubPRCause.class).reason)
+            text(" ")
         }
-        a(href: rootURL + "/" + build.url, build.displayName, title: build.getCause(GitHubPRCause.class).reason)
-        text(" ")
+    } else {
+        a("No related builds.")
     }
 }
 
@@ -53,11 +56,10 @@ l.layout(title: "GitHub Pull Request Status") {
                         st.include(page: "index", it: pr)
                     }
                 }
-                if (!builds.isEmpty()) {
-                    tr() {
-                        td() { makeBuildItem(builds) }
-                    }
+                tr() {
+                    td() { makeBuildItem(builds) }
                 }
+
 
                 if (h.hasPermission(Item.BUILD)) {
                     tr() {
@@ -73,7 +75,7 @@ l.layout(title: "GitHub Pull Request Status") {
                                 }
 
                                 // rebuild button
-                                if (!builds.isEmpty()) {
+                                if (builds != null && !builds.isEmpty()) {
                                     def rebuildId = "rebuildResult" + pr.number;
                                     form(method: "post", action: "rebuild",
                                             onsubmit: "return callFeature(this, ${rebuildId}, {'prNumber' : ${pr.number} })",
