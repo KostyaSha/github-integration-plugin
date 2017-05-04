@@ -71,7 +71,7 @@ public class GitHubPRPullRequest {
 
         try {
             Date maxDate = new Date(0);
-            List<GHIssueComment> comments = execute(() -> pr.getComments());
+            List<GHIssueComment> comments = execute(pr::getComments);
             for (GHIssueComment comment : comments) {
                 if (comment.getCreatedAt().compareTo(maxDate) > 0) {
                     maxDate = comment.getCreatedAt();
