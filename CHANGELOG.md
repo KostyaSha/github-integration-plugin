@@ -2,6 +2,11 @@
 
 ## Next 
 
+## 0.1.0-rc23
+- [branch/pr] Build and rebuild latest buttons added/reworked
+- [pr] comment triggering fixed and enhanced
+- [pr] exposed labels as environment variable
+
 ## 0.1.0-rc22
 - [branch] Don't trigger on new branch when expecting commit changes 
 - [pr] fix user restriction.
