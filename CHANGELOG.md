@@ -2,6 +2,10 @@
 
 ## Next 
 
+## 0.1.0-rc24
+- [branch/pr] fix triggers triggering from hooks when jenkins has bad configured job with triggers
+- [branch/pr] Don't throw exception when events not defined in triggers.
+
 ## 0.1.0-rc23
 - [branch/pr] Build and rebuild latest buttons added/reworked
 - [pr] comment triggering fixed and enhanced
