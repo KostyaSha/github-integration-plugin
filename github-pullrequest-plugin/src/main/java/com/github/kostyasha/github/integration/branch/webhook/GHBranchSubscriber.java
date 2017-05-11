@@ -51,7 +51,7 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
         try {
             BranchInfo ref = extractRefInfo(event, payload);
 
-            for (Job job : getJobs(ref.getRepo())) {
+            for (Job job : getBranchTriggerJobs(ref.getRepo())) {
                 GitHubBranchTrigger trigger = ghBranchTriggerFromJob(job);
                 if (isNull(trigger)) {
                     continue;
@@ -91,20 +91,17 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
         }
     }
 
-    private static Set<Job> getJobs(final String repo) {
+    static Set<Job> getBranchTriggerJobs(final String repo) {
         final Set<Job> ret = new HashSet<>();
 
-        ACL.impersonate(ACL.SYSTEM, new Runnable() {
-            @Override
-            public void run() {
-                List<Job> jobs = Jenkins.getActiveInstance().getAllItems(Job.class);
-                ret.addAll(FluentIterableWrapper.from(jobs)
-                        .filter(isBuildable())
-                        .filter(withBranchTrigger())
-                        .filter(withBranchTriggerRepo(repo))
-                        .toSet()
-                );
-            }
+        ACL.impersonate(ACL.SYSTEM, () -> {
+            List<Job> jobs = Jenkins.getActiveInstance().getAllItems(Job.class);
+            ret.addAll(FluentIterableWrapper.from(jobs)
+                    .filter(isBuildable())
+                    .filter(withBranchTrigger())
+                    .filter(withBranchTriggerRepo(repo))
+                    .toSet()
+            );
         });
 
         return ret;

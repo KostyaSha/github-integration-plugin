@@ -14,7 +14,9 @@ target/
 *.iml
 
 ## Directory-based project format:
-.idea/
+.idea/*
+!.idea/codeStyleSettings.xml
+!.idea/encodings.xml
 
 ## File-based project format:
 *.ipr

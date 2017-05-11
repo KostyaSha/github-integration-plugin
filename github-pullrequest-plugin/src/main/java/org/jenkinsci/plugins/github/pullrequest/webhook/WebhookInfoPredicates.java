@@ -4,6 +4,8 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import hudson.model.Job;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Arrays.asList;
@@ -49,6 +51,8 @@ public final class WebhookInfoPredicates {
     }
 
     private static class WithRepo implements Predicate<Job> {
+        public static final Logger LOG = LoggerFactory.getLogger(WithRepo.class);
+
         private final String repo;
 
         WithRepo(String repo) {
@@ -57,12 +61,18 @@ public final class WebhookInfoPredicates {
 
         @Override
         public boolean apply(Job job) {
-            return equalsIgnoreCase(
-                    repo,
-                    asFullRepoName(
-                            ghPRTriggerFromJob(job).getRepoFullName(job)
-                    )
-            );
+            try {
+                return equalsIgnoreCase(
+                        repo,
+                        asFullRepoName(
+                                ghPRTriggerFromJob(job).getRepoFullName(job)
+                        )
+                );
+            } catch (Exception ex) {
+                LOG.warn("Can't get GitHub repository name for {}. Have you set correct 'GitHub Project Property'?",
+                        job.getFullName(), ex);
+                return false;
+            }
         }
     }
 }

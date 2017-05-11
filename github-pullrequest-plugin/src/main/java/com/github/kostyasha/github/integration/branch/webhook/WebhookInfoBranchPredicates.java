@@ -4,6 +4,8 @@ import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import hudson.model.Job;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghBranchTriggerFromJob;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -52,6 +54,8 @@ public class WebhookInfoBranchPredicates {
     }
 
     private static class WithBranchTriggerRepo implements Predicate<Job> {
+        private static final Logger LOG = LoggerFactory.getLogger(WithBranchTriggerRepo.class);
+
         private final String repo;
 
         WithBranchTriggerRepo(String repo) {
@@ -60,12 +64,18 @@ public class WebhookInfoBranchPredicates {
 
         @Override
         public boolean apply(Job job) {
-            return equalsIgnoreCase(
-                    repo,
-                    asFullRepoName(
-                            ghBranchTriggerFromJob(job).getRepoFullName(job)
-                    )
-            );
+            try {
+                return equalsIgnoreCase(
+                        repo,
+                        asFullRepoName(
+                                ghBranchTriggerFromJob(job).getRepoFullName(job)
+                        )
+                );
+            } catch (Exception ex) {
+                LOG.warn("Can't get GitHub repository name for {}. Have you set correct 'GitHub Project Property'?",
+                        job.getFullName(), ex);
+                return false;
+            }
         }
     }
 }
