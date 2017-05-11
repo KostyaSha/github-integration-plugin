@@ -45,6 +45,7 @@ import static com.github.kostyasha.github.integration.branch.webhook.WebhookInfo
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Predicates.not;
 import static java.text.DateFormat.getDateTimeInstance;
+import static java.util.Collections.emptyList;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.LIGHT_HOOKS;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
@@ -99,9 +100,9 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
         return preStatus;
     }
 
-    @CheckForNull
+    @Nonnull
     public List<GitHubBranchEvent> getEvents() {
-        return events;
+        return nonNull(events) ? events : emptyList();
     }
 
     @CheckForNull
@@ -241,7 +242,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
             return causes;
         } catch (IOException e) {
             listener.error("Can't get build causes: '{}'", e);
-            return Collections.emptyList();
+            return emptyList();
         }
     }
 

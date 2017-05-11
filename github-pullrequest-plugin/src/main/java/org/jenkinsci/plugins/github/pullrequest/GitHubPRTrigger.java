@@ -138,8 +138,9 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
         return preStatus;
     }
 
+    @Nonnull
     public List<GitHubPREvent> getEvents() {
-        return events;
+        return nonNull(events) ? events : emptyList();
     }
 
     public GitHubPRUserRestriction getUserRestriction() {
