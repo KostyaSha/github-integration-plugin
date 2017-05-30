@@ -49,6 +49,7 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
     @CheckForNull
     @Override
     public GitHubPRCause apply(final GHPullRequest remotePR) {
+        LOGGER.trace("Checking for remote PR {}", remotePR);
         final GitHubPRCause gitHubPRCause = from(trigger.getEvents())
                 .transform(toCause(remotePR))
                 .filter(notNull())

@@ -65,6 +65,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
     @Nonnull
     public Map<Integer, GitHubPRPullRequest> getPulls() {
         if (isNull(pulls)) {
+            LOG.trace("Pull map is null, initialising with empty.");
             pulls = new HashMap<>();
         }
         return pulls;

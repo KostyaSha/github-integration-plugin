@@ -41,6 +41,8 @@ public class NotUpdatedPRFilter implements Predicate<GHPullRequest> {
             logger.debug("PR [#{} {}] not changed", remotePR.getNumber(), remotePR.getTitle());
             return false;
         }
+        logger.debug("PR [#{} {}] was changed", remotePR.getNumber(), remotePR.getTitle());
+
         return true;
     }
 
@@ -48,23 +50,32 @@ public class NotUpdatedPRFilter implements Predicate<GHPullRequest> {
      * lightweight check that comments and time were changed
      */
     private static boolean isUpdated(GHPullRequest remotePR, GitHubPRPullRequest localPR) {
+        final int prNum = remotePR.getNumber();
         if (isNull(localPR)) {
+            LOGGER.trace("Local PR is null for remote pr #{}", prNum);
             return true; // we don't know yet
         }
         try {
 
             boolean prUpd = new CompareToBuilder()
                     .append(localPR.getPrUpdatedAt(), remotePR.getUpdatedAt()).build() < 0; // by time
+            LOGGER.trace("#{}, updatedAt {}, localPR:{}, remotePR:{}",
+                    prNum, prUpd, localPR.getPrUpdatedAt(), remotePR.getUpdatedAt());
 
             boolean issueUpd = new CompareToBuilder()
                     .append(localPR.getIssueUpdatedAt(), remotePR.getIssueUpdatedAt()).build() < 0;
+            LOGGER.trace("#{}, updatedAt {}, issue:{}, issue:{}",
+                    prNum, issueUpd, localPR.getIssueUpdatedAt(), remotePR.getIssueUpdatedAt());
 
             boolean headUpd = !StringUtils.equals(localPR.getHeadSha(), remotePR.getHead().getSha()); // or head?
+            LOGGER.trace("#{}, hash {}, issue:{}, issue:{}",
+                    prNum, headUpd, localPR.getHeadSha(), remotePR.getHead().getSha());
+
             boolean updated = prUpd || issueUpd || headUpd;
 
             if (updated) {
-                LOGGER.info("Pull request #{} was created by {}, last updated: {}",
-                        localPR.getNumber(), localPR.getUserLogin(), localPR.getPrUpdatedAt());
+                LOGGER.info("Pull request #{} was created by {}, last prUpdated: {}, issue updated: {}",
+                        localPR.getNumber(), localPR.getUserLogin(), localPR.getPrUpdatedAt(), localPR.getIssueUpdatedAt());
             }
 
             return updated;

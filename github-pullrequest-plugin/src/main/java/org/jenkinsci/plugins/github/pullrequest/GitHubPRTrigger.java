@@ -277,6 +277,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
             //FIXME HiddenField: 'remoteRepository' hides a field? renamed to `remoteRepo`
             GHRepository remoteRepo = getRemoteRepository();
             Set<GHPullRequest> remotePulls = pullRequestsToCheck(prNumber, remoteRepo, localRepository);
+            LOGGER.trace("Remote pulls {}", remotePulls);
 
             Set<GHPullRequest> prepared = from(remotePulls)
                     .filter(badState(localRepository, listener))
@@ -323,11 +324,14 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
                                                           @Nonnull GHRepository remoteRepo,
                                                           @Nonnull GitHubPRRepository localRepo) throws IOException {
         if (prNumber != null) {
+            LOGGER.debug("Getting PR for check {}", prNumber);
             return execute(() -> singleton(remoteRepo.getPullRequest(prNumber)));
         } else {
+            LOGGER.debug("Getting all open prs for check.");
             List<GHPullRequest> remotePulls = execute(() -> remoteRepo.getPullRequests(GHIssueState.OPEN));
 
             Set<Integer> remotePRNums = from(remotePulls).transform(extractPRNumber()).toSet();
+            LOGGER.trace("Fetched remote PRs {}", remotePRNums);
 
             return from(localRepo.getPulls().keySet())
                     // add PRs that was closed on remote
