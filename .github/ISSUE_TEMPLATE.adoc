@@ -1,0 +1,13 @@
+## Before creating issue
+
+- Search for existing github issue
+
+## For creating new issue
+
+- Check that you didn't miss documentation https://github.com/KostyaSha/github-integration-plugin/tree/master/docs
+- Check that you correctly configure `github-plugin` in global settings.
+- Check that you sepcified `GitHub project` job property.
+- Post piece or the whole `config.xml` using GitHub markdown syntax. Describe what job type do you use.
+- Post `GitHub XXX Polling Log` action on left side of job or from triggered build
+- If you are using some advanced jenkins configuration handler describe it.
+- Check for logs in global settings jenkins system log.
