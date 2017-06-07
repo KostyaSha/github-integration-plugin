@@ -83,6 +83,8 @@ public class GitHubPRJobDslExtensionTest {
          */
         verifyBranchFilter(trigger.getEvents().get(0));
         verifyCommitChecks(trigger.getEvents().get(1));
+
+        assertThat("Should contain repoProvider", trigger.getRepoProviders(), notNullValue());
     }
 
     private void verifyCommitChecks(GitHubBranchEvent gitHubBranchEvent) {

@@ -1,7 +1,10 @@
 package com.github.kostyasha.github.integration.branch.dsl.context;
 
 import com.github.kostyasha.github.integration.branch.dsl.context.events.GitHubBranchEventsDslContext;
+import com.github.kostyasha.github.integration.branch.dsl.context.repoproviders.GitHubRepoProvidersDslContext;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
+import com.github.kostyasha.github.integration.generic.GitHubRepoProvider;
+import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider;
 import javaposse.jobdsl.dsl.Context;
 import javaposse.jobdsl.plugin.ContextExtensionPoint;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
@@ -10,6 +13,8 @@ import org.jenkinsci.plugins.github.pullrequest.dsl.context.GitHubPRTriggerModeD
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static org.codehaus.groovy.runtime.InvokerHelper.asList;
 
 /**
  * @author Kanstantsin Shautsou
@@ -23,6 +28,7 @@ public class GitHubBranchTriggerDslContext implements Context {
 
     private List<String> whitelistedBranches = new ArrayList<>();
     private List<GitHubBranchEvent> events = new ArrayList<>();
+    private List<GitHubRepoProvider> repoProviders = asList(new GitHubPluginRepoProvider());
 
 
     public void cron(String cron) {
@@ -54,6 +60,13 @@ public class GitHubBranchTriggerDslContext implements Context {
         ContextExtensionPoint.executeInContext(closure, eventsContext);
 
         events.addAll(eventsContext.events());
+    }
+
+    public void repoProviders(Runnable closure) {
+        GitHubRepoProvidersDslContext repoProvidersContext = new GitHubRepoProvidersDslContext();
+        ContextExtensionPoint.executeInContext(closure, repoProvidersContext);
+
+        repoProviders.addAll(repoProvidersContext.repoProviders());
     }
 
     public void whitelistedBranches(String... branches) {

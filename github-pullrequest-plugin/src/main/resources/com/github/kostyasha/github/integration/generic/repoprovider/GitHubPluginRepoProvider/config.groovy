@@ -13,3 +13,13 @@ if (instance == null) {
 f.entry(title: "Cache connection?", field: "cacheConnection") {
     f.checkbox(default: false)
 }
+
+f.entry(title: "Manage hooks", field: "manageHooks") {
+    f.checkbox()
+}
+
+f.entry(title: "Repository requested permission", field: "permission") {
+    f.enum() {
+        text(my.text)
+    }
+}

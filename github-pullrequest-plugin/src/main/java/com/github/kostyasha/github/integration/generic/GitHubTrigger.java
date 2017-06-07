@@ -10,6 +10,7 @@ import com.google.common.annotations.Beta;
 import hudson.model.Action;
 import hudson.model.Job;
 import hudson.triggers.Trigger;
+import org.apache.commons.lang3.BooleanUtils;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.DataBoundSetter;

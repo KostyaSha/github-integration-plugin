@@ -6,6 +6,7 @@ import com.github.kostyasha.github.integration.generic.GitHubRepoProvider;
 import com.github.kostyasha.github.integration.generic.GitHubTrigger;
 import com.google.common.base.Optional;
 import hudson.Extension;
+import org.apache.commons.lang3.BooleanUtils;
 import org.jenkinsci.plugins.github.GitHubPlugin;
 import org.jenkinsci.plugins.github.internal.GHPluginConfigException;
 import org.jenkinsci.plugins.github.util.misc.NullSafePredicate;
@@ -39,6 +40,10 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
     // possible cache connection/repo here
     protected Boolean cacheConnection = true;
 
+    private Boolean manageHooks = true;
+
+    private GHPermission repoPermission = GHPermission.ADMIN;
+
     private transient GHRepository remoteRepository;
     private transient GitHub gitHub;
 
@@ -55,6 +60,23 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
         this.cacheConnection = cacheConnection;
     }
 
+    public boolean isManageHooks() {
+        return BooleanUtils.isTrue(manageHooks);
+    }
+
+    @DataBoundSetter
+    public void setManageHooks(boolean manageHooks) {
+        this.manageHooks = manageHooks;
+    }
+
+    public GHPermission getRepoPermission() {
+        return repoPermission;
+    }
+
+    public void setRepoPermission(GHPermission repoPermission) {
+        this.repoPermission = repoPermission;
+    }
+
     @Override
     public void registerHookFor(GitHubTrigger trigger) {
         GitHubWebHook.get().registerHookFor(trigger.getJob());
@@ -63,7 +85,7 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
     @Override
     public boolean isManageHooks(GitHubTrigger trigger) {
         // not exact @see https://github.com/jenkinsci/github-plugin/pull/149
-        return GitHubPlugin.configuration().isManageHooks();
+        return isManageHooks() && GitHubPlugin.configuration().isManageHooks();
     }
 
     @Nonnull
@@ -76,24 +98,31 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
         final GitHubRepositoryName repoFullName = trigger.getRepoFullName();
 
         Optional<GitHub> client = from(GitHubPlugin.configuration().findGithubConfig(withHost(repoFullName.getHost())))
-            .firstMatch(withAdminAccess(repoFullName));
+            .firstMatch(withPermission(repoFullName, getRepoPermission()));
         if (client.isPresent()) {
             gitHub = client.get();
             return gitHub;
         }
 
         throw new GHPluginConfigException("GitHubPluginRepoProvider can't find appropriate client for github repo " +
-            "<%s>. Probably you didn't configure 'GitHub Plugin' global 'GitHub Server Settings'.or there is no tokens" +
-            "with admin access to this repo.",
-            repoFullName.toString());
+            "<%s>. Probably you didn't configure 'GitHub Plugin' global 'GitHub Server Settings' or there is no tokens" +
+            "with %s access to this repository.",
+            repoFullName.toString(), getRepoPermission());
     }
 
-    private NullSafePredicate<GitHub> withAdminAccess(final GitHubRepositoryName name) {
+    private NullSafePredicate<GitHub> withPermission(final GitHubRepositoryName name, GHPermission permission) {
         return new NullSafePredicate<GitHub>() {
             @Override
             protected boolean applyNullSafe(@Nonnull GitHub gh) {
                 try {
-                    return gh.getRepository(name.getUserName() + "/" + name.getRepositoryName()).hasAdminAccess();
+                    final GHRepository repo = gh.getRepository(name.getUserName() + "/" + name.getRepositoryName());
+                    if (permission == GHPermission.ADMIN) {
+                        return repo.hasAdminAccess();
+                    } else if (permission == GHPermission.PUSH) {
+                        return repo.hasPushAccess();
+                    } else {
+                        return repo.hasPullAccess();
+                    }
                 } catch (IOException e) {
                     return false;
                 }
