@@ -28,7 +28,7 @@ public class GitHubBranchTriggerDslContext implements Context {
 
     private List<String> whitelistedBranches = new ArrayList<>();
     private List<GitHubBranchEvent> events = new ArrayList<>();
-    private List<GitHubRepoProvider> repoProviders = asList(new GitHubPluginRepoProvider());
+    private List<GitHubRepoProvider> repoProviders = new ArrayList<>(asList(new GitHubPluginRepoProvider()));
 
 
     public void cron(String cron) {
