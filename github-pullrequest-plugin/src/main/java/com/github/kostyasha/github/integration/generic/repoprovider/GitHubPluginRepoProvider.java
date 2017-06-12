@@ -73,6 +73,7 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
         return repoPermission;
     }
 
+    @DataBoundSetter
     public void setRepoPermission(GHPermission repoPermission) {
         this.repoPermission = repoPermission;
     }
@@ -149,6 +150,8 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
 
     protected Object readResolve() {
         if (isNull(cacheConnection)) cacheConnection = true;
+        if (isNull(repoPermission)) repoPermission = GHPermission.ADMIN;
+        if (isNull(manageHooks)) manageHooks = true;
         return this;
     }
 

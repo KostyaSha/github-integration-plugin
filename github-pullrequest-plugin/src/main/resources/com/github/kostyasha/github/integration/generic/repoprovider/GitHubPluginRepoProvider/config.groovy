@@ -18,8 +18,8 @@ f.entry(title: "Manage hooks", field: "manageHooks") {
     f.checkbox()
 }
 
-f.entry(title: "Repository requested permission", field: "permission") {
+f.entry(title: "Repository requested permission", field: "repoPermission") {
     f.enum() {
-        text(my.text)
+        text(my.name())
     }
 }
