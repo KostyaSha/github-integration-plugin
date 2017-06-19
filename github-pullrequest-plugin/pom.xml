@@ -10,7 +10,7 @@
 
     <!-- historical name -->
     <artifactId>github-pullrequest</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.2-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <name>GitHub Integration Plugin</name>
