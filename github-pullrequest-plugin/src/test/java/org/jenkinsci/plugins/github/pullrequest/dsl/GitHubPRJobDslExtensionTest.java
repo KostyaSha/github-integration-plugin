@@ -6,6 +6,7 @@ import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchCo
 import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.impl.GitHubBranchCommitMessageCheck;
 import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchRestrictionFilter;
 
+import com.github.kostyasha.github.integration.generic.GitHubRepoProvider;
 import hudson.model.FreeStyleProject;
 import hudson.triggers.Trigger;
 
@@ -15,6 +16,7 @@ import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.util.Collection;
+import java.util.List;
 
 import javaposse.jobdsl.plugin.ExecuteDslScripts;
 import javaposse.jobdsl.plugin.LookupStrategy;
@@ -84,7 +86,10 @@ public class GitHubPRJobDslExtensionTest {
         verifyBranchFilter(trigger.getEvents().get(0));
         verifyCommitChecks(trigger.getEvents().get(1));
 
-        assertThat("Should contain repoProvider", trigger.getRepoProviders(), notNullValue());
+        final List<GitHubRepoProvider> repoProviders = trigger.getRepoProviders();
+        assertThat("Should contain repoProvider", repoProviders, notNullValue());
+        assertThat("Should contain 1 repoProvider", repoProviders, hasSize(1));
+
     }
 
     private void verifyCommitChecks(GitHubBranchEvent gitHubBranchEvent) {
