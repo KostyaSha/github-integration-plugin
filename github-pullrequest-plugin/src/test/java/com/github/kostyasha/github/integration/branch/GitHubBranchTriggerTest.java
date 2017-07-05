@@ -16,14 +16,17 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestExtension;
+import org.jvnet.hudson.test.recipes.LocalData;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.collection.IsMapContaining.hasKey;
 import static org.hamcrest.core.Is.is;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.CRON;
 import static org.junit.Assert.assertThat;
@@ -52,6 +55,7 @@ public class GitHubBranchTriggerTest {
             .stubRepo()
             .stubStatuses();
 
+    @LocalData
     @Test
     public void someTest() throws Exception {
         config.getConfigs().add(github.serverConfig());
@@ -76,6 +80,10 @@ public class GitHubBranchTriggerTest {
 
         assertThat(branchTrigger.getRemoteRepository(), notNullValue());
 
+        GitHubBranchRepository localRepo = prj.getAction(GitHubBranchRepository.class);
+        assertThat(localRepo, notNullValue());
+        assertThat(localRepo.getBranches(), hasKey("for-removal"));
+
         branchTrigger.run();
 
         jRule.waitUntilNoActivity();
@@ -87,6 +95,9 @@ public class GitHubBranchTriggerTest {
         assertThat(cause, notNullValue());
         assertThat(cause.getCommitSha(), is("6dcb09b5b57875f334f61aebed695e2e4193db5e"));
         assertThat(cause.getBranchName(), is("master"));
+
+        localRepo = prj.getAction(GitHubBranchRepository.class);
+        assertThat(localRepo.getBranches(), not(hasKey("for-removal")));
     }
 
     @TestExtension
