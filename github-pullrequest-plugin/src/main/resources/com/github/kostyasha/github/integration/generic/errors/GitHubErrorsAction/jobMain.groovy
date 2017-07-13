@@ -3,7 +3,7 @@ package com.github.kostyasha.github.integration.generic.errors.GitHubErrorsActio
 def t = namespace("/lib/hudson")
 def st = namespace("jelly:stapler");
 
-if (!from?.errors?.isEmpty()) {
+if (from?.hasVisibleErrors()) {
     // indent like in hudson/model/AbstractProject/main.jelly
     table(style: "margin-left:1em;") {
         t.summary(icon: "warning.png") {

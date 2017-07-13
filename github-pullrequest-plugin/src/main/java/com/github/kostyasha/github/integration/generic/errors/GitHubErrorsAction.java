@@ -23,6 +23,17 @@ public class GitHubErrorsAction implements ProminentProjectAction {
         this.description = description;
     }
 
+    public boolean hasVisibleErrors() {
+        boolean hasVisible = false;
+        for (GitHubError error : errors) {
+            if (error.isVisible()) {
+                hasVisible = true;
+                break;
+            }
+        }
+        return hasVisible;
+    }
+
     @Nonnull
     public String getDescription() {
         return description;
