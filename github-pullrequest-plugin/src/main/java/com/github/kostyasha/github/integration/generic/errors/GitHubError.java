@@ -21,6 +21,13 @@ public abstract class GitHubError implements ExtensionPoint {
     public abstract String getTitle();
 
     /**
+     * Whether to show error on job page. Useful when error visibility will be known after delay.
+     */
+    public boolean isVisible() {
+        return true;
+    }
+
+    /**
      * Raw displayed html content as description.
      */
     @Nonnull
