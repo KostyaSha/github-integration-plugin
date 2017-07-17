@@ -2,7 +2,8 @@
 
 ==== Environment variables disappeared for triggered build!
 
-Set `-Dhudson.model.ParametersAction.keepUndefinedParameters=true` for jenkins java process. Caused by "ugly" `SECURITY-170` fix.
+Set `-Dhudson.model.ParametersAction.keepUndefinedParameters=true` for jenkins java process. Caused by "ugly" `SECURITY-170` fix. 
+UPD workarounded in latest versions.
 
 ==== Option `Pipeline script from SCM` doesn't work
 
