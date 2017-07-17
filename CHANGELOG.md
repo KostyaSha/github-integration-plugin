@@ -2,6 +2,11 @@
 
 ## Next 
 
+## 0.1.0-rc25
+- [branch/pr] API for hidding delayed errors
+- [branch/pr] Providers dsl.
+- [branch] Remove deleted branches from local repo.
+
 ## 0.1.0-rc24
 - [branch/pr] fix triggers triggering from hooks when jenkins has bad configured job with triggers
 - [branch/pr] Don't throw exception when events not defined in triggers.
