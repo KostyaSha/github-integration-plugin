@@ -13,9 +13,9 @@ freeStyleJob('gh-branch') {
 
             repoProviders {
                 gitHubPlugin {
-                    manageHooks(true)
-                    cacheConnection(true)
-                    permission { admin() }
+                    manageHooks(false)
+                    cacheConnection(false)
+                    permission { pull() }
                 }
             }
 

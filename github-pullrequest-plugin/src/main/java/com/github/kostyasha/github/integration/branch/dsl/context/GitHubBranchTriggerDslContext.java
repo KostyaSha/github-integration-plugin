@@ -42,7 +42,6 @@ public class GitHubBranchTriggerDslContext implements Context {
         mode = modeContext.mode();
     }
 
-
     public void setPreStatus() {
         setPreStatus = true;
     }
@@ -66,6 +65,7 @@ public class GitHubBranchTriggerDslContext implements Context {
         GitHubRepoProvidersDslContext repoProvidersContext = new GitHubRepoProvidersDslContext();
         ContextExtensionPoint.executeInContext(closure, repoProvidersContext);
 
+        repoProviders.clear();
         repoProviders.addAll(repoProvidersContext.repoProviders());
     }
 
@@ -99,5 +99,9 @@ public class GitHubBranchTriggerDslContext implements Context {
 
     public List<String> whitelistedBranches() {
         return whitelistedBranches;
+    }
+
+    public List<GitHubRepoProvider> repoProviders() {
+        return repoProviders;
     }
 }

@@ -61,6 +61,7 @@ public class GitHubPRTriggerDslContext implements Context {
         GitHubRepoProvidersDslContext repoProvidersContext = new GitHubRepoProvidersDslContext();
         ContextExtensionPoint.executeInContext(closure, repoProvidersContext);
 
+        repoProviders.clear();
         repoProviders.addAll(repoProvidersContext.repoProviders());
     }
 
@@ -86,5 +87,9 @@ public class GitHubPRTriggerDslContext implements Context {
 
     public List<GitHubPREvent> events() {
         return events;
+    }
+
+    public List<GitHubRepoProvider> repoProviders() {
+        return repoProviders;
     }
 }
