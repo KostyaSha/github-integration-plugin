@@ -2,6 +2,9 @@
 
 ## Next 
 
+## 0.1.0-rc26
+- fix repoproviders job-dsl binding.
+
 ## 0.1.0-rc25
 - [branch/pr] API for hidding delayed errors
 - [branch/pr] Providers dsl.
