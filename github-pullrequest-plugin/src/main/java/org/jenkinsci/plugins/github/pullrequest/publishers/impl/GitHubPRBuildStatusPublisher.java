@@ -90,7 +90,7 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
         String statusMsgValue = getStatusMsg().expandAll(run, listener);
         String buildUrl = publishedURL + run.getUrl();
 
-	if (isNull(c) {
+	if (isNull(c)) {
 	     listener.error("Can't get PR Cause for this run! Silently skipping. " +
                      "TODO implement error handler, like in publishers");
              return;
