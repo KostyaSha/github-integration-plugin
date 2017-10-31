@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghBranchCauseFromRun;
 import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghBranchTriggerFromJob;
@@ -43,7 +44,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
     public static final String FILE = GitHubBranchRepository.class.getName() + ".runtime.xml";
     private static final Logger LOG = LoggerFactory.getLogger(GitHubBranchRepository.class);
 
-    private Map<String, GitHubBranch> branches = new HashMap<>();
+    private final Map<String, GitHubBranch> branches = new ConcurrentHashMap<>();
 
     /**
      * Object that represent GitHub repository to work with
@@ -60,9 +61,6 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
 
     @Nonnull
     public Map<String, GitHubBranch> getBranches() {
-        if (isNull(branches)) {
-            branches = new HashMap<>();
-        }
         return branches;
     }
 
@@ -117,7 +115,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
         try {
             Jenkins instance = GitHubWebHook.getJenkinsInstance();
             if (instance.hasPermission(Item.DELETE)) {
-                branches = new HashMap<>();
+                branches.clear();
                 save();
                 result = FormValidation.ok("Branches deleted");
             } else {

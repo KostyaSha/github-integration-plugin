@@ -6,6 +6,7 @@ import hudson.model.Item;
 import hudson.model.Job;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.SequentialExecutionQueue;
+import jenkins.branch.MultiBranchProject;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
@@ -80,6 +81,9 @@ public abstract class GitHubTriggerDescriptor extends TriggerDescriptor {
 
     @Override
     public boolean isApplicable(Item item) {
+        if (item instanceof MultiBranchProject) {
+            return true;
+        }
         return item instanceof Job && nonNull(SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(item))
                 && item instanceof ParameterizedJobMixIn.ParameterizedJob;
     }

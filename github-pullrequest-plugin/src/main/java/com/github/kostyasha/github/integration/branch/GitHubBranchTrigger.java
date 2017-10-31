@@ -4,10 +4,12 @@ import antlr.ANTLRException;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
 import com.github.kostyasha.github.integration.branch.trigger.JobRunnerForBranchCause;
+import com.github.kostyasha.github.integration.branch.utils.ItemHelpers;
 import com.github.kostyasha.github.integration.generic.GitHubTrigger;
 import com.github.kostyasha.github.integration.generic.GitHubTriggerDescriptor;
 import com.github.kostyasha.github.integration.generic.errors.impl.GitHubHookRegistrationError;
 import hudson.Extension;
+import hudson.model.Item;
 import hudson.model.Job;
 import hudson.triggers.Trigger;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
@@ -112,20 +114,22 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
     }
 
     @Override
-    public void start(Job<?, ?> job, boolean newInstance) {
+    public void start(Item item, boolean newInstance) {
         LOG.info("Starting GitHub Branch trigger for project {}", job.getFullName());
-        super.start(job, newInstance);
-
-        if (newInstance && getRepoProvider().isManageHooks(this) && withHookTriggerMode().apply(job)) {
-            try {
-                getRepoProvider().registerHookFor(this);
-                getErrorsAction().removeErrors(GitHubHookRegistrationError.class);
-            } catch (Throwable error) {
-                getErrorsAction().addOrReplaceError(new GitHubHookRegistrationError(
-                        String.format("Failed register hook for %s. <br/> Because %s",
-                                job.getFullName(), error.toString())
-                ));
-                throw error;
+        super.start(item, newInstance);
+        if (item instanceof Job) {
+        Job<?, ?> job = (Job) item;
+            if (newInstance && getRepoProvider().isManageHooks(this) && withHookTriggerMode().apply(job)) {
+                try {
+                    getRepoProvider().registerHookFor(this);
+                    getErrorsAction().removeErrors(GitHubHookRegistrationError.class);
+                } catch (Throwable error) {
+                    getErrorsAction().addOrReplaceError(new GitHubHookRegistrationError(
+                            String.format("Failed register hook for %s. <br/> Because %s",
+                                    job.getFullName(), error.toString())
+                    ));
+                    throw error;
+                }
             }
         }
     }
@@ -166,7 +170,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
      * @param branch - branch for check, if null - then all PRs
      */
     public void doRun(String branch) {
-        if (not(isBuildable()).apply(job)) {
+        if (!ItemHelpers.isBuildable().test(job)) {
             LOG.debug("Job {} is disabled, but trigger run!", isNull(job) ? "<no job>" : job.getFullName());
             return;
         }
@@ -176,7 +180,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
             return;
         }
 
-        GitHubBranchRepository localRepository = job.getAction(GitHubBranchRepository.class);
+        GitHubBranchRepository localRepository = ItemHelpers.getBranchRepositoryFor(job);
         if (isNull(localRepository)) {
             LOG.warn("Can't get repository info, maybe project {} misconfigured?", job.getFullName());
             return;

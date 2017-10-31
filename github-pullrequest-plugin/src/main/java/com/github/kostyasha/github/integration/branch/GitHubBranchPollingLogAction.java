@@ -1,5 +1,6 @@
 package com.github.kostyasha.github.integration.branch;
 
+import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.Run;
 import com.github.kostyasha.github.integration.generic.GitHubPollingLogAction;
@@ -8,8 +9,8 @@ import com.github.kostyasha.github.integration.generic.GitHubPollingLogAction;
  * @author Kanstantsin Shautsou
  */
 public class GitHubBranchPollingLogAction extends GitHubPollingLogAction {
-    public GitHubBranchPollingLogAction(Job<?, ?> job) {
-        super(job);
+    public GitHubBranchPollingLogAction(Item item) {
+        super(item);
     }
 
     public GitHubBranchPollingLogAction(Run run) {

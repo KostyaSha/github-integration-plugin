@@ -45,8 +45,8 @@
         <maven-findbugs-plugin.version>3.0.2</maven-findbugs-plugin.version>
         <powermock.version>1.6.0</powermock.version>
         <logback.version>1.1.3</logback.version>
-        <workflow.version>1.14</workflow.version>
-        <matrix.version>1.6</matrix.version>
+        <workflow.version>1.14.2</workflow.version>
+        <matrix.version>1.7.1</matrix.version>
         <excluded.tests>**/its/*.java</excluded.tests>
         <java.level>8</java.level>
     </properties>
@@ -106,6 +106,81 @@
             <version>${matrix.version}</version>
         </dependency>
 
+        <!-- -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>freestyle-multibranch</artifactId>
+            <version>0.1-beta-1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>scm-api</artifactId>
+            <version>2.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>branch-api</artifactId>
+            <version>2.0.15</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>cloudbees-folder</artifactId>
+            <version>6.2.1</version>
+        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.infradna.tool</groupId>-->
+            <!--<artifactId>bridge-method-annotation</artifactId>-->
+            <!--<version>1.14</version>-->
+        <!--</dependency>-->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>mailer</artifactId>
+            <version>1.17</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.icon-shim</groupId>
+            <artifactId>icon-shim</artifactId>
+            <version>2.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.icon-shim</groupId>
+            <artifactId>icon-set</artifactId>
+            <version>2.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.ui</groupId>
+            <artifactId>jquery-detached</artifactId>
+            <version>1.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>git</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>git-client</artifactId>
+            <version>2.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>credentials</artifactId>
+            <version>2.1.16</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>ssh-credentials</artifactId>
+            <version>1.13</version>
+        </dependency>
+
+        <!-- -->
+
         <!--for publishers-->
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -117,7 +192,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>token-macro</artifactId>
-            <version>1.10</version>
+            <version>1.11</version>
             <optional>true</optional>
         </dependency>
 
@@ -170,7 +245,7 @@
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps</artifactId>
             <!-- see https://github.com/jenkinsci/workflow-cps-plugin/pull/7#issuecomment-216587074 -->
-            <version>${workflow.version}-beta-1</version>
+            <version>${workflow.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -302,10 +377,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.${java.level}</source>
-                    <target>1.${java.level}</target>
-                </configuration>
+                <version>3.7.0</version>
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>

@@ -9,6 +9,7 @@ import com.google.common.base.Predicate;
 import hudson.model.Action;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
+import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
@@ -53,10 +54,10 @@ public class JobRunnerForBranchCause implements Predicate<GitHubBranchCause> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JobRunnerForBranchCause.class);
 
-    private Job<?, ?> job;
+    private Item job;
     private GitHubBranchTrigger trigger;
 
-    public JobRunnerForBranchCause(Job<?, ?> job, GitHubBranchTrigger trigger) {
+    public JobRunnerForBranchCause(Item job, GitHubBranchTrigger trigger) {
         this.job = job;
         this.trigger = trigger;
     }
