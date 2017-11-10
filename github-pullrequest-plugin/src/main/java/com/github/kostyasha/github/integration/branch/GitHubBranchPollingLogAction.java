@@ -9,7 +9,7 @@ import com.github.kostyasha.github.integration.generic.GitHubPollingLogAction;
  * @author Kanstantsin Shautsou
  */
 public class GitHubBranchPollingLogAction extends GitHubPollingLogAction {
-    public GitHubBranchPollingLogAction(Item item) {
+    public GitHubBranchPollingLogAction(Job<?, ?> item) {
         super(item);
     }
 

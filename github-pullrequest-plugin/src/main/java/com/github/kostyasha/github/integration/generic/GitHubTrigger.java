@@ -34,7 +34,7 @@ import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull
 /**
  * @author Kanstantsin Shautsou
  */
-public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<Item> {
+public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<Job<?, ?>> {
     private static final Logger LOG = LoggerFactory.getLogger(GitHubTrigger.class);
 
     @CheckForNull
@@ -204,7 +204,7 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
     }
 
     @CheckForNull
-    public Item getJob() {
+    public Job getJob() {
         return job;
     }
 
@@ -212,23 +212,21 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
         return getRepoFullName(getJob());
     }
 
-    public GitHubRepositoryName getRepoFullName(Item item) {
-        if (item instanceof Job) {
-            Job<?, ?> job = (Job) item;
-            if (isNull(repoName)) {
-                checkNotNull(job, "job object is null, race condition?");
-                GithubProjectProperty ghpp = job.getProperty(GithubProjectProperty.class);
+    public GitHubRepositoryName getRepoFullName(Job item) {
+        Job<?, ?> job = (Job) item;
+        if (isNull(repoName)) {
+            checkNotNull(job, "job object is null, race condition?");
+            GithubProjectProperty ghpp = job.getProperty(GithubProjectProperty.class);
 
-                checkNotNull(ghpp, "GitHub project property is not defined. Can't setup GitHub trigger for job %s",
-                        job.getName());
-                checkNotNull(ghpp.getProjectUrl(), "A GitHub project url is required");
+            checkNotNull(ghpp, "GitHub project property is not defined. Can't setup GitHub trigger for job %s",
+                    job.getName());
+            checkNotNull(ghpp.getProjectUrl(), "A GitHub project url is required");
 
-                GitHubRepositoryName repo = GitHubRepositoryName.create(ghpp.getProjectUrl().baseUrl());
+            GitHubRepositoryName repo = GitHubRepositoryName.create(ghpp.getProjectUrl().baseUrl());
 
-                checkNotNull(repo, "Invalid GitHub project url: %s", ghpp.getProjectUrl().baseUrl());
+            checkNotNull(repo, "Invalid GitHub project url: %s", ghpp.getProjectUrl().baseUrl());
 
-                setRepoName(repo);
-            }
+            setRepoName(repo);
         }
 
         return repoName;

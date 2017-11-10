@@ -1,19 +1,16 @@
 package com.github.kostyasha.github.integration.multibranch;
 
-import com.coravy.hudson.plugins.github.GithubUrl;
 import com.github.kostyasha.github.integration.generic.GitHubRepoProvider;
 import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider;
-import com.github.kostyasha.github.integration.multibranch.category.GitHubBranchSCMHeadCategory;
+import com.github.kostyasha.github.integration.multibranch.handler.GitHubBranchHandler;
+import com.github.kostyasha.github.integration.multibranch.handler.GitHubPRHandler;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubTagSCMHead;
 import com.google.common.annotations.Beta;
-import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.TaskListener;
-import hudson.plugins.git.GitSCM;
 import hudson.scm.NullSCM;
 import hudson.scm.SCM;
-import jenkins.plugins.git.AbstractGitSCMSource;
 import jenkins.plugins.git.AbstractGitSCMSource.SCMRevisionImpl;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMHeadCategory;
@@ -42,13 +39,17 @@ import static java.util.Arrays.asList;
 public class GitHubSCMSource extends SCMSource {
     /**
      * This will the URL to the project main branch.
+     * One for PRs and branches... etc...
      */
     private String projectUrlStr;
 
-
+    // one for tags, etc
     @Beta
     private List<GitHubRepoProvider> repoProviders = asList(new GitHubPluginRepoProvider()); // default
     private transient GitHubRepoProvider repoProvider = null;
+
+    private GitHubBranchHandler branchHandler;
+    private GitHubPRHandler prHandler;
 
 
 

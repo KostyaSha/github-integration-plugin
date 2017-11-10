@@ -54,10 +54,10 @@ public class JobRunnerForBranchCause implements Predicate<GitHubBranchCause> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JobRunnerForBranchCause.class);
 
-    private Item job;
+    private Job job;
     private GitHubBranchTrigger trigger;
 
-    public JobRunnerForBranchCause(Item job, GitHubBranchTrigger trigger) {
+    public JobRunnerForBranchCause(Job job, GitHubBranchTrigger trigger) {
         this.job = job;
         this.trigger = trigger;
     }

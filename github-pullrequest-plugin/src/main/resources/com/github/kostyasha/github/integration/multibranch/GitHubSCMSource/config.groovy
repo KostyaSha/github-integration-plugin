@@ -25,3 +25,5 @@ f.entry(title: "Repo providers") {
 
     )
 }
+
+f.optionalProperty(field: "prHandler", title: "Pull Requests")

@@ -31,6 +31,7 @@ import org.kohsuke.github.GHCommitState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -268,7 +269,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
         return startJob(cause, null);
     }
 
-    public QueueTaskFuture<?> startJob(GitHubPRCause cause, Cause additionalCause) {
+    public QueueTaskFuture<?> startJob(GitHubPRCause cause, @CheckForNull Cause additionalCause) {
         ParametersAction parametersAction;
         List<ParameterValue> parameters = getDefaultParametersValues(job);
         final List<ParameterValue> pluginParameters = asList(
