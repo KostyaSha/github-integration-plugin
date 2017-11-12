@@ -357,7 +357,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
         }
 
         // list all available descriptors for choosing in job configuration
-        public List<GitHubPREventDescriptor> getEventDescriptors() {
+        public static List<GitHubPREventDescriptor> getEventDescriptors() {
             return GitHubPREventDescriptor.all();
         }
 

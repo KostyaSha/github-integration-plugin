@@ -1,5 +1,6 @@
 package com.github.kostyasha.github.integration.multibranch.handler;
 
+import hudson.Extension;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -35,6 +36,7 @@ public class GitHubPRHandler extends GitHubHandler {
         return (DescriptorImpl) super.getDescriptor();
     }
 
+    @Extension
     public static class DescriptorImpl extends GitHubHandlerDescriptor {
         @Nonnull
         @Override

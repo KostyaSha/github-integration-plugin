@@ -1,12 +1,8 @@
-package com.github.kostyasha.github.integration.multibranch;
+package com.github.kostyasha.github.integration.multibranch.action;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
-import hudson.BulkChange;
-import hudson.XmlFile;
 import hudson.model.Action;
 import hudson.model.Saveable;
-import hudson.model.listeners.SaveableListener;
-import jenkins.branch.MultiBranchProject;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
@@ -22,7 +18,7 @@ import java.net.URL;
  * and {@link com.github.kostyasha.github.integration.branch.GitHubBranchRepository}, but will contain
  * anything related to repo in this single class.
  */
-public class GitHubRepo implements Action, Saveable {
+public class GitHubRepo implements Action {
     private static final Logger LOG = LoggerFactory.getLogger(GitHubRepo.class);
 
     private final GitHubBranchRepository branchRepository;
@@ -68,11 +64,5 @@ public class GitHubRepo implements Action, Saveable {
     @Override
     public String getUrlName() {
         return null;
-    }
-
-
-    @Override
-    public void save() throws IOException {
-
     }
 }

@@ -1,5 +1,6 @@
-package com.github.kostyasha.github.integration.multibranch;
+package com.github.kostyasha.github.integration.multibranch.action;
 
+import com.github.kostyasha.github.integration.generic.GitHubRepository;
 import hudson.BulkChange;
 import hudson.XmlFile;
 import hudson.model.Action;
@@ -10,13 +11,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class GitHubRepos implements Saveable, Action {
-    private static final Logger LOG = LoggerFactory.getLogger(GitHubRepos.class);
+/**
+ * Single Action for every MultiBranch
+ */
+public class GitHubSCMSourcesReposAction implements Saveable, Action {
+    private static final Logger LOG = LoggerFactory.getLogger(GitHubSCMSourcesReposAction.class);
 
-    protected transient XmlFile configFile; // for save()
-    protected transient MultiBranchProject<?, ?> project;  // for UI ?
+    public static final String FILE = "github-repositories.runtime.xml";
+
+    @Nonnull
+    protected transient MultiBranchProject<?, ?> project;
+
+    Map<String, GitHubRepo> repoStates = new ConcurrentHashMap<>();
+
+
+    public GitHubSCMSourcesReposAction(@Nonnull MultiBranchProject<?, ?> project) {
+        this.project = project;
+    }
 
     public MultiBranchProject<?, ?> getProject() {
         return project;
@@ -27,11 +46,7 @@ public class GitHubRepos implements Saveable, Action {
     }
 
     public XmlFile getConfigFile() {
-        return configFile;
-    }
-
-    public void setConfigFile(XmlFile configFile) {
-        this.configFile = configFile;
+        return new XmlFile(new File(project.getRootDir(), FILE));
     }
 
     public void saveQuietly() {
@@ -49,9 +64,16 @@ public class GitHubRepos implements Saveable, Action {
                 return;
             }
 
-            configFile.write(this);
+            getConfigFile().write(this);
         }
-        SaveableListener.fireOnChange(this, configFile);
+        SaveableListener.fireOnChange(this, getConfigFile());
+    }
+
+
+    public synchronized void load() throws IOException {
+        if (getConfigFile().exists()) {
+            getConfigFile().unmarshal(this);
+        }
     }
 
     @CheckForNull
@@ -71,4 +93,5 @@ public class GitHubRepos implements Saveable, Action {
     public String getUrlName() {
         return "github-repos";
     }
+
 }

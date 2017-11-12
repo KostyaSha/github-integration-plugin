@@ -13,17 +13,22 @@ if (instance == null) {
     instance = new GitHubSCMSource();
 }
 
-f.entry(field: 'projectUrlStr', title: _('github.project.url')) {
-    f.textbox()
+f.block() {
+    f.entry(field: 'projectUrlStr', title: _('github.project.url')) {
+        f.textbox()
+    }
+
+    f.entry(title: "Repo providers") {
+        f.hetero_list(name: "repoProviders",
+                items: instance.repoProviders,
+                descriptors: GitHubRepoProvider.GitHubRepoProviderDescriptor.allRepoProviders(),
+                hasHeader: true
+
+        )
+    }
+
+    f.optionalProperty(field: "prHandler", title: "Pull Requests")
+
+    f.optionalProperty(field: "branchHandler", title: "Branches")
+
 }
-
-f.entry(title: "Repo providers") {
-    f.hetero_list(name: "repoProviders",
-            items: instance.repoProviders,
-            descriptors: GitHubRepoProvider.GitHubRepoProviderDescriptor.allRepoProviders(),
-            hasHeader: true
-
-    )
-}
-
-f.optionalProperty(field: "prHandler", title: "Pull Requests")

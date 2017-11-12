@@ -81,9 +81,6 @@ public abstract class GitHubTriggerDescriptor extends TriggerDescriptor {
 
     @Override
     public boolean isApplicable(Item item) {
-        if (item instanceof MultiBranchProject) {
-            return true;
-        }
         return item instanceof Job && nonNull(SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(item))
                 && item instanceof ParameterizedJobMixIn.ParameterizedJob;
     }
