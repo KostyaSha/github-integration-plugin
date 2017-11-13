@@ -2,6 +2,7 @@ package com.github.kostyasha.github.integration.multibranch.GitHubSCMSource
 
 import com.github.kostyasha.github.integration.generic.GitHubRepoProvider
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource
+import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandlerDescriptor
 import jenkins.plugins.git.GitSCMSource
 import lib.FormTagLib
 
@@ -27,8 +28,13 @@ f.block() {
         )
     }
 
-    f.optionalProperty(field: "prHandler", title: "Pull Requests")
-
-    f.optionalProperty(field: "branchHandler", title: "Branches")
-
+    f.entry(title: "Handlers") {
+        f.hetero_list(
+                name: "handlers",
+                items: instance.handlers,
+                descriptors: GitHubHandlerDescriptor.getAllGitHubHandlerDescriptors(),
+                hasHeader: true,
+                addCaption: _("Add Handler")
+        )
+    }
 }

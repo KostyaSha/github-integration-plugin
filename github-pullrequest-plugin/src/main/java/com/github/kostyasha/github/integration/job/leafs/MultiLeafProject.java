@@ -1,6 +1,5 @@
-package com.github.kostyasha.github.integration.multibranch.job.leafs;
+package com.github.kostyasha.github.integration.job.leafs;
 
-import com.cloudbees.hudson.plugins.folder.AbstractFolderDescriptor;
 import com.cloudbees.hudson.plugins.folder.computed.ChildObserver;
 import com.cloudbees.hudson.plugins.folder.computed.ComputedFolder;
 import hudson.model.ItemGroup;

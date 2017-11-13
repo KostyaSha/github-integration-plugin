@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest.webhook;
 
 import hudson.Extension;
+import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
 import jenkins.model.Jenkins;
@@ -40,8 +41,8 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHPullRequestSubscriber.class);
 
     @Override
-    protected boolean isApplicable(Job<?, ?> job) {
-        return withPRTrigger().apply(job);
+    protected boolean isApplicable(Item item) {
+        return item instanceof Job && withPRTrigger().apply((Job) item);
     }
 
     @Override

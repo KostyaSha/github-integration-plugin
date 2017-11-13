@@ -2,6 +2,7 @@ package com.github.kostyasha.github.integration.branch.webhook;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import hudson.Extension;
+import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
 import jenkins.model.Jenkins;
@@ -13,6 +14,7 @@ import org.kohsuke.github.GHEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -37,8 +39,9 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
     private static final Set<GHEvent> EVENTS = immutableEnumSet(GHEvent.PUSH, GHEvent.CREATE, GHEvent.DELETE);
 
     @Override
-    protected boolean isApplicable(Job<?, ?> job) {
-        return withBranchTrigger().apply(job);
+    protected boolean isApplicable(@Nullable Item item) {
+        return item instanceof Job &&
+                withBranchTrigger().apply((Job) item);
     }
 
     @Override

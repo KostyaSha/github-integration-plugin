@@ -1,20 +1,21 @@
 package com.github.kostyasha.github.integration.multibranch;
 
 import com.cloudbees.hudson.plugins.folder.computed.ComputedFolder;
+import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.github.kostyasha.github.integration.generic.GitHubRepoProvider;
 import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider;
+import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubSCMSourcesReposAction;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubBranchHandler;
+import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubPRHandler;
-import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
-import com.github.kostyasha.github.integration.multibranch.head.GitHubTagSCMHead;
+import com.github.kostyasha.github.integration.multibranch.repoprovider.GitHubPluginRepoProvider2;
 import com.google.common.annotations.Beta;
 import hudson.Extension;
 import hudson.model.Action;
 import hudson.model.TaskListener;
 import hudson.scm.NullSCM;
 import hudson.scm.SCM;
-import jenkins.plugins.git.AbstractGitSCMSource.SCMRevisionImpl;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMHeadCategory;
 import jenkins.scm.api.SCMHeadEvent;
@@ -27,6 +28,8 @@ import jenkins.scm.api.SCMSourceDescriptor;
 import jenkins.scm.api.SCMSourceEvent;
 import jenkins.scm.impl.UncategorizedSCMHeadCategory;
 import jenkins.util.NonLocalizable;
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
+import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.slf4j.Logger;
@@ -35,15 +38,20 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import static com.github.kostyasha.github.integration.multibranch.category.GitHubBranchSCMHeadCategory.BRANCH;
 import static com.github.kostyasha.github.integration.multibranch.category.GitHubPRSCMHeadCategory.PR;
 import static com.github.kostyasha.github.integration.multibranch.category.GitHubTagSCMHeadCategory.TAG;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Arrays.asList;
+import static java.util.Arrays.sort;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
 
 public class GitHubSCMSource extends SCMSource {
@@ -55,18 +63,18 @@ public class GitHubSCMSource extends SCMSource {
     private String projectUrlStr;
 
     // one for tags, etc
-    @Beta
-    private List<GitHubRepoProvider> repoProviders = asList(new GitHubPluginRepoProvider()); // default
-    private transient GitHubRepoProvider repoProvider = null;
+    private GitHubPluginRepoProvider2 repoProvider = null;
 
-    private GitHubBranchHandler branchHandler;
-    private GitHubPRHandler prHandler;
-
+    private final static List<GitHubHandler> handlers = new ArrayList<>();
 
     @DataBoundConstructor
     public GitHubSCMSource() {
     }
 
+
+    public GitHubRepositoryName getRepoFullName() {
+        return GitHubRepositoryName.create(projectUrlStr);
+    }
 
     @DataBoundSetter
     public void setProjectUrlStr(String projectUrlStr) {
@@ -77,63 +85,71 @@ public class GitHubSCMSource extends SCMSource {
         return projectUrlStr;
     }
 
-
-    public List<GitHubRepoProvider> getRepoProviders() {
-        return repoProviders;
-    }
-
-    @DataBoundSetter
-    public void setRepoProviders(List<GitHubRepoProvider> repoProviders) {
-        this.repoProviders = repoProviders;
-    }
-
-
     @CheckForNull
-    public GitHubBranchHandler getBranchHandler() {
-        return branchHandler;
+    public GitHubPluginRepoProvider2 getRepoProvider() {
+        return repoProvider;
     }
 
     @DataBoundSetter
-    public GitHubSCMSource setBranchHandler(GitHubBranchHandler branchHandler) {
-        this.branchHandler = branchHandler;
+    public GitHubSCMSource setRepoProvider(GitHubPluginRepoProvider2 repoProvider) {
+        this.repoProvider = repoProvider;
         return this;
     }
 
-    @CheckForNull
-    public GitHubPRHandler getPrHandler() {
-        return prHandler;
+    public static List<GitHubHandler> getHandlers() {
+        return handlers;
     }
 
-    @DataBoundSetter
-    public GitHubSCMSource setPrHandler(GitHubPRHandler prHandler) {
-        this.prHandler = prHandler;
-        return this;
-    }
-
-
-    protected getStorageAction() {
+    protected GitHubRepo getLocalRepo() {
         ComputedFolder owner = (ComputedFolder) getOwner();
 
         GitHubSCMSourcesReposAction sourcesReposAction = owner.getAction(GitHubSCMSourcesReposAction.class);
-        sourcesReposAction.get
+        return sourcesReposAction.getOrCreate(this);
     }
 
     @Override
-    protected void retrieve(SCMSourceCriteria scmSourceCriteria,
-                            @Nonnull SCMHeadObserver scmHeadObserver, SCMHeadEvent<?> scmHeadEvent,
+    protected void retrieve(SCMSourceCriteria scmSourceCriteria, //useless
+                            @Nonnull SCMHeadObserver scmHeadObserver,
+                            SCMHeadEvent<?> scmHeadEvent, // null for manual run
                             @Nonnull TaskListener taskListener) throws IOException, InterruptedException {
+        PrintStream llog = taskListener.getLogger();
+        llog.println("> GitHubSCMSource.retrieve(jenkins.scm.api.SCMSourceCriteria, jenkins.scm.api.SCMHeadObserver, jenkins.scm.api.SCMHeadEvent<?>, hudson.model.TaskListener)");
+        llog.println(">> scmSourceCriteria " + scmSourceCriteria);
+        llog.println(">> scmHeadObserver " + scmHeadObserver);
+        llog.println(">> scmHeadEvent " + scmHeadEvent);
 
-        taskListener.getLogger().println("> GitHubSCMSource.retrieve(jenkins.scm.api.SCMSourceCriteria, jenkins.scm.api.SCMHeadObserver, jenkins.scm.api.SCMHeadEvent<?>, hudson.model.TaskListener)");
+        // TODO actualise some repo for UI Action?
 
-        GitHubBranchSCMHead branchHead = new GitHubBranchSCMHead("someBranch");
+        List<GitHubPRCause> causes;
 
-        scmHeadObserver.observe(branchHead, new SCMRevisionImpl(branchHead, UUID.randomUUID().toString()));
+        getHandlers().forEach(handler -> {
+            try {
+                handler.handle(getLocalRepo(), getRemoteRepo(), taskListener);
+            } catch (IOException e) {
+                LOG.error("Can't get remoteRepo()", e);
+                e.printStackTrace(llog);
+            }
+        });
 
 
-        GitHubTagSCMHead taggy = new GitHubTagSCMHead("taggy");
-        scmHeadObserver.observe(taggy, new SCMRevisionImpl(taggy, UUID.randomUUID().toString()));
+//        GitHubBranchSCMHead branchHead = new GitHubBranchSCMHead("someBranch");
+//
+//        scmHeadObserver.observe(branchHead, new SCMRevisionImpl(branchHead, UUID.randomUUID().toString()));
+//
+//
+//        GitHubTagSCMHead taggy = new GitHubTagSCMHead("taggy");
+//        scmHeadObserver.observe(taggy, new SCMRevisionImpl(taggy, UUID.randomUUID().toString()));
 
     }
+
+
+    @Nonnull
+    public GHRepository getRemoteRepo() throws IOException {
+        GHRepository remoteRepository = getRepoProvider().getGHRepository(this);
+        checkState(nonNull(remoteRepository), "Can't get remote GH repo for source %s", getId());
+        return remoteRepository;
+    }
+
 
     @Nonnull
     @Override

@@ -21,8 +21,14 @@ import java.net.URL;
 public class GitHubRepo implements Action {
     private static final Logger LOG = LoggerFactory.getLogger(GitHubRepo.class);
 
-    private final GitHubBranchRepository branchRepository;
-    private final GitHubPRRepository prRepository;
+    private transient Action owner;
+
+    private GitHubBranchRepository branchRepository;
+    private GitHubPRRepository prRepository;
+
+
+    public GitHubRepo() {
+    }
 
     /**
      * When remote side available.

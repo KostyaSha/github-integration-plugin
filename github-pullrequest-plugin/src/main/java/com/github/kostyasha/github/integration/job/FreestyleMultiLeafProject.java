@@ -1,7 +1,7 @@
-package com.github.kostyasha.github.integration.multibranch.job;
+package com.github.kostyasha.github.integration.job;
 
-import com.github.kostyasha.github.integration.multibranch.job.leafs.MultiLeafProject;
-import com.github.kostyasha.github.integration.multibranch.job.leafs.MultiLeafProjectDescriptor;
+import com.github.kostyasha.github.integration.job.leafs.MultiLeafProject;
+import com.github.kostyasha.github.integration.job.leafs.MultiLeafProjectDescriptor;
 import hudson.Extension;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;

@@ -1,6 +1,6 @@
 package com.github.kostyasha.github.integration.multibranch.action;
 
-import com.github.kostyasha.github.integration.generic.GitHubRepository;
+import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import hudson.BulkChange;
 import hudson.XmlFile;
 import hudson.model.Action;
@@ -14,9 +14,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -30,8 +28,20 @@ public class GitHubSCMSourcesReposAction implements Saveable, Action {
     @Nonnull
     protected transient MultiBranchProject<?, ?> project;
 
-    Map<String, GitHubRepo> repoStates = new ConcurrentHashMap<>();
+    protected Map<String, GitHubRepo> repoStates = new ConcurrentHashMap<>();
 
+    public GitHubRepo getOrCreate(final GitHubSCMSource source) {
+        return repoStates.computeIfAbsent(source.getId(), s -> new GitHubRepo());
+    }
+
+    public Map<String, GitHubRepo> getRepoStates() {
+        return repoStates;
+    }
+
+    public GitHubSCMSourcesReposAction setRepoStates(Map<String, GitHubRepo> repoStates) {
+        this.repoStates = repoStates;
+        return this;
+    }
 
     public GitHubSCMSourcesReposAction(@Nonnull MultiBranchProject<?, ?> project) {
         this.project = project;
