@@ -28,7 +28,7 @@ import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull
  */
 public abstract class GitHubPollingLogAction<A extends GitHubPollingLogAction<A>> implements MatrixChildAction, RunAction2 {
     @CheckForNull
-    private transient Item job;
+    private transient Job<?, ?> job;
 
     @CheckForNull
     private transient Run<?, ?> run;
@@ -44,7 +44,7 @@ public abstract class GitHubPollingLogAction<A extends GitHubPollingLogAction<A>
     public abstract String getPollingFileName();
 
     @CheckForNull
-    public Item getJob() {
+    public Job<?, ?> getJob() {
         return job;
     }
 

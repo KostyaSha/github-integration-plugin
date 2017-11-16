@@ -2,6 +2,8 @@ package com.github.kostyasha.github.integration.multibranch;
 
 import com.cloudbees.hudson.plugins.folder.computed.ComputedFolder;
 import com.cloudbees.jenkins.GitHubRepositoryName;
+import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
+import com.github.kostyasha.github.integration.generic.GitHubCause;
 import com.github.kostyasha.github.integration.generic.GitHubRepoProvider;
 import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
@@ -9,6 +11,7 @@ import com.github.kostyasha.github.integration.multibranch.action.GitHubSCMSourc
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubBranchHandler;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubPRHandler;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
 import com.github.kostyasha.github.integration.multibranch.repoprovider.GitHubPluginRepoProvider2;
 import com.google.common.annotations.Beta;
 import hudson.Extension;
@@ -16,6 +19,7 @@ import hudson.model.Action;
 import hudson.model.TaskListener;
 import hudson.scm.NullSCM;
 import hudson.scm.SCM;
+import jenkins.plugins.git.AbstractGitSCMSource;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMHeadCategory;
 import jenkins.scm.api.SCMHeadEvent;
@@ -65,7 +69,7 @@ public class GitHubSCMSource extends SCMSource {
     // one for tags, etc
     private GitHubPluginRepoProvider2 repoProvider = null;
 
-    private final static List<GitHubHandler> handlers = new ArrayList<>();
+    private List<GitHubHandler> handlers = new ArrayList<>();
 
     @DataBoundConstructor
     public GitHubSCMSource() {
@@ -96,8 +100,14 @@ public class GitHubSCMSource extends SCMSource {
         return this;
     }
 
-    public static List<GitHubHandler> getHandlers() {
+    public List<GitHubHandler> getHandlers() {
         return handlers;
+    }
+
+    @DataBoundSetter
+    public GitHubSCMSource setHandlers(List<GitHubHandler> handlers) {
+        this.handlers = handlers;
+        return this;
     }
 
     protected GitHubRepo getLocalRepo() {
@@ -118,20 +128,37 @@ public class GitHubSCMSource extends SCMSource {
         llog.println(">> scmHeadObserver " + scmHeadObserver);
         llog.println(">> scmHeadEvent " + scmHeadEvent);
 
-        // TODO actualise some repo for UI Action?
+        GitHubRepo localRepo = getLocalRepo();
 
-        List<GitHubPRCause> causes;
+        // TODO actualise some repo for UI Action?
+        localRepo.actualize(getRemoteRepo());
+
+        List<GitHubCause> causes = new ArrayList<>();
 
         getHandlers().forEach(handler -> {
             try {
-                handler.handle(getLocalRepo(), getRemoteRepo(), taskListener);
+                causes.addAll(handler.handle(localRepo, getRemoteRepo(), taskListener, this));
             } catch (IOException e) {
                 LOG.error("Can't get remoteRepo()", e);
                 e.printStackTrace(llog);
             }
         });
 
+        causes.forEach(cause -> {
+            if (cause instanceof GitHubBranchCause) {
+                GitHubBranchCause branchCause = (GitHubBranchCause) cause;
+                String commitSha = branchCause.getCommitSha();
+                String branchName = branchCause.getBranchName();
 
+                GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(branchName);
+                AbstractGitSCMSource.SCMRevisionImpl scmRevision = new AbstractGitSCMSource.SCMRevisionImpl(scmHead, commitSha);
+                try {
+                    scmHeadObserver.observe(scmHead, scmRevision);
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace(taskListener.getLogger());
+                }
+            }
+        });
 //        GitHubBranchSCMHead branchHead = new GitHubBranchSCMHead("someBranch");
 //
 //        scmHeadObserver.observe(branchHead, new SCMRevisionImpl(branchHead, UUID.randomUUID().toString()));

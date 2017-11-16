@@ -1,6 +1,7 @@
 package com.github.kostyasha.github.integration.multibranch.handler;
 
 import com.github.kostyasha.github.integration.generic.GitHubCause;
+import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
 import hudson.DescriptorExtensionList;
 import hudson.model.AbstractDescribableImpl;
@@ -21,8 +22,8 @@ public abstract class GitHubHandler extends AbstractDescribableImpl<GitHubHandle
         return (GitHubHandlerDescriptor) super.getDescriptor();
     }
 
+
     @Nonnull
-    public abstract List<GitHubCause> handle(@Nonnull GitHubRepo localRepo,
-                                             @Nonnull GHRepository remoteRepo,
-                                             @Nonnull TaskListener taskListener);
+    public abstract List<GitHubCause> handle(@Nonnull GitHubRepo localRepo, @Nonnull GHRepository remoteRepo,
+                                             @Nonnull TaskListener taskListener, @Nonnull GitHubSCMSource source);
 }

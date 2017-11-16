@@ -5,6 +5,8 @@ import com.cloudbees.jenkins.GitHubWebHook;
 import com.github.kostyasha.github.integration.generic.repoprovider.GHPermission;
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import com.google.common.base.Optional;
+import hudson.Extension;
+import hudson.model.Descriptor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.jenkinsci.plugins.github.GitHubPlugin;
 import org.jenkinsci.plugins.github.config.GitHubServerConfig;
@@ -154,7 +156,12 @@ public class GitHubPluginRepoProvider2 extends GitHubRepoProvider2 {
         return this;
     }
 
+    @Override
+    public GitHubPluginRepoProviderDescriptor2 getDescriptor() {
+        return (GitHubPluginRepoProviderDescriptor2) super.getDescriptor();
+    }
 
+    @Extension
     public static class GitHubPluginRepoProviderDescriptor2 extends GitHubRepoProviderDescriptor2 {
         @Nonnull
         @Override

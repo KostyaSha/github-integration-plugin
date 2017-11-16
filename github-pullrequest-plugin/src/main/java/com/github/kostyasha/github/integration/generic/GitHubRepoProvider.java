@@ -47,7 +47,7 @@ public abstract class GitHubRepoProvider extends AbstractDescribableImpl<GitHubR
         public abstract String getDisplayName();
 
         public static DescriptorExtensionList allRepoProviders() {
-            return Jenkins.getActiveInstance().getDescriptorList(GitHubRepoProvider.class);
+            return Jenkins.getInstance().getDescriptorList(GitHubRepoProvider.class);
         }
     }
 }

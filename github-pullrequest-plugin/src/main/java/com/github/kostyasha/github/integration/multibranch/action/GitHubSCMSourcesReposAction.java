@@ -31,7 +31,7 @@ public class GitHubSCMSourcesReposAction implements Saveable, Action {
     protected Map<String, GitHubRepo> repoStates = new ConcurrentHashMap<>();
 
     public GitHubRepo getOrCreate(final GitHubSCMSource source) {
-        return repoStates.computeIfAbsent(source.getId(), s -> new GitHubRepo());
+        return repoStates.computeIfAbsent(source.getId(), s -> new GitHubRepo(this));
     }
 
     public Map<String, GitHubRepo> getRepoStates() {
@@ -84,6 +84,7 @@ public class GitHubSCMSourcesReposAction implements Saveable, Action {
         if (getConfigFile().exists()) {
             getConfigFile().unmarshal(this);
         }
+        repoStates.values().forEach( v -> v.setOwner(this));
     }
 
     @CheckForNull

@@ -6,6 +6,7 @@ import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
+import com.github.kostyasha.github.integration.multibranch.handler.GitHubBranchHandler;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import org.kohsuke.github.GHBranch;
@@ -33,11 +34,26 @@ public class GitHubBranchCreatedEvent extends GitHubBranchEvent {
     }
 
     @Override
+    public GitHubBranchCause check(GitHubBranchHandler handler, GHBranch remoteBranch,
+                                   @CheckForNull GitHubBranch localBranch,
+                                   GitHubBranchRepository localRepo,
+                                   TaskListener listener) throws IOException {
+        return check(remoteBranch, localBranch, localRepo, listener);
+    }
+
+    @Override
     public GitHubBranchCause check(GitHubBranchTrigger trigger,
                                    GHBranch remoteBranch,
                                    @CheckForNull GitHubBranch localBranch,
                                    GitHubBranchRepository locaRepo,
                                    TaskListener listener) throws IOException {
+        return check(remoteBranch, localBranch, locaRepo, listener);
+    }
+
+    private GitHubBranchCause check(GHBranch remoteBranch,
+                                    @CheckForNull GitHubBranch localBranch,
+                                    GitHubBranchRepository locaRepo,
+                                    TaskListener listener) {
         if (remoteBranch == null && localBranch == null) {
             // just in case
             LOG.debug("Remote and local branch are null");

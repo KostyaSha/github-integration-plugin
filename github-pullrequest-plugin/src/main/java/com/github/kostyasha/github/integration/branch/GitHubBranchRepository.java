@@ -44,7 +44,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
     public static final String FILE = GitHubBranchRepository.class.getName() + ".runtime.xml";
     private static final Logger LOG = LoggerFactory.getLogger(GitHubBranchRepository.class);
 
-    private final Map<String, GitHubBranch> branches = new ConcurrentHashMap<>();
+    private Map<String, GitHubBranch> branches = new ConcurrentHashMap<>();
 
     /**
      * Object that represent GitHub repository to work with
@@ -61,6 +61,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
 
     @Nonnull
     public Map<String, GitHubBranch> getBranches() {
+        if (isNull(branches)) branches = new ConcurrentHashMap<>();
         return branches;
     }
 

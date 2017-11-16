@@ -5,16 +5,22 @@ import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
-import org.jenkinsci.plugins.github.pullrequest.utils.LoggingTaskListenerWrapper;
+import com.github.kostyasha.github.integration.multibranch.handler.GitHubBranchHandler;
+import hudson.model.TaskListener;
 import org.kohsuke.github.GHBranch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.nonNull;
 
 /**
  * @author Kanstantsin Shautsou
@@ -22,27 +28,50 @@ import java.util.stream.Collectors;
 public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCause> {
     private static final Logger LOGGER = LoggerFactory.getLogger(BranchToCauseConverter.class);
 
-    private final GitHubBranchRepository localRepo;
-    private final LoggingTaskListenerWrapper listener;
+    private final GitHubBranchRepository localBranches;
+    private final TaskListener listener;
+    @CheckForNull
     private final GitHubBranchTrigger trigger;
+    @CheckForNull
+    private final GitHubBranchHandler handler;
 
-    private BranchToCauseConverter(GitHubBranchRepository localRepo,
-                                   LoggingTaskListenerWrapper listener,
-                                   GitHubBranchTrigger trigger) {
-        this.localRepo = localRepo;
+    private BranchToCauseConverter(@Nonnull GitHubBranchRepository localBranches,
+                                   @Nonnull TaskListener listener,
+                                   @Nonnull GitHubBranchTrigger trigger) {
+        this.localBranches = localBranches;
         this.listener = listener;
         this.trigger = trigger;
+        this.handler = null;
+    }
+
+    public BranchToCauseConverter(@Nonnull GitHubBranchRepository localBranches,
+                                  @Nonnull TaskListener listener,
+                                  @Nonnull GitHubBranchHandler handler) {
+        this.localBranches = localBranches;
+        this.listener = listener;
+        this.handler = handler;
+        this.trigger = null;
     }
 
     public static BranchToCauseConverter toGitHubBranchCause(GitHubBranchRepository localRepo,
-                                                             LoggingTaskListenerWrapper listener,
+                                                             TaskListener listener,
                                                              GitHubBranchTrigger trigger) {
         return new BranchToCauseConverter(localRepo, listener, trigger);
     }
 
+    private List<GitHubBranchEvent> getEvents() {
+        if (nonNull(trigger)) {
+            return trigger.getEvents();
+        } else if (nonNull(handler)) {
+            return handler.getEvents();
+        }
+
+        return Collections.emptyList();
+    }
+
     @Override
     public GitHubBranchCause apply(final GHBranch remoteBranch) {
-        List<GitHubBranchCause> causes = trigger.getEvents().stream()
+        List<GitHubBranchCause> causes = getEvents().stream()
                 .map(event -> toCause(event, remoteBranch))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -57,7 +86,7 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
 
         GitHubBranchCause cause = skipTrigger(causes);
         if (cause != null) {
-            listener.info("Build of branch [{}] skipped: {}.", name, cause.getReason());
+            listener.getLogger().println(String.format("Build of branch [{}] skipped: {}.", name, cause.getReason()));
             return null;
         }
 
@@ -84,10 +113,14 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
 
     private GitHubBranchCause toCause(GitHubBranchEvent event, GHBranch remoteBranch) {
         String branchName = remoteBranch.getName();
-        GitHubBranch localBranch = localRepo.getBranches().get(branchName);
+        GitHubBranch localBranch = localBranches.getBranches().get(branchName);
 
         try {
-            return event.check(trigger, remoteBranch, localBranch, localRepo, listener);
+            if (nonNull(trigger)) {
+                return event.check(trigger, remoteBranch, localBranch, localBranches, listener);
+            } else {
+                return event.check(handler, remoteBranch, localBranch, localBranches, listener);
+            }
         } catch (IOException e) {
             LOGGER.error("Event check failed, skipping branch [{}].", branchName, e);
             listener.error("Event check failed, skipping branch [{}] {}", branchName, e);
@@ -95,4 +128,5 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
             return null;
         }
     }
+
 }

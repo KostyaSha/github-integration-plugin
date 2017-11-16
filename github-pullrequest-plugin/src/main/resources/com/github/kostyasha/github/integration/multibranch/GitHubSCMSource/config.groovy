@@ -1,10 +1,10 @@
 package com.github.kostyasha.github.integration.multibranch.GitHubSCMSource
 
-import com.github.kostyasha.github.integration.generic.GitHubRepoProvider
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandlerDescriptor
-import jenkins.plugins.git.GitSCMSource
 import lib.FormTagLib
+
+import static com.github.kostyasha.github.integration.multibranch.repoprovider.GitHubRepoProvider2.GitHubRepoProviderDescriptor2.allRepoProviders2
 
 
 def f = namespace(FormTagLib);
@@ -19,13 +19,24 @@ f.block() {
         f.textbox()
     }
 
-    f.entry(title: "Repo providers") {
-        f.hetero_list(name: "repoProviders",
-                items: instance.repoProviders,
-                descriptors: GitHubRepoProvider.GitHubRepoProviderDescriptor.allRepoProviders(),
-                hasHeader: true
-
-        )
+    f.dropdownList(name: "repoProvider", title: _("Repo Provider")) {
+        allRepoProviders2().each { sd ->
+            if (sd != null) {
+                f.dropdownListBlock(value: sd.clazz.name, name: sd.displayName,
+                        selected: instance.repoProvider == null ?
+                                false : instance.repoProvider.descriptor.equals(sd),
+                        title: sd.displayName) {
+                    descriptor = sd
+                    if (instance.repoProvider != null && instance.repoProvider.descriptor.equals(sd)) {
+                        instance = instance.repoProvider
+                    }
+                    f.invisibleEntry() {
+                        input(type: "hidden", name: "stapler-class", value: sd.clazz.name)
+                    }
+                    st.include(from: sd, page: sd.configPage, optional: "true")
+                }
+            }
+        }
     }
 
     f.entry(title: "Handlers") {

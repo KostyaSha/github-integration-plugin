@@ -1,8 +1,10 @@
 package com.github.kostyasha.github.integration.multibranch.action;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
+import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import hudson.model.Action;
 import hudson.model.Saveable;
+import jenkins.scm.api.SCMSourceOwner;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
@@ -11,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.net.URL;
+
+import static java.util.Objects.isNull;
 
 /**
  * Action as storage of critical (and not) information required for triggering decision.
@@ -21,13 +25,13 @@ import java.net.URL;
 public class GitHubRepo implements Action {
     private static final Logger LOG = LoggerFactory.getLogger(GitHubRepo.class);
 
-    private transient Action owner;
+    private transient GitHubSCMSourcesReposAction owner;
 
     private GitHubBranchRepository branchRepository;
     private GitHubPRRepository prRepository;
 
-
-    public GitHubRepo() {
+    public GitHubRepo(GitHubSCMSourcesReposAction owner) {
+        this.owner = owner;
     }
 
     /**
@@ -45,6 +49,7 @@ public class GitHubRepo implements Action {
         branchRepository = new GitHubBranchRepository(repoFullName, url);
         prRepository = new GitHubPRRepository(repoFullName, url);
     }
+
 
     public GitHubBranchRepository getBranchRepository() {
         return branchRepository;
@@ -70,5 +75,20 @@ public class GitHubRepo implements Action {
     @Override
     public String getUrlName() {
         return null;
+    }
+
+    public void actualize(GHRepository remoteRepo) throws IOException {
+        if (isNull(branchRepository)) {
+            branchRepository = new GitHubBranchRepository(remoteRepo);
+        }
+        if (isNull(prRepository)) {
+            prRepository = new GitHubPRRepository(remoteRepo);
+        }
+
+        owner.save();
+    }
+
+    public void setOwner(GitHubSCMSourcesReposAction owner) {
+        this.owner = owner;
     }
 }

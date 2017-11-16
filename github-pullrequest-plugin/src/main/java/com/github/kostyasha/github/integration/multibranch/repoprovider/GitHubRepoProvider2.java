@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
 /**
  * @author Kanstantsin Shautsou
  */
-public abstract class GitHubRepoProvider2 extends AbstractDescribableImpl<GitHubRepoProvider> implements ExtensionPoint {
+public abstract class GitHubRepoProvider2 extends AbstractDescribableImpl<GitHubRepoProvider2> implements ExtensionPoint {
 
 
     public abstract void registerHookFor(GitHubSCMSource source);
@@ -28,12 +28,12 @@ public abstract class GitHubRepoProvider2 extends AbstractDescribableImpl<GitHub
     public abstract GHRepository getGHRepository(GitHubSCMSource source);
 
     public abstract static class GitHubRepoProviderDescriptor2
-            extends Descriptor<GitHubRepoProvider> {
+            extends Descriptor<GitHubRepoProvider2> {
         @Nonnull
         public abstract String getDisplayName();
 
-        public static DescriptorExtensionList allRepoProviders() {
-            return Jenkins.getInstance().getDescriptorList(GitHubRepoProvider.class);
+        public static DescriptorExtensionList allRepoProviders2() {
+            return Jenkins.getInstance().getDescriptorList(GitHubRepoProvider2.class);
         }
     }
 }
