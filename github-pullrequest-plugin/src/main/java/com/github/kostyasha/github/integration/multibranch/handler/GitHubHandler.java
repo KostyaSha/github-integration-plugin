@@ -17,13 +17,7 @@ import java.util.List;
  */
 public abstract class GitHubHandler extends AbstractDescribableImpl<GitHubHandler> {
 
-    @Override
-    public GitHubHandlerDescriptor getDescriptor() {
-        return (GitHubHandlerDescriptor) super.getDescriptor();
-    }
-
-
     @Nonnull
-    public abstract List<GitHubCause> handle(@Nonnull GitHubRepo localRepo, @Nonnull GHRepository remoteRepo,
+    public abstract List<? extends GitHubCause> handle(@Nonnull GitHubRepo localRepo, @Nonnull GHRepository remoteRepo,
                                              @Nonnull TaskListener taskListener, @Nonnull GitHubSCMSource source);
 }

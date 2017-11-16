@@ -3,6 +3,7 @@ package com.github.kostyasha.github.integration.multibranch;
 import com.cloudbees.hudson.plugins.folder.computed.ComputedFolder;
 import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
+import com.github.kostyasha.github.integration.generic.GitHubBadgeAction;
 import com.github.kostyasha.github.integration.generic.GitHubCause;
 import com.github.kostyasha.github.integration.generic.GitHubRepoProvider;
 import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider;
@@ -12,10 +13,14 @@ import com.github.kostyasha.github.integration.multibranch.handler.GitHubBranchH
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubPRHandler;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubPRSCMHead;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
 import com.github.kostyasha.github.integration.multibranch.repoprovider.GitHubPluginRepoProvider2;
+import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
 import com.google.common.annotations.Beta;
 import hudson.Extension;
 import hudson.model.Action;
+import hudson.model.CauseAction;
 import hudson.model.TaskListener;
 import hudson.scm.NullSCM;
 import hudson.scm.SCM;
@@ -32,6 +37,7 @@ import jenkins.scm.api.SCMSourceDescriptor;
 import jenkins.scm.api.SCMSourceEvent;
 import jenkins.scm.impl.UncategorizedSCMHeadCategory;
 import jenkins.util.NonLocalizable;
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRBadgeAction;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -44,6 +50,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +77,9 @@ public class GitHubSCMSource extends SCMSource {
     private GitHubPluginRepoProvider2 repoProvider = null;
 
     private List<GitHubHandler> handlers = new ArrayList<>();
+
+
+    private transient List<GitHubCause> causes = new ArrayList<>();
 
     @DataBoundConstructor
     public GitHubSCMSource() {
@@ -133,7 +143,7 @@ public class GitHubSCMSource extends SCMSource {
         // TODO actualise some repo for UI Action?
         localRepo.actualize(getRemoteRepo());
 
-        List<GitHubCause> causes = new ArrayList<>();
+//        List<GitHubCause> causes = new ArrayList<>();
 
         getHandlers().forEach(handler -> {
             try {
@@ -150,8 +160,17 @@ public class GitHubSCMSource extends SCMSource {
                 String commitSha = branchCause.getCommitSha();
                 String branchName = branchCause.getBranchName();
 
-                GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(branchName);
-                AbstractGitSCMSource.SCMRevisionImpl scmRevision = new AbstractGitSCMSource.SCMRevisionImpl(scmHead, commitSha);
+                GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(branchName, branchCause);
+                AbstractGitSCMSource.SCMRevisionImpl scmRevision = new GitHubSCMRevision(scmHead, commitSha);
+                try {
+                    scmHeadObserver.observe(scmHead, scmRevision);
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace(taskListener.getLogger());
+                }
+            } else if (cause instanceof GitHubPRCause) {
+                GitHubPRCause prCause = (GitHubPRCause) cause;
+                GitHubPRSCMHead scmHead = new GitHubPRSCMHead(Integer.toString(prCause.getNumber()), prCause);
+                AbstractGitSCMSource.SCMRevisionImpl scmRevision = new GitHubSCMRevision(scmHead, ((GitHubPRCause) cause).getHeadSha());
                 try {
                     scmHeadObserver.observe(scmHead, scmRevision);
                 } catch (IOException | InterruptedException e) {
@@ -262,8 +281,10 @@ public class GitHubSCMSource extends SCMSource {
                                            @Nonnull TaskListener listener) throws IOException, InterruptedException {
         listener.getLogger().println("> GitHubSCMSource.retrieveActions(jenkins.scm.api.SCMHead, jenkins.scm.api.SCMHeadEvent, hudson.model.TaskListener)");
         listener.getLogger().println(">> head " + head + " event " + event);
+        String name = head.getName();
 
-        return super.retrieveActions(head, event, listener);
+        return Collections.singletonList(new CauseAction(((GitHubSCMHead) head).getCause()));
+//        return super.retrieveActions(head, event, listener);
     }
 
     @Nonnull

@@ -1,11 +1,11 @@
 package org.jenkinsci.plugins.github.pullrequest.trigger.check;
 
 import com.google.common.base.Predicate;
+import hudson.model.TaskListener;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
-import org.jenkinsci.plugins.github.pullrequest.utils.LoggingTaskListenerWrapper;
 import org.kohsuke.github.GHPullRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,14 +22,14 @@ public class NotUpdatedPRFilter implements Predicate<GHPullRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NotUpdatedPRFilter.class);
 
     private final GitHubPRRepository localRepo;
-    private final LoggingTaskListenerWrapper logger;
+    private final TaskListener logger;
 
-    private NotUpdatedPRFilter(GitHubPRRepository localRepo, LoggingTaskListenerWrapper logger) {
+    private NotUpdatedPRFilter(GitHubPRRepository localRepo, TaskListener logger) {
         this.localRepo = localRepo;
         this.logger = logger;
     }
 
-    public static NotUpdatedPRFilter notUpdated(GitHubPRRepository localRepo, LoggingTaskListenerWrapper logger) {
+    public static NotUpdatedPRFilter notUpdated(GitHubPRRepository localRepo, TaskListener logger) {
         return new NotUpdatedPRFilter(localRepo, logger);
     }
 
@@ -38,7 +38,7 @@ public class NotUpdatedPRFilter implements Predicate<GHPullRequest> {
         @CheckForNull GitHubPRPullRequest localPR = localRepo.getPulls().get(remotePR.getNumber());
 
         if (!isUpdated(remotePR, localPR)) { // light check
-            logger.debug("PR [#{} {}] not changed", remotePR.getNumber(), remotePR.getTitle());
+            logger.getLogger().println(String.format("PR [#%s %s] not changed", remotePR.getNumber(), remotePR.getTitle()));
             return false;
         }
         return true;

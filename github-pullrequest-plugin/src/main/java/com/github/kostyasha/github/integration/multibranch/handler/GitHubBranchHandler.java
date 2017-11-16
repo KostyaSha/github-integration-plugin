@@ -1,5 +1,6 @@
 package com.github.kostyasha.github.integration.multibranch.handler;
 
+import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.trigger.check.BranchToCauseConverter;
@@ -58,8 +59,8 @@ public class GitHubBranchHandler extends GitHubHandler {
 
     @Nonnull
     @Override
-    public List<GitHubCause> handle(@Nonnull GitHubRepo localRepo, @Nonnull GHRepository remoteRepo,
-                                    @Nonnull TaskListener listener, @Nonnull GitHubSCMSource source) {
+    public List<GitHubBranchCause> handle(@Nonnull GitHubRepo localRepo, @Nonnull GHRepository remoteRepo,
+                                          @Nonnull TaskListener listener, @Nonnull GitHubSCMSource source) {
         GitHubBranchRepository localBranches = localRepo.getBranchRepository();
 
         try {
@@ -73,7 +74,7 @@ public class GitHubBranchHandler extends GitHubHandler {
 
             Objects.requireNonNull(localBranches);
 
-            List<GitHubCause> causes = checkBranches(remoteBranches, localBranches, listener);
+            List<GitHubBranchCause> causes = checkBranches(remoteBranches, localBranches, listener);
 
             GHRateLimit rateLimitAfter = github.getRateLimit();
             int consumed = rateLimitBefore.remaining - rateLimitAfter.remaining;
@@ -108,10 +109,10 @@ public class GitHubBranchHandler extends GitHubHandler {
         return ghBranches;
     }
 
-    private List<GitHubCause> checkBranches(Set<GHBranch> remoteBranches,
+    private List<GitHubBranchCause> checkBranches(Set<GHBranch> remoteBranches,
                                             @Nonnull GitHubBranchRepository localBranches,
                                             @Nonnull TaskListener listener) {
-        List<GitHubCause> causes = remoteBranches.stream()
+        List<GitHubBranchCause> causes = remoteBranches.stream()
                 // TODO: update user whitelist filter
                 .filter(Objects::nonNull)
                 .map(new BranchToCauseConverter(localBranches, listener, this))

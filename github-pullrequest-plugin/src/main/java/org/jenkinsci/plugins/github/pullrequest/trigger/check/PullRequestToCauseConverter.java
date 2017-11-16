@@ -1,21 +1,25 @@
 package org.jenkinsci.plugins.github.pullrequest.trigger.check;
 
+import com.github.kostyasha.github.integration.multibranch.handler.GitHubPRHandler;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
-import org.jenkinsci.plugins.github.pullrequest.utils.LoggingTaskListenerWrapper;
 import org.kohsuke.github.GHPullRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.List;
 
 import static com.google.common.base.Predicates.notNull;
+import static java.util.Objects.nonNull;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 
 /**
@@ -25,31 +29,47 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
     private static final Logger LOGGER = LoggerFactory.getLogger(PullRequestToCauseConverter.class);
 
     private final GitHubPRRepository localRepo;
-    private final LoggingTaskListenerWrapper listener;
+    private final TaskListener listener;
+
+    @CheckForNull
     private final GitHubPRTrigger trigger;
 
+    @CheckForNull
+    private final GitHubPRHandler prHandler;
+
     private PullRequestToCauseConverter(GitHubPRRepository localRepo,
-                                        LoggingTaskListenerWrapper listener,
+                                        TaskListener listener,
                                         GitHubPRTrigger trigger) {
         this.localRepo = localRepo;
         this.listener = listener;
         this.trigger = trigger;
+        prHandler = null;
     }
 
-    public static PullRequestToCauseConverter toGitHubPRCause(GitHubPRRepository localRepo,
-                                                              LoggingTaskListenerWrapper listener,
-                                                              GitHubPRTrigger trigger) {
+    public PullRequestToCauseConverter(@Nonnull GitHubPRRepository localRepo,
+                                       @Nonnull TaskListener listener,
+                                       @Nonnull GitHubPRHandler prHandler) {
+        this.localRepo = localRepo;
+        this.listener = listener;
+        this.prHandler = prHandler;
+        trigger = null;
+    }
+
+    public static PullRequestToCauseConverter toGitHubPRCause(@Nonnull GitHubPRRepository localRepo,
+                                                              @Nonnull TaskListener listener,
+                                                              @Nonnull GitHubPRTrigger trigger) {
         return new PullRequestToCauseConverter(localRepo, listener, trigger);
     }
 
     /**
      * TODO migrate to java8 and cleanup.
+     *
      * @return only real trigger cause if matched trigger (not skip) event found for this remotePr.
      */
     @CheckForNull
     @Override
     public GitHubPRCause apply(final GHPullRequest remotePR) {
-        final GitHubPRCause gitHubPRCause = from(trigger.getEvents())
+        final GitHubPRCause gitHubPRCause = from(getEvents())
                 .transform(toCause(remotePR))
                 .filter(notNull())
                 .first()
@@ -63,8 +83,18 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
     }
 
     @VisibleForTesting
-    /* package */ EventToCauseConverter toCause(GHPullRequest remotePR) {
+    /* package */ EventToCauseConverter toCause( GHPullRequest remotePR) {
         return new EventToCauseConverter(remotePR);
+    }
+
+    public List<GitHubPREvent> getEvents() {
+        if (nonNull(trigger)) {
+            return trigger.getEvents();
+        } else if (nonNull(prHandler)) {
+            return prHandler.getEvents();
+        }
+
+        throw new IllegalArgumentException("Can't extract events");
     }
 
     @VisibleForTesting
@@ -80,7 +110,11 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
             //null if local not existed before
             @CheckForNull GitHubPRPullRequest localPR = localRepo.getPulls().get(remotePR.getNumber());
             try {
-                return event.check(trigger, remotePR, localPR, listener);
+                if (nonNull(trigger)) {
+                    return event.check(trigger, remotePR, localPR, listener);
+                }
+
+                return event.check(prHandler, remotePR, localPR, listener);
             } catch (IOException e) {
                 LOGGER.warn("Can't check trigger event", e);
                 listener.error("Can't check trigger event, so skipping PR #{}. {}", remotePR.getNumber(), e);

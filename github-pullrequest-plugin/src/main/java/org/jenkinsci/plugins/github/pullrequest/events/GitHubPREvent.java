@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.github.pullrequest.events;
 
+import com.github.kostyasha.github.integration.multibranch.handler.GitHubPRHandler;
 import hudson.ExtensionPoint;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.TaskListener;
@@ -31,6 +32,15 @@ public abstract class GitHubPREvent extends AbstractDescribableImpl<GitHubPREven
     @CheckForNull
     public GitHubPRCause check(
             GitHubPRTrigger gitHubPRTrigger,
+            GHPullRequest remotePR,
+            @CheckForNull GitHubPRPullRequest localPR,
+            TaskListener listener) throws IOException {
+        return null;
+    }
+
+    @CheckForNull
+    public GitHubPRCause check(
+            GitHubPRHandler prHandler,
             GHPullRequest remotePR,
             @CheckForNull GitHubPRPullRequest localPR,
             TaskListener listener) throws IOException {

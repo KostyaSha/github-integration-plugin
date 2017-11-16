@@ -106,11 +106,16 @@
             <version>${matrix.version}</version>
         </dependency>
 
-        <!-- -->
+        <!-- multi pseudo-branch -->
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>freestyle-multibranch</artifactId>
             <version>0.1-beta-1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-multibranch</artifactId>
+            <version>2.16</version>
         </dependency>
 
         <dependency>

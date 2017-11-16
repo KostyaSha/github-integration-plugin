@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.github.pullrequest.events.impl;
 
-import edu.umd.cs.findbugs.annotations.CheckForNull;
+import com.github.kostyasha.github.integration.multibranch.handler.GitHubPRHandler;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
@@ -15,6 +15,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.kohsuke.github.GHIssueState.CLOSED;
@@ -33,8 +36,20 @@ public class GitHubPROpenEvent extends GitHubPREvent {
     }
 
     @Override
+    public GitHubPRCause check(GitHubPRHandler prHandler, GHPullRequest remotePR,
+                               @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
+        return check(remotePR, localPR, listener);
+    }
+
+    @Override
     public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
                                @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
+
+        return check(remotePR, localPR, listener);
+    }
+
+    private GitHubPRCause check(GHPullRequest remotePR,
+                                @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
         if (remotePR.getState() == CLOSED) {
             return null; // already closed, nothing to check
         }
@@ -52,6 +67,7 @@ public class GitHubPROpenEvent extends GitHubPREvent {
 
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
+        @Nonnull
         @Override
         public final String getDisplayName() {
             return DISPLAY_NAME;

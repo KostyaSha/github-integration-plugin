@@ -86,7 +86,7 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
 
         GitHubBranchCause cause = skipTrigger(causes);
         if (cause != null) {
-            listener.getLogger().println(String.format("Build of branch [{}] skipped: {}.", name, cause.getReason()));
+            listener.getLogger().println(String.format("Build of branch %s skipped: %s.", name, cause.getReason()));
             return null;
         }
 
