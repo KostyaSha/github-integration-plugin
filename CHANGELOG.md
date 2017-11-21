@@ -2,6 +2,9 @@
 
 ## Next 
 
+## 0.1.0-rc27
+- fix error in branch commit event
+
 ## 0.1.0-rc26
 - fix repoproviders job-dsl binding.
 
