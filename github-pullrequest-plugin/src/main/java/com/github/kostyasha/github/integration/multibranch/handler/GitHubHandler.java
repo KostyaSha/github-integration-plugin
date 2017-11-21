@@ -7,9 +7,11 @@ import hudson.DescriptorExtensionList;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
+import jenkins.scm.api.SCMHeadObserver;
 import org.kohsuke.github.GHRepository;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -17,7 +19,10 @@ import java.util.List;
  */
 public abstract class GitHubHandler extends AbstractDescribableImpl<GitHubHandler> {
 
-    @Nonnull
-    public abstract List<? extends GitHubCause> handle(@Nonnull GitHubRepo localRepo, @Nonnull GHRepository remoteRepo,
-                                             @Nonnull TaskListener taskListener, @Nonnull GitHubSCMSource source);
+    public abstract void handle(@Nonnull SCMHeadObserver observer,
+                                                       @Nonnull GitHubRepo localRepo,
+                                                       @Nonnull GHRepository remoteRepo,
+                                                       @Nonnull TaskListener taskListener,
+                                                       @Nonnull GitHubSCMSource source
+    ) throws IOException;
 }

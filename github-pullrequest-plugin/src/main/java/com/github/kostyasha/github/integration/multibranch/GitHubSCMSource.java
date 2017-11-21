@@ -2,29 +2,18 @@ package com.github.kostyasha.github.integration.multibranch;
 
 import com.cloudbees.hudson.plugins.folder.computed.ComputedFolder;
 import com.cloudbees.jenkins.GitHubRepositoryName;
-import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
-import com.github.kostyasha.github.integration.generic.GitHubBadgeAction;
 import com.github.kostyasha.github.integration.generic.GitHubCause;
-import com.github.kostyasha.github.integration.generic.GitHubRepoProvider;
-import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubSCMSourcesReposAction;
-import com.github.kostyasha.github.integration.multibranch.handler.GitHubBranchHandler;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler;
-import com.github.kostyasha.github.integration.multibranch.handler.GitHubPRHandler;
-import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
-import com.github.kostyasha.github.integration.multibranch.head.GitHubPRSCMHead;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
 import com.github.kostyasha.github.integration.multibranch.repoprovider.GitHubPluginRepoProvider2;
-import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
-import com.google.common.annotations.Beta;
 import hudson.Extension;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.TaskListener;
 import hudson.scm.NullSCM;
 import hudson.scm.SCM;
-import jenkins.plugins.git.AbstractGitSCMSource;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMHeadCategory;
 import jenkins.scm.api.SCMHeadEvent;
@@ -37,8 +26,6 @@ import jenkins.scm.api.SCMSourceDescriptor;
 import jenkins.scm.api.SCMSourceEvent;
 import jenkins.scm.impl.UncategorizedSCMHeadCategory;
 import jenkins.util.NonLocalizable;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRBadgeAction;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -51,7 +38,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,8 +46,6 @@ import static com.github.kostyasha.github.integration.multibranch.category.GitHu
 import static com.github.kostyasha.github.integration.multibranch.category.GitHubPRSCMHeadCategory.PR;
 import static com.github.kostyasha.github.integration.multibranch.category.GitHubTagSCMHeadCategory.TAG;
 import static com.google.common.base.Preconditions.checkState;
-import static java.util.Arrays.asList;
-import static java.util.Arrays.sort;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
 
@@ -143,49 +127,14 @@ public class GitHubSCMSource extends SCMSource {
         // TODO actualise some repo for UI Action?
         localRepo.actualize(getRemoteRepo());
 
-//        List<GitHubCause> causes = new ArrayList<>();
-
         getHandlers().forEach(handler -> {
             try {
-                causes.addAll(handler.handle(localRepo, getRemoteRepo(), taskListener, this));
+                handler.handle(scmHeadObserver, localRepo, getRemoteRepo(), taskListener, this);
             } catch (IOException e) {
-                LOG.error("Can't get remoteRepo()", e);
+                LOG.error("Can't process handler", e);
                 e.printStackTrace(llog);
             }
         });
-
-        causes.forEach(cause -> {
-            if (cause instanceof GitHubBranchCause) {
-                GitHubBranchCause branchCause = (GitHubBranchCause) cause;
-                String commitSha = branchCause.getCommitSha();
-                String branchName = branchCause.getBranchName();
-
-                GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(branchName, branchCause);
-                AbstractGitSCMSource.SCMRevisionImpl scmRevision = new GitHubSCMRevision(scmHead, commitSha);
-                try {
-                    scmHeadObserver.observe(scmHead, scmRevision);
-                } catch (IOException | InterruptedException e) {
-                    e.printStackTrace(taskListener.getLogger());
-                }
-            } else if (cause instanceof GitHubPRCause) {
-                GitHubPRCause prCause = (GitHubPRCause) cause;
-                GitHubPRSCMHead scmHead = new GitHubPRSCMHead(Integer.toString(prCause.getNumber()), prCause);
-                AbstractGitSCMSource.SCMRevisionImpl scmRevision = new GitHubSCMRevision(scmHead, ((GitHubPRCause) cause).getHeadSha());
-                try {
-                    scmHeadObserver.observe(scmHead, scmRevision);
-                } catch (IOException | InterruptedException e) {
-                    e.printStackTrace(taskListener.getLogger());
-                }
-            }
-        });
-//        GitHubBranchSCMHead branchHead = new GitHubBranchSCMHead("someBranch");
-//
-//        scmHeadObserver.observe(branchHead, new SCMRevisionImpl(branchHead, UUID.randomUUID().toString()));
-//
-//
-//        GitHubTagSCMHead taggy = new GitHubTagSCMHead("taggy");
-//        scmHeadObserver.observe(taggy, new SCMRevisionImpl(taggy, UUID.randomUUID().toString()));
-
     }
 
 
@@ -282,9 +231,10 @@ public class GitHubSCMSource extends SCMSource {
         listener.getLogger().println("> GitHubSCMSource.retrieveActions(jenkins.scm.api.SCMHead, jenkins.scm.api.SCMHeadEvent, hudson.model.TaskListener)");
         listener.getLogger().println(">> head " + head + " event " + event);
         String name = head.getName();
-
-        return Collections.singletonList(new CauseAction(((GitHubSCMHead) head).getCause()));
-//        return super.retrieveActions(head, event, listener);
+        GitHubSCMHead gitHubSCMHead = (GitHubSCMHead) head;
+        List<Action> causeActions = Collections.singletonList(new CauseAction(gitHubSCMHead.getCause()));
+        gitHubSCMHead.setCause(null);
+        return causeActions;
     }
 
     @Nonnull

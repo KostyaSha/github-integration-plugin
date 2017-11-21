@@ -6,7 +6,7 @@ import jenkins.scm.api.SCMHead;
 import javax.annotation.Nonnull;
 
 public abstract class GitHubSCMHead extends SCMHead {
-    protected final GitHubCause cause;
+    protected GitHubCause cause;
 
     public GitHubSCMHead(@Nonnull String name, GitHubCause cause) {
         super(name);
@@ -15,5 +15,9 @@ public abstract class GitHubSCMHead extends SCMHead {
 
     public GitHubCause getCause() {
         return cause;
+    }
+
+    public void setCause(GitHubCause cause) {
+        this.cause = cause;
     }
 }

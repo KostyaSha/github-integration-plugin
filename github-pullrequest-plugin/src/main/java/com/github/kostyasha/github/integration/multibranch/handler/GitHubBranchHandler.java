@@ -7,8 +7,12 @@ import com.github.kostyasha.github.integration.branch.trigger.check.BranchToCaus
 import com.github.kostyasha.github.integration.generic.GitHubCause;
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
+import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
 import hudson.Extension;
 import hudson.model.TaskListener;
+import jenkins.plugins.git.AbstractGitSCMSource;
+import jenkins.scm.api.SCMHeadObserver;
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHRateLimit;
 import org.kohsuke.github.GHRepository;
@@ -57,42 +61,50 @@ public class GitHubBranchHandler extends GitHubHandler {
         return (DescriptorImpl) super.getDescriptor();
     }
 
-    @Nonnull
     @Override
-    public List<GitHubBranchCause> handle(@Nonnull GitHubRepo localRepo, @Nonnull GHRepository remoteRepo,
-                                          @Nonnull TaskListener listener, @Nonnull GitHubSCMSource source) {
+    public void handle(@Nonnull SCMHeadObserver observer,
+                       @Nonnull GitHubRepo localRepo, @Nonnull GHRepository remoteRepo,
+                       @Nonnull TaskListener listener, @Nonnull GitHubSCMSource source) throws IOException {
         GitHubBranchRepository localBranches = localRepo.getBranchRepository();
 
-        try {
-            GitHub github = source.getRepoProvider().getGitHub(source);
+        GitHub github = source.getRepoProvider().getGitHub(source);
 
-            GHRateLimit rateLimitBefore = github.getRateLimit();
-            listener.getLogger().println("GitHub rate limit before check: " + rateLimitBefore);
+        GHRateLimit rateLimitBefore = github.getRateLimit();
+        listener.getLogger().println("GitHub rate limit before check: " + rateLimitBefore);
 
-            // get local and remote list of branches
-            Set<GHBranch> remoteBranches = branchesToCheck(null, remoteRepo, localBranches);
+        // get local and remote list of branches
+        Set<GHBranch> remoteBranches = branchesToCheck(null, remoteRepo, localBranches);
 
-            Objects.requireNonNull(localBranches);
+        Objects.requireNonNull(localBranches);
 
-            List<GitHubBranchCause> causes = checkBranches(remoteBranches, localBranches, listener);
+        List<GitHubBranchCause> causes = checkBranches(remoteBranches, localBranches, listener);
 
-            GHRateLimit rateLimitAfter = github.getRateLimit();
-            int consumed = rateLimitBefore.remaining - rateLimitAfter.remaining;
-            LOG.info("GitHub rate limit after check {}: {}, consumed: {}, checked branches: {}",
-                    source.getRepoFullName(), rateLimitAfter, consumed, remoteBranches.size());
+        GHRateLimit rateLimitAfter = github.getRateLimit();
+        int consumed = rateLimitBefore.remaining - rateLimitAfter.remaining;
+        LOG.info("GitHub rate limit after check {}: {}, consumed: {}, checked branches: {}",
+                source.getRepoFullName(), rateLimitAfter, consumed, remoteBranches.size());
 
-            return causes;
-        } catch (IOException e) {
-            listener.error("Can't get build causes: '{}'", e);
-        }
+        causes.forEach(branchCause -> {
 
-        return emptyList();
+            String commitSha = branchCause.getCommitSha();
+            String branchName = branchCause.getBranchName();
+
+            GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(branchName, branchCause);
+            AbstractGitSCMSource.SCMRevisionImpl scmRevision = new GitHubSCMRevision(scmHead, commitSha);
+            try {
+                observer.observe(scmHead, scmRevision);
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace(listener.getLogger());
+            }
+        });
+
     }
 
     /**
      * Remote branch for future analysing. null - all remote branches.
      */
-    private Set<GHBranch> branchesToCheck(@CheckForNull String branch, @Nonnull GHRepository remoteRepo,
+    private Set<GHBranch> branchesToCheck(@CheckForNull String branch,
+                                          @Nonnull GHRepository remoteRepo,
                                           GitHubBranchRepository localRepository)
             throws IOException {
         final LinkedHashSet<GHBranch> ghBranches = new LinkedHashSet<>();
@@ -110,8 +122,8 @@ public class GitHubBranchHandler extends GitHubHandler {
     }
 
     private List<GitHubBranchCause> checkBranches(Set<GHBranch> remoteBranches,
-                                            @Nonnull GitHubBranchRepository localBranches,
-                                            @Nonnull TaskListener listener) {
+                                                  @Nonnull GitHubBranchRepository localBranches,
+                                                  @Nonnull TaskListener listener) {
         List<GitHubBranchCause> causes = remoteBranches.stream()
                 // TODO: update user whitelist filter
                 .filter(Objects::nonNull)

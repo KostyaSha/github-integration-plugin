@@ -3,8 +3,12 @@ package com.github.kostyasha.github.integration.multibranch.handler;
 import com.github.kostyasha.github.integration.generic.GitHubCause;
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubPRSCMHead;
+import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
 import hudson.Extension;
 import hudson.model.TaskListener;
+import jenkins.plugins.git.AbstractGitSCMSource;
+import jenkins.scm.api.SCMHeadObserver;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
@@ -76,57 +80,61 @@ public class GitHubPRHandler extends GitHubHandler {
         return (DescriptorImpl) super.getDescriptor();
     }
 
-    @Nonnull
     @Override
-    public List<GitHubPRCause> handle(@Nonnull GitHubRepo localRepo, @Nonnull GHRepository remoteRepo,
-                                    @Nonnull TaskListener listener, @Nonnull GitHubSCMSource source) {
-        try {
-            GitHub github = source.getRepoProvider().getGitHub(source);
+    public void handle(@Nonnull SCMHeadObserver observer,
+                       @Nonnull GitHubRepo localRepo,
+                       @Nonnull GHRepository remoteRepo,
+                       @Nonnull TaskListener listener,
+                       @Nonnull GitHubSCMSource source) throws IOException {
+        GitHub github = source.getRepoProvider().getGitHub(source);
 
-            GHRateLimit rateLimitBefore = github.getRateLimit();
-            listener.getLogger().println("GitHub rate limit before check: " + rateLimitBefore);
+        GHRateLimit rateLimitBefore = github.getRateLimit();
+        listener.getLogger().println("GitHub rate limit before check: " + rateLimitBefore);
 
-            GitHubPRRepository prRepository = localRepo.getPrRepository();
+        GitHubPRRepository prRepository = localRepo.getPrRepository();
 
-            // get local and remote list of PRs
-            Set<GHPullRequest> remotePulls = pullRequestsToCheck(null, remoteRepo, prRepository);
+        // get local and remote list of PRs
+        Set<GHPullRequest> remotePulls = pullRequestsToCheck(null, remoteRepo, prRepository);
 
-            Set<GHPullRequest> prepared = from(remotePulls)
-                    .filter(badState(prRepository, listener))
-                    .filter(notUpdated(prRepository, listener))
-                    .toSet();
+        Set<GHPullRequest> prepared = from(remotePulls)
+                .filter(badState(prRepository, listener))
+                .filter(notUpdated(prRepository, listener))
+                .toSet();
 
-            List<GitHubPRCause> causes = from(prepared)
-                    .filter(notNull())
+        List<GitHubPRCause> causes = from(prepared)
+                .filter(notNull())
 //                    .filter(and(
 //                            ifSkippedFirstRun(listener, isSkipFirstRun()),
 //                            withBranchRestriction(listener, getBranchRestriction()),
 //                            withUserRestriction(listener, getUserRestriction())
 //                    ))
-                    .transform(new PullRequestToCauseConverter(prRepository, listener, this))
-                    .filter(notNull())
-                    .toList();
+                .transform(new PullRequestToCauseConverter(prRepository, listener, this))
+                .filter(notNull())
+                .toList();
 
-            LOG.trace("Causes count for {}: {}", prRepository.getFullName(), causes.size());
+        LOG.trace("Causes count for {}: {}", prRepository.getFullName(), causes.size());
 
-            // refresh all PRs because user may add events that may trigger unexpected builds.
-            from(remotePulls).transform(updateLocalRepo(prRepository)).toSet();
+        // refresh all PRs because user may add events that may trigger unexpected builds.
+        from(remotePulls).transform(updateLocalRepo(prRepository)).toSet();
 
 //            saveIfSkipFirstRun();
 
 
-            GHRateLimit rateLimitAfter = github.getRateLimit();
-            int consumed = rateLimitBefore.remaining - rateLimitAfter.remaining;
-            LOG.info("GitHub rate limit after check {}: {}, consumed: {}, checked PRs: {}",
-                    localRepo.getUrlName(), rateLimitAfter, consumed, remotePulls.size());
+        GHRateLimit rateLimitAfter = github.getRateLimit();
+        int consumed = rateLimitBefore.remaining - rateLimitAfter.remaining;
+        LOG.info("GitHub rate limit after check {}: {}, consumed: {}, checked PRs: {}",
+                localRepo.getUrlName(), rateLimitAfter, consumed, remotePulls.size());
 
+        causes.forEach(prCause -> {
+            GitHubPRSCMHead scmHead = new GitHubPRSCMHead(Integer.toString(prCause.getNumber()), prCause);
+            AbstractGitSCMSource.SCMRevisionImpl scmRevision = new GitHubSCMRevision(scmHead, prCause.getHeadSha());
+            try {
+                observer.observe(scmHead, scmRevision);
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace(listener.getLogger());
+            }
+        });
 
-            return causes;
-        } catch (IOException e) {
-            listener.error("Can't get build causes: '{}'", e);
-        }
-
-        return Collections.emptyList();
     }
 
     /**

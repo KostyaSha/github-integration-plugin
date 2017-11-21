@@ -14,6 +14,7 @@ public class GitHubSCMRevision extends AbstractGitSCMSource.SCMRevisionImpl {
 
     @Override
     public boolean equals(Object obj) {
+        //we control when to run outside of multibranch logic
         return false;
     }
 
