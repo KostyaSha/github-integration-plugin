@@ -128,7 +128,7 @@ public class GitHubBranchCommitEvent extends GitHubBranchEvent {
 
         GitHubBranchCause cause = causes.get(0);
         LOG.info("Building branch [{}] skipped due to commit check: {}", name, cause.getReason());
-        logger.printf("Building branch [%s] skipped due to commit check: %s", cause.getReason());
+        logger.printf("Building branch [%s] skipped due to commit check: %s", name, cause.getReason());
 
         return cause;
     }
