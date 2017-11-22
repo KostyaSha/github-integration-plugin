@@ -280,7 +280,7 @@ public class GitHubSCMSource extends SCMSource {
         @Override
         protected SCMHeadCategory[] createCategories() {
             // array? bundled in descriptor??  seriously?
-            return new SCMHeadCategory[]{BRANCH, PR, TAG, new UncategorizedSCMHeadCategory(new NonLocalizable("Lost&Found"))};
+            return new SCMHeadCategory[]{BRANCH, PR, TAG};
         }
 
 

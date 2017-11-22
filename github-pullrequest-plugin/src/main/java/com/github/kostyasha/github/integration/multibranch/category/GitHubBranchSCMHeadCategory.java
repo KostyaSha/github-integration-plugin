@@ -11,10 +11,14 @@ import org.jvnet.localizer.Localizable;
 import javax.annotation.Nonnull;
 
 public class GitHubBranchSCMHeadCategory extends GitHubSCMHeadCategory {
-    public static final GitHubBranchSCMHeadCategory BRANCH = new GitHubBranchSCMHeadCategory("branch", new NonLocalizable("Branch"));
+    public static final GitHubBranchSCMHeadCategory BRANCH = new GitHubBranchSCMHeadCategory(new NonLocalizable("Branch"));
 
     public GitHubBranchSCMHeadCategory(@Nonnull String urlName, Localizable pronoun) {
         super(urlName, pronoun);
+    }
+
+    public GitHubBranchSCMHeadCategory(Localizable pronoun) {
+        super(pronoun);
     }
 
     @Override
