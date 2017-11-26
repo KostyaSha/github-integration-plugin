@@ -46,6 +46,7 @@ import static com.github.kostyasha.github.integration.multibranch.category.GitHu
 import static com.github.kostyasha.github.integration.multibranch.category.GitHubPRSCMHeadCategory.PR;
 import static com.github.kostyasha.github.integration.multibranch.category.GitHubTagSCMHeadCategory.TAG;
 import static com.google.common.base.Preconditions.checkState;
+import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
 
@@ -62,8 +63,7 @@ public class GitHubSCMSource extends SCMSource {
 
     private List<GitHubHandler> handlers = new ArrayList<>();
 
-
-    private transient List<GitHubCause> causes = new ArrayList<>();
+    private transient GitHubSCMSourcesReposAction reposAction;
 
     @DataBoundConstructor
     public GitHubSCMSource() {
@@ -105,10 +105,19 @@ public class GitHubSCMSource extends SCMSource {
     }
 
     protected GitHubRepo getLocalRepo() {
+        return getReposAction().getOrCreate(this);
+    }
+
+    protected synchronized GitHubSCMSourcesReposAction getReposAction(){
         ComputedFolder owner = (ComputedFolder) getOwner();
 
-        GitHubSCMSourcesReposAction sourcesReposAction = owner.getAction(GitHubSCMSourcesReposAction.class);
-        return sourcesReposAction.getOrCreate(this);
+        // TransientActions are not persisted between getAllActions() calls.
+        if (isNull(reposAction)) {
+            // or stop asking job for Action and work directly with folder and action
+            reposAction = owner.getAction(GitHubSCMSourcesReposAction.class);
+        }
+
+        return reposAction;
     }
 
     @Override
@@ -117,6 +126,8 @@ public class GitHubSCMSource extends SCMSource {
                             SCMHeadEvent<?> scmHeadEvent, // null for manual run
                             @Nonnull TaskListener taskListener) throws IOException, InterruptedException {
         PrintStream llog = taskListener.getLogger();
+        llog.println("Source id " + getId());
+
         llog.println("> GitHubSCMSource.retrieve(jenkins.scm.api.SCMSourceCriteria, jenkins.scm.api.SCMHeadObserver, jenkins.scm.api.SCMHeadEvent<?>, hudson.model.TaskListener)");
         llog.println(">> scmSourceCriteria " + scmSourceCriteria);
         llog.println(">> scmHeadObserver " + scmHeadObserver);
@@ -230,7 +241,7 @@ public class GitHubSCMSource extends SCMSource {
                                            @Nonnull TaskListener listener) throws IOException, InterruptedException {
         listener.getLogger().println("> GitHubSCMSource.retrieveActions(jenkins.scm.api.SCMHead, jenkins.scm.api.SCMHeadEvent, hudson.model.TaskListener)");
         listener.getLogger().println(">> head " + head + " event " + event);
-        String name = head.getName();
+
         GitHubSCMHead gitHubSCMHead = (GitHubSCMHead) head;
         List<Action> causeActions = Collections.singletonList(new CauseAction(gitHubSCMHead.getCause()));
         gitHubSCMHead.setCause(null);
@@ -243,6 +254,7 @@ public class GitHubSCMSource extends SCMSource {
                                            @Nonnull TaskListener listener) throws IOException, InterruptedException {
         listener.getLogger().println("> GitHubSCMSource.retrieveActions(jenkins.scm.api.SCMSourceEvent, hudson.model.TaskListener)");
         listener.getLogger().println(">> sourceEvent " + event);
+//        return Collections.singletonList(getReposAction());
         return super.retrieveActions(event, listener);
     }
 

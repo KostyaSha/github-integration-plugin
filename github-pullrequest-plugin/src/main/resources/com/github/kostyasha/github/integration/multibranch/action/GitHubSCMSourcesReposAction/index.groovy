@@ -6,3 +6,4 @@ import lib.FormTagLib
 import lib.LayoutTagLib
 
 println("test")
+f.entry(title: "test")

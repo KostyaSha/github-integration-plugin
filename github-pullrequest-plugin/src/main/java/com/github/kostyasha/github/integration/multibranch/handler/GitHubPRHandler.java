@@ -3,6 +3,7 @@ package com.github.kostyasha.github.integration.multibranch.handler;
 import com.github.kostyasha.github.integration.generic.GitHubCause;
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubPRSCMHead;
 import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
 import hudson.Extension;
@@ -30,7 +31,9 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -82,7 +85,7 @@ public class GitHubPRHandler extends GitHubHandler {
 
     @Override
     public void handle(@Nonnull SCMHeadObserver observer,
-                       @Nonnull GitHubRepo localRepo,
+                       @Nonnull GitHubRepo localPRs,
                        @Nonnull GHRepository remoteRepo,
                        @Nonnull TaskListener listener,
                        @Nonnull GitHubSCMSource source) throws IOException {
@@ -91,7 +94,7 @@ public class GitHubPRHandler extends GitHubHandler {
         GHRateLimit rateLimitBefore = github.getRateLimit();
         listener.getLogger().println("GitHub rate limit before check: " + rateLimitBefore);
 
-        GitHubPRRepository prRepository = localRepo.getPrRepository();
+        GitHubPRRepository prRepository = localPRs.getPrRepository();
 
         // get local and remote list of PRs
         Set<GHPullRequest> remotePulls = pullRequestsToCheck(null, remoteRepo, prRepository);
@@ -119,21 +122,40 @@ public class GitHubPRHandler extends GitHubHandler {
 
 //            saveIfSkipFirstRun();
 
-
         GHRateLimit rateLimitAfter = github.getRateLimit();
         int consumed = rateLimitBefore.remaining - rateLimitAfter.remaining;
         LOG.info("GitHub rate limit after check {}: {}, consumed: {}, checked PRs: {}",
-                localRepo.getUrlName(), rateLimitAfter, consumed, remotePulls.size());
+                localPRs.getUrlName(), rateLimitAfter, consumed, remotePulls.size());
+
+        HashSet<String> causedPRs = new HashSet<>();
 
         causes.forEach(prCause -> {
-            GitHubPRSCMHead scmHead = new GitHubPRSCMHead(Integer.toString(prCause.getNumber()), prCause);
-            AbstractGitSCMSource.SCMRevisionImpl scmRevision = new GitHubSCMRevision(scmHead, prCause.getHeadSha());
+            GitHubPRSCMHead scmHead = new GitHubPRSCMHead(prCause);
+            AbstractGitSCMSource.SCMRevisionImpl scmRevision = new GitHubSCMRevision(scmHead, prCause.getHeadSha(), false);
             try {
                 observer.observe(scmHead, scmRevision);
+                causedPRs.add(scmHead.getName());
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace(listener.getLogger());
             }
         });
+
+        // don't think that items without cause are orphaned,
+        // make com.cloudbees.hudson.plugins.folder.computed.ChildObserver.shouldUpdate() happy
+        // or don't hide childObserver
+        prRepository.getPulls().entrySet().stream()
+                .filter(causedPRs::contains)
+                .map(Map.Entry::getValue)
+                .forEach(value -> {
+                    try {
+                        GitHubPRSCMHead scmHead = new GitHubPRSCMHead(Integer.toString(value.getNumber()));
+                        GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getHeadSha(), true);
+                        observer.observe(scmHead, scmRevision);
+                    } catch (IOException | InterruptedException e) {
+                        // try as much as can
+                        e.printStackTrace(listener.getLogger());
+                    }
+                });
 
     }
 

@@ -8,18 +8,21 @@ import jenkins.scm.api.SCMRevision;
  * @author Kanstantsin Shautsou
  */
 public class GitHubSCMRevision extends AbstractGitSCMSource.SCMRevisionImpl {
-    public GitHubSCMRevision(SCMHead head, String hash) {
+    private final boolean superEquals;
+
+    public GitHubSCMRevision(SCMHead head, String hash, boolean superEquals) {
         super(head, hash);
+        this.superEquals = superEquals;
     }
 
     @Override
     public boolean equals(Object obj) {
+        if (superEquals) {
+            return super.equals(obj);
+        }
+
         //we control when to run outside of multibranch logic
         return false;
     }
 
-//    @Override
-//    public int hashCode() {
-//        return 0;
-//    }
 }

@@ -88,7 +88,13 @@ public class GitHubRepo implements Action {
         owner.save();
     }
 
+    public void sync(GHRepository remoteRepo) {
+
+    }
+
     public void setOwner(GitHubSCMSourcesReposAction owner) {
         this.owner = owner;
     }
+
+
 }

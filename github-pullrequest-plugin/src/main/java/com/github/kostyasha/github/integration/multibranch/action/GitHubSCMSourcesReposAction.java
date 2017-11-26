@@ -2,6 +2,7 @@ package com.github.kostyasha.github.integration.multibranch.action;
 
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import hudson.BulkChange;
+import hudson.Functions;
 import hudson.XmlFile;
 import hudson.model.Action;
 import hudson.model.Saveable;
@@ -31,7 +32,9 @@ public class GitHubSCMSourcesReposAction implements Saveable, Action {
     protected Map<String, GitHubRepo> repoStates = new ConcurrentHashMap<>();
 
     public GitHubRepo getOrCreate(final GitHubSCMSource source) {
-        return repoStates.computeIfAbsent(source.getId(), s -> new GitHubRepo(this));
+        return repoStates.computeIfAbsent(source.getId(),
+                s -> new GitHubRepo(this)
+        );
     }
 
     public Map<String, GitHubRepo> getRepoStates() {
@@ -84,13 +87,13 @@ public class GitHubSCMSourcesReposAction implements Saveable, Action {
         if (getConfigFile().exists()) {
             getConfigFile().unmarshal(this);
         }
-        repoStates.values().forEach( v -> v.setOwner(this));
+        repoStates.values().forEach(v -> v.setOwner(this));
     }
 
     @CheckForNull
     @Override
     public String getIconFileName() {
-        return null;
+        return Functions.getResourcePath() + "/plugin/github-pullrequest/git-pull-request.svg";
     }
 
     @CheckForNull

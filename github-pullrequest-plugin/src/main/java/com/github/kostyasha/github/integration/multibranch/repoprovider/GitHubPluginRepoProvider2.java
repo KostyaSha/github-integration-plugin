@@ -166,7 +166,7 @@ public class GitHubPluginRepoProvider2 extends GitHubRepoProvider2 {
         @Nonnull
         @Override
         public String getDisplayName() {
-            return "GitHub Plugin Global Settings";
+            return "GitHub Plugin from Global Settings";
         }
     }
 }
