@@ -8,6 +8,8 @@ import com.github.kostyasha.github.integration.multibranch.action.GitHubSCMSourc
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
 import com.github.kostyasha.github.integration.multibranch.repoprovider.GitHubPluginRepoProvider2;
+import com.github.kostyasha.github.integration.multibranch.repoprovider.GitHubRepoProvider2;
+import com.google.common.base.Throwables;
 import hudson.Extension;
 import hudson.model.Action;
 import hudson.model.CauseAction;
@@ -59,7 +61,7 @@ public class GitHubSCMSource extends SCMSource {
     private String projectUrlStr;
 
     // one for tags, etc
-    private GitHubPluginRepoProvider2 repoProvider = null;
+    private GitHubRepoProvider2 repoProvider = null;
 
     private List<GitHubHandler> handlers = new ArrayList<>();
 
@@ -84,12 +86,12 @@ public class GitHubSCMSource extends SCMSource {
     }
 
     @CheckForNull
-    public GitHubPluginRepoProvider2 getRepoProvider() {
+    public GitHubRepoProvider2 getRepoProvider() {
         return repoProvider;
     }
 
     @DataBoundSetter
-    public GitHubSCMSource setRepoProvider(GitHubPluginRepoProvider2 repoProvider) {
+    public GitHubSCMSource setRepoProvider(GitHubRepoProvider2 repoProvider) {
         this.repoProvider = repoProvider;
         return this;
     }
@@ -277,7 +279,12 @@ public class GitHubSCMSource extends SCMSource {
     protected SCMProbe createProbe(@Nonnull SCMHead head,
                                    @CheckForNull SCMRevision revision) throws IOException {
         LOG.debug("CreateProbe");
-        return super.createProbe(head, revision);
+        try {
+            return fromSCMFileSystem(head, revision);
+        } catch (InterruptedException e) {
+            Throwables.propagate(e);
+        }
+
     }
 
     @Override

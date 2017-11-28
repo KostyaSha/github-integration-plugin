@@ -115,17 +115,16 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
 
     @Override
     public void start(Job item, boolean newInstance) {
-        LOG.info("Starting GitHub Branch trigger for project {}", job.getFullName());
+        LOG.info("Starting GitHub Branch trigger for project {}", item.getFullName());
         super.start(item, newInstance);
-        Job<?, ?> job = (Job) item;
-        if (newInstance && getRepoProvider().isManageHooks(this) && withHookTriggerMode().apply(job)) {
+        if (newInstance && getRepoProvider().isManageHooks(this) && withHookTriggerMode().apply(item)) {
             try {
                 getRepoProvider().registerHookFor(this);
                 getErrorsAction().removeErrors(GitHubHookRegistrationError.class);
             } catch (Throwable error) {
                 getErrorsAction().addOrReplaceError(new GitHubHookRegistrationError(
                         String.format("Failed register hook for %s. <br/> Because %s",
-                                job.getFullName(), error.toString())
+                                item.getFullName(), error.toString())
                 ));
                 throw error;
             }
