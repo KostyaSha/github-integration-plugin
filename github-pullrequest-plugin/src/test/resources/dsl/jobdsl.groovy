@@ -11,6 +11,14 @@ freeStyleJob('gh-pull-request') {
                 heavyHooksCron()
             }
 
+            repoProviders {
+                gitHubPlugin {
+                    manageHooks(false)
+                    cacheConnection(false)
+                    permission { push() }
+                }
+            }
+
             events {
                 opened()
                 closed()

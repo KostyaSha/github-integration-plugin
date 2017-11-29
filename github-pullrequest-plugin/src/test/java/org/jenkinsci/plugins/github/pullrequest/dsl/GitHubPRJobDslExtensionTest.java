@@ -3,25 +3,25 @@ package org.jenkinsci.plugins.github.pullrequest.dsl;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchCommitEvent;
-import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.impl.GitHubBranchCommitMessageCheck;
 import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchRestrictionFilter;
-
+import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.impl.GitHubBranchCommitMessageCheck;
+import com.github.kostyasha.github.integration.generic.GitHubRepoProvider;
+import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider;
 import hudson.model.FreeStyleProject;
 import hudson.triggers.Trigger;
-
+import javaposse.jobdsl.plugin.ExecuteDslScripts;
+import javaposse.jobdsl.plugin.LookupStrategy;
+import javaposse.jobdsl.plugin.RemovedJobAction;
+import javaposse.jobdsl.plugin.RemovedViewAction;
 import org.apache.commons.io.IOUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.util.Collection;
+import java.util.List;
 
-import javaposse.jobdsl.plugin.ExecuteDslScripts;
-import javaposse.jobdsl.plugin.LookupStrategy;
-import javaposse.jobdsl.plugin.RemovedJobAction;
-import javaposse.jobdsl.plugin.RemovedViewAction;
-
-import static org.hamcrest.Matchers.contains;
+import static com.github.kostyasha.github.integration.generic.repoprovider.GHPermission.PULL;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -83,6 +83,18 @@ public class GitHubPRJobDslExtensionTest {
          */
         verifyBranchFilter(trigger.getEvents().get(0));
         verifyCommitChecks(trigger.getEvents().get(1));
+
+        final List<GitHubRepoProvider> repoProviders = trigger.getRepoProviders();
+        assertThat("Should contain repoProvider", repoProviders, notNullValue());
+        assertThat("Should contain 1 repoProvider", repoProviders, hasSize(1));
+
+        final GitHubRepoProvider repoProvider = repoProviders.get(0);
+        assertThat(repoProvider, instanceOf(GitHubPluginRepoProvider.class));
+        final GitHubPluginRepoProvider provider = (GitHubPluginRepoProvider) repoProvider;
+        assertThat(provider.isCacheConnection(), is(false));
+        assertThat(provider.isManageHooks(), is(false));
+        assertThat(provider.getRepoPermission(), is(PULL));
+
     }
 
     private void verifyCommitChecks(GitHubBranchEvent gitHubBranchEvent) {

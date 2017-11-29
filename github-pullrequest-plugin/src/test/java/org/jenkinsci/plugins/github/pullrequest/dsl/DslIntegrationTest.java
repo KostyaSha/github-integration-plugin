@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest.dsl;
 
+import com.github.kostyasha.github.integration.generic.GitHubRepoProvider;
+import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider;
 import hudson.model.Descriptor;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
@@ -25,11 +27,14 @@ import org.jvnet.hudson.test.JenkinsRule;
 import java.util.Collection;
 import java.util.List;
 
+import static com.github.kostyasha.github.integration.generic.repoprovider.GHPermission.PULL;
+import static com.github.kostyasha.github.integration.generic.repoprovider.GHPermission.PUSH;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.HEAVY_HOOKS_CRON;
 import static org.junit.Assert.assertThat;
 
@@ -84,6 +89,17 @@ public class DslIntegrationTest {
         assertThat("Should have pre status", trigger.isPreStatus(), equalTo(true));
         assertThat("Should have cancel queued", trigger.isCancelQueued(), equalTo(true));
         assertThat("Should set mode", trigger.getTriggerMode(), equalTo(HEAVY_HOOKS_CRON));
+
+        final List<GitHubRepoProvider> repoProviders = trigger.getRepoProviders();
+        assertThat("Should contain repoProvider", repoProviders, notNullValue());
+        assertThat("Should contain 1 repoProvider", repoProviders, hasSize(1));
+
+        final GitHubRepoProvider repoProvider = repoProviders.get(0);
+        assertThat(repoProvider, instanceOf(GitHubPluginRepoProvider.class));
+        final GitHubPluginRepoProvider provider = (GitHubPluginRepoProvider) repoProvider;
+        assertThat(provider.isCacheConnection(), is(false));
+        assertThat(provider.isManageHooks(), is(false));
+        assertThat(provider.getRepoPermission(), is(PUSH));
 
         final List<GitHubPREvent> events = trigger.getEvents();
         assertThat("Should add events", events, hasSize(17));

@@ -24,6 +24,7 @@ public class GitHubBranchJobDslExtenstion extends ContextExtensionPoint {
         trigger.setPreStatus(context.isSetPreStatus());
         trigger.setCancelQueued(context.isCancelQueued());
         trigger.setAbortRunning(context.isAbortRunning());
+        trigger.setRepoProviders(context.repoProviders());
 
         return trigger;
     }

@@ -30,7 +30,15 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.*;
+//import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.github.kostyasha.github.integration.branch.trigger.check.BranchToCauseConverter.toGitHubBranchCause;
@@ -327,11 +335,25 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
         return causes;
     }
 
-    private void updateLocalRepository(Set<GHBranch> remoteBranches, GitHubBranchRepository localRepository) {
+    public static void updateLocalRepository(Set<GHBranch> remoteBranches, GitHubBranchRepository localRepository) {
         long count = remoteBranches.stream()
                 .map(updateLocalRepo(localRepository))
                 .count();
+
         LOG.trace("Updated local branch details with [{}] repositories.", count);
+        final Map<String, GitHubBranch> localBranches = localRepository.getBranches();
+        final Iterator<String> iterator = localBranches.keySet().iterator();
+        while (iterator.hasNext()) {
+            final String localBranch = iterator.next();
+            final boolean present = remoteBranches.stream()
+                    .filter(br -> br.getName().equals(localBranch))
+                    .findFirst()
+                    .isPresent();
+            if (!present) {
+                LOG.debug("Removing {}, from localBranches", localBranch);
+                iterator.remove();
+            }
+        }
     }
 
     private static boolean isSupportedTriggerMode(GitHubPRTriggerMode mode) {
