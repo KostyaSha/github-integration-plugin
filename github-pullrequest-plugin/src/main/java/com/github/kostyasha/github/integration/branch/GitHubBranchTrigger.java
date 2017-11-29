@@ -285,7 +285,8 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        // DELETE BRANCH is a special case since the remote branch exists for all the other events and there is probably a more elegant solution ...
+        // DELETE BRANCH is a special case since the remote branch exists for all the other events
+        //      and there is probably a more elegant solution ...
         //boolean processDelete = false;
         for (GitHubBranchEvent event : events) {
             //processDelete = (event instanceof GitHubBranchDeletedEvent) ? true : false;
@@ -298,7 +299,8 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
                     Map<String, GHBranch> remoteRepoBranches = remoteRepo.getBranches();
                     if (remoteRepoBranches.get(branchName) == null) {
                         causes.add(new GitHubBranchCause(localBranch, localRepository, "Branch Deleted", false));
-                        // we probably want to take the localBranch out of the localRepository ... cause that also operates on a empty "Set<GHBranch>" stream ...
+                        // we probably want to take the localBranch out of the localRepository ...
+                        //      cause that also operates on a empty "Set<GHBranch>" stream ...
                         localRepository.removeBranch(branchName); // so that we don't process a delete on this again ...
                         LOG.error("Adding cause to trigger delete event for [{}] : {}", localRepository.getFullName(), branchName);
                     }
