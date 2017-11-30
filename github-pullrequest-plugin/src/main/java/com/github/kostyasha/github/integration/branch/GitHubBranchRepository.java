@@ -82,10 +82,8 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
     }
 
 
-    public synchronized void removeBranch(String branchName) {
-        if (nonNull(branches)) {
-            branches.remove(branchName);
-        }
+    public synchronized void removeBranch(@NonNull String branchName) {
+        getBranches().remove(branchName)
     }
 
     /**
