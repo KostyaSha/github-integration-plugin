@@ -284,7 +284,7 @@ public class GitHubSCMSource extends SCMSource {
         } catch (InterruptedException e) {
             Throwables.propagate(e);
         }
-
+        throw new IllegalStateException();
     }
 
     @Override
