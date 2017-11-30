@@ -9,5 +9,13 @@
                 <htmlUrl>http://localhost/org/repo/tree/for-removal</htmlUrl>
             </com.github.kostyasha.github.integration.branch.GitHubBranch>
         </entry>
+        <entry>
+            <string>should-change</string>
+            <com.github.kostyasha.github.integration.branch.GitHubBranch>
+                <name>should-change</name>
+                <commitSha>6dcb09b5b57875f334f61aebed695e2e4193ffbb</commitSha>
+                <htmlUrl>http://localhost/org/repo/tree/should-change</htmlUrl>
+            </com.github.kostyasha.github.integration.branch.GitHubBranch>
+        </entry>
     </branches>
 </com.github.kostyasha.github.integration.branch.GitHubBranchRepository>
