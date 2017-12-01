@@ -233,7 +233,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
             GHRepository remoteRepo = getRemoteRepository();
             Set<GHBranch> remoteBranches = branchesToCheck(requestedBranch, remoteRepo, localRepository);
 
-            List<GitHubBranchCause> causes = checkBranches(branch, remoteBranches, remoteRepo, localRepository, listener);
+            List<GitHubBranchCause> causes = checkBranches(requestedBranch, remoteBranches, remoteRepo, localRepository, listener);
 
             /*
              * update details about the local repo after the causes are determined as they expect
