@@ -276,10 +276,10 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
 
     // i think this is what I have to do to get the complication to pass ?
     private List<GitHubBranchCause> checkBranches(@Nullable String branchName,
-						  Set<GHBranch> remoteBranches,
-						  @Nonnull GHRepository remoteRepo,
+                                                  Set<GHBranch> remoteBranches,
+                                                  @Nonnull GHRepository remoteRepo,
                                                   GitHubBranchRepository localRepository,
-						  LoggingTaskListenerWrapper listener)
+                                                  LoggingTaskListenerWrapper listener)
             throws IOException {
 
         List<GitHubBranchCause> causes = remoteBranches.stream()
