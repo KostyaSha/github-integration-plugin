@@ -1,6 +1,8 @@
 ## Changelog
 
 ## Next 
+## 0.1.0-rc28
+- Single branch check shouldn't effect local storage.
 
 ## 0.1.0-rc27
 - fix error in branch commit event
