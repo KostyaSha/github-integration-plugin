@@ -82,6 +82,10 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
     }
 
 
+    public synchronized void removeBranch(@Nonnull String branchName) {
+        getBranches().remove(branchName);
+    }
+
     /**
      * Searches for all builds performed in the runs of current job.
      *
