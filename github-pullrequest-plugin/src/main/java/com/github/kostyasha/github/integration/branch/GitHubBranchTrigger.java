@@ -3,6 +3,7 @@ package com.github.kostyasha.github.integration.branch;
 import antlr.ANTLRException;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
+import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchDeletedEvent;
 import com.github.kostyasha.github.integration.branch.trigger.JobRunnerForBranchCause;
 import com.github.kostyasha.github.integration.generic.GitHubTrigger;
 import com.github.kostyasha.github.integration.generic.GitHubTriggerDescriptor;
@@ -164,9 +165,13 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
     /**
      * Runs check
      *
+     * synchronizing a method is bad ... we really should just focus on synchronizing the variable localreposittory
+     * so that it is cleaned up in case multiple events come in ... so we dont' prematurely fire delete events on
+     * local repo that maybe processing a delete ...
+     *
      * @param branch - branch for check, if null - then all PRs
      */
-    public void doRun(String branch) {
+    public synchronized void doRun(String branch) {
         if (not(isBuildable()).apply(job)) {
             LOG.debug("Job {} is disabled, but trigger run!", isNull(job) ? "<no job>" : job.getFullName());
             return;
@@ -227,7 +232,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
             GHRepository remoteRepo = getRemoteRepository();
             Set<GHBranch> remoteBranches = branchesToCheck(requestedBranch, remoteRepo, localRepository);
 
-            List<GitHubBranchCause> causes = checkBranches(remoteBranches, localRepository, listener);
+            List<GitHubBranchCause> causes = checkBranches(branch, remoteBranches, remoteRepo, localRepository, listener);
 
             /*
              * update details about the local repo after the causes are determined as they expect
@@ -256,7 +261,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
             throws IOException {
         final LinkedHashSet<GHBranch> ghBranches = new LinkedHashSet<>();
 
-        if (branch != null) {
+        if (branch != null) { // What about DELETED event ? the remote branch is already gone ...
             final GHBranch ghBranch = remoteRepo.getBranches().get(branch);
             if (ghBranch != null) {
                 ghBranches.add(ghBranch);
@@ -268,8 +273,10 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
         return ghBranches;
     }
 
-    private List<GitHubBranchCause> checkBranches(Set<GHBranch> remoteBranches,
-                                                  GitHubBranchRepository localRepository, LoggingTaskListenerWrapper listener) {
+    private List<GitHubBranchCause> checkBranches(String branchName, Set<GHBranch> remoteBranches,  @Nonnull GHRepository remoteRepo,
+                                                  GitHubBranchRepository localRepository, LoggingTaskListenerWrapper listener)
+            throws IOException {
+
         List<GitHubBranchCause> causes = remoteBranches.stream()
                 // TODO: update user whitelist filter
                 .filter(ifSkippedFirstRun(listener, skipFirstRun))
@@ -277,6 +284,54 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
                 .map(toGitHubBranchCause(localRepository, listener, this))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+
+        // DELETE BRANCH is a special case since the remote branch exists for all the other events
+        //      and there is probably a more elegant solution ...
+        //boolean processDelete = false;
+        for (GitHubBranchEvent event : events) {
+            //processDelete = (event instanceof GitHubBranchDeletedEvent) ? true : false;
+            //}
+            //if (processDelete) {
+            if (event instanceof GitHubBranchDeletedEvent) {
+                Map<String, GitHubBranch> localBranches = localRepository.getBranches();
+                GitHubBranch localBranch = localBranches.get(branchName);
+                if (localBranch != null) {
+                    Map<String, GHBranch> remoteRepoBranches = remoteRepo.getBranches();
+                    if (remoteRepoBranches.get(branchName) == null) {
+                        causes.add(new GitHubBranchCause(localBranch, localRepository, "Branch Deleted", false));
+                        // we probably want to take the localBranch out of the localRepository ...
+                        //      cause that also operates on a empty "Set<GHBranch>" stream ...
+                        localRepository.removeBranch(branchName); // so that we don't process a delete on this again ...
+                        LOG.error("Adding cause to trigger delete event for [{}] : {}", localRepository.getFullName(), branchName);
+                    }
+                }
+                break; // we only care about delete in the loop ...
+            }
+        }
+/*
+        // DELETE BRANCH is a special case since the remote branch exists for all the other events
+        // and there is probably a more elegant solution ...
+        boolean processDelete = false;
+        for (GitHubBranchEvent event : events) {
+            if (event instanceof GitHubBranchDeletedEvent) {
+                processDelete = true;
+            }
+        }
+
+        if (processDelete) {
+            synchronized (localRepository) {
+                Map<String, GitHubBranch> localBranches = localRepository.getBranches();
+                Map<String, GHBranch> remoteRepoBranches = remoteRepo.getBranches();
+                localBranches.forEach((localBranchName, localBranch) -> {
+                    if (remoteRepoBranches.get(localBranchName) == null) {
+                        causes.add(new GitHubBranchCause(localBranch, localRepository, "Branch Deleted", false));
+                        LOG.error("MG Adding cause to trigger delete event for [{}] : {}", localRepository.getFullName(), localBranchName);
+                        localRepository.removeBranch(localBranchName);
+                    }
+                });
+            }
+        }
+        */
 
         LOG.debug("Build trigger count for [{}] : {}", localRepository.getFullName(), causes.size());
         return causes;
