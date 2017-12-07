@@ -2,10 +2,10 @@
 
 ## Next 
 ## 0.1.0-rc28
-- Single branch check shouldn't effect local storage.
+- [branch] Single branch check shouldn't effect local storage.
 
 ## 0.1.0-rc27
-- fix error in branch commit event
+- [branch] fix error in branch commit event
 
 ## 0.1.0-rc26
 - fix repoproviders job-dsl binding.
