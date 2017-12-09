@@ -98,7 +98,7 @@ public class GitHubBranchHandler extends GitHubHandler {
             String commitSha = branchCause.getCommitSha();
             String branchName = branchCause.getBranchName();
 
-            GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(branchName);
+            GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(branchName, source.getId());
             GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, commitSha, false, branchCause);
             try {
                 observer.observe(scmHead, scmRevision);
@@ -117,7 +117,7 @@ public class GitHubBranchHandler extends GitHubHandler {
                 .map(Map.Entry::getValue)
                 .forEach(value -> {
                     try {
-                        GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(value.getName());
+                        GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(value.getName(), source.getId());
                         GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getCommitSha(), true, null);
                         observer.observe(scmHead, scmRevision);
                     } catch (IOException | InterruptedException e) {

@@ -6,9 +6,14 @@ import jenkins.scm.api.SCMHead;
 import javax.annotation.Nonnull;
 
 public abstract class GitHubSCMHead extends SCMHead {
+    private final String sourceId;
 
-    public GitHubSCMHead(@Nonnull String name) {
+    public GitHubSCMHead(@Nonnull String name, String sourceId) {
         super(name);
+        this.sourceId = sourceId;
     }
 
+    public String getSourceId() {
+        return sourceId;
+    }
 }

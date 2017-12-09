@@ -130,7 +130,7 @@ public class GitHubPRHandler extends GitHubHandler {
         HashSet<String> causedPRs = new HashSet<>();
 
         causes.forEach(prCause -> {
-            GitHubPRSCMHead scmHead = new GitHubPRSCMHead(prCause);
+            GitHubPRSCMHead scmHead = new GitHubPRSCMHead(prCause, source.getId());
             AbstractGitSCMSource.SCMRevisionImpl scmRevision = new GitHubSCMRevision(scmHead, prCause.getHeadSha(), false, prCause);
             try {
                 observer.observe(scmHead, scmRevision);
@@ -148,7 +148,7 @@ public class GitHubPRHandler extends GitHubHandler {
                 .map(Map.Entry::getValue)
                 .forEach(value -> {
                     try {
-                        GitHubPRSCMHead scmHead = new GitHubPRSCMHead(Integer.toString(value.getNumber()));
+                        GitHubPRSCMHead scmHead = new GitHubPRSCMHead(Integer.toString(value.getNumber()), source.getId());
                         GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getHeadSha(), true, null);
                         observer.observe(scmHead, scmRevision);
                     } catch (IOException | InterruptedException e) {

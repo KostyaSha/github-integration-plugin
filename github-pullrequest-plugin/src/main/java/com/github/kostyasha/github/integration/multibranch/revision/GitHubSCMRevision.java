@@ -10,7 +10,8 @@ import jenkins.scm.api.SCMRevision;
  */
 public class GitHubSCMRevision extends AbstractGitSCMSource.SCMRevisionImpl {
     private final boolean superEquals;
-    transient GitHubCause cause;
+
+    private transient GitHubCause cause = null;
 
 
     public GitHubSCMRevision(SCMHead head, String hash, boolean superEquals, GitHubCause cause) {
