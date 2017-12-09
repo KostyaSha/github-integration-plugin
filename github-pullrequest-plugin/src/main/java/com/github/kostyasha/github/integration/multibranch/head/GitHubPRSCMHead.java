@@ -8,10 +8,10 @@ import javax.annotation.Nonnull;
 public class GitHubPRSCMHead extends GitHubSCMHead {
 
     public GitHubPRSCMHead(@Nonnull GitHubPRCause prCause) {
-        super(Integer.toString(prCause.getNumber()), prCause);
+        super(Integer.toString(prCause.getNumber()));
     }
 
     public GitHubPRSCMHead(@Nonnull String name) {
-        super(name, null);
+        super(name);
     }
 }

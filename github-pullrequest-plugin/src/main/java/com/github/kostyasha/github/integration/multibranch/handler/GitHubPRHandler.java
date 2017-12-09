@@ -131,7 +131,7 @@ public class GitHubPRHandler extends GitHubHandler {
 
         causes.forEach(prCause -> {
             GitHubPRSCMHead scmHead = new GitHubPRSCMHead(prCause);
-            AbstractGitSCMSource.SCMRevisionImpl scmRevision = new GitHubSCMRevision(scmHead, prCause.getHeadSha(), false);
+            AbstractGitSCMSource.SCMRevisionImpl scmRevision = new GitHubSCMRevision(scmHead, prCause.getHeadSha(), false, prCause);
             try {
                 observer.observe(scmHead, scmRevision);
                 causedPRs.add(scmHead.getName());
@@ -144,19 +144,18 @@ public class GitHubPRHandler extends GitHubHandler {
         // make com.cloudbees.hudson.plugins.folder.computed.ChildObserver.shouldUpdate() happy
         // or don't hide childObserver
         prRepository.getPulls().entrySet().stream()
-                .filter(causedPRs::contains)
+                .filter(it -> !causedPRs.contains(it.getKey().toString()))
                 .map(Map.Entry::getValue)
                 .forEach(value -> {
                     try {
                         GitHubPRSCMHead scmHead = new GitHubPRSCMHead(Integer.toString(value.getNumber()));
-                        GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getHeadSha(), true);
+                        GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getHeadSha(), true, null);
                         observer.observe(scmHead, scmRevision);
                     } catch (IOException | InterruptedException e) {
                         // try as much as can
                         e.printStackTrace(listener.getLogger());
                     }
                 });
-
     }
 
     /**

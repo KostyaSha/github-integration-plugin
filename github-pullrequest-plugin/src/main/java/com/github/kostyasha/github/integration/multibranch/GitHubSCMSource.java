@@ -9,6 +9,7 @@ import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler
 import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
 import com.github.kostyasha.github.integration.multibranch.repoprovider.GitHubPluginRepoProvider2;
 import com.github.kostyasha.github.integration.multibranch.repoprovider.GitHubRepoProvider2;
+import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
 import com.google.common.base.Throwables;
 import hudson.Extension;
 import hudson.model.Action;
@@ -26,8 +27,6 @@ import jenkins.scm.api.SCMSource;
 import jenkins.scm.api.SCMSourceCriteria;
 import jenkins.scm.api.SCMSourceDescriptor;
 import jenkins.scm.api.SCMSourceEvent;
-import jenkins.scm.impl.UncategorizedSCMHeadCategory;
-import jenkins.util.NonLocalizable;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -42,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.github.kostyasha.github.integration.multibranch.category.GitHubBranchSCMHeadCategory.BRANCH;
@@ -153,7 +153,8 @@ public class GitHubSCMSource extends SCMSource {
 
     @Nonnull
     public GHRepository getRemoteRepo() throws IOException {
-        GHRepository remoteRepository = getRepoProvider().getGHRepository(this);
+        Objects.requireNonNull(repoProvider);
+        GHRepository remoteRepository = repoProvider.getGHRepository(this);
         checkState(nonNull(remoteRepository), "Can't get remote GH repo for source %s", getId());
         return remoteRepository;
     }
@@ -232,8 +233,9 @@ public class GitHubSCMSource extends SCMSource {
                                            @CheckForNull SCMHeadEvent event,
                                            @Nonnull TaskListener listener) throws IOException, InterruptedException {
         listener.getLogger().println("> GitHubSCMSource.retrieveActions(jenkins.scm.api.SCMRevision, jenkins.scm.api.SCMHeadEvent, hudson.model.TaskListener)");
+        GitHubSCMRevision gitHubSCMRevision = (GitHubSCMRevision) revision;
 
-        return super.retrieveActions(revision, event, listener);
+        return Collections.singletonList(new CauseAction(gitHubSCMRevision.getCause()));
     }
 
     @Nonnull
@@ -244,10 +246,10 @@ public class GitHubSCMSource extends SCMSource {
         listener.getLogger().println("> GitHubSCMSource.retrieveActions(jenkins.scm.api.SCMHead, jenkins.scm.api.SCMHeadEvent, hudson.model.TaskListener)");
         listener.getLogger().println(">> head " + head + " event " + event);
 
-        GitHubSCMHead gitHubSCMHead = (GitHubSCMHead) head;
-        List<Action> causeActions = Collections.singletonList(new CauseAction(gitHubSCMHead.getCause()));
-        gitHubSCMHead.setCause(null);
-        return causeActions;
+//        GitHubSCMHead gitHubSCMHead = (GitHubSCMHead) head;
+//        List<Action> causeActions = Collections.singletonList(new CauseAction(gitHubSCMHead.getCause()));
+//        gitHubSCMHead.setCause(null);
+        return Collections.emptyList();
     }
 
     @Nonnull
@@ -271,7 +273,7 @@ public class GitHubSCMSource extends SCMSource {
 
     @Override
     public boolean canProbe() {
-        return super.canProbe();
+        return true;
     }
 
     @Nonnull

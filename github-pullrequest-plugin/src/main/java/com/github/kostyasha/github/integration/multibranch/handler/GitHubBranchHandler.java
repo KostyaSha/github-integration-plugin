@@ -98,8 +98,8 @@ public class GitHubBranchHandler extends GitHubHandler {
             String commitSha = branchCause.getCommitSha();
             String branchName = branchCause.getBranchName();
 
-            GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(branchCause);
-            AbstractGitSCMSource.SCMRevisionImpl scmRevision = new GitHubSCMRevision(scmHead, commitSha, false);
+            GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(branchName);
+            GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, commitSha, false, branchCause);
             try {
                 observer.observe(scmHead, scmRevision);
                 triggeredBranches.add(scmHead.getName());
@@ -113,12 +113,12 @@ public class GitHubBranchHandler extends GitHubHandler {
         // make com.cloudbees.hudson.plugins.folder.computed.ChildObserver.shouldUpdate() happy
         // or don't hide childObserver
         localBranches.getBranches().entrySet().stream()
-                .filter(triggeredBranches::contains)
+                .filter(it -> !triggeredBranches.contains(it.getKey()))
                 .map(Map.Entry::getValue)
                 .forEach(value -> {
                     try {
                         GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(value.getName());
-                        GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getCommitSha(), true);
+                        GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getCommitSha(), true, null);
                         observer.observe(scmHead, scmRevision);
                     } catch (IOException | InterruptedException e) {
                         // try as much as can
