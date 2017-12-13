@@ -9,7 +9,6 @@ import com.github.kostyasha.github.integration.generic.GitHubTrigger;
 import com.github.kostyasha.github.integration.generic.GitHubTriggerDescriptor;
 import com.github.kostyasha.github.integration.generic.errors.impl.GitHubHookRegistrationError;
 import hudson.Extension;
-import hudson.model.Item;
 import hudson.model.Job;
 import hudson.triggers.Trigger;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
@@ -46,14 +45,12 @@ import static com.github.kostyasha.github.integration.branch.trigger.check.Local
 import static com.github.kostyasha.github.integration.branch.trigger.check.SkipFirstRunForBranchFilter.ifSkippedFirstRun;
 import static com.github.kostyasha.github.integration.branch.webhook.WebhookInfoBranchPredicates.withHookTriggerMode;
 import static com.google.common.base.Charsets.UTF_8;
-import static com.google.common.base.Predicates.not;
 import static java.text.DateFormat.getDateTimeInstance;
 import static java.util.Collections.emptyList;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.LIGHT_HOOKS;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
-import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
 
 /**
  * @author Kanstantsin Shautsou
@@ -314,6 +311,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
             load();
         }
 
+        @Nonnull
         @Override
         public String getDisplayName() {
             return "GitHub Branches";

@@ -13,6 +13,8 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.annotation.Nonnull;
+
 import static java.util.Collections.emptyList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNull.notNullValue;
@@ -77,6 +79,7 @@ public class GitHubBranchTriggerJRuleTest {
 
         @TestExtension
         public static final class DescriptorImpl extends GitHubRepoProviderDescriptor {
+            @Nonnull
             @Override
             public String getDisplayName() {
                 return "Test GitHub Repo Provider";

@@ -35,7 +35,7 @@ public class GitHubSCMFileSystem extends SCMFileSystem {
 
     @Override
     public SCMRevision getRevision() {
-        return (GitHubSCMRevision) super.getRevision();
+        return super.getRevision();
     }
 
     @Override
@@ -46,6 +46,6 @@ public class GitHubSCMFileSystem extends SCMFileSystem {
     @Nonnull
     @Override
     public SCMFile getRoot() {
-        return new GitHubSCMFile(this, "/");
+        return new GitHubSCMFile(this);
     }
 }
