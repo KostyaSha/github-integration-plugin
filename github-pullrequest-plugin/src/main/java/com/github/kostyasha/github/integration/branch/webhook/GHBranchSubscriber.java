@@ -5,9 +5,11 @@ import hudson.Extension;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
+import hudson.security.ACLContext;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.github.extension.GHEventsSubscriber;
+import org.jenkinsci.plugins.github.extension.GHSubscriberEvent;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.jenkinsci.plugins.github.util.FluentIterableWrapper;
 import org.kohsuke.github.GHEvent;
@@ -24,6 +26,7 @@ import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghB
 import static com.github.kostyasha.github.integration.branch.webhook.WebhookInfoBranchPredicates.withBranchTrigger;
 import static com.github.kostyasha.github.integration.branch.webhook.WebhookInfoBranchPredicates.withBranchTriggerRepo;
 import static com.google.common.collect.Sets.immutableEnumSet;
+import static hudson.security.ACL.SYSTEM;
 import static java.lang.String.format;
 import static net.sf.json.JSONObject.fromObject;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
@@ -33,10 +36,10 @@ import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
  * @author Kanstantsin Shautsou
  * @see org.jenkinsci.plugins.github.pullrequest.webhook.GHPullRequestSubscriber
  */
+@SuppressWarnings("unused")
 @Extension
-public class GHBranchSubscriber extends GHEventsSubscriber {
+public class GHBranchSubscriber extends AbstractGHBranchSubscriber {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHBranchSubscriber.class);
-    private static final Set<GHEvent> EVENTS = immutableEnumSet(GHEvent.PUSH, GHEvent.CREATE, GHEvent.DELETE);
 
     @Override
     protected boolean isApplicable(@Nullable Item item) {
@@ -45,14 +48,9 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
     }
 
     @Override
-    protected Set<GHEvent> events() {
-        return EVENTS;
-    }
-
-    @Override
-    protected void onEvent(GHEvent event, String payload) {
+    protected void onEvent(GHSubscriberEvent event) {
         try {
-            BranchInfo ref = extractRefInfo(event, payload);
+            BranchInfo ref = extractRefInfo(event.getGHEvent(), event.getPayload());
 
             for (Job job : getBranchTriggerJobs(ref.getRepo())) {
                 GitHubBranchTrigger trigger = ghBranchTriggerFromJob(job);
@@ -85,40 +83,20 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
         }
     }
 
-    private BranchInfo extractRefInfo(GHEvent event, String payload) throws IOException {
-        JSONObject json = fromObject(payload);
-        if (EVENTS.contains(event)) {
-            return fromJson(json);
-        } else {
-            throw new IllegalStateException(format("Did you add event %s in events() method?", event));
-        }
-    }
-
     static Set<Job> getBranchTriggerJobs(final String repo) {
         final Set<Job> ret = new HashSet<>();
 
-        ACL.impersonate(ACL.SYSTEM, () -> {
-            List<Job> jobs = Jenkins.getActiveInstance().getAllItems(Job.class);
+        try (ACLContext ignored = ACL.as(SYSTEM)) {
+            List<Job> jobs = Jenkins.getInstance().getAllItems(Job.class);
             ret.addAll(FluentIterableWrapper.from(jobs)
                     .filter(isBuildable())
                     .filter(withBranchTrigger())
                     .filter(withBranchTriggerRepo(repo))
                     .toSet()
             );
-        });
+        }
 
         return ret;
     }
 
-    private BranchInfo fromJson(JSONObject json) {
-        final String repo = json.getJSONObject("repository").getString("full_name");
-        String branchName = json.getString("ref");
-        String fullRef = branchName;
-
-        if (branchName.startsWith("refs/heads/")) {
-            branchName = branchName.replace("refs/heads/", "");
-        }
-
-        return new BranchInfo(repo, branchName, fullRef);
-    }
 }

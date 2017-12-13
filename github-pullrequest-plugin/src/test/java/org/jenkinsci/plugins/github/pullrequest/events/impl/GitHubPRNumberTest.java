@@ -4,6 +4,7 @@ import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kohsuke.github.GHCommitPointer;
@@ -54,6 +55,8 @@ public class GitHubPRNumberTest {
     private GHLabel label;
     @Mock
     private PrintStream logger;
+    @Mock
+    private GitHubPRTrigger trigger;
 
 
     @Test
@@ -63,7 +66,7 @@ public class GitHubPRNumberTest {
 
         final GitHubPRNumber event = new GitHubPRNumber(null, true, true);
 
-        final GitHubPRCause cause = event.check(null, remotePr, null, listener);
+        final GitHubPRCause cause = event.check(trigger, remotePr, null, listener);
         assertThat(cause, notNullValue());
         assertThat(cause.isSkip(), is(true));
     }
@@ -75,7 +78,7 @@ public class GitHubPRNumberTest {
 
         final GitHubPRNumber event = new GitHubPRNumber(15, false, true);
 
-        final GitHubPRCause cause = event.check(null, remotePr, null, listener);
+        final GitHubPRCause cause = event.check(trigger, remotePr, null, listener);
         assertThat(cause, notNullValue());
         assertThat(cause.isSkip(), is(true));
     }
@@ -89,7 +92,7 @@ public class GitHubPRNumberTest {
 
         final GitHubPRNumber event = new GitHubPRNumber(16, true, true);
 
-        final GitHubPRCause cause = event.check(null, remotePr, null, listener);
+        final GitHubPRCause cause = event.check(trigger, remotePr, null, listener);
         assertThat(cause, notNullValue());
         assertThat(cause.isSkip(), is(true));
     }
@@ -103,7 +106,7 @@ public class GitHubPRNumberTest {
 
         final GitHubPRNumber event = new GitHubPRNumber(16, true, false);
 
-        final GitHubPRCause cause = event.check(null, remotePr, null, listener);
+        final GitHubPRCause cause = event.check(trigger, remotePr, null, listener);
         assertThat(cause, notNullValue());
         assertThat(cause.isSkip(), is(false));
     }
@@ -117,7 +120,7 @@ public class GitHubPRNumberTest {
 
         final GitHubPRNumber event = new GitHubPRNumber(16, true, false);
 
-        final GitHubPRCause cause = event.check(null, remotePr, null, listener);
+        final GitHubPRCause cause = event.check(trigger, remotePr, null, listener);
         assertThat(cause, nullValue());
     }
 

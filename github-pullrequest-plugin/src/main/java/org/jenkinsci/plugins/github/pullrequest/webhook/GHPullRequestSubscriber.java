@@ -6,6 +6,7 @@ import hudson.model.Job;
 import hudson.security.ACL;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.github.extension.GHEventsSubscriber;
+import org.jenkinsci.plugins.github.extension.GHSubscriberEvent;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.jenkinsci.plugins.github.util.FluentIterableWrapper;
@@ -51,11 +52,11 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
     }
 
     @Override
-    protected void onEvent(GHEvent event, String payload) {
+    protected void onEvent(GHSubscriberEvent event) {
         try {
             GitHub gh = GitHub.connectAnonymously();
 
-            PullRequestInfo info = extractPullRequestInfo(event, payload, gh);
+            PullRequestInfo info = extractPullRequestInfo(event.getGHEvent(), event.getPayload(), gh);
 
             for (Job job : getPRTriggerJobs(info.getRepo())) {
                 GitHubPRTrigger trigger = ghPRTriggerFromJob(job);

@@ -15,6 +15,10 @@ if (instance == null) {
 }
 
 f.block() {
+    f.invisibleEntry() {
+        f.textbox(field: "id", name: "id", value: instance.id)
+    }
+
     f.entry(field: 'projectUrlStr', title: _('github.project.url')) {
         f.textbox()
     }
