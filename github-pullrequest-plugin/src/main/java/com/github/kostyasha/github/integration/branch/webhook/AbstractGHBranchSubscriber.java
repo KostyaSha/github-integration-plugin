@@ -32,7 +32,10 @@ public abstract class AbstractGHBranchSubscriber extends GHEventsSubscriber {
     }
 
     protected BranchInfo fromJson(JSONObject json) {
-        final String repo = json.getJSONObject("repository").getString("full_name");
+        JSONObject jsonRepository = json.getJSONObject("repository");
+        final String repo = jsonRepository.getString("full_name");
+        final String name = jsonRepository.getString("name");
+
         String branchName = json.getString("ref");
         String fullRef = branchName;
 

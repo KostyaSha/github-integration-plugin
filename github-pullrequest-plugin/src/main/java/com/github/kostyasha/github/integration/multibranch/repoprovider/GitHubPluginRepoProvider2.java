@@ -78,6 +78,7 @@ public class GitHubPluginRepoProvider2 extends GitHubRepoProvider2 {
 
     @Override
     public void registerHookFor(GitHubSCMSource source) {
+        // ideally register hook for source and not for owner with iterations
         GitHubWebHook.get().registerHookFor(source.getOwner());
     }
 

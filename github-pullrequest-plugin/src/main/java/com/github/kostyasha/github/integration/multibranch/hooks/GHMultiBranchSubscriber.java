@@ -1,43 +1,21 @@
 package com.github.kostyasha.github.integration.multibranch.hooks;
 
-import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.webhook.AbstractGHBranchSubscriber;
 import com.github.kostyasha.github.integration.branch.webhook.BranchInfo;
-import com.github.kostyasha.github.integration.branch.webhook.GHBranchSubscriber;
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubBranchHandler;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler;
 import hudson.Extension;
 import hudson.model.Item;
-import hudson.model.Job;
-import hudson.security.ACL;
-import hudson.security.ACLContext;
-import jenkins.branch.MultiBranchProject;
-import jenkins.model.Jenkins;
+import jenkins.scm.api.SCMEvent;
+import jenkins.scm.api.SCMHeadEvent;
 import jenkins.scm.api.SCMSource;
 import jenkins.scm.api.SCMSourceOwner;
-import org.jenkinsci.plugins.github.extension.GHEventsSubscriber;
 import org.jenkinsci.plugins.github.extension.GHSubscriberEvent;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
-import org.jenkinsci.plugins.github.util.FluentIterableWrapper;
-import org.kohsuke.github.GHEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghBranchTriggerFromJob;
-import static com.github.kostyasha.github.integration.branch.webhook.WebhookInfoBranchPredicates.withBranchTrigger;
-import static com.github.kostyasha.github.integration.branch.webhook.WebhookInfoBranchPredicates.withBranchTriggerRepo;
-import static com.github.kostyasha.github.integration.multibranch.Functions.isBuildable;
-import static com.github.kostyasha.github.integration.multibranch.Functions.withBranchHandler;
-import static com.github.kostyasha.github.integration.multibranch.Functions.withGitHubSCMSource;
-import static hudson.security.ACL.SYSTEM;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 
 /**
  * @author Kanstantsin Shautsou
@@ -71,17 +49,24 @@ public class GHMultiBranchSubscriber extends AbstractGHBranchSubscriber {
     protected void onEvent(GHSubscriberEvent event) {
         try {
             BranchInfo ref = extractRefInfo(event.getGHEvent(), event.getPayload());
-            final Set<MultiBranchProject> ret = new HashSet<>();
+            SCMHeadEvent.fireNow(new GitHubSCMHeadEvent(
+                    SCMEvent.Type.UPDATED,
+                    event.getTimestamp(),
+                    ref,
+                    ref.getRepo())
+            );
 
-            try (ACLContext ignored = ACL.as(SYSTEM)) {
-                List<MultiBranchProject> jobs = Jenkins.getInstance().getAllItems(MultiBranchProject.class);
-                ret.addAll(jobs.stream()
-                        .filter(isBuildable())
-//                        .filter(withGitHubSCMSource(ref.getRepo()))
-                        .filter(withBranchHandler())
-                        .collect(Collectors.toSet())
-                );
-            }
+//            final Set<MultiBranchProject> ret = new HashSet<>();
+//
+//            try (ACLContext ignored = ACL.as(SYSTEM)) {
+//                List<MultiBranchProject> jobs = Jenkins.getInstance().getAllItems(MultiBranchProject.class);
+//                ret.addAll(jobs.stream()
+//                        .filter(isBuildable())
+////                        .filter(withGitHubSCMSource(ref.getRepo()))
+//                        .filter(withBranchHandler())
+//                        .collect(Collectors.toSet())
+//                );
+//            }
 
 //            for (MultiBranchProject job : ret) {
 //                GitHubBranchTrigger trigger = ghBranchTriggerFromJob(job);

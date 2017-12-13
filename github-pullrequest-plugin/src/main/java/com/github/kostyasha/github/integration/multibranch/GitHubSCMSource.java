@@ -28,6 +28,7 @@ import jenkins.scm.api.SCMSource;
 import jenkins.scm.api.SCMSourceCriteria;
 import jenkins.scm.api.SCMSourceDescriptor;
 import jenkins.scm.api.SCMSourceEvent;
+import jenkins.scm.api.SCMSourceOwner;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -144,7 +145,7 @@ public class GitHubSCMSource extends SCMSource {
 
         getHandlers().forEach(handler -> {
             try {
-                handler.handle(scmHeadObserver, localRepo, getRemoteRepo(), taskListener, this);
+                handler.handle(scmHeadObserver, scmHeadEvent, localRepo, getRemoteRepo(), taskListener, this);
             } catch (IOException e) {
                 LOG.error("Can't process handler", e);
                 e.printStackTrace(llog);
@@ -152,6 +153,13 @@ public class GitHubSCMSource extends SCMSource {
         });
     }
 
+    @Override
+    public void afterSave() {
+        SCMSourceOwner owner = getOwner();
+        if (nonNull(owner) && getRepoProvider().isManageHooks(this)) {
+            getRepoProvider().registerHookFor(this);
+        }
+    }
 
     @Nonnull
     public GHRepository getRemoteRepo() throws IOException {

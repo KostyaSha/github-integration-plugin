@@ -14,6 +14,7 @@ import com.google.common.base.Throwables;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import jenkins.plugins.git.AbstractGitSCMSource;
+import jenkins.scm.api.SCMHeadEvent;
 import jenkins.scm.api.SCMHeadObserver;
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHRateLimit;
@@ -68,8 +69,11 @@ public class GitHubBranchHandler extends GitHubHandler {
 
     @Override
     public void handle(@Nonnull SCMHeadObserver observer,
-                       @Nonnull GitHubRepo localRepo, @Nonnull GHRepository remoteRepo,
-                       @Nonnull TaskListener listener, @Nonnull GitHubSCMSource source) throws IOException {
+                       @CheckForNull SCMHeadEvent scmHeadEvent,
+                       @Nonnull GitHubRepo localRepo,
+                       @Nonnull GHRepository remoteRepo,
+                       @Nonnull TaskListener listener,
+                       @Nonnull GitHubSCMSource source) throws IOException {
         GitHubBranchRepository localBranches = localRepo.getBranchRepository();
 
         GitHub github = source.getRepoProvider().getGitHub(source);

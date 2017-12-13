@@ -9,6 +9,7 @@ import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRev
 import hudson.Extension;
 import hudson.model.TaskListener;
 import jenkins.plugins.git.AbstractGitSCMSource;
+import jenkins.scm.api.SCMHeadEvent;
 import jenkins.scm.api.SCMHeadObserver;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
@@ -85,6 +86,7 @@ public class GitHubPRHandler extends GitHubHandler {
 
     @Override
     public void handle(@Nonnull SCMHeadObserver observer,
+                       @CheckForNull SCMHeadEvent scmHeadEvent,
                        @Nonnull GitHubRepo localPRs,
                        @Nonnull GHRepository remoteRepo,
                        @Nonnull TaskListener listener,
