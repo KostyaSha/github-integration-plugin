@@ -38,17 +38,12 @@ import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
  */
 @SuppressWarnings("unused")
 @Extension
-public class GHPullRequestSubscriber extends GHEventsSubscriber {
+public class GHPullRequestSubscriber extends AbstractGHPullRequestSubsriber {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHPullRequestSubscriber.class);
 
     @Override
     protected boolean isApplicable(Item item) {
         return item instanceof Job && withPRTrigger().apply((Job) item);
-    }
-
-    @Override
-    protected Set<GHEvent> events() {
-        return immutableEnumSet(GHEvent.PULL_REQUEST, GHEvent.ISSUE_COMMENT);
     }
 
     @Override
@@ -90,26 +85,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
         }
     }
 
-    private PullRequestInfo extractPullRequestInfo(GHEvent event, String payload, GitHub gh) throws IOException {
-        switch (event) {
-            case ISSUE_COMMENT: {
-                IssueComment commentPayload = gh.parseEventPayload(new StringReader(payload), IssueComment.class);
 
-                int prNumber = commentPayload.getIssue().getNumber();
-
-                return new PullRequestInfo(commentPayload.getRepository().getFullName(), prNumber);
-            }
-
-            case PULL_REQUEST: {
-                PullRequest pr = gh.parseEventPayload(new StringReader(payload), PullRequest.class);
-
-                return new PullRequestInfo(pr.getPullRequest().getRepository().getFullName(), pr.getNumber());
-            }
-
-            default:
-                throw new IllegalStateException(format("Did you add event %s in events() method?", event));
-        }
-    }
 
     static Set<Job> getPRTriggerJobs(final String repo) {
         final Set<Job> ret = new HashSet<>();

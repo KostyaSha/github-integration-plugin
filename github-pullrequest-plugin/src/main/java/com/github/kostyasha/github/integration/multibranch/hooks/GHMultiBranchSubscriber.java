@@ -49,7 +49,7 @@ public class GHMultiBranchSubscriber extends AbstractGHBranchSubscriber {
     protected void onEvent(GHSubscriberEvent event) {
         try {
             BranchInfo ref = extractRefInfo(event.getGHEvent(), event.getPayload());
-            SCMHeadEvent.fireNow(new GitHubSCMHeadEvent(
+            SCMHeadEvent.fireNow(new GitHubBranchSCMHeadEvent(
                     SCMEvent.Type.UPDATED,
                     event.getTimestamp(),
                     ref,

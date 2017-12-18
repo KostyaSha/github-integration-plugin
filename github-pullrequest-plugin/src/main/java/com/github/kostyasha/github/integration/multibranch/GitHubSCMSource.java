@@ -29,7 +29,6 @@ import jenkins.scm.api.SCMSourceCriteria;
 import jenkins.scm.api.SCMSourceDescriptor;
 import jenkins.scm.api.SCMSourceEvent;
 import jenkins.scm.api.SCMSourceOwner;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -256,9 +255,6 @@ public class GitHubSCMSource extends SCMSource {
         listener.getLogger().println("> GitHubSCMSource.retrieveActions(jenkins.scm.api.SCMHead, jenkins.scm.api.SCMHeadEvent, hudson.model.TaskListener)");
         listener.getLogger().println(">> head " + head + " event " + event);
 
-//        GitHubSCMHead gitHubSCMHead = (GitHubSCMHead) head;
-//        List<Action> causeActions = Collections.singletonList(new CauseAction(gitHubSCMHead.getCause()));
-//        gitHubSCMHead.setCause(null);
         return Collections.emptyList();
     }
 

@@ -23,11 +23,11 @@ import java.util.Map;
 /**
  * @author Kanstantsin Shautsou
  */
-public class GitHubSCMHeadEvent extends SCMHeadEvent<BranchInfo> {
-    public GitHubSCMHeadEvent(@Nonnull Type type,
-                              long timestamp,
-                              @Nonnull BranchInfo payload,
-                              @CheckForNull String origin) {
+public class GitHubBranchSCMHeadEvent extends SCMHeadEvent<BranchInfo> {
+    public GitHubBranchSCMHeadEvent(@Nonnull Type type,
+                                    long timestamp,
+                                    @Nonnull BranchInfo payload,
+                                    @CheckForNull String origin) {
         super(type, timestamp, payload, origin);
     }
 
