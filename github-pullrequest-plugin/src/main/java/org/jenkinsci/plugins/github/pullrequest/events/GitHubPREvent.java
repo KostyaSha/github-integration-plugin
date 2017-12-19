@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.github.pullrequest.events;
 
+import com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubPRHandler;
 import hudson.ExtensionPoint;
 import hudson.model.AbstractDescribableImpl;
@@ -11,6 +12,7 @@ import org.kohsuke.github.GHEventPayload;
 import org.kohsuke.github.GHPullRequest;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.IOException;
 
 /**
@@ -23,27 +25,13 @@ public abstract class GitHubPREvent extends AbstractDescribableImpl<GitHubPREven
     /**
      * indicates that PR was changed
      *
-     * @param remotePR current PR state fetched from GH
-     * @param localPR  PR state from last run saved in jenkins. null when not exist before
+
      * @return cause object. null when no influence (other events will be checked.
      * If cause.isSkip() == true, then other checks wouldn't influence. And triggering for this branch will be skipped.
      * If cause.isSkip() == false, indicates that branch build should be run.
      */
     @CheckForNull
-    public GitHubPRCause check(
-            GitHubPRTrigger gitHubPRTrigger,
-            GHPullRequest remotePR,
-            @CheckForNull GitHubPRPullRequest localPR,
-            TaskListener listener) throws IOException {
-        return null;
-    }
-
-    @CheckForNull
-    public GitHubPRCause check(
-            GitHubPRHandler prHandler,
-            GHPullRequest remotePR,
-            @CheckForNull GitHubPRPullRequest localPR,
-            TaskListener listener) throws IOException {
+    public GitHubPRCause check(@Nonnull GitHubPRDecisionContext prDecisionContext) throws IOException {
         return null;
     }
 

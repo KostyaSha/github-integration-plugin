@@ -83,21 +83,21 @@ public class BranchToCauseConverterTest {
 
     private GitHubBranchEvent createExceptionEvent() throws IOException {
         GitHubBranchEvent event = mock(GitHubBranchEvent.class);
-        doThrow(IOException.class).when(event).check(any(), any(), any(), any(), any());
+        doThrow(IOException.class).when(event).check(any());
 
         return event;
     }
 
     private GitHubBranchEvent createMatchingEvent() throws IOException {
         GitHubBranchEvent event = mock(GitHubBranchEvent.class);
-        when(event.check(any(), any(), any(), any(), any())).thenReturn(mockCause);
+        when(event.check(any())).thenReturn(mockCause);
 
         return event;
     }
 
     private GitHubBranchEvent createNonMatchingEvent() throws IOException {
         GitHubBranchEvent event = mock(GitHubBranchEvent.class);
-        when(event.check(any(), any(), any(), any(), any())).thenReturn(null);
+        when(event.check(any())).thenReturn(null);
 
         return event;
     }

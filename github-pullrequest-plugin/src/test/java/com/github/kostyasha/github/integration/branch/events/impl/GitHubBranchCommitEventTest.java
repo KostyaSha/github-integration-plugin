@@ -19,6 +19,7 @@ import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Collections;
 
+import static com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext.newGitHubBranchDecisionContext;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNull;
@@ -46,16 +47,16 @@ public class GitHubBranchCommitEventTest {
     private LoggingTaskListenerWrapper mockListener;
 
     @Mock
-    private GitHubBranch mockLocalBranch;
+    private GitHubBranch localbranch;
 
     @Mock
-    private GHBranch mockRemoteBranch;
+    private GHBranch remoteBranch;
 
     @Mock
-    private GitHubBranchRepository mockRepo;
+    private GitHubBranchRepository localRepo;
 
     @Mock
-    private GitHubBranchTrigger mockTrigger;
+    private GitHubBranchTrigger trigger;
 
     private GitHubBranchCause result;
 
@@ -117,19 +118,19 @@ public class GitHubBranchCommitEventTest {
     }
 
     private void givenCheckLastCommitReturnsCause() {
-        when(mockCommitCheck.check(mockRemoteBranch, mockRepo, mockCommit)).thenReturn(mockCause);
+        when(mockCommitCheck.check(remoteBranch, localRepo, mockCommit)).thenReturn(mockCause);
     }
 
     private void givenCheckLastCommitReturnsNull() {
-        when(mockCommitCheck.check(mockRemoteBranch, mockRepo, mockCommit)).thenReturn(null);
+        when(mockCommitCheck.check(remoteBranch, localRepo, mockCommit)).thenReturn(null);
     }
 
     private void givenChecksReturnNull() {
-        when(mockCommitCheck.check(mockRemoteBranch, mockRepo, commits)).thenReturn(null);
+        when(mockCommitCheck.check(remoteBranch, localRepo, commits)).thenReturn(null);
     }
 
     private void givenLocalRepositoryIsNull() throws Exception {
-        mockLocalBranch = null;
+        localbranch = null;
     }
 
     private void givenNoChecksAreConfigured() {
@@ -138,7 +139,7 @@ public class GitHubBranchCommitEventTest {
 
     private void givenSkippableBranchCause() {
         when(mockCause.isSkip()).thenReturn(true);
-        when(mockCommitCheck.check(mockRemoteBranch, mockRepo, commits)).thenReturn(mockCause);
+        when(mockCommitCheck.check(remoteBranch, localRepo, commits)).thenReturn(mockCause);
     }
 
     private void thenAdditionalTriggersWillBeChecked() {
@@ -155,6 +156,12 @@ public class GitHubBranchCommitEventTest {
     }
 
     private void whenCheckCommits() throws IOException {
-        result = check.check(mockTrigger, mockRemoteBranch, mockLocalBranch, mockRepo, mockListener);
+        result = check.check(newGitHubBranchDecisionContext()
+                .withLocalBranch(localbranch)
+                .withBranchTrigger(trigger)
+                .withLocalRepo(localRepo)
+                .withRemoteBranch(remoteBranch)
+                .withListener(mockListener)
+                .build());
     }
 }

@@ -5,6 +5,8 @@ import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
+import com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext;
+import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubBranchHandler;
 import hudson.model.TaskListener;
 import org.kohsuke.github.GHBranch;
@@ -20,6 +22,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext.newGitHubBranchDecisionContext;
 import static java.util.Objects.nonNull;
 
 /**
@@ -34,6 +37,7 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
     private final GitHubBranchTrigger trigger;
     @CheckForNull
     private final GitHubBranchHandler handler;
+    private final GitHubSCMSource source;
 
     private BranchToCauseConverter(@Nonnull GitHubBranchRepository localBranches,
                                    @Nonnull TaskListener listener,
@@ -42,14 +46,17 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
         this.listener = listener;
         this.trigger = trigger;
         this.handler = null;
+        this.source = null;
     }
 
     public BranchToCauseConverter(@Nonnull GitHubBranchRepository localBranches,
                                   @Nonnull TaskListener listener,
-                                  @Nonnull GitHubBranchHandler handler) {
+                                  @Nonnull GitHubBranchHandler handler,
+                                  @Nonnull GitHubSCMSource source) {
         this.localBranches = localBranches;
         this.listener = listener;
         this.handler = handler;
+        this.source = source;
         this.trigger = null;
     }
 
@@ -72,7 +79,7 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
     @Override
     public GitHubBranchCause apply(final GHBranch remoteBranch) {
         List<GitHubBranchCause> causes = getEvents().stream()
-                .map(event -> toCause(event, remoteBranch))
+                .map(event -> toCause(event, remoteBranch, source))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
@@ -111,16 +118,23 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
         return cause;
     }
 
-    private GitHubBranchCause toCause(GitHubBranchEvent event, GHBranch remoteBranch) {
+    private GitHubBranchCause toCause(GitHubBranchEvent event, GHBranch remoteBranch, GitHubSCMSource source) {
         String branchName = remoteBranch.getName();
         GitHubBranch localBranch = localBranches.getBranches().get(branchName);
 
         try {
-            if (nonNull(trigger)) {
-                return event.check(trigger, remoteBranch, localBranch, localBranches, listener);
-            } else {
-                return event.check(handler, remoteBranch, localBranch, localBranches, listener);
-            }
+
+            GitHubBranchDecisionContext context = newGitHubBranchDecisionContext()
+                    .withListener(listener)
+                    .withLocalRepo(localBranches)
+                    .withRemoteBranch(remoteBranch)
+                    .withLocalBranch(localBranch)
+                    .withBranchTrigger(trigger)
+                    .withBranchHandler(handler)
+                    .withSCMSource(source)
+                    .build();
+
+            return event.check(context);
         } catch (IOException e) {
             LOGGER.error("Event check failed, skipping branch [{}].", branchName, e);
             listener.error("Event check failed, skipping branch [{}] {}", branchName, e);

@@ -9,6 +9,7 @@ import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDe
 import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheck;
 import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheckDescriptor;
 
+import com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
 
@@ -68,9 +69,11 @@ public class GitHubBranchCommitEvent extends GitHubBranchEvent {
     }
 
     @Override
-    public GitHubBranchCause check(GitHubBranchTrigger trigger, GHBranch remoteBranch, @CheckForNull GitHubBranch localBranch,
-            GitHubBranchRepository localRepo, TaskListener listener)
-        throws IOException {
+    public GitHubBranchCause check(@Nonnull GitHubBranchDecisionContext context) throws IOException {
+        GHBranch remoteBranch = context.getRemoteBranch();
+        GitHubBranch localBranch = context.getLocalBranch();
+        GitHubBranchRepository localRepo = context.getLocalRepo();
+        TaskListener listener = context.getListener();
         final PrintStream logger = listener.getLogger();
         Function<GitHubBranchCommitCheck, GitHubBranchCause> function;
 

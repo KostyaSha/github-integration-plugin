@@ -1,10 +1,9 @@
 package org.jenkinsci.plugins.github.pullrequest.events.impl;
 
+import com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREventDescriptor;
 import org.kohsuke.github.GHPullRequest;
@@ -50,8 +49,10 @@ public class GitHubPRNumber extends GitHubPREvent {
     }
 
     @Override
-    public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, @Nonnull GHPullRequest remotePR,
-                               @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
+    public GitHubPRCause check(@Nonnull GitHubPRDecisionContext prDecisionContext) throws IOException {
+        TaskListener listener = prDecisionContext.getListener();
+        GHPullRequest remotePR = prDecisionContext.getRemotePR();
+
         if (isNull(number)) {
             // skip the whole PR because we can't trust in other checks to not get unexpected triggers.
             listener.error(DISPLAY_NAME + ": number is null -> Bad configured event, skipping other checks.");
@@ -77,6 +78,7 @@ public class GitHubPRNumber extends GitHubPREvent {
 
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
+        @Nonnull
         @Override
         public String getDisplayName() {
             return DISPLAY_NAME;

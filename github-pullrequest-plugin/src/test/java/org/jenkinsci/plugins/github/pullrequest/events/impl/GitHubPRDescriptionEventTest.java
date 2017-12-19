@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 
+import static com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext.newGitHubPRDecisionContext;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
@@ -65,7 +66,12 @@ public class GitHubPRDescriptionEventTest {
         when(remotePr.getBody()).thenReturn("must skip ci body");
 
         GitHubPRCause cause = new GitHubPRDescriptionEvent(".*[skip ci].*")
-                .check(trigger, remotePr, null, listener);
+                .check(newGitHubPRDecisionContext()
+                        .withPrTrigger(trigger)
+                        .withRemotePR(remotePr)
+                        .withListener(listener)
+                        .build()
+                );
 
         assertNotNull(cause);
         assertThat(cause.isSkip(), is(true));
@@ -82,7 +88,12 @@ public class GitHubPRDescriptionEventTest {
         when(remotePr.getBody()).thenReturn("unmatched comment");
 
         GitHubPRCause cause = new GitHubPRDescriptionEvent(".*skip ci.*")
-                .check(trigger, remotePr, null, listener);
+                .check(newGitHubPRDecisionContext()
+                        .withPrTrigger(trigger)
+                        .withRemotePR(remotePr)
+                        .withListener(listener)
+                        .build()
+                );
 
         assertThat(cause, nullValue());
     }

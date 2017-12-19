@@ -2,6 +2,7 @@ package com.github.kostyasha.github.integration.branch.events.impl;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
+import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.generic.GitHubRepository;
 import hudson.model.TaskListener;
 import org.junit.Test;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
 
+import static com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext.newGitHubBranchDecisionContext;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.*;
@@ -38,6 +40,8 @@ public class GitHubBranchDeletedEventTest {
     private TaskListener listener;
     @Mock
     private PrintStream logger;
+    @Mock
+    private GitHubBranchTrigger trigger;
 
     private final GitHubBranchDeletedEvent event = new GitHubBranchDeletedEvent();
 
@@ -45,7 +49,12 @@ public class GitHubBranchDeletedEventTest {
     public void branchCreated() throws IOException {
         commonExpectations();
         assertThat(
-                event.check(null, remoteBranch, null, localRepo, listener),
+                event.check(newGitHubBranchDecisionContext()
+                        .withLocalBranch(null)
+                        .withBranchTrigger(trigger)
+                        .withRemoteBranch(remoteBranch)
+                        .withListener(listener)
+                        .build()),
                 nullValue()
         );
     }
@@ -54,7 +63,13 @@ public class GitHubBranchDeletedEventTest {
     public void branchNotChangedExisted() throws IOException {
         commonExpectations();
         assertThat(
-                event.check(null, remoteBranch, localBranch, localRepo, listener),
+                event.check(newGitHubBranchDecisionContext()
+                        .withLocalBranch(localBranch)
+                        .withBranchTrigger(trigger)
+                        .withLocalRepo(localRepo)
+                        .withRemoteBranch(remoteBranch)
+                        .withListener(listener)
+                        .build()),
                 nullValue()
         );
     }
@@ -63,7 +78,13 @@ public class GitHubBranchDeletedEventTest {
     public void branchNotChangedNotExisted() throws IOException {
         commonExpectations();
         assertThat(
-                event.check(null, null, null, localRepo, listener),
+                event.check(newGitHubBranchDecisionContext()
+                        .withLocalBranch(localBranch)
+                        .withBranchTrigger(trigger)
+                        .withLocalRepo(localRepo)
+                        .withRemoteBranch(null)
+                        .withListener(listener)
+                        .build()),
                 nullValue()
         );
     }
@@ -72,7 +93,12 @@ public class GitHubBranchDeletedEventTest {
     public void branchDeleted() throws IOException {
         commonExpectations();
         assertThat(
-                event.check(null, null, localBranch, localRepo, listener),
+                event.check(newGitHubBranchDecisionContext()
+                        .withLocalBranch(localBranch)
+                        .withBranchTrigger(trigger)
+                        .withLocalRepo(localRepo)
+                        .withListener(listener)
+                        .build()),
                 notNullValue()
         );
     }

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
 
+import static com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext.newGitHubPRDecisionContext;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static org.hamcrest.core.Is.is;
@@ -83,7 +84,13 @@ public class GitHubPRCommentEventTest {
         ghIssueComments.add(comment);
         when(remotePr.getComments()).thenReturn(ghIssueComments);
 
-        GitHubPRCause cause = new GitHubPRCommentEvent("Comment").check(trigger, remotePr, null, listener);
+        GitHubPRCause cause = new GitHubPRCommentEvent("Comment")
+                .check(newGitHubPRDecisionContext()
+                        .withPrTrigger(trigger)
+                        .withRemotePR(remotePr)
+                        .withListener(listener)
+                        .build()
+                );
 
         assertNull(cause);
     }
@@ -103,7 +110,13 @@ public class GitHubPRCommentEventTest {
         when(remotePr.getComments()).thenReturn(ghIssueComments);
 
         GitHubPRCause cause = new GitHubPRCommentEvent("test ([A-Za-z0-9 ,!]+) tags please.")
-                .check(trigger, remotePr, localPR, listener);
+                .check(newGitHubPRDecisionContext()
+                        .withPrTrigger(trigger)
+                        .withLocalPR(localPR)
+                        .withRemotePR(remotePr)
+                        .withListener(listener)
+                        .build()
+                );
 
         assertThat(cause.getCommentBody(), is(body));
         assertThat(cause.getCommentBodyMatch(), is("foo, bar"));
@@ -132,8 +145,13 @@ public class GitHubPRCommentEventTest {
         when(remotePr.getComments()).thenReturn(ghIssueComments);
 
         GitHubPRCause cause = new GitHubPRCommentEvent("test ([A-Za-z0-9 ,!]+) tags please.")
-                .check(trigger, remotePr, localPR, listener);
-
+                .check(newGitHubPRDecisionContext()
+                        .withPrTrigger(trigger)
+                        .withLocalPR(localPR)
+                        .withRemotePR(remotePr)
+                        .withListener(listener)
+                        .build()
+                );
         assertThat(cause, notNullValue());
         assertThat(cause.getCommentBody(), is(body));
         assertThat(cause.getCommentBodyMatch(), is("foo, bar"));
@@ -145,8 +163,14 @@ public class GitHubPRCommentEventTest {
         when(remotePr.getNumber()).thenReturn(14);
         when(listener.getLogger()).thenReturn(logger);
 
-        GitHubPRCause cause = new GitHubPRCommentEvent("Comment").check(null, remotePr, localPR, listener);
-
+        GitHubPRCause cause = new GitHubPRCommentEvent("Comment")
+                .check(newGitHubPRDecisionContext()
+                        .withPrTrigger(trigger)
+                        .withLocalPR(localPR)
+                        .withRemotePR(remotePr)
+                        .withListener(listener)
+                        .build()
+                );
         assertNull(cause);
     }
 
@@ -165,7 +189,12 @@ public class GitHubPRCommentEventTest {
         when(remotePr.getComments()).thenReturn(ghIssueComments);
 
         GitHubPRCause cause = new GitHubPRCommentEvent("test ([A-Za-z0-9 ,!]+) tags please.")
-                .check(trigger, remotePr, null, listener); // localPR is null
+                .check(newGitHubPRDecisionContext()
+                        .withPrTrigger(trigger)
+                        .withRemotePR(remotePr)
+                        .withListener(listener)
+                        .build()
+                ); // localPR is null
 
         assertThat(cause.getCommentBody(), is(body));
         assertThat(cause.getCommentBodyMatch(), is("foo, bar"));

@@ -87,7 +87,7 @@ public class GitHubBranchHandler extends GitHubHandler {
         Objects.requireNonNull(localBranches);
 
         // triggering logic and result
-        List<GitHubBranchCause> causes = checkBranches(remoteBranches, localBranches, listener);
+        List<GitHubBranchCause> causes = checkBranches(remoteBranches, localBranches, source, listener);
 
         GitHubBranchTrigger.updateLocalRepository(remoteBranches, localBranches);
 
@@ -155,11 +155,12 @@ public class GitHubBranchHandler extends GitHubHandler {
 
     private List<GitHubBranchCause> checkBranches(Set<GHBranch> remoteBranches,
                                                   @Nonnull GitHubBranchRepository localBranches,
+                                                  @Nonnull GitHubSCMSource source,
                                                   @Nonnull TaskListener listener) {
         List<GitHubBranchCause> causes = remoteBranches.stream()
                 // TODO: update user whitelist filter
                 .filter(Objects::nonNull)
-                .map(new BranchToCauseConverter(localBranches, listener, this))
+                .map(new BranchToCauseConverter(localBranches, listener, this, source))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 

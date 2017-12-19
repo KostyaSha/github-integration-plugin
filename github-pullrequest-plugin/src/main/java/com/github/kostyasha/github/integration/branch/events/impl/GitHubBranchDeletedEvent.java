@@ -6,6 +6,7 @@ import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
+import com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import org.kohsuke.github.GHBranch;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
 
@@ -32,11 +34,12 @@ public class GitHubBranchDeletedEvent extends GitHubBranchEvent {
     }
 
     @Override
-    public GitHubBranchCause check(GitHubBranchTrigger trigger,
-                                   GHBranch remoteBranch,
-                                   @CheckForNull GitHubBranch localBranch,
-                                   GitHubBranchRepository localRepo,
-                                   TaskListener listener) throws IOException {
+    public GitHubBranchCause check(@Nonnull GitHubBranchDecisionContext context) throws IOException {
+        TaskListener listener = context.getListener();
+        GitHubBranch localBranch = context.getLocalBranch();
+        GHBranch remoteBranch = context.getRemoteBranch();
+        GitHubBranchRepository localRepo = context.getLocalRepo();
+
         GitHubBranchCause cause = null;
         if (nonNull(localBranch) && isNull(remoteBranch)) { // didn't exist before
             final PrintStream logger = listener.getLogger();

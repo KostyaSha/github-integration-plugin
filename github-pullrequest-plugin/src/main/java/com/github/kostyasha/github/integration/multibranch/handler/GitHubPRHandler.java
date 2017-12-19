@@ -113,7 +113,7 @@ public class GitHubPRHandler extends GitHubHandler {
 //                            withBranchRestriction(listener, getBranchRestriction()),
 //                            withUserRestriction(listener, getUserRestriction())
 //                    ))
-                .transform(new PullRequestToCauseConverter(prRepository, listener, this))
+                .transform(new PullRequestToCauseConverter(prRepository, listener, source, this))
                 .filter(notNull())
                 .toList();
 

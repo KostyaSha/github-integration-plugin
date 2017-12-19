@@ -1,10 +1,10 @@
 package org.jenkinsci.plugins.github.pullrequest.events.impl;
 
+import com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREventDescriptor;
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction;
@@ -14,7 +14,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -45,9 +44,12 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
     }
 
     @Override
-    public GitHubPRCause check(@Nonnull GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
-                               @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) {
+    public GitHubPRCause check(@Nonnull GitHubPRDecisionContext prDecisionContext) {
+        final TaskListener listener = prDecisionContext.getListener();
         final PrintStream llog = listener.getLogger();
+        final GitHubPRPullRequest localPR = prDecisionContext.getLocalPR();
+        final GHPullRequest remotePR = prDecisionContext.getRemotePR();
+        final GitHubPRUserRestriction prUserRestriction = prDecisionContext.getPrUserRestriction();
 
         GitHubPRCause cause = null;
         try {
@@ -58,7 +60,8 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
                         || localPR.getLastCommentCreatedAt().compareTo(issueComment.getCreatedAt()) < 0) {
                     llog.printf("%s: state has changed (new comment found - '%s')%n",
                             DISPLAY_NAME, issueComment.getBody());
-                    cause = checkComment(issueComment, gitHubPRTrigger.getUserRestriction(), remotePR, listener);
+
+                    cause = checkComment(issueComment, prUserRestriction, remotePR, listener);
                     if (nonNull(cause)) {
                         break;
                     }
@@ -105,6 +108,7 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
 
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
+        @Nonnull
         @Override
         public String getDisplayName() {
             return DISPLAY_NAME;

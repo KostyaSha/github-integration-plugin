@@ -7,6 +7,7 @@ import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
 
+import com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
 
@@ -16,6 +17,8 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -73,8 +76,10 @@ public class GitHubBranchRestrictionFilter extends GitHubBranchEvent {
     }
 
     @Override
-    public GitHubBranchCause check(GitHubBranchTrigger gitHubBranchTrigger, GHBranch remoteBranch, GitHubBranch localBranch,
-                                   GitHubBranchRepository localRepo, TaskListener listener) {
+    public GitHubBranchCause check(@Nonnull GitHubBranchDecisionContext context) throws IOException {
+        GHBranch remoteBranch = context.getRemoteBranch();
+        GitHubBranchRepository localRepo = context.getLocalRepo();
+
         String name = remoteBranch.getName();
         if (matchCriteria.isEmpty() || branchIsAllowed(name)) {
             if (matchCriteria.isEmpty()) {

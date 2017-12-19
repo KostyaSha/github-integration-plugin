@@ -1,11 +1,10 @@
 package org.jenkinsci.plugins.github.pullrequest.events.impl;
 
+import com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREventDescriptor;
 import org.kohsuke.github.GHLabel;
@@ -14,7 +13,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.regex.Pattern;
@@ -37,8 +36,9 @@ public class GitHubPRLabelPatternExistsEvent extends GitHubPREvent {
 
 
     @Override
-    public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
-                               @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
+    public GitHubPRCause check(@Nonnull GitHubPRDecisionContext prDecisionContext) throws IOException {
+        TaskListener listener = prDecisionContext.getListener();
+        GHPullRequest remotePR = prDecisionContext.getRemotePR();
         final PrintStream logger = listener.getLogger();
 
         for (GHLabel ghLabel : remotePR.getRepository().getIssue(remotePR.getNumber()).getLabels()) {
@@ -65,6 +65,7 @@ public class GitHubPRLabelPatternExistsEvent extends GitHubPREvent {
 
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
+        @Nonnull
         @Override
         public String getDisplayName() {
             return DISPLAY_NAME;

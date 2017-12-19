@@ -6,6 +6,7 @@ import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
+import com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubBranchHandler;
 import hudson.Extension;
 import hudson.model.TaskListener;
@@ -14,6 +15,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
 
@@ -34,26 +36,12 @@ public class GitHubBranchCreatedEvent extends GitHubBranchEvent {
     }
 
     @Override
-    public GitHubBranchCause check(GitHubBranchHandler handler, GHBranch remoteBranch,
-                                   @CheckForNull GitHubBranch localBranch,
-                                   GitHubBranchRepository localRepo,
-                                   TaskListener listener) throws IOException {
-        return check(remoteBranch, localBranch, localRepo, listener);
-    }
+    public GitHubBranchCause check(@Nonnull GitHubBranchDecisionContext context) throws IOException {
+        GHBranch remoteBranch = context.getRemoteBranch();
+        GitHubBranch localBranch = context.getLocalBranch();
+        GitHubBranchRepository localRepo = context.getLocalRepo();
+        TaskListener listener = context.getListener();
 
-    @Override
-    public GitHubBranchCause check(GitHubBranchTrigger trigger,
-                                   GHBranch remoteBranch,
-                                   @CheckForNull GitHubBranch localBranch,
-                                   GitHubBranchRepository locaRepo,
-                                   TaskListener listener) throws IOException {
-        return check(remoteBranch, localBranch, locaRepo, listener);
-    }
-
-    private GitHubBranchCause check(GHBranch remoteBranch,
-                                    @CheckForNull GitHubBranch localBranch,
-                                    GitHubBranchRepository locaRepo,
-                                    TaskListener listener) {
         if (remoteBranch == null && localBranch == null) {
             // just in case
             LOG.debug("Remote and local branch are null");
@@ -68,7 +56,7 @@ public class GitHubBranchCreatedEvent extends GitHubBranchEvent {
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": '" + remoteBranch.getName() + "'");
             LOG.debug("{}: '{}'", DISPLAY_NAME, remoteBranch.getName());
-            cause = new GitHubBranchCause(remoteBranch, locaRepo, DISPLAY_NAME, false);
+            cause = new GitHubBranchCause(remoteBranch, localRepo, DISPLAY_NAME, false);
         }
 
         return cause;
@@ -76,6 +64,7 @@ public class GitHubBranchCreatedEvent extends GitHubBranchEvent {
 
     @Extension
     public static class DescriptorImpl extends GitHubBranchEventDescriptor {
+        @Nonnull
         @Override
         public final String getDisplayName() {
             return DISPLAY_NAME;

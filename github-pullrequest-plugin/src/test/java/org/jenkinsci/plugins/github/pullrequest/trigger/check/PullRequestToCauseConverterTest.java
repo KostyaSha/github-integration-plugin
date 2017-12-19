@@ -29,6 +29,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.HashMap;
 
+import static com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext.newGitHubPRDecisionContext;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
@@ -91,7 +92,14 @@ public class PullRequestToCauseConverterTest {
         when(remotePR.getNumber()).thenReturn(1);
 
         toGitHubPRCause(local, tlRule.getListener(), trigger).toCause(remotePR).apply(event);
-        verify(event).check(eq(trigger), eq(remotePR), eq(localPR), any(TaskListener.class));
+
+        verify(event).check(newGitHubPRDecisionContext()
+                .withPrTrigger(eq(trigger))
+                .withRemotePR(eq(remotePR))
+                .withListener(any(TaskListener.class))
+                .withLocalPR(eq(localPR))
+                .build()
+        );
     }
 
     @Test
@@ -126,10 +134,10 @@ public class PullRequestToCauseConverterTest {
 
     /**
      * Test trigger configuration of:
-     *
-     *     1.) Skip PR if label is not present (when label is not present)
-     *     2.) Cause PR if commit changed (when commit has changed)
-     *
+     * <p>
+     * 1.) Skip PR if label is not present (when label is not present)
+     * 2.) Cause PR if commit changed (when commit has changed)
+     * <p>
      * Expected result is that the PR should be skipped. No causes should be
      * identified.
      */

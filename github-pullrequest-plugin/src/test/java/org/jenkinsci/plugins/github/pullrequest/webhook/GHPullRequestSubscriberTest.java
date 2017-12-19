@@ -7,6 +7,7 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Job;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.MatcherAssert;
+import org.jenkinsci.plugins.github.extension.GHSubscriberEvent;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -77,7 +78,11 @@ public class GHPullRequestSubscriberTest {
         job.addProperty(new GithubProjectProperty(REPO_URL_FROM_PAYLOAD));
         job.addTrigger(trigger);
 
-        new GHPullRequestSubscriber().onEvent(GHEvent.PULL_REQUEST, classpath("payload/pull_request.json"));
+        new GHPullRequestSubscriber().onEvent(new GHSubscriberEvent(
+                "",
+                GHEvent.PULL_REQUEST,
+                classpath("payload/pull_request.json"))
+        );
 
         verify(trigger).queueRun(eq(job), eq(1));
     }
@@ -91,7 +96,11 @@ public class GHPullRequestSubscriberTest {
         job.addProperty(new GithubProjectProperty(REPO_URL_FROM_PAYLOAD));
         job.addTrigger(trigger);
 
-        new GHPullRequestSubscriber().onEvent(GHEvent.ISSUE_COMMENT, classpath("payload/issue_comment.json"));
+        new GHPullRequestSubscriber().onEvent(new GHSubscriberEvent(
+                "",
+                GHEvent.ISSUE_COMMENT,
+                classpath("payload/issue_comment.json"))
+        );
 
         verify(trigger).queueRun(eq(job), eq(1));
     }
@@ -105,7 +114,11 @@ public class GHPullRequestSubscriberTest {
         job.addProperty(new GithubProjectProperty(REPO_URL_FROM_PAYLOAD));
         job.addTrigger(trigger);
 
-        new GHPullRequestSubscriber().onEvent(GHEvent.ISSUE_COMMENT, classpath("payload/issue_comment.json"));
+        new GHPullRequestSubscriber().onEvent(new GHSubscriberEvent(
+                "",
+                GHEvent.ISSUE_COMMENT,
+                classpath("payload/issue_comment.json"))
+        );
 
         verify(trigger).queueRun(eq(job), eq(1));
     }

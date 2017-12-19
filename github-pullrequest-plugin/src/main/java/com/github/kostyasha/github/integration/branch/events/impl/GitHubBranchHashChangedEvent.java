@@ -6,6 +6,7 @@ import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
+import com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import org.kohsuke.github.GHBranch;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
 
@@ -33,11 +35,12 @@ public class GitHubBranchHashChangedEvent extends GitHubBranchEvent {
     }
 
     @Override
-    public GitHubBranchCause check(GitHubBranchTrigger trigger,
-                                   GHBranch remoteBranch,
-                                   @CheckForNull GitHubBranch localBranch,
-                                   GitHubBranchRepository localRepo,
-                                   TaskListener listener) throws IOException {
+    public GitHubBranchCause check(@Nonnull GitHubBranchDecisionContext context) throws IOException {
+        GHBranch remoteBranch = context.getRemoteBranch();
+        GitHubBranch localBranch = context.getLocalBranch();
+        GitHubBranchRepository localRepo = context.getLocalRepo();
+        TaskListener listener = context.getListener();
+
         GitHubBranchCause cause = null;
         if (nonNull(localBranch) && nonNull(remoteBranch)) { // didn't exist before
             final String localBranchSHA1 = localBranch.getCommitSha();
@@ -56,6 +59,7 @@ public class GitHubBranchHashChangedEvent extends GitHubBranchEvent {
 
     @Extension
     public static class DescriptorImpl extends GitHubBranchEventDescriptor {
+        @Nonnull
         @Override
         public final String getDisplayName() {
             return DISPLAY_NAME;
