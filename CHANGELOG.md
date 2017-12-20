@@ -1,6 +1,10 @@
 ## Changelog
 
 ## Next 
+
+## 0.1.0-rc29
+- [branch] reduce number of github api calls for hook processing.
+
 ## 0.1.0-rc28
 - [branch] Single branch check shouldn't effect local storage.
 
