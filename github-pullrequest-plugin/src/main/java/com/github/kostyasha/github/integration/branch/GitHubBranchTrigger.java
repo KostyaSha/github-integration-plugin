@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -257,10 +258,14 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
         final LinkedHashSet<GHBranch> ghBranches = new LinkedHashSet<>();
 
         if (branch != null) {
-            final GHBranch ghBranch = remoteRepo.getBranch(branch);
-            if (ghBranch != null) {
-                ghBranches.add(ghBranch);
+            try {
+                GHBranch ghBranch = remoteRepo.getBranch(branch);
+                if (ghBranch != null) {
+                    ghBranches.add(ghBranch);
+                }
+            } catch (FileNotFoundException ignore) {
             }
+
         } else {
             ghBranches.addAll(remoteRepo.getBranches().values());
         }

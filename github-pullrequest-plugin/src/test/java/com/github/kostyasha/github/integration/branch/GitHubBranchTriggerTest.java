@@ -51,6 +51,7 @@ public class GitHubBranchTriggerTest {
             ))
             .stubRateLimit()
             .stubUser()
+            .stubRepoBranchShouldChange()
             .stubRepoBranches()
             .stubRepo()
             .stubStatuses();

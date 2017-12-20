@@ -114,6 +114,18 @@ public class GHMockRule implements TestRule {
         });
     }
 
+    public GHMockRule stubRepoBranchShouldChange() {
+        return addSetup(() -> {
+            String repo = format("/repos/%s/%s/branches/should-change", REPO.getUserName(), REPO.getRepositoryName());
+            service().stubFor(
+                    get(urlEqualTo(repo))
+                            .willReturn(aResponse()
+                                    .withStatus(200)
+                                    .withHeader("Content-Type", "application/json; charset=utf-8")
+                                    .withBody(classpath(GHMockRule.class, "branch-should-change.json"))));
+        });
+    }
+
     /**
      * Stubs /repos/org/repo response with predefined content
      * <p>
