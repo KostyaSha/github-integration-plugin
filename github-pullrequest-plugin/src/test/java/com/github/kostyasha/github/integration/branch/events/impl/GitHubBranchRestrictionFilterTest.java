@@ -56,8 +56,7 @@ public class GitHubBranchRestrictionFilterTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
         filter = new GitHubBranchRestrictionFilter();
-    }git commit -a -m
-
+    }
     @Test
     public void testBranchNameExclude() throws IOException {
         givenMatchAsExact();
