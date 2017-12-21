@@ -16,6 +16,7 @@ build for merged state or '/head' for building exact PR commits, or `$GITHUB_PR_
 when PR is not mergeable (according to GH state). Set branch specifier to `origin-pull/pull/${GITHUB_PR_NUMBER}/merge`.
 This exact link allows to speedup fetch sources.
 - Enable "Build GitHub Pull Requests" trigger and configure it.
+- Under `Trigger Events` add event `Not mergeable` and check `Skip building unmergeable pull requests?`. Because above branch specifier will not give error on unmergeable PRs and silently checkout commits up to which PR was mergeable. Alternatively use [Branch Trigger](#branch-trigger) and merge using git commands.
 - If you want do gatekeepering, then add second repository with i.e. origin.
 Add `Merge` extension in from Git SCM and configure post build action for push action.
 
