@@ -11,6 +11,7 @@ import org.jenkinsci.plugins.github.util.FluentIterableWrapper;
 import org.kohsuke.github.GHEvent;
 import org.kohsuke.github.GHEventPayload.IssueComment;
 import org.kohsuke.github.GHEventPayload.PullRequest;
+import org.kohsuke.github.GHEventPayload.PullRequestReview;
 import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +56,10 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
             GitHub gh = GitHub.connectAnonymously();
 
             PullRequestInfo info = extractPullRequestInfo(event, payload, gh);
+
+            LOGGER.info("TEST GHPullRequestSubscriber.onEvent()  \n\n ");
+
+            LOGGER.info("Payload: {} \n\n ", payload);
 
             for (Job job : getPRTriggerJobs(info.getRepo())) {
                 GitHubPRTrigger trigger = ghPRTriggerFromJob(job);
