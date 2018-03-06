@@ -1,21 +1,32 @@
 package com.github.kostyasha.github.integration.multibranch.handler;
 
-import com.github.kostyasha.github.integration.generic.GitHubCause;
-import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
-import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
-import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
-import com.github.kostyasha.github.integration.multibranch.head.GitHubPRSCMHead;
-import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
-import hudson.Extension;
-import hudson.model.TaskListener;
-import jenkins.plugins.git.AbstractGitSCMSource;
-import jenkins.scm.api.SCMHeadEvent;
-import jenkins.scm.api.SCMHeadObserver;
+import static com.github.kostyasha.github.integration.generic.utils.RetryableGitHubOperation.execute;
+import static com.google.common.base.Predicates.in;
+import static com.google.common.base.Predicates.not;
+import static com.google.common.base.Predicates.notNull;
+import static java.util.Collections.singleton;
+import static org.jenkinsci.plugins.github.pullrequest.trigger.check.LocalRepoUpdater.updateLocalRepo;
+import static org.jenkinsci.plugins.github.pullrequest.trigger.check.NotUpdatedPRFilter.notUpdated;
+import static org.jenkinsci.plugins.github.pullrequest.trigger.check.SkipPRInBadState.badState;
+import static org.jenkinsci.plugins.github.pullrequest.utils.PRHelperFunctions.extractPRNumber;
+import static org.jenkinsci.plugins.github.pullrequest.utils.PRHelperFunctions.fetchRemotePR;
+import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.trigger.check.PullRequestToCauseConverter;
-import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRateLimit;
@@ -26,35 +37,14 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
+import com.github.kostyasha.github.integration.multibranch.SCMHeadConsumer;
+import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubPRSCMHead;
+import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
 
-import static com.github.kostyasha.github.integration.generic.utils.RetryableGitHubOperation.execute;
-import static com.google.common.base.Predicates.and;
-import static com.google.common.base.Predicates.in;
-import static com.google.common.base.Predicates.not;
-import static com.google.common.base.Predicates.notNull;
-import static java.util.Collections.singleton;
-import static org.jenkinsci.plugins.github.pullrequest.trigger.check.BranchRestrictionFilter.withBranchRestriction;
-import static org.jenkinsci.plugins.github.pullrequest.trigger.check.LocalRepoUpdater.updateLocalRepo;
-import static org.jenkinsci.plugins.github.pullrequest.trigger.check.NotUpdatedPRFilter.notUpdated;
-import static org.jenkinsci.plugins.github.pullrequest.trigger.check.PullRequestToCauseConverter.toGitHubPRCause;
-import static org.jenkinsci.plugins.github.pullrequest.trigger.check.SkipFirstRunForPRFilter.ifSkippedFirstRun;
-import static org.jenkinsci.plugins.github.pullrequest.trigger.check.SkipPRInBadState.badState;
-import static org.jenkinsci.plugins.github.pullrequest.trigger.check.UserRestrictionFilter.withUserRestriction;
-import static org.jenkinsci.plugins.github.pullrequest.utils.PRHelperFunctions.extractPRNumber;
-import static org.jenkinsci.plugins.github.pullrequest.utils.PRHelperFunctions.fetchRemotePR;
-import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
+import hudson.Extension;
+import hudson.model.TaskListener;
 
 /**
  * @author Kanstantsin Shautsou
@@ -85,8 +75,7 @@ public class GitHubPRHandler extends GitHubHandler {
     }
 
     @Override
-    public void handle(@Nonnull SCMHeadObserver observer,
-                       @CheckForNull SCMHeadEvent scmHeadEvent,
+    public void handle(@Nonnull SCMHeadConsumer consumer,
                        @Nonnull GitHubRepo localPRs,
                        @Nonnull GHRepository remoteRepo,
                        @Nonnull TaskListener listener,
@@ -133,9 +122,9 @@ public class GitHubPRHandler extends GitHubHandler {
 
         causes.forEach(prCause -> {
             GitHubPRSCMHead scmHead = new GitHubPRSCMHead(prCause, source.getId());
-            AbstractGitSCMSource.SCMRevisionImpl scmRevision = new GitHubSCMRevision(scmHead, prCause.getHeadSha(), false, prCause);
+            GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, prCause.getHeadSha(), false, prCause);
             try {
-                observer.observe(scmHead, scmRevision);
+                consumer.accept(scmHead, scmRevision);
                 causedPRs.add(scmHead.getName());
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace(listener.getLogger());
@@ -152,7 +141,7 @@ public class GitHubPRHandler extends GitHubHandler {
                     try {
                         GitHubPRSCMHead scmHead = new GitHubPRSCMHead(Integer.toString(value.getNumber()), source.getId());
                         GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getHeadSha(), true, null);
-                        observer.observe(scmHead, scmRevision);
+                        consumer.accept(scmHead, scmRevision);
                     } catch (IOException | InterruptedException e) {
                         // try as much as can
                         e.printStackTrace(listener.getLogger());

@@ -1,32 +1,5 @@
 package com.github.kostyasha.github.integration.multibranch.handler;
 
-import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
-import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
-import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
-import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
-import com.github.kostyasha.github.integration.branch.trigger.check.BranchToCauseConverter;
-import com.github.kostyasha.github.integration.generic.GitHubCause;
-import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
-import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
-import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
-import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
-import com.google.common.base.Throwables;
-import hudson.Extension;
-import hudson.model.TaskListener;
-import jenkins.plugins.git.AbstractGitSCMSource;
-import jenkins.scm.api.SCMHeadEvent;
-import jenkins.scm.api.SCMHeadObserver;
-import org.kohsuke.github.GHBranch;
-import org.kohsuke.github.GHRateLimit;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GitHub;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,8 +10,31 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.emptyList;
-import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+
+import org.kohsuke.github.GHBranch;
+import org.kohsuke.github.GHRateLimit;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GitHub;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
+import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
+import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
+import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
+import com.github.kostyasha.github.integration.branch.trigger.check.BranchToCauseConverter;
+import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
+import com.github.kostyasha.github.integration.multibranch.SCMHeadConsumer;
+import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
+import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
+
+import hudson.Extension;
+import hudson.model.TaskListener;
 
 /**
  * @author Kanstantsin Shautsou
@@ -68,8 +64,7 @@ public class GitHubBranchHandler extends GitHubHandler {
     }
 
     @Override
-    public void handle(@Nonnull SCMHeadObserver observer,
-                       @CheckForNull SCMHeadEvent scmHeadEvent,
+    public void handle(@Nonnull SCMHeadConsumer consumer,
                        @Nonnull GitHubRepo localRepo,
                        @Nonnull GHRepository remoteRepo,
                        @Nonnull TaskListener listener,
@@ -105,7 +100,7 @@ public class GitHubBranchHandler extends GitHubHandler {
             GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(branchName, source.getId());
             GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, commitSha, false, branchCause);
             try {
-                observer.observe(scmHead, scmRevision);
+                consumer.accept(scmHead, scmRevision);
                 triggeredBranches.add(scmHead.getName());
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace(listener.getLogger());
@@ -123,7 +118,7 @@ public class GitHubBranchHandler extends GitHubHandler {
                     try {
                         GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(value.getName(), source.getId());
                         GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getCommitSha(), true, null);
-                        observer.observe(scmHead, scmRevision);
+                        consumer.accept(scmHead, scmRevision);
                     } catch (IOException | InterruptedException e) {
                         // try as much as can
                         e.printStackTrace(listener.getLogger());

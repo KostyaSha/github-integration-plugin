@@ -121,6 +121,7 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
                         newGitHubPRDecisionContext()
                                 .withListener(listener)
                                 .withLocalPR(localPR)
+                                .withRemotePR(remotePR)
                                 .withPrTrigger(trigger)
                                 .withPrHandler(prHandler)
                                 .withSCMSource(source)

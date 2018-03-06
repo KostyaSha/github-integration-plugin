@@ -2,19 +2,15 @@ package com.github.kostyasha.github.integration.multibranch;
 
 import com.cloudbees.hudson.plugins.folder.computed.ComputedFolder;
 import com.cloudbees.jenkins.GitHubRepositoryName;
-import com.github.kostyasha.github.integration.generic.GitHubCause;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubSCMSourcesReposAction;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler;
-import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
-import com.github.kostyasha.github.integration.multibranch.repoprovider.GitHubPluginRepoProvider2;
 import com.github.kostyasha.github.integration.multibranch.repoprovider.GitHubRepoProvider2;
 import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
 import com.google.common.base.Throwables;
 import hudson.Extension;
 import hudson.model.Action;
 import hudson.model.CauseAction;
-import hudson.model.ReconfigurableDescribable;
 import hudson.model.TaskListener;
 import hudson.scm.NullSCM;
 import hudson.scm.SCM;
@@ -125,7 +121,7 @@ public class GitHubSCMSource extends SCMSource {
     }
 
     @Override
-    protected void retrieve(SCMSourceCriteria scmSourceCriteria, //useless
+    protected void retrieve(SCMSourceCriteria scmSourceCriteria,
                             @Nonnull SCMHeadObserver scmHeadObserver,
                             SCMHeadEvent<?> scmHeadEvent, // null for manual run
                             @Nonnull TaskListener taskListener) throws IOException, InterruptedException {
@@ -141,10 +137,12 @@ public class GitHubSCMSource extends SCMSource {
 
         // TODO actualise some repo for UI Action?
         localRepo.actualize(getRemoteRepo());
+        
+        SCMHeadConsumer consumer = new GithubSCMHeadConsumer(this, scmHeadObserver, scmSourceCriteria, taskListener);
 
         getHandlers().forEach(handler -> {
             try {
-                handler.handle(scmHeadObserver, scmHeadEvent, localRepo, getRemoteRepo(), taskListener, this);
+                handler.handle(consumer, localRepo, getRemoteRepo(), taskListener, this);
             } catch (IOException e) {
                 LOG.error("Can't process handler", e);
                 e.printStackTrace(llog);

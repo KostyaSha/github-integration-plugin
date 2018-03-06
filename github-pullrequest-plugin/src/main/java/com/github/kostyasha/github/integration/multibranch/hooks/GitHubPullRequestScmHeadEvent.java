@@ -2,7 +2,8 @@ package com.github.kostyasha.github.integration.multibranch.hooks;
 
 import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
-import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubPRSCMHead;
+
 import hudson.scm.SCM;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMHeadEvent;
@@ -54,7 +55,7 @@ public class GitHubPullRequestScmHeadEvent extends SCMHeadEvent<PullRequestInfo>
         if (sourceRepo.equals(getPayload().getRepo())) {
             HashMap<SCMHead, SCMRevision> heads = new HashMap<>(1);
             heads.put(
-                    new GitHubBranchSCMHead(Integer.toString(getPayload().getNum()), source.getId()),
+                    new GitHubPRSCMHead(Integer.toString(getPayload().getNum()), source.getId()),
                     null
             );
             return heads;

@@ -112,6 +112,27 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
         this.state = state;
     }
 
+    /**
+     * Copy constructor
+     */
+    public GitHubPRCause(GitHubPRCause orig) {
+        this(orig.getHeadSha(), orig.getNumber(), orig.isMergeable(),
+            orig.getTargetBranch(), orig.getSourceBranch(),
+            orig.getPRAuthorEmail(), orig.getTitle(),
+            orig.getHtmlUrl(), orig.getSourceRepoOwner(), orig.getLabels(), null,
+            orig.isSkip(), orig.getReason(), orig.getCommitAuthorName(), orig.getCommitAuthorEmail(), orig.getState());
+        withTriggerSenderName(orig.getTriggerSenderEmail());
+        withTriggerSenderEmail(orig.getTriggerSenderEmail());
+        withBody(orig.getBody());
+        withCommentBody(orig.getCommentBody());
+        withCommentBodyMatch(orig.getCommentBodyMatch());
+        withCommitAuthorName(orig.getCommitAuthorName());
+        withCommitAuthorEmail(orig.getCommitAuthorEmail());
+        withCondRef(orig.getCondRef());
+        withGitUrl(orig.getGitUrl());
+        withSshUrl(orig.getSshUrl());
+        withPollingLog(orig.getPollingLog());
+      }
 
     public static GitHubPRCause newGitHubPRCause() {
         return new GitHubPRCause();

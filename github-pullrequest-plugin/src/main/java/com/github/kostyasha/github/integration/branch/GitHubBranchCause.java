@@ -1,6 +1,7 @@
 package com.github.kostyasha.github.integration.branch;
 
 import com.github.kostyasha.github.integration.generic.GitHubCause;
+
 import hudson.model.Run;
 import org.kohsuke.github.GHBranch;
 import org.slf4j.Logger;
@@ -31,23 +32,39 @@ public class GitHubBranchCause extends GitHubCause<GitHubBranchCause> {
 
     public GitHubBranchCause(@Nonnull GitHubBranch localBranch, @Nonnull GitHubBranchRepository localRepo,
                              String reason, boolean skip) {
+        this(localBranch.getName(), localBranch.getCommitSha());
         withReason(reason);
         withSkip(skip);
         withLocalRepo(localRepo);
-        this.branchName = localBranch.getName();
-        this.commitSha = localBranch.getCommitSha();
-        this.fullRef = "refs/heads/" + branchName;
     }
 
     public GitHubBranchCause(@Nonnull GHBranch remoteBranch,
                              @Nonnull GitHubBranchRepository localRepo,
                              String reason, boolean skip) {
+        this(remoteBranch.getName(), remoteBranch.getSHA1());
         withReason(reason);
         withSkip(skip);
         withLocalRepo(localRepo);
-        this.branchName = remoteBranch.getName();
-        this.commitSha = remoteBranch.getSHA1();
+    }
+
+    public GitHubBranchCause(@Nonnull String branchName, String commitSha) {
+        this.branchName = branchName;
+        this.commitSha = commitSha;
         this.fullRef = "refs/heads/" + branchName;
+    }
+
+    /**
+     * Copy constructor
+     */
+    public GitHubBranchCause(GitHubBranchCause cause) {
+        this(cause.getBranchName(), cause.getCommitSha());
+        withGitUrl(cause.getGitUrl());
+        withSshUrl(cause.getSshUrl());
+        withHtmlUrl(cause.getHtmlUrl());
+        withPollingLog(cause.getPollingLog());
+        withReason(cause.getReason());
+        withSkip(cause.isSkip());
+        withTitle(cause.getTitle());
     }
 
     public String getBranchName() {

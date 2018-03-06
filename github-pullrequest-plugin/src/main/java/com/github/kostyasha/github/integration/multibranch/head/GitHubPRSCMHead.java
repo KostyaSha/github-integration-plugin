@@ -13,4 +13,9 @@ public class GitHubPRSCMHead extends GitHubSCMHead {
     public GitHubPRSCMHead(@Nonnull String name, String sourceId) {
         super(name, sourceId);
     }
+
+    @Override
+    public String getPronounPrefix() {
+        return "PR";
+    }
 }
