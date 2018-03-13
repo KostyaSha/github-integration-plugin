@@ -1,4 +1,6 @@
 package org.jenkinsci.plugins.github.pullrequest.webhook;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import hudson.Extension;
 import hudson.model.Job;
@@ -9,6 +11,7 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.jenkinsci.plugins.github.util.FluentIterableWrapper;
 import org.kohsuke.github.GHEvent;
+import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GHEventPayload.IssueComment;
 import org.kohsuke.github.GHEventPayload.PullRequest;
 import org.kohsuke.github.GHEventPayload.PullRequestReview;
@@ -57,9 +60,14 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
 
             PullRequestInfo info = extractPullRequestInfo(event, payload, gh);
 
+
             LOGGER.info("TEST GHPullRequestSubscriber.onEvent()  \n\n ");
 
             LOGGER.info("Payload: {} \n\n ", payload);
+            // ObjectMapper objectMapper = new ObjectMapper();
+            // JsonNode jsonNode = objectMapper.readTree(payload);
+            // String text = jsonNode.get("requested_reviewers").asText(); 
+
 
             for (Job job : getPRTriggerJobs(info.getRepo())) {
                 GitHubPRTrigger trigger = ghPRTriggerFromJob(job);
@@ -97,18 +105,30 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
         switch (event) {
             case ISSUE_COMMENT: {
                 IssueComment commentPayload = gh.parseEventPayload(new StringReader(payload), IssueComment.class);
-
                 int prNumber = commentPayload.getIssue().getNumber();
 
                 return new PullRequestInfo(commentPayload.getRepository().getFullName(), prNumber);
             }
 
             case PULL_REQUEST: {
+                LOGGER.warn("\nParsing the pull request\n");
                 PullRequest pr = gh.parseEventPayload(new StringReader(payload), PullRequest.class);
 
+                List<GHUser> u = pr.getPullRequest().getRequestedReviewers();
+
+                if(u.size() == 0){
+                    LOGGER.warn("\nNo requested reviewers\n");
+                }
+                for(int i = 0; i < u.size() ; i++){
+                    LOGGER.debug("Pull request event with 1st requested reviewer: {} ", u.get(i).getLogin());
+                }
                 return new PullRequestInfo(pr.getPullRequest().getRepository().getFullName(), pr.getNumber());
             }
 
+            case PULL_REQUEST_REVIEW: {
+                LOGGER.info("\n\n PullRequestReview received \n\n", payload);
+                
+            }
             default:
                 throw new IllegalStateException(format("Did you add event %s in events() method?", event));
         }
