@@ -16,6 +16,8 @@ import org.kohsuke.github.GHEventPayload.IssueComment;
 import org.kohsuke.github.GHEventPayload.PullRequest;
 import org.kohsuke.github.GHEventPayload.PullRequestReview;
 import org.kohsuke.github.GitHub;
+import org.jenkinsci.plugins.github.pullrequest.utils.PRApprovalState;
+import org.jenkinsci.plugins.github.pullrequest.utils.ReviewState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +26,8 @@ import java.io.StringReader;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.io.File;
+
 
 import static com.google.common.collect.Sets.immutableEnumSet;
 import static java.lang.String.format;
@@ -64,9 +68,11 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
             LOGGER.info("TEST GHPullRequestSubscriber.onEvent()  \n\n ");
 
             LOGGER.info("Payload: {} \n\n ", payload);
-            // ObjectMapper objectMapper = new ObjectMapper();
+            
             // JsonNode jsonNode = objectMapper.readTree(payload);
             // String text = jsonNode.get("requested_reviewers").asText(); 
+            //ObjectMapper objectMapper = new ObjectMapper();
+ 
 
 
             for (Job job : getPRTriggerJobs(info.getRepo())) {
@@ -119,9 +125,14 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                 if(u.size() == 0){
                     LOGGER.warn("\nNo requested reviewers\n");
                 }
+                PRApprovalState pras = new PRApprovalState();
                 for(int i = 0; i < u.size() ; i++){
                     LOGGER.warn("reviewer {}: {} ", i, u.get(i).getLogin());
+                    pras.addReviewState(new ReviewState(u.get(i)));
                 }
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.writeValue(new File("~/.jenkins/PR_TEST.json"),pras);
+              
                 return new PullRequestInfo(pr.getPullRequest().getRepository().getFullName(), pr.getNumber());
             }
 
