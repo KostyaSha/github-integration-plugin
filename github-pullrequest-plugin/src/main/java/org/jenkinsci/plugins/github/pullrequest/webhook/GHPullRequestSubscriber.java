@@ -120,14 +120,13 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                     LOGGER.warn("\nNo requested reviewers\n");
                 }
                 for(int i = 0; i < u.size() ; i++){
-                    LOGGER.debug("Pull request event with 1st requested reviewer: {} ", u.get(i).getLogin());
+                    LOGGER.warn("reviewer {}: {} ", i, u.get(i).getLogin());
                 }
                 return new PullRequestInfo(pr.getPullRequest().getRepository().getFullName(), pr.getNumber());
             }
 
             case PULL_REQUEST_REVIEW: {
                 LOGGER.info("\n\n PullRequestReview received \n\n", payload);
-                
             }
             default:
                 throw new IllegalStateException(format("Did you add event %s in events() method?", event));
