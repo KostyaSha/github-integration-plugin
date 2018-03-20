@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Set;
 import java.io.File;
 
@@ -54,7 +55,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
 
     @Override
     protected Set<GHEvent> events() {
-        return immutableEnumSet(GHEvent.PULL_REQUEST, GHEvent.ISSUE_COMMENT);
+        return immutableEnumSet(GHEvent.PULL_REQUEST, GHEvent.ISSUE_COMMENT, GHEvent.PULL_REQUEST_REVIEW,GHEvent.PULL_REQUEST_REVIEW_COMMENT);
     }
 
     @Override
@@ -63,17 +64,6 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
             GitHub gh = GitHub.connectAnonymously();
 
             PullRequestInfo info = extractPullRequestInfo(event, payload, gh);
-
-
-            LOGGER.info("TEST GHPullRequestSubscriber.onEvent()  \n\n ");
-
-            LOGGER.info("Payload: {} \n\n ", payload);
-            
-            // JsonNode jsonNode = objectMapper.readTree(payload);
-            // String text = jsonNode.get("requested_reviewers").asText(); 
-            //ObjectMapper objectMapper = new ObjectMapper();
- 
-
 
             for (Job job : getPRTriggerJobs(info.getRepo())) {
                 GitHubPRTrigger trigger = ghPRTriggerFromJob(job);
@@ -108,6 +98,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
     }
 
     private PullRequestInfo extractPullRequestInfo(GHEvent event, String payload, GitHub gh) throws IOException {
+        LOGGER.warn("extractPullRequestInfo(), even: " + event);
         switch (event) {
             case ISSUE_COMMENT: {
                 IssueComment commentPayload = gh.parseEventPayload(new StringReader(payload), IssueComment.class);
@@ -125,19 +116,47 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                 if(u.size() == 0){
                     LOGGER.warn("\nNo requested reviewers\n");
                 }
+                
                 PRApprovalState pras = new PRApprovalState();
+                List<ReviewState> rs = new ArrayList<ReviewState>();
                 for(int i = 0; i < u.size() ; i++){
                     LOGGER.warn("reviewer {}: {} ", i, u.get(i).getLogin());
-                    pras.addReviewState(new ReviewState(u.get(i)));
+                    rs.add(new ReviewState(u.get(i).getLogin()));
                 }
+                for(int i = 0; i < rs.size() ; i++){
+                    LOGGER.warn("Review state : reviewer {}: {} ", i, rs.get(i).getReviewer());
+                }
+                pras.setReviews_states(rs);
+                
                 ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.writeValue(new File("~/.jenkins/PR_TEST.json"),pras);
+                LOGGER.warn(objectMapper.writeValueAsString(rs));
+                LOGGER.warn(objectMapper.writeValueAsString(pras));
+                try{
+                    File fileName = new File("/home/nicola/pr_" + pr.getRepository().getName() + "_#" + String.valueOf(pr.getNumber()) + ".json");
+                    objectMapper.writeValue(fileName,pras);
+                }
+                catch(java.lang.NullPointerException e){
+                    LOGGER.warn("Exception writin the PRApprovalObject: " + e.getMessage());
+                }
               
                 return new PullRequestInfo(pr.getPullRequest().getRepository().getFullName(), pr.getNumber());
             }
 
             case PULL_REQUEST_REVIEW: {
-                LOGGER.info("\n\n PullRequestReview received \n\n", payload);
+                LOGGER.warn("\n\n PullRequestReview received \n\n");
+                PullRequestReview prr = gh.parseEventPayload(new StringReader(payload), PullRequestReview.class);
+
+                //Read the file 
+                //File fileName = new File("/home/nicola/pr_" + pr.getRepository().getName() + "_#" + String.valueOf(pr.getNumber()) + ".json");
+
+                // Let's suppose that the PR is approved. Let's trigger now a job.
+                
+                return new PullRequestInfo(prr.getPullRequest().getRepository().getFullName(), prr.getPullRequest().getNumber());
+            }
+            case PULL_REQUEST_REVIEW_COMMENT: {
+                PullRequestReview prr = gh.parseEventPayload(new StringReader(payload), PullRequestReview.class);
+                LOGGER.warn("\n\n PullRequestReviewComment received \n\n" + payload);
+                return new PullRequestInfo(prr.getPullRequest().getRepository().getFullName(), prr.getPullRequest().getNumber());
             }
             default:
                 throw new IllegalStateException(format("Did you add event %s in events() method?", event));
