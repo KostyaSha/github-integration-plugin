@@ -40,7 +40,7 @@ public class GitHubPRPullRequestReview {
     private String commitId;
     private String body;
     private GitHubPRPullRequest parent = null; // the PR it refers to
-    private GHPullRequestReviewState state;
+    private String state;
     private URL htmlUrl;
     private PagedIterable<GHPullRequestReviewComment> comments;
 
@@ -67,7 +67,7 @@ public class GitHubPRPullRequestReview {
         return parent;
     }
 
-    public GHPullRequestReviewState getState(){
+    public String getState(){
         return state;
     }
 

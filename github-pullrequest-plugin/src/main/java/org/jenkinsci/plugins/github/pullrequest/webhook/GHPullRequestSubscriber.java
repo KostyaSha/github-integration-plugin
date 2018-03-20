@@ -65,14 +65,18 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
 
             PullRequestInfo info = extractPullRequestInfo(event, payload, gh);
 
+            // For each hob that has the current repo, gets the trigger
+            // 
             for (Job job : getPRTriggerJobs(info.getRepo())) {
                 GitHubPRTrigger trigger = ghPRTriggerFromJob(job);
-                GitHubPRTriggerMode triggerMode = trigger.getTriggerMode();
-
+                GitHubPRTriggerMode triggerMode = trigger.getTriggerMode();               
+                
                 switch (triggerMode) {
                     case HEAVY_HOOKS_CRON:
                     case HEAVY_HOOKS: {
                         LOGGER.debug("Queued check for {} (PR #{}) after heavy hook", job.getName(), info.getNum());
+
+                        //Trigger the job
                         trigger.queueRun(job, info.getNum());
                         break;
                     }
@@ -123,16 +127,13 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                     LOGGER.warn("reviewer {}: {} ", i, u.get(i).getLogin());
                     rs.add(new ReviewState(u.get(i).getLogin()));
                 }
-                for(int i = 0; i < rs.size() ; i++){
-                    LOGGER.warn("Review state : reviewer {}: {} ", i, rs.get(i).getReviewer());
-                }
                 pras.setReviews_states(rs);
                 
                 ObjectMapper objectMapper = new ObjectMapper();
-                LOGGER.warn(objectMapper.writeValueAsString(rs));
-                LOGGER.warn(objectMapper.writeValueAsString(pras));
+                // LOGGER.warn(objectMapper.writeValueAsString(pras));
                 try{
-                    File fileName = new File("/home/nicola/pr_" + pr.getRepository().getName() + "_#" + String.valueOf(pr.getNumber()) + ".json");
+                    String home = System.getProperty("user.home");
+                    File fileName = new File(home + "/pr_" + pr.getRepository().getName() + "_#" + String.valueOf(pr.getNumber()) + ".json");
                     objectMapper.writeValue(fileName,pras);
                 }
                 catch(java.lang.NullPointerException e){
@@ -143,14 +144,30 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
             }
 
             case PULL_REQUEST_REVIEW: {
-                LOGGER.warn("\n\n PullRequestReview received \n\n");
+                LOGGER.warn("\n\n PullRequestReview received \n\n " + payload);
                 PullRequestReview prr = gh.parseEventPayload(new StringReader(payload), PullRequestReview.class);
 
                 //Read the file 
-                //File fileName = new File("/home/nicola/pr_" + pr.getRepository().getName() + "_#" + String.valueOf(pr.getNumber()) + ".json");
+                String home = System.getProperty("user.home");
+                File fileName = new File(home + "/pr_" + prr.getRepository().getName() + "_#" + String.valueOf(prr.getPullRequest().getNumber()) + ".json");
 
-                // Let's suppose that the PR is approved. Let's trigger now a job.
-                
+                // Update PR state 
+                // So far it just update the state of the current reviewer. 
+                ObjectMapper objectMapper = new ObjectMapper();
+                PRApprovalState pras = objectMapper.readValue(fileName,PRApprovalState.class);
+                List<ReviewState> reviewStates = pras.getReviews_states();
+
+                // Update the state of the current reviewer
+                for( int i = 0; i < reviewStates.size(); i++ ){
+                    if(reviewStates.get(i).getReviewer().equals(prr.getReview().getUser().getLogin()) ){
+                        reviewStates.get(i).setState(prr.getReview().getState());
+                    }
+                }
+                pras.setReviews_states(reviewStates);
+                LOGGER.warn(objectMapper.writeValueAsString(pras));
+                objectMapper.writeValue(fileName,pras);
+
+                // Here we have to return the name of the repo.
                 return new PullRequestInfo(prr.getPullRequest().getRepository().getFullName(), prr.getPullRequest().getNumber());
             }
             case PULL_REQUEST_REVIEW_COMMENT: {
@@ -163,6 +180,9 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
         }
     }
 
+    /*
+    * This method filters the jobs depending on the trigger
+    */
     static Set<Job> getPRTriggerJobs(final String repo) {
         final Set<Job> ret = new HashSet<>();
 
@@ -170,7 +190,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
             List<Job> jobs = Jenkins.getActiveInstance().getAllItems(Job.class);
             ret.addAll(FluentIterableWrapper.from(jobs)
                     .filter(isBuildable())
-                    .filter(withPRTrigger())
+                    .filter(withPRTrigger()) // Filters by trigger
                     .filter(withRepo(repo))
                     .toSet()
             );
