@@ -6,6 +6,7 @@ import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext;
+import com.github.kostyasha.github.integration.generic.GitHubCause;
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubBranchHandler;
 import hudson.model.TaskListener;
@@ -79,7 +80,7 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
     @Override
     public GitHubBranchCause apply(final GHBranch remoteBranch) {
         List<GitHubBranchCause> causes = getEvents().stream()
-                .map(event -> toCause(event, remoteBranch, source))
+                .map(event -> toCause(event, remoteBranch))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
@@ -91,34 +92,21 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
 
         LOGGER.debug("All matched events for branch [{}] : {}.", name, causes);
 
-        GitHubBranchCause cause = skipTrigger(causes);
+        GitHubBranchCause cause = GitHubCause.skipTrigger(causes);
         if (cause != null) {
+            LOGGER.debug("Cause [{}] indicated build should be skipped.", cause);
             listener.getLogger().println(String.format("Build of branch %s skipped: %s.", name, cause.getReason()));
             return null;
+        } else if (!causes.isEmpty()) {
+            // use the first cause from the list
+            cause = causes.get(0);
+            LOGGER.debug("Using build cause [{}] as trigger for branch [{}].", cause, name);
         }
-
-        // use the first cause from the list
-        cause = causes.get(0);
-        LOGGER.debug("Using build cause [{}] as trigger for branch [{}].", cause, name);
 
         return cause;
     }
 
-    private GitHubBranchCause skipTrigger(List<GitHubBranchCause> causes) {
-        GitHubBranchCause cause = causes.stream()
-                .filter(GitHubBranchCause::isSkip)
-                .findFirst()
-                .orElse(null);
-
-        if (cause == null) {
-            return null;
-        }
-
-        LOGGER.debug("Cause [{}] indicated build should be skipped.", cause);
-        return cause;
-    }
-
-    private GitHubBranchCause toCause(GitHubBranchEvent event, GHBranch remoteBranch, GitHubSCMSource source) {
+    private GitHubBranchCause toCause(GitHubBranchEvent event, GHBranch remoteBranch) {
         String branchName = remoteBranch.getName();
         GitHubBranch localBranch = localBranches.getBranches().get(branchName);
 

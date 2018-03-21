@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.apache.commons.lang.StringUtils.abbreviate;
@@ -131,5 +132,17 @@ public abstract class GitHubCause<T extends GitHubCause<T>> extends Cause {
      */
     public String getAbbreviatedTitle() {
         return abbreviate(getTitle(), 30);
+    }
+
+    public static <T extends GitHubCause<T>> T skipTrigger(List<? extends T> causes) {
+        if (causes == null) {
+            return null;
+        }
+        T cause = causes.stream()
+                .filter(GitHubCause::isSkip)
+                .findFirst()
+                .orElse(null);
+
+        return cause;
     }
 }

@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.github.pullrequest.trigger.check;
 
-import com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext;
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubPRHandler;
 import com.google.common.annotations.VisibleForTesting;
@@ -19,11 +18,11 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext.newGitHubPRDecisionContext;
-import static com.google.common.base.Predicates.notNull;
 import static java.util.Objects.nonNull;
-import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 
 /**
  * @author lanwen (Merkushev Kirill)
@@ -76,22 +75,24 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
     @CheckForNull
     @Override
     public GitHubPRCause apply(final GHPullRequest remotePR) {
-        final GitHubPRCause gitHubPRCause = from(getEvents())
-                .transform(toCause(remotePR))
-                .filter(notNull())
-                .first()
-                .orNull();
+        final List<GitHubPRCause> causes = getEvents().stream()
+                .map(e -> toCause(e, remotePR))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
-        if (gitHubPRCause == null || gitHubPRCause.isSkip()) {
+        GitHubPRCause cause = GitHubPRCause.skipTrigger(causes);
+
+        if (cause != null) {
+            LOGGER.debug("Cause [{}] indicated build should be skipped.", cause);
+            listener.getLogger().println(String.format("Build of pr %s skipped: %s.", remotePR.getNumber(), cause.getReason()));
             return null;
-        } else {
-            return gitHubPRCause;
+        } else if (!causes.isEmpty()) {
+            // use the first cause from the list
+            cause = causes.get(0);
+            LOGGER.debug("Using build cause [{}] as trigger for pr [{}].", cause, remotePR.getNumber());
         }
-    }
 
-    @VisibleForTesting
-    /* package */ EventToCauseConverter toCause(GHPullRequest remotePR) {
-        return new EventToCauseConverter(remotePR);
+        return cause;
     }
 
     public List<GitHubPREvent> getEvents() {
@@ -104,6 +105,32 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
         throw new IllegalArgumentException("Can't extract events");
     }
 
+    private GitHubPRCause toCause(GitHubPREvent event, GHPullRequest remotePR) {
+        //null if local not existed before
+        @CheckForNull GitHubPRPullRequest localPR = localRepo.getPulls().get(remotePR.getNumber());
+        try {
+            return event.check(
+                    newGitHubPRDecisionContext()
+                            .withListener(listener)
+                            .withLocalPR(localPR)
+                            .withRemotePR(remotePR)
+                            .withPrTrigger(trigger)
+                            .withPrHandler(prHandler)
+                            .withSCMSource(source)
+                            .build()
+            );
+        } catch (IOException e) {
+            LOGGER.warn("Can't check trigger event", e);
+            listener.error("Can't check trigger event, so skipping PR #{}. {}", remotePR.getNumber(), e);
+            return null;
+        }
+    }
+
+    @VisibleForTesting
+    /* package */ EventToCauseConverter toCause(GHPullRequest remotePR) {
+        return new EventToCauseConverter(remotePR);
+    }
+
     @VisibleForTesting
     /* package */ class EventToCauseConverter implements Function<GitHubPREvent, GitHubPRCause> {
         private final GHPullRequest remotePR;
@@ -114,24 +141,7 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
 
         @Override
         public GitHubPRCause apply(GitHubPREvent event) {
-            //null if local not existed before
-            @CheckForNull GitHubPRPullRequest localPR = localRepo.getPulls().get(remotePR.getNumber());
-            try {
-                return event.check(
-                        newGitHubPRDecisionContext()
-                                .withListener(listener)
-                                .withLocalPR(localPR)
-                                .withRemotePR(remotePR)
-                                .withPrTrigger(trigger)
-                                .withPrHandler(prHandler)
-                                .withSCMSource(source)
-                                .build()
-                );
-            } catch (IOException e) {
-                LOGGER.warn("Can't check trigger event", e);
-                listener.error("Can't check trigger event, so skipping PR #{}. {}", remotePR.getNumber(), e);
-                return null;
-            }
+           return toCause(event, remotePR);
         }
     }
 }

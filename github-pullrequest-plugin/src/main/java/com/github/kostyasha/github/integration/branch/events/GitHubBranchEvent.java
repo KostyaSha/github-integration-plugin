@@ -1,15 +1,11 @@
 package com.github.kostyasha.github.integration.branch.events;
 
-import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
-import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext;
-import com.github.kostyasha.github.integration.multibranch.handler.GitHubBranchHandler;
 import hudson.ExtensionPoint;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.TaskListener;
-import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHEventPayload;
 
 import javax.annotation.CheckForNull;
