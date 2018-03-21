@@ -68,6 +68,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
             // For each hob that has the current repo, gets the trigger
             // 
             for (Job job : getPRTriggerJobs(info.getRepo())) {
+                LOGGER.warn("Job name: " + job.getName());
                 GitHubPRTrigger trigger = ghPRTriggerFromJob(job);
                 GitHubPRTriggerMode triggerMode = trigger.getTriggerMode();               
                 
