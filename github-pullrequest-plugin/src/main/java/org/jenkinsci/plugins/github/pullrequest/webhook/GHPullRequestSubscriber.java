@@ -106,7 +106,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
 
     private PullRequestInfo extractPullRequestInfo(GHEvent event, String payload, GitHub gh) throws IOException {
         LOGGER.warn("extractPullRequestInfo(), even: " + event);
-        LOGGER.warn("payload\n" + payload);
+        //LOGGER.warn("payload\n" + payload);
         switch (event) {
             case ISSUE_COMMENT: {
                 IssueComment commentPayload = gh.parseEventPayload(new StringReader(payload), IssueComment.class);
@@ -123,14 +123,23 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                 if(!pr.getAction().equals("review_requested") && !pr.getAction().equals("review_requested_removed")){
                     File fileName = new File(System.getProperty("user.home") + "/pr_" + pr.getRepository().getName() + "_#" + String.valueOf(pr.getNumber()) + ".json");
                     if(fileName.exists()){
-                        ObjectMapper objectMapper = new ObjectMapper();
-                        PRApprovalState pras = objectMapper.readValue(fileName,PRApprovalState.class);
-                        pras.setAction(pr.getAction());
-                        objectMapper.writeValue(fileName,pras);
+                        if(pr.getAction().equals("closed")){
+                            if(fileName.delete()){
+                                LOGGER.info("PR is closed, file " + fileName.getName() + " deleted successfully");
+                            }
+                            else{
+                                LOGGER.warn("PR is closed, impossible deleting file " + fileName.getName());
+                            }
+                        }
+                        else{
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            PRApprovalState pras = objectMapper.readValue(fileName,PRApprovalState.class);
+                            pras.setAction(pr.getAction());
+                            objectMapper.writeValue(fileName,pras);
+                        }
                     }
                     return new PullRequestInfo(pr.getPullRequest().getRepository().getFullName(), pr.getNumber());
                 }
-
 
 
                 List<GHUser> u = pr.getPullRequest().getRequestedReviewers();
@@ -144,7 +153,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                 List<ReviewState> rs = new ArrayList<ReviewState>();
                 for(int i = 0; i < u.size() ; i++){
                     LOGGER.warn("reviewer {}: {} ", i, u.get(i).getLogin());
-                    rs.add(new ReviewState(u.get(i).getLogin()));
+                    rs.add(new ReviewState(u.get(i).getLogin(),u.get(i).getEmail()));
                 }
                 pras.setReviews_states(rs);
                 

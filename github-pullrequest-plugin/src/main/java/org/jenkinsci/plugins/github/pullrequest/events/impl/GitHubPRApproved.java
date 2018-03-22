@@ -43,7 +43,7 @@ public class GitHubPRApproved extends GitHubPREvent {
                                GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
 
         GitHubPRCause cause = null;
-        LOG.warn("Checking\n\n\n");
+        LOG.warn("Checking\n");
 
         // analyse the json file
         String home = System.getProperty("user.home");
@@ -75,9 +75,9 @@ public class GitHubPRApproved extends GitHubPREvent {
         }
         
         if (isNull(cause))
-            LOG.info("PR NOT approved\n\n\n");
+            LOG.info("PR NOT approved\n");
         else
-            LOG.info("PR approved\n\n\n");
+            LOG.info("PR approved\n");
 
         return cause;
     }
