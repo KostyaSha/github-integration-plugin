@@ -106,6 +106,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
 
     private PullRequestInfo extractPullRequestInfo(GHEvent event, String payload, GitHub gh) throws IOException {
         LOGGER.warn("extractPullRequestInfo(), even: " + event);
+        LOGGER.warn("payload\n" + payload);
         switch (event) {
             case ISSUE_COMMENT: {
                 IssueComment commentPayload = gh.parseEventPayload(new StringReader(payload), IssueComment.class);
@@ -144,7 +145,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                     LOGGER.warn("Exception writin the PRApprovalObject: " + e.getMessage());
                 }
                 catch(java.lang.InterruptedException e){
-                    LOGGER.warn("Exception writin the PRApprovalObject: " + e.getMessage());
+                    LOGGER.warn("Exception writin the PRApprovalObject: " + e.getMessage());    
                 }
               
                 return new PullRequestInfo(pr.getPullRequest().getRepository().getFullName(), pr.getNumber());
