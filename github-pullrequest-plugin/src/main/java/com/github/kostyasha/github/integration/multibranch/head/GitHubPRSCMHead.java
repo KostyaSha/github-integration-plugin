@@ -29,6 +29,6 @@ public class GitHubPRSCMHead extends GitHubSCMHead {
 
     @Override
     public String getPronounPrefix() {
-        return "PR";
+        return "PR#";
     }
 }

@@ -1,13 +1,13 @@
 package com.github.kostyasha.github.integration.multibranch;
 
-import com.cloudbees.hudson.plugins.folder.computed.ComputedFolder;
 import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.github.kostyasha.github.integration.generic.GitHubCause;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubBranchAction;
+import com.github.kostyasha.github.integration.multibranch.action.GitHubLinkAction;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubPRAction;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepoAction;
-import com.github.kostyasha.github.integration.multibranch.action.GitHubSCMSourcesReposAction;
+import com.github.kostyasha.github.integration.multibranch.action.GitHubSCMSourcesLocalStorage;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubSourceContext;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
@@ -15,6 +15,8 @@ import com.github.kostyasha.github.integration.multibranch.head.GitHubPRSCMHead;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
 import com.github.kostyasha.github.integration.multibranch.repoprovider.GitHubRepoProvider2;
 import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
+
+import hudson.BulkChange;
 import hudson.Extension;
 import hudson.model.Action;
 import hudson.model.CauseAction;
@@ -38,6 +40,7 @@ import jenkins.scm.api.SCMSourceCriteria;
 import jenkins.scm.api.SCMSourceDescriptor;
 import jenkins.scm.api.SCMSourceEvent;
 import jenkins.scm.api.SCMSourceOwner;
+import jenkins.scm.api.metadata.ObjectMetadataAction;
 import jenkins.scm.api.metadata.PrimaryInstanceMetadataAction;
 
 import org.kohsuke.github.GHRepository;
@@ -78,7 +81,7 @@ public class GitHubSCMSource extends SCMSource {
 
     private List<GitHubHandler> handlers = new ArrayList<>();
 
-    private transient GitHubSCMSourcesReposAction reposAction;
+    private transient volatile GitHubSCMSourcesLocalStorage localStorage;
 
     @DataBoundConstructor
     public GitHubSCMSource() {
@@ -120,19 +123,19 @@ public class GitHubSCMSource extends SCMSource {
     }
 
     public GitHubRepo getLocalRepo() {
-        return getReposAction().getOrCreate(this);
+        return getLocalStorage().getLocalRepo();
     }
 
-    protected synchronized GitHubSCMSourcesReposAction getReposAction(){
-        ComputedFolder owner = (ComputedFolder) getOwner();
-
-        // TransientActions are not persisted between getAllActions() calls.
-        if (isNull(reposAction)) {
-            // or stop asking job for Action and work directly with folder and action
-            reposAction = owner.getAction(GitHubSCMSourcesReposAction.class);
+    protected synchronized GitHubSCMSourcesLocalStorage getLocalStorage() {
+        if (isNull(localStorage)) {
+            localStorage = new GitHubSCMSourcesLocalStorage(getOwner(), getId());
+            try {
+                localStorage.load();
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
         }
-
-        return reposAction;
+        return localStorage;
     }
 
     @Override
@@ -140,25 +143,27 @@ public class GitHubSCMSource extends SCMSource {
                             @Nonnull SCMHeadObserver scmHeadObserver,
                             SCMHeadEvent<?> scmHeadEvent, // null for manual run
                             @Nonnull TaskListener taskListener) throws IOException, InterruptedException {
-        GitHubRepo localRepo = getLocalRepo();
 
-        // latch onto local repo state
-        synchronized (localRepo) {
+        try (BulkChange bc = new BulkChange(getLocalStorage())) {
+            GitHubRepo localRepo = getLocalRepo();
 
-            // TODO actualise some repo for UI Action?
-            localRepo.actualize(getRemoteRepo());
+            // latch onto local repo state
+            synchronized (localRepo) {
+                localRepo.actualize(getRemoteRepo());
 
-            GitHubSourceContext context = new GitHubSourceContext(this, scmHeadObserver, scmSourceCriteria, scmHeadEvent, localRepo, getRemoteRepo(), taskListener);
+                GitHubSourceContext context = new GitHubSourceContext(this, scmHeadObserver, scmSourceCriteria, scmHeadEvent, localRepo, getRemoteRepo(), taskListener);
 
-            getHandlers().forEach(handler -> {
-                try {
-                    handler.handle(context);
-                } catch (IOException e) {
-                    LOG.error("Can't process handler", e);
-                    e.printStackTrace(taskListener.getLogger());
-                }
-            });
+                getHandlers().forEach(handler -> {
+                    try {
+                        handler.handle(context);
+                    } catch (IOException e) {
+                        LOG.error("Can't process handler", e);
+                        e.printStackTrace(taskListener.getLogger());
+                    }
+                });
+            }
 
+            bc.commit();
         }
     }
 
@@ -252,27 +257,37 @@ public class GitHubSCMSource extends SCMSource {
 
     @Nonnull
     @Override
-    protected List<Action> retrieveActions(@Nonnull SCMHead head,
-                                           @CheckForNull SCMHeadEvent event,
-                                           @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    protected List<Action> retrieveActions(@Nonnull SCMHead head, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
 
         List<Action> actions = new ArrayList<>();
 
         GHRepository remoteRepo = getRemoteRepo();
 
+        boolean primary = false;
+        GitHubLinkAction link = null;
+        String desc = null;
+
         if (head instanceof GitHubBranchSCMHead) {
 
             // mark default branch item as primary
-            if (remoteRepo.getDefaultBranch().equals(head.getName())) {
-                actions.add(new PrimaryInstanceMetadataAction());
-            }
-            actions.add(new GitHubBranchAction(remoteRepo, head.getName()));
+            primary = remoteRepo.getDefaultBranch().equals(head.getName());
+            link = new GitHubBranchAction(remoteRepo, head.getName());
+            desc = null;
 
         } else if (head instanceof GitHubPRSCMHead) {
 
             GitHubPRSCMHead prh = (GitHubPRSCMHead) head;
-            actions.add(new GitHubPRAction(remoteRepo, prh.getPr()));
+            link = new GitHubPRAction(remoteRepo, prh.getPr());
+            desc = remoteRepo.getPullRequest(prh.getPr()).getTitle();
 
+        }
+
+        if (link != null) {
+            actions.add(link);
+        }
+        actions.add(new ObjectMetadataAction(null, desc, link == null ? null : link.getUrlName()));
+        if (primary) {
+            actions.add(new PrimaryInstanceMetadataAction());
         }
 
         return actions;
@@ -282,6 +297,7 @@ public class GitHubSCMSource extends SCMSource {
     @Override
     protected List<Action> retrieveActions(@CheckForNull SCMSourceEvent event,
                                            @Nonnull TaskListener listener) throws IOException, InterruptedException {
+
         return Collections.singletonList(new GitHubRepoAction(getRemoteRepo()));
     }
 

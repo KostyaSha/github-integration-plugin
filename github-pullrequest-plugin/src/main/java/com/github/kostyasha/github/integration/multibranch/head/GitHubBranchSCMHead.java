@@ -9,6 +9,6 @@ public class GitHubBranchSCMHead extends GitHubSCMHead {
 
     @Override
     public String getPronounPrefix() {
-        return "Branch";
+        return "Branch ";
     }
 }

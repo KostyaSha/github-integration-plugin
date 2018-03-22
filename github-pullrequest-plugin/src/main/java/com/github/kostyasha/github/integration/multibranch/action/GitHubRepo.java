@@ -1,10 +1,7 @@
 package com.github.kostyasha.github.integration.multibranch.action;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
-import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import hudson.model.Action;
-import hudson.model.Saveable;
-import jenkins.scm.api.SCMSourceOwner;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
@@ -25,12 +22,12 @@ import static java.util.Objects.isNull;
 public class GitHubRepo implements Action {
     private static final Logger LOG = LoggerFactory.getLogger(GitHubRepo.class);
 
-    private transient GitHubSCMSourcesReposAction owner;
+    private transient GitHubSCMSourcesLocalStorage owner;
 
     private GitHubBranchRepository branchRepository;
     private GitHubPRRepository prRepository;
 
-    public GitHubRepo(GitHubSCMSourcesReposAction owner) {
+    public GitHubRepo(GitHubSCMSourcesLocalStorage owner) {
         this.owner = owner;
     }
 
@@ -92,7 +89,7 @@ public class GitHubRepo implements Action {
 
     }
 
-    public void setOwner(GitHubSCMSourcesReposAction owner) {
+    public void setOwner(GitHubSCMSourcesLocalStorage owner) {
         this.owner = owner;
     }
 
