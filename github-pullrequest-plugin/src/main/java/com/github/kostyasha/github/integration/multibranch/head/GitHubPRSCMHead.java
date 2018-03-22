@@ -6,12 +6,25 @@ import javax.annotation.Nonnull;
 
 public class GitHubPRSCMHead extends GitHubSCMHead {
 
+    private final int pr;
+    private final String targetBranch;
+
     public GitHubPRSCMHead(@Nonnull GitHubPRCause prCause, String sourceId) {
-        super(Integer.toString(prCause.getNumber()), sourceId);
+        this(prCause.getNumber(), prCause.getTargetBranch(), sourceId);
     }
 
-    public GitHubPRSCMHead(@Nonnull String name, String sourceId) {
-        super(name, sourceId);
+    public GitHubPRSCMHead(@Nonnull Integer pr, @Nonnull String targetBranch, String sourceId) {
+        super(Integer.toString(pr), sourceId);
+        this.pr = pr;
+        this.targetBranch = targetBranch;
+    }
+
+    public int getPr() {
+        return pr;
+    }
+
+    public String getTargetBranch() {
+        return targetBranch;
     }
 
     @Override

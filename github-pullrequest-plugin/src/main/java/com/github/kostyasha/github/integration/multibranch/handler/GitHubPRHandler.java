@@ -167,7 +167,7 @@ public class GitHubPRHandler extends GitHubHandler {
                 .map(Map.Entry::getValue)
                 .forEach(value -> {
                     try {
-                        GitHubPRSCMHead scmHead = new GitHubPRSCMHead(Integer.toString(value.getNumber()), source.getId());
+                        GitHubPRSCMHead scmHead = new GitHubPRSCMHead(value.getNumber(), value.getBaseRef(), source.getId());
                         GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getHeadSha(), true, null);
                         context.getObserver().observe(scmHead, scmRevision);
                     } catch (IOException | InterruptedException e) {
@@ -214,7 +214,7 @@ public class GitHubPRHandler extends GitHubHandler {
     }
 
     private static boolean isInteresting(@Nonnull GHPullRequest pr, @Nonnull GitHubSourceContext context) throws IOException {
-        GitHubPRSCMHead head = new GitHubPRSCMHead(String.valueOf(pr.getNumber()), context.getSource().getId());
+        GitHubPRSCMHead head = new GitHubPRSCMHead(pr.getNumber(), pr.getBase().getRef(), context.getSource().getId());
         return context.checkCriteria(head, new GitHubSCMRevision(head, pr.getBase().getSha(), true, null));
     }
 

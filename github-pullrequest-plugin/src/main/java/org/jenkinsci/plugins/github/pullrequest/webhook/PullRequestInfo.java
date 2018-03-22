@@ -8,10 +8,16 @@ package org.jenkinsci.plugins.github.pullrequest.webhook;
 public class PullRequestInfo {
     private final String repo;
     private final int num;
+    private String target;
 
     public PullRequestInfo(String repo, int num) {
+        this(repo, num, null);
+    }
+
+    public PullRequestInfo(String repo, int num, String target) {
         this.repo = repo;
         this.num = num;
+        this.target = target;
     }
 
     public String getRepo() {
@@ -20,5 +26,9 @@ public class PullRequestInfo {
 
     public int getNum() {
         return num;
+    }
+
+    public String getTarget() {
+        return target;
     }
 }

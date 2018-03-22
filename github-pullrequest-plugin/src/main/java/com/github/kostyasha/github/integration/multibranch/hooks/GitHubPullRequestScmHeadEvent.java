@@ -55,7 +55,7 @@ public class GitHubPullRequestScmHeadEvent extends SCMHeadEvent<PullRequestInfo>
         if (sourceRepo.equals(getPayload().getRepo())) {
             HashMap<SCMHead, SCMRevision> heads = new HashMap<>(1);
             heads.put(
-                    new GitHubPRSCMHead(Integer.toString(getPayload().getNum()), source.getId()),
+                    new GitHubPRSCMHead(getPayload().getNum(), getPayload().getTarget(), source.getId()),
                     null
             );
             return heads;
