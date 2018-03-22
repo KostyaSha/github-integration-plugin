@@ -2,16 +2,14 @@ package com.github.kostyasha.github.integration.multibranch.action;
 
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import hudson.BulkChange;
-import hudson.Functions;
 import hudson.XmlFile;
-import hudson.model.Action;
+import hudson.model.InvisibleAction;
 import hudson.model.Saveable;
 import hudson.model.listeners.SaveableListener;
 import jenkins.branch.MultiBranchProject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Single Action for every MultiBranch
  */
-public class GitHubSCMSourcesReposAction implements Saveable, Action {
+public class GitHubSCMSourcesReposAction extends InvisibleAction implements Saveable {
     private static final Logger LOG = LoggerFactory.getLogger(GitHubSCMSourcesReposAction.class);
 
     public static final String FILE = "github-repositories.runtime.xml";
@@ -88,24 +86,6 @@ public class GitHubSCMSourcesReposAction implements Saveable, Action {
             getConfigFile().unmarshal(this);
         }
         repoStates.values().forEach(v -> v.setOwner(this));
-    }
-
-    @CheckForNull
-    @Override
-    public String getIconFileName() {
-        return Functions.getResourcePath() + "/plugin/github-pullrequest/git-pull-request.svg";
-    }
-
-    @CheckForNull
-    @Override
-    public String getDisplayName() {
-        return "GitHub Repos";
-    }
-
-    @CheckForNull
-    @Override
-    public String getUrlName() {
-        return "github-repos";
     }
 
 }

@@ -3,7 +3,10 @@ package com.github.kostyasha.github.integration.multibranch;
 import com.cloudbees.hudson.plugins.folder.computed.ComputedFolder;
 import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.github.kostyasha.github.integration.generic.GitHubCause;
+import com.github.kostyasha.github.integration.multibranch.action.GitHubBranchAction;
+import com.github.kostyasha.github.integration.multibranch.action.GitHubPRAction;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
+import com.github.kostyasha.github.integration.multibranch.action.GitHubRepoAction;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubSCMSourcesReposAction;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubSourceContext;
@@ -35,6 +38,7 @@ import jenkins.scm.api.SCMSourceCriteria;
 import jenkins.scm.api.SCMSourceDescriptor;
 import jenkins.scm.api.SCMSourceEvent;
 import jenkins.scm.api.SCMSourceOwner;
+import jenkins.scm.api.metadata.PrimaryInstanceMetadataAction;
 
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -251,15 +255,34 @@ public class GitHubSCMSource extends SCMSource {
     protected List<Action> retrieveActions(@Nonnull SCMHead head,
                                            @CheckForNull SCMHeadEvent event,
                                            @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        return Collections.emptyList();
+
+        List<Action> actions = new ArrayList<>();
+
+        GHRepository remoteRepo = getRemoteRepo();
+
+        if (head instanceof GitHubBranchSCMHead) {
+
+            // mark default branch item as primary
+            if (remoteRepo.getDefaultBranch().equals(head.getName())) {
+                actions.add(new PrimaryInstanceMetadataAction());
+            }
+            actions.add(new GitHubBranchAction(remoteRepo, head.getName()));
+
+        } else if (head instanceof GitHubPRSCMHead) {
+
+            GitHubPRSCMHead prh = (GitHubPRSCMHead) head;
+            actions.add(new GitHubPRAction(remoteRepo, prh.getPr()));
+
+        }
+
+        return actions;
     }
 
     @Nonnull
     @Override
     protected List<Action> retrieveActions(@CheckForNull SCMSourceEvent event,
                                            @Nonnull TaskListener listener) throws IOException, InterruptedException {
-//        return Collections.singletonList(getReposAction());
-        return super.retrieveActions(event, listener);
+        return Collections.singletonList(new GitHubRepoAction(getRemoteRepo()));
     }
 
     @Nonnull
