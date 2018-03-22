@@ -2,19 +2,28 @@ package com.github.kostyasha.github.integration.multibranch;
 
 import com.cloudbees.hudson.plugins.folder.computed.ComputedFolder;
 import com.cloudbees.jenkins.GitHubRepositoryName;
+import com.github.kostyasha.github.integration.generic.GitHubCause;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubSCMSourcesReposAction;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubSourceContext;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubPRSCMHead;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
 import com.github.kostyasha.github.integration.multibranch.repoprovider.GitHubRepoProvider2;
 import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
 import hudson.Extension;
 import hudson.model.Action;
 import hudson.model.CauseAction;
+import hudson.model.Item;
+import hudson.model.ItemGroup;
+import hudson.model.Job;
 import hudson.model.TaskListener;
+import hudson.model.listeners.ItemListener;
 import hudson.scm.NullSCM;
 import hudson.scm.SCM;
+import jenkins.branch.Branch;
+import jenkins.branch.MultiBranchProject;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMHeadCategory;
 import jenkins.scm.api.SCMHeadEvent;
@@ -26,6 +35,7 @@ import jenkins.scm.api.SCMSourceCriteria;
 import jenkins.scm.api.SCMSourceDescriptor;
 import jenkins.scm.api.SCMSourceEvent;
 import jenkins.scm.api.SCMSourceOwner;
+
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -41,6 +51,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static com.github.kostyasha.github.integration.multibranch.category.GitHubBranchSCMHeadCategory.BRANCH;
 import static com.github.kostyasha.github.integration.multibranch.category.GitHubPRSCMHeadCategory.PR;
@@ -104,7 +115,7 @@ public class GitHubSCMSource extends SCMSource {
         return this;
     }
 
-    protected GitHubRepo getLocalRepo() {
+    public GitHubRepo getLocalRepo() {
         return getReposAction().getOrCreate(this);
     }
 
@@ -227,7 +238,12 @@ public class GitHubSCMSource extends SCMSource {
                                            @Nonnull TaskListener listener) throws IOException, InterruptedException {
         GitHubSCMRevision gitHubSCMRevision = (GitHubSCMRevision) revision;
 
-        return Collections.singletonList(new CauseAction(gitHubSCMRevision.getCause()));
+        @SuppressWarnings("rawtypes")
+        GitHubCause cause = gitHubSCMRevision.getCause();
+        if (cause != null) {
+            return Collections.singletonList(new CauseAction(cause));
+        }
+        return Collections.emptyList();
     }
 
     @Nonnull
@@ -285,6 +301,54 @@ public class GitHubSCMSource extends SCMSource {
         @Override
         public String getDisplayName() {
             return "GitHub source";
+        }
+    }
+
+    /**
+     * Clean up local repo cache when items get deleted
+     */
+    @Extension
+    public static class LocalRepoPlunger extends ItemListener {
+        @Override
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        public void onDeleted(Item item) {
+
+            if (!(item instanceof Job)) {
+                return;
+            }
+
+            ItemGroup<? extends Item> parent = item.getParent();
+            if (!(parent instanceof MultiBranchProject)) {
+                return;
+            }
+
+            Job j = (Job) item;
+            MultiBranchProject mb = (MultiBranchProject) parent;
+            Branch branch = mb.getProjectFactory().getBranch(j);
+            SCMHead head = branch.getHead();
+
+            Consumer<GitHubRepo> plunger = null;
+            if (head instanceof GitHubBranchSCMHead) {
+
+                plunger = r -> r.getBranchRepository().getBranches().remove(head.getName());
+
+            } else if (head instanceof GitHubPRSCMHead) {
+
+                GitHubPRSCMHead prHead = (GitHubPRSCMHead) head;
+                plunger = r -> r.getPrRepository().getPulls().remove(prHead.getPr());
+
+            }
+
+            if(plunger != null) {
+                for (SCMSource src : (List<SCMSource>) mb.getSCMSources()) {
+                    if (src instanceof GitHubSCMSource) {
+                        GitHubSCMSource gsrc = (GitHubSCMSource) src;
+                        plunger.accept(gsrc.getLocalRepo());
+                        LOG.info("Plunging local data for {}", item.getFullName());
+                    }
+                }
+            }
+
         }
     }
 }

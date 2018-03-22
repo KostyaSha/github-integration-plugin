@@ -45,12 +45,8 @@ import com.github.kostyasha.github.integration.multibranch.hooks.GitHubPullReque
 import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
 
 import hudson.Extension;
-import hudson.model.Job;
 import hudson.model.TaskListener;
-import jenkins.branch.BranchProjectFactory;
-import jenkins.branch.MultiBranchProject;
 import jenkins.scm.api.SCMHeadEvent;
-import jenkins.scm.api.SCMSourceOwner;
 
 /**
  * @author Kanstantsin Shautsou
@@ -117,7 +113,7 @@ public class GitHubPRHandler extends GitHubHandler {
 
         Set<GHPullRequest> prepared = from(remotePulls)
                 .filter(badState(prRepository, listener))
-                //.filter(notUpdated(prRepository, listener))
+                .filter(notUpdated(prRepository, listener))
                 .toSet();
 
         List<GitHubPRCause> causes = from(prepared)
@@ -219,7 +215,7 @@ public class GitHubPRHandler extends GitHubHandler {
 
     private static boolean isInteresting(@Nonnull GHPullRequest pr, @Nonnull GitHubSourceContext context) throws IOException {
         GitHubPRSCMHead head = new GitHubPRSCMHead(pr.getNumber(), pr.getBase().getRef(), context.getSource().getId());
-        GitHubSCMRevision revision = new GitHubSCMRevision(head, pr.getBase().getSha(), null);
+        GitHubSCMRevision revision = new GitHubSCMRevision(head, pr.getHead().getSha(), null);
         return context.checkCriteria(head, revision);
     }
 

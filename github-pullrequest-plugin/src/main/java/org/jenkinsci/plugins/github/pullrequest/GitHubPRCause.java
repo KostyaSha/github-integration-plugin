@@ -60,7 +60,7 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
     public GitHubPRCause(GitHubPRPullRequest pr,
                          GHUser triggerSender,
                          boolean skip,
-                         String reason) throws IOException {
+                         String reason) {
         this(pr.getHeadSha(), pr.getNumber(),
                 pr.isMergeable(), pr.getBaseRef(), pr.getHeadRef(),
                 pr.getUserEmail(), pr.getTitle(), pr.getHtmlUrl(), pr.getSourceRepoOwner(),
