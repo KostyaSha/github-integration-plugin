@@ -78,7 +78,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                     case HEAVY_HOOKS_CRON:
                     case HEAVY_HOOKS: {
                         LOGGER.debug("Queued check for {} (PR #{}) after heavy hook", job.getName(), info.getNum());
-
+                        LOGGER.warn("Heavy hooks");
                         //Trigger the job
                         trigger.queueRun(job, info.getNum());
                         break;
@@ -119,6 +119,20 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                 LOGGER.warn("\nParsing the pull request\n");
                 PullRequest pr = gh.parseEventPayload(new StringReader(payload), PullRequest.class);
 
+                // If the number of reviews changed we update the PR approval state  
+                if(!pr.getAction().equals("review_requested") && !pr.getAction().equals("review_requested_removed")){
+                    File fileName = new File(System.getProperty("user.home") + "/pr_" + pr.getRepository().getName() + "_#" + String.valueOf(pr.getNumber()) + ".json");
+                    if(fileName.exists()){
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        PRApprovalState pras = objectMapper.readValue(fileName,PRApprovalState.class);
+                        pras.setAction(pr.getAction());
+                        objectMapper.writeValue(fileName,pras);
+                    }
+                    return new PullRequestInfo(pr.getPullRequest().getRepository().getFullName(), pr.getNumber());
+                }
+
+
+
                 List<GHUser> u = pr.getPullRequest().getRequestedReviewers();
 
                 if(u.size() == 0){
@@ -126,6 +140,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                 }
                 
                 PRApprovalState pras = new PRApprovalState();
+                pras.setAction(pr.getAction());
                 List<ReviewState> rs = new ArrayList<ReviewState>();
                 for(int i = 0; i < u.size() ; i++){
                     LOGGER.warn("reviewer {}: {} ", i, u.get(i).getLogin());
@@ -165,6 +180,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                 List<ReviewState> reviewStates = pras.getReviews_states();
 
                 // Update the state of the current reviewer
+                pras.setAction("reviewed");
                 for( int i = 0; i < reviewStates.size(); i++ ){
                     if(reviewStates.get(i).getReviewer().equals(prr.getReview().getUser().getLogin()) ){
                         reviewStates.get(i).setState(prr.getReview().getState());

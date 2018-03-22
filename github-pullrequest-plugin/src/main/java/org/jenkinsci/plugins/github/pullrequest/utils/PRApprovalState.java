@@ -9,10 +9,16 @@ import java.util.ArrayList;
  * @author Nicola Covallero
  */
 public class PRApprovalState {
+    private String action;// this variable includes some info regarding the reason of the last change to the PR.
     private List<ReviewState> reviews_states;
+    
     
     public PRApprovalState() {
         this.reviews_states = new ArrayList<ReviewState>();
+    }
+
+    public void setAction(String action){
+        this.action = action;
     }
 
     public void setReviews_states (List<ReviewState> reviews_states){
@@ -21,6 +27,10 @@ public class PRApprovalState {
 
     public List<ReviewState> getReviews_states(){
         return this.reviews_states;
+    }
+
+    public String getAction(){
+        return this.action;
     }
 
     public void addReviewState(ReviewState review){

@@ -43,10 +43,14 @@ public class GitHubPRApproved extends GitHubPREvent {
                                GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
 
         GitHubPRCause cause = null;
+        LOG.warn("Checking\n\n\n");
 
         // analyse the json file
         String home = System.getProperty("user.home");
         File fileName = new File(home + "/pr_" + remotePR.getRepository().getName() + "_#" + String.valueOf(remotePR.getNumber()) + ".json");
+        if(!fileName.exists()){
+            return cause;
+        }
 
         // check json file
         boolean approved = true;
@@ -67,7 +71,7 @@ public class GitHubPRApproved extends GitHubPREvent {
         if (approved){
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": state has changed (PR was approved)");
-            cause = new GitHubPRCause(remotePR, "PR was approved", false);
+            cause = new GitHubPRCause(remotePR, "PR was approved, triggered because: " + pras.getAction() + " commit hash: " + remotePR.getHead().getSha(), false); 
         }
         
         if (isNull(cause))
