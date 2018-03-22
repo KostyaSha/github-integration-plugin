@@ -48,7 +48,7 @@ public class GHPRMultiBranchSubscriber extends AbstractGHPullRequestSubsriber {
     @Override
     protected void onEvent(GHSubscriberEvent event) {
         try {
-            GitHub gh = GitHub.connectAnonymously();
+            GitHub gh = GitHub.offline();
 
             PullRequestInfo ref = extractPullRequestInfo(event.getGHEvent(), event.getPayload(), gh);
             SCMHeadEvent.fireNow(new GitHubPullRequestScmHeadEvent(

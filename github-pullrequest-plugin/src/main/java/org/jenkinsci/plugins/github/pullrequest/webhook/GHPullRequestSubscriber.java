@@ -49,7 +49,7 @@ public class GHPullRequestSubscriber extends AbstractGHPullRequestSubsriber {
     @Override
     protected void onEvent(GHSubscriberEvent event) {
         try {
-            GitHub gh = GitHub.connectAnonymously();
+            GitHub gh = GitHub.offline();
 
             PullRequestInfo info = extractPullRequestInfo(event.getGHEvent(), event.getPayload(), gh);
 
