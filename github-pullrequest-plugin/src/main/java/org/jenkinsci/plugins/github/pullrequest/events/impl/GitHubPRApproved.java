@@ -41,57 +41,39 @@ public class GitHubPRApproved extends GitHubPREvent {
     @Override
     public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
                                GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
-        // if (isNull(localPR)) {
-        //     return null;
-        // }
-
-        //LOG.warn("Running check\n\n\n");
-        //GitHubPRCause cause = null;
-
-        // // analyse the json file
-        // String home = System.getProperty("user.home");
-        // File fileName = new File(home + "/pr_" + remotePR.getRepository().getName() + "_#" + String.valueOf(remotePR.getNumber()) + ".json");
-
-        // LOG.warn("Analyse json\n\n\n");
-        // // check json file
-        // boolean approved = true;
-        // ObjectMapper objectMapper = new ObjectMapper();
-        // PRApprovalState pras = objectMapper.readValue(fileName,PRApprovalState.class);
-        // for( ReviewState r : pras.getReviews_states() ){
-        //     if(!r.getState().equals("approved")){
-        //         approved = false;
-        //         break;
-        //     }
-        // }
-        // // If there are no reviewers we consider the PR as not accepted
-        // if(pras.getReviews_states().size() == 0)
-        //     approved = false;
-        // LOG.warn("Finished analysing json\n\n\n");
-
-        // // If approved
-        // if (approved){
-        //     final PrintStream logger = listener.getLogger();
-        //     logger.println(DISPLAY_NAME + ": state has changed (PR was approved)");
-        //     cause = new GitHubPRCause(remotePR, "PR was approved", false);
-        //     LOG.warn("Approved\n\n\n");    
-        // }
-        
-        // if (isNull(cause))
-        //     LOG.warn("PR NOT approved\n\n\n");
-        // else
-        //     LOG.warn("PR approved\n\n\n");
-        if (isNull(localPR)) {
-            return null;
-        }
 
         GitHubPRCause cause = null;
 
-        // must be closed once
-        if (remotePR.getState().equals(GHIssueState.CLOSED)) {
-            final PrintStream logger = listener.getLogger();
-            logger.println(DISPLAY_NAME + ": state has changed (PR was closed)");
-            cause = new GitHubPRCause(remotePR, "PR was closed", false);
+        // analyse the json file
+        String home = System.getProperty("user.home");
+        File fileName = new File(home + "/pr_" + remotePR.getRepository().getName() + "_#" + String.valueOf(remotePR.getNumber()) + ".json");
+
+        // check json file
+        boolean approved = true;
+        ObjectMapper objectMapper = new ObjectMapper();
+        PRApprovalState pras = objectMapper.readValue(fileName,PRApprovalState.class);
+        for( ReviewState r : pras.getReviews_states() ){
+            if(!r.getState().equals("approved")){
+                approved = false;
+                break;
+            }
         }
+
+        // If there are no reviewers we consider the PR as not accepted
+        if(pras.getReviews_states().size() == 0)
+            approved = false;
+
+        // If approved
+        if (approved){
+            final PrintStream logger = listener.getLogger();
+            logger.println(DISPLAY_NAME + ": state has changed (PR was approved)");
+            cause = new GitHubPRCause(remotePR, "PR was approved", false);
+        }
+        
+        if (isNull(cause))
+            LOG.info("PR NOT approved\n\n\n");
+        else
+            LOG.info("PR approved\n\n\n");
 
         return cause;
     }

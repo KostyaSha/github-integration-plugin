@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 
 import static com.google.common.collect.Sets.immutableEnumSet;
@@ -55,6 +56,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
 
     @Override
     protected Set<GHEvent> events() {
+        // TODO add push event
         return immutableEnumSet(GHEvent.PULL_REQUEST, GHEvent.ISSUE_COMMENT, GHEvent.PULL_REQUEST_REVIEW,GHEvent.PULL_REQUEST_REVIEW_COMMENT);
     }
 
@@ -136,8 +138,12 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                     String home = System.getProperty("user.home");
                     File fileName = new File(home + "/pr_" + pr.getRepository().getName() + "_#" + String.valueOf(pr.getNumber()) + ".json");
                     objectMapper.writeValue(fileName,pras);
+                    TimeUnit.SECONDS.sleep(2);//wait 2 seconds to give time to fully write the .json
                 }
                 catch(java.lang.NullPointerException e){
+                    LOGGER.warn("Exception writin the PRApprovalObject: " + e.getMessage());
+                }
+                catch(java.lang.InterruptedException e){
                     LOGGER.warn("Exception writin the PRApprovalObject: " + e.getMessage());
                 }
               
@@ -145,7 +151,6 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
             }
 
             case PULL_REQUEST_REVIEW: {
-                LOGGER.warn("\n\n PullRequestReview received \n\n " + payload);
                 PullRequestReview prr = gh.parseEventPayload(new StringReader(payload), PullRequestReview.class);
 
                 //Read the file 
