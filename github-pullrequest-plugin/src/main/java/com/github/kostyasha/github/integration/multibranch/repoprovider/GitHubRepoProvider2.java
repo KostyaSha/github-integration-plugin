@@ -1,6 +1,5 @@
 package com.github.kostyasha.github.integration.multibranch.repoprovider;
 
-import com.github.kostyasha.github.integration.generic.GitHubRepoProvider;
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import hudson.DescriptorExtensionList;
 import hudson.ExtensionPoint;

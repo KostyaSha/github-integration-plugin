@@ -27,6 +27,7 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.trigger.check.PullRequestToCauseConverter;
+import org.jenkinsci.plugins.github.pullrequest.webhook.PullRequestInfo;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRateLimit;
@@ -38,13 +39,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
-import com.github.kostyasha.github.integration.multibranch.SCMHeadConsumer;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubPRSCMHead;
+import com.github.kostyasha.github.integration.multibranch.hooks.GitHubPullRequestScmHeadEvent;
 import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
 
 import hudson.Extension;
 import hudson.model.TaskListener;
+import jenkins.scm.api.SCMHeadEvent;
 
 /**
  * @author Kanstantsin Shautsou
@@ -75,20 +77,33 @@ public class GitHubPRHandler extends GitHubHandler {
     }
 
     @Override
-    public void handle(@Nonnull SCMHeadConsumer consumer,
-                       @Nonnull GitHubRepo localPRs,
-                       @Nonnull GHRepository remoteRepo,
-                       @Nonnull TaskListener listener,
-                       @Nonnull GitHubSCMSource source) throws IOException {
-        GitHub github = source.getRepoProvider().getGitHub(source);
+    public void handle(@Nonnull GitHubSourceContext context) throws IOException {
+
+        Integer prNumber;
+
+        SCMHeadEvent<?> scmHeadEvent = context.getScmHeadEvent();
+        if (scmHeadEvent instanceof GitHubPullRequestScmHeadEvent) {
+            PullRequestInfo info = (PullRequestInfo) scmHeadEvent.getPayload();
+            prNumber = info.getNum();
+        } else if (scmHeadEvent != null) {
+            // not our event, skip completely
+            return;
+        } else {
+            prNumber = null;
+        }
+
+        GitHubSCMSource source = context.getSource();
+        GitHubRepo localRepo = context.getLocalRepo();
+        GitHubPRRepository prRepository = localRepo.getPrRepository();
+        GitHub github = context.getGitHub();
+        TaskListener listener = context.getListener();
 
         GHRateLimit rateLimitBefore = github.getRateLimit();
         listener.getLogger().println("GitHub rate limit before check: " + rateLimitBefore);
 
-        GitHubPRRepository prRepository = localPRs.getPrRepository();
-
+        
         // get local and remote list of PRs
-        Set<GHPullRequest> remotePulls = pullRequestsToCheck(null, remoteRepo, prRepository);
+        Set<GHPullRequest> remotePulls = pullRequestsToCheck(prNumber, context);
 
         Set<GHPullRequest> prepared = from(remotePulls)
                 .filter(badState(prRepository, listener))
@@ -109,6 +124,11 @@ public class GitHubPRHandler extends GitHubHandler {
         LOG.trace("Causes count for {}: {}", prRepository.getFullName(), causes.size());
 
         // refresh all PRs because user may add events that may trigger unexpected builds.
+        if (prNumber != null) {
+            prRepository.getPulls().remove(prNumber);
+        } else {
+            prRepository.getPulls().clear();
+        }
         from(remotePulls).transform(updateLocalRepo(prRepository)).toSet();
 
 //            saveIfSkipFirstRun();
@@ -116,32 +136,33 @@ public class GitHubPRHandler extends GitHubHandler {
         GHRateLimit rateLimitAfter = github.getRateLimit();
         int consumed = rateLimitBefore.remaining - rateLimitAfter.remaining;
         LOG.info("GitHub rate limit after check {}: {}, consumed: {}, checked PRs: {}",
-                localPRs.getUrlName(), rateLimitAfter, consumed, remotePulls.size());
+                localRepo.getUrlName(), rateLimitAfter, consumed, remotePulls.size());
 
-        HashSet<String> causedPRs = new HashSet<>();
+        HashSet<Integer> causedPRs = new HashSet<>();
 
         causes.forEach(prCause -> {
             GitHubPRSCMHead scmHead = new GitHubPRSCMHead(prCause, source.getId());
             GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, prCause.getHeadSha(), false, prCause);
             try {
-                consumer.accept(scmHead, scmRevision);
-                causedPRs.add(scmHead.getName());
+                context.getObserver().observe(scmHead, scmRevision);
+                causedPRs.add(prCause.getNumber());
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace(listener.getLogger());
             }
         });
 
-        // don't think that items without cause are orphaned,
-        // make com.cloudbees.hudson.plugins.folder.computed.ChildObserver.shouldUpdate() happy
-        // or don't hide childObserver
+        // notify untriggered items that we're still interested in them
         prRepository.getPulls().entrySet().stream()
-                .filter(it -> !causedPRs.contains(it.getKey().toString()))
+                // only handle the requested pr if present
+                .filter(it -> prNumber == null || prNumber.equals(it.getKey()))
+                // and only if it wasn't triggered
+                .filter(it -> !causedPRs.contains(it.getKey()))
                 .map(Map.Entry::getValue)
                 .forEach(value -> {
                     try {
                         GitHubPRSCMHead scmHead = new GitHubPRSCMHead(Integer.toString(value.getNumber()), source.getId());
                         GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getHeadSha(), true, null);
-                        consumer.accept(scmHead, scmRevision);
+                        context.getObserver().observe(scmHead, scmRevision);
                     } catch (IOException | InterruptedException e) {
                         // try as much as can
                         e.printStackTrace(listener.getLogger());
@@ -152,9 +173,11 @@ public class GitHubPRHandler extends GitHubHandler {
     /**
      * @return remote pull requests for future analysing.
      */
-    private static Set<GHPullRequest> pullRequestsToCheck(@Nullable Integer prNumber,
-                                                          @Nonnull GHRepository remoteRepo,
-                                                          @Nonnull GitHubPRRepository localPRRepo) throws IOException {
+    private static Set<GHPullRequest> pullRequestsToCheck(@Nullable Integer prNumber, @Nonnull GitHubSourceContext context) throws IOException {
+        return filterOutUninteresting(fetchRemotePRs(prNumber, context.getLocalRepo(), context.getRemoteRepo()), context);
+    }
+
+    private static Set<GHPullRequest> fetchRemotePRs(@Nullable Integer prNumber, GitHubRepo localRepo, GHRepository remoteRepo) throws IOException {
         if (prNumber != null) {
             return execute(() -> singleton(remoteRepo.getPullRequest(prNumber)));
         } else {
@@ -162,14 +185,29 @@ public class GitHubPRHandler extends GitHubHandler {
 
             Set<Integer> remotePRNums = from(remotePulls).transform(extractPRNumber()).toSet();
 
-            return from(localPRRepo.getPulls().keySet())
-                    // add PRs that was closed on remote
+            return from(localRepo.getPrRepository().getPulls().keySet())
+                    // add PRs that were closed on remote
                     .filter(not(in(remotePRNums)))
                     .transform(fetchRemotePR(remoteRepo))
                     .filter(notNull())
                     .append(remotePulls)
                     .toSet();
         }
+    }
+
+    private static Set<GHPullRequest> filterOutUninteresting(Set<GHPullRequest> prs, @Nonnull GitHubSourceContext context) throws IOException {
+        Set<GHPullRequest> newPrs = new HashSet<>();
+        for (GHPullRequest pr : prs) {
+            if (isInteresting(pr, context)) {
+                newPrs.add(pr);
+            }
+        }
+        return newPrs;
+    }
+
+    private static boolean isInteresting(@Nonnull GHPullRequest pr, @Nonnull GitHubSourceContext context) throws IOException {
+        GitHubPRSCMHead head = new GitHubPRSCMHead(String.valueOf(pr.getNumber()), context.getSource().getId());
+        return context.checkCriteria(head, new GitHubSCMRevision(head, pr.getBase().getSha(), true, null));
     }
 
     @Extension

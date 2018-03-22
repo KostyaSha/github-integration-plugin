@@ -5,6 +5,7 @@ import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubSCMSourcesReposAction;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler;
+import com.github.kostyasha.github.integration.multibranch.handler.GitHubSourceContext;
 import com.github.kostyasha.github.integration.multibranch.repoprovider.GitHubRepoProvider2;
 import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
 import com.google.common.base.Throwables;
@@ -138,11 +139,11 @@ public class GitHubSCMSource extends SCMSource {
         // TODO actualise some repo for UI Action?
         localRepo.actualize(getRemoteRepo());
         
-        SCMHeadConsumer consumer = new GithubSCMHeadConsumer(this, scmHeadObserver, scmSourceCriteria, taskListener);
+        GitHubSourceContext context = new GitHubSourceContext(this, scmHeadObserver, scmSourceCriteria, scmHeadEvent, localRepo, getRemoteRepo(), taskListener);
 
         getHandlers().forEach(handler -> {
             try {
-                handler.handle(consumer, localRepo, getRemoteRepo(), taskListener, this);
+                handler.handle(context);
             } catch (IOException e) {
                 LOG.error("Can't process handler", e);
                 e.printStackTrace(llog);
