@@ -122,8 +122,9 @@ public class GitHubBranchHandler extends GitHubHandler {
         causes.forEach(branchCause -> {
             String commitSha = branchCause.getCommitSha();
             GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(branchCause.getBranchName(), source.getId());
-            GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, commitSha, false, branchCause);
+            GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, commitSha, branchCause);
             try {
+                context.forceNextBuild(scmRevision);
                 context.getObserver().observe(scmHead, scmRevision);
                 triggeredBranches.add(scmHead.getName());
             } catch (IOException | InterruptedException e) {
@@ -141,7 +142,7 @@ public class GitHubBranchHandler extends GitHubHandler {
                 .forEach(value -> {
                     try {
                         GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(value.getName(), source.getId());
-                        GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getCommitSha(), true, null);
+                        GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getCommitSha(), null);
                         context.getObserver().observe(scmHead, scmRevision);
                     } catch (IOException | InterruptedException e) {
                         // try as much as can
@@ -186,7 +187,8 @@ public class GitHubBranchHandler extends GitHubHandler {
 
     private static boolean isInteresting(@Nonnull GHBranch ghBranch, @Nonnull GitHubSourceContext context) throws IOException {
         GitHubBranchSCMHead head = new GitHubBranchSCMHead(ghBranch.getName(), context.getSource().getId());
-        return context.checkCriteria(head, new GitHubSCMRevision(head, ghBranch.getSHA1(), true, null));
+        GitHubSCMRevision revision = new GitHubSCMRevision(head, ghBranch.getSHA1(), null);
+        return context.checkCriteria(head, revision);
     }
 
     private List<GitHubBranchCause> checkBranches(Set<GHBranch> remoteBranches,

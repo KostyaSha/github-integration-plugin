@@ -45,8 +45,12 @@ import com.github.kostyasha.github.integration.multibranch.hooks.GitHubPullReque
 import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
 
 import hudson.Extension;
+import hudson.model.Job;
 import hudson.model.TaskListener;
+import jenkins.branch.BranchProjectFactory;
+import jenkins.branch.MultiBranchProject;
 import jenkins.scm.api.SCMHeadEvent;
+import jenkins.scm.api.SCMSourceOwner;
 
 /**
  * @author Kanstantsin Shautsou
@@ -91,7 +95,6 @@ public class GitHubPRHandler extends GitHubHandler {
         } else {
             prNumber = null;
         }
-        
 
         GitHubSCMSource source = context.getSource();
         GitHubRepo localRepo = context.getLocalRepo();
@@ -114,7 +117,7 @@ public class GitHubPRHandler extends GitHubHandler {
 
         Set<GHPullRequest> prepared = from(remotePulls)
                 .filter(badState(prRepository, listener))
-                .filter(notUpdated(prRepository, listener))
+                //.filter(notUpdated(prRepository, listener))
                 .toSet();
 
         List<GitHubPRCause> causes = from(prepared)
@@ -149,8 +152,9 @@ public class GitHubPRHandler extends GitHubHandler {
 
         causes.forEach(prCause -> {
             GitHubPRSCMHead scmHead = new GitHubPRSCMHead(prCause, source.getId());
-            GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, prCause.getHeadSha(), false, prCause);
+            GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, prCause.getHeadSha(), prCause);
             try {
+                context.forceNextBuild(scmRevision);
                 context.getObserver().observe(scmHead, scmRevision);
                 causedPRs.add(prCause.getNumber());
             } catch (IOException | InterruptedException e) {
@@ -168,7 +172,7 @@ public class GitHubPRHandler extends GitHubHandler {
                 .forEach(value -> {
                     try {
                         GitHubPRSCMHead scmHead = new GitHubPRSCMHead(value.getNumber(), value.getBaseRef(), source.getId());
-                        GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getHeadSha(), true, null);
+                        GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getHeadSha(), null);
                         context.getObserver().observe(scmHead, scmRevision);
                     } catch (IOException | InterruptedException e) {
                         // try as much as can
@@ -215,7 +219,8 @@ public class GitHubPRHandler extends GitHubHandler {
 
     private static boolean isInteresting(@Nonnull GHPullRequest pr, @Nonnull GitHubSourceContext context) throws IOException {
         GitHubPRSCMHead head = new GitHubPRSCMHead(pr.getNumber(), pr.getBase().getRef(), context.getSource().getId());
-        return context.checkCriteria(head, new GitHubSCMRevision(head, pr.getBase().getSha(), true, null));
+        GitHubSCMRevision revision = new GitHubSCMRevision(head, pr.getBase().getSha(), null);
+        return context.checkCriteria(head, revision);
     }
 
     @Extension

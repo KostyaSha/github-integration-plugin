@@ -13,10 +13,16 @@ import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
 import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
 
+import hudson.model.Job;
 import hudson.model.TaskListener;
+import jenkins.branch.BranchProjectFactory;
+import jenkins.branch.MultiBranchProject;
+import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMHeadEvent;
 import jenkins.scm.api.SCMHeadObserver;
+import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.SCMSourceCriteria;
+import jenkins.scm.api.SCMSourceOwner;
 
 public class GitHubSourceContext {
 
@@ -85,4 +91,44 @@ public class GitHubSourceContext {
         return true;
     }
 
+    /**
+     * Force job to unconditionally build on any next revision
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public void forceNextBuild(SCMRevision nextRev) throws IOException {
+        SCMSourceOwner owner = source.getOwner();
+        if (owner instanceof MultiBranchProject) {
+            MultiBranchProject mb = (MultiBranchProject) owner;
+
+            BranchProjectFactory pf = mb.getProjectFactory();
+            for (Object o : mb.getItems()) {
+                Job j = (Job) o;
+                SCMRevision rev = pf.getRevision(j);
+                if (rev != null && rev.equals(nextRev)) {
+                    pf.setRevisionHash(j, new DummyRevision(nextRev.getHead()));
+                }
+            }
+        }
+    }
+
+    /**
+     * Special revision to unconditionally force next build
+     */
+    public static class DummyRevision extends SCMRevision {
+        private static final long serialVersionUID = 1L;
+
+        public DummyRevision(SCMHead head) {
+            super(head);
+        }
+
+        @Override
+        public int hashCode() {
+            return 0;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return false;
+        }
+    };
 }

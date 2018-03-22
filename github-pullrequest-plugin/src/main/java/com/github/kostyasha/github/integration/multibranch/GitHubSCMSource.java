@@ -121,25 +121,30 @@ public class GitHubSCMSource extends SCMSource {
     }
 
     @Override
-    protected synchronized void retrieve(SCMSourceCriteria scmSourceCriteria,
+    protected void retrieve(SCMSourceCriteria scmSourceCriteria,
                             @Nonnull SCMHeadObserver scmHeadObserver,
                             SCMHeadEvent<?> scmHeadEvent, // null for manual run
                             @Nonnull TaskListener taskListener) throws IOException, InterruptedException {
         GitHubRepo localRepo = getLocalRepo();
 
-        // TODO actualise some repo for UI Action?
-        localRepo.actualize(getRemoteRepo());
-        
-        GitHubSourceContext context = new GitHubSourceContext(this, scmHeadObserver, scmSourceCriteria, scmHeadEvent, localRepo, getRemoteRepo(), taskListener);
+        // latch onto local repo state
+        synchronized (localRepo) {
 
-        getHandlers().forEach(handler -> {
-            try {
-                handler.handle(context);
-            } catch (IOException e) {
-                LOG.error("Can't process handler", e);
-                e.printStackTrace(taskListener.getLogger());
-            }
-        });
+            // TODO actualise some repo for UI Action?
+            localRepo.actualize(getRemoteRepo());
+
+            GitHubSourceContext context = new GitHubSourceContext(this, scmHeadObserver, scmSourceCriteria, scmHeadEvent, localRepo, getRemoteRepo(), taskListener);
+
+            getHandlers().forEach(handler -> {
+                try {
+                    handler.handle(context);
+                } catch (IOException e) {
+                    LOG.error("Can't process handler", e);
+                    e.printStackTrace(taskListener.getLogger());
+                }
+            });
+
+        }
     }
 
     @Override
