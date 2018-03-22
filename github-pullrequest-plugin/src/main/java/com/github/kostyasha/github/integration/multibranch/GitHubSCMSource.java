@@ -6,9 +6,9 @@ import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubSCMSourcesReposAction;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubSourceContext;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
 import com.github.kostyasha.github.integration.multibranch.repoprovider.GitHubRepoProvider2;
 import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
-import com.google.common.base.Throwables;
 import hudson.Extension;
 import hudson.model.Action;
 import hudson.model.CauseAction;
@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -122,18 +121,10 @@ public class GitHubSCMSource extends SCMSource {
     }
 
     @Override
-    protected void retrieve(SCMSourceCriteria scmSourceCriteria,
+    protected synchronized void retrieve(SCMSourceCriteria scmSourceCriteria,
                             @Nonnull SCMHeadObserver scmHeadObserver,
                             SCMHeadEvent<?> scmHeadEvent, // null for manual run
                             @Nonnull TaskListener taskListener) throws IOException, InterruptedException {
-        PrintStream llog = taskListener.getLogger();
-        llog.println("Source id " + getId());
-
-        llog.println("> GitHubSCMSource.retrieve(jenkins.scm.api.SCMSourceCriteria, jenkins.scm.api.SCMHeadObserver, jenkins.scm.api.SCMHeadEvent<?>, hudson.model.TaskListener)");
-        llog.println(">> scmSourceCriteria " + scmSourceCriteria);
-        llog.println(">> scmHeadObserver " + scmHeadObserver);
-        llog.println(">> scmHeadEvent " + scmHeadEvent);
-
         GitHubRepo localRepo = getLocalRepo();
 
         // TODO actualise some repo for UI Action?
@@ -146,7 +137,7 @@ public class GitHubSCMSource extends SCMSource {
                 handler.handle(context);
             } catch (IOException e) {
                 LOG.error("Can't process handler", e);
-                e.printStackTrace(llog);
+                e.printStackTrace(taskListener.getLogger());
             }
         });
     }
@@ -183,7 +174,6 @@ public class GitHubSCMSource extends SCMSource {
     public Set<SCMRevision> parentRevisions(@Nonnull SCMHead head,
                                             @Nonnull SCMRevision revision,
                                             @CheckForNull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> GitHubSCMSource.parentRevisions");
         return super.parentRevisions(head, revision, listener);
     }
 
@@ -191,14 +181,12 @@ public class GitHubSCMSource extends SCMSource {
     @Override
     public Map<SCMHead, SCMRevision> parentHeads(@Nonnull SCMHead head,
                                                  @CheckForNull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> .GitHubSCMSource.parentHeads(SCMHead, TaskListener");
         return super.parentHeads(head, listener);
     }
 
     @Nonnull
     @Override
     protected Set<SCMHead> retrieve(@Nonnull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> Retrieve Set<SCMHead> = GitHubSCMSource.retrieve(hudson.model.TaskListener)");
         return super.retrieve(listener);
     }
 
@@ -206,32 +194,24 @@ public class GitHubSCMSource extends SCMSource {
     @Override
     protected Set<SCMHead> retrieve(@CheckForNull SCMSourceCriteria criteria,
                                     @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> Retrieve Set<SCMHead> GitHubSCMSource.retrieve(jenkins.scm.api.SCMSourceCriteria, hudson.model.TaskListener)");
-        listener.getLogger().println(">> criteria " + criteria);
         return super.retrieve(criteria, listener);
     }
 
     @Override
     protected SCMRevision retrieve(@Nonnull SCMHead head,
                                    @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> Retrieve Set<SCMHead> GitHubSCMSource.retrieve(jenkins.scm.api.SCMHead, hudson.model.TaskListener)");
-        listener.getLogger().println(">> head " + head);
-
         return super.retrieve(head, listener);
     }
 
     @Override
     protected SCMRevision retrieve(@Nonnull String thingName,
                                    @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> SCMRevision = GitHubSCMSource.retrieve(java.lang.String, hudson.model.TaskListener)");
-        listener.getLogger().println(">> thingName " + thingName);
         return super.retrieve(thingName, listener);
     }
 
     @Nonnull
     @Override
     protected Set<String> retrieveRevisions(@Nonnull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> GitHubSCMSource.retrieveRevisions");
         return super.retrieveRevisions(listener);
     }
 
@@ -240,7 +220,6 @@ public class GitHubSCMSource extends SCMSource {
     protected List<Action> retrieveActions(@Nonnull SCMRevision revision,
                                            @CheckForNull SCMHeadEvent event,
                                            @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> GitHubSCMSource.retrieveActions(jenkins.scm.api.SCMRevision, jenkins.scm.api.SCMHeadEvent, hudson.model.TaskListener)");
         GitHubSCMRevision gitHubSCMRevision = (GitHubSCMRevision) revision;
 
         return Collections.singletonList(new CauseAction(gitHubSCMRevision.getCause()));
@@ -251,9 +230,6 @@ public class GitHubSCMSource extends SCMSource {
     protected List<Action> retrieveActions(@Nonnull SCMHead head,
                                            @CheckForNull SCMHeadEvent event,
                                            @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> GitHubSCMSource.retrieveActions(jenkins.scm.api.SCMHead, jenkins.scm.api.SCMHeadEvent, hudson.model.TaskListener)");
-        listener.getLogger().println(">> head " + head + " event " + event);
-
         return Collections.emptyList();
     }
 
@@ -261,8 +237,6 @@ public class GitHubSCMSource extends SCMSource {
     @Override
     protected List<Action> retrieveActions(@CheckForNull SCMSourceEvent event,
                                            @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> GitHubSCMSource.retrieveActions(jenkins.scm.api.SCMSourceEvent, hudson.model.TaskListener)");
-        listener.getLogger().println(">> sourceEvent " + event);
 //        return Collections.singletonList(getReposAction());
         return super.retrieveActions(event, listener);
     }
@@ -271,8 +245,6 @@ public class GitHubSCMSource extends SCMSource {
     @Override
     public SCMRevision getTrustedRevision(@Nonnull SCMRevision revision,
                                           @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> GitHubSCMSource.getTrustedRevision");
-        listener.getLogger().println(">> revision " + revision);
         return super.getTrustedRevision(revision, listener);
     }
 
@@ -285,13 +257,7 @@ public class GitHubSCMSource extends SCMSource {
     @Override
     protected SCMProbe createProbe(@Nonnull SCMHead head,
                                    @CheckForNull SCMRevision revision) throws IOException {
-        LOG.debug("CreateProbe");
-        try {
-            return fromSCMFileSystem(head, revision);
-        } catch (InterruptedException e) {
-            Throwables.propagate(e);
-        }
-        throw new IllegalStateException();
+        return new GitHubSCMProbe(this, (GitHubSCMHead) head, (GitHubSCMRevision) revision);
     }
 
     @Override

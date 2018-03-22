@@ -91,12 +91,19 @@ public class GitHubPRHandler extends GitHubHandler {
         } else {
             prNumber = null;
         }
+        
 
         GitHubSCMSource source = context.getSource();
         GitHubRepo localRepo = context.getLocalRepo();
         GitHubPRRepository prRepository = localRepo.getPrRepository();
         GitHub github = context.getGitHub();
         TaskListener listener = context.getListener();
+
+        if (prNumber != null) {
+            listener.getLogger().println("**** Processing pull request #" + prNumber + " ****");
+        } else {
+            listener.getLogger().println("**** Processing pull requests ****");
+        }
 
         GHRateLimit rateLimitBefore = github.getRateLimit();
         listener.getLogger().println("GitHub rate limit before check: " + rateLimitBefore);
@@ -168,6 +175,7 @@ public class GitHubPRHandler extends GitHubHandler {
                         e.printStackTrace(listener.getLogger());
                     }
                 });
+        listener.getLogger().println("**** Done processing pull requests ****\n");
     }
 
     /**

@@ -88,6 +88,12 @@ public class GitHubBranchHandler extends GitHubHandler {
         GitHub github = context.getGitHub();
         TaskListener listener = context.getListener();
 
+        if (branchName != null) {
+            listener.getLogger().println("**** Processing branch " + branchName + " ****");
+        } else {
+            listener.getLogger().println("**** Processing branches ****");
+        }
+
         GHRateLimit rateLimitBefore = github.getRateLimit();
         listener.getLogger().println("GitHub rate limit before check: " + rateLimitBefore);
 
@@ -143,6 +149,7 @@ public class GitHubBranchHandler extends GitHubHandler {
                     }
                 });
 
+        listener.getLogger().println("**** Done processing branches ****\n");
     }
 
     /**
