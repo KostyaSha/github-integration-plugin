@@ -46,9 +46,11 @@ public class GitHubPRApproved extends GitHubPREvent {
         LOG.warn("Checking\n");
 
         // analyse the json file
-        String home = System.getProperty("user.home");
+        //File fileName = new File(home + "/pr_" + remotePR.getRepository().getName() + "_#" + String.valueOf(remotePR.getNumber()) + ".json");
+        String home = System.getProperty("user.home") + "/.jenkins/workspace";
         File fileName = new File(home + "/pr_" + remotePR.getRepository().getName() + "_#" + String.valueOf(remotePR.getNumber()) + ".json");
         if(!fileName.exists()){
+            LOG.warn("File name " + fileName.getName() + " does not exist!");
             return cause;
         }
 

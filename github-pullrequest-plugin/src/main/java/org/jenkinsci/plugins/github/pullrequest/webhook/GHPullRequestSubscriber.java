@@ -124,7 +124,8 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
 
                 // If the number of reviews changed we update the PR approval state  
                 if(!pr.getAction().equals("review_requested") && !pr.getAction().equals("review_requested_removed")){
-                    File fileName = new File(System.getProperty("user.home") + "/pr_" + pr.getRepository().getName() + "_#" + String.valueOf(pr.getNumber()) + ".json");
+                    String home = System.getProperty("user.home")+ "/.jenkins/workspace";
+                    File fileName = new File(home + "/pr_" + pr.getRepository().getName() + "_#" + String.valueOf(pr.getPullRequest().getNumber()) + ".json");
                     if(fileName.exists()){
                         if(pr.getAction().equals("closed")){
                             if(fileName.delete()){
@@ -163,7 +164,8 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                 ObjectMapper objectMapper = new ObjectMapper();
                 // LOGGER.warn(objectMapper.writeValueAsString(pras));
                 try{
-                    String home = System.getProperty("user.home");
+                    //String home = System.getProperty("user.home");
+                    String home = System.getProperty("user.home")+ "/.jenkins/workspace";
                     File fileName = new File(home + "/pr_" + pr.getRepository().getName() + "_#" + String.valueOf(pr.getNumber()) + ".json");
                     objectMapper.writeValue(fileName,pras);
                     TimeUnit.SECONDS.sleep(2);//wait 2 seconds to give time to fully write the .json
@@ -182,7 +184,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                 PullRequestReview prr = gh.parseEventPayload(new StringReader(payload), PullRequestReview.class);
 
                 //Read the file 
-                String home = System.getProperty("user.home");
+                String home = System.getProperty("user.home") + "/.jenkins/workspace";
                 File fileName = new File(home + "/pr_" + prr.getRepository().getName() + "_#" + String.valueOf(prr.getPullRequest().getNumber()) + ".json");
 
                 // Update PR state 
