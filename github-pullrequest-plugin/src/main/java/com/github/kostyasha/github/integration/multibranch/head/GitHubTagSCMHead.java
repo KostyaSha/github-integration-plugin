@@ -8,7 +8,7 @@ public class GitHubTagSCMHead extends GitHubSCMHead {
     }
 
     @Override
-    public String getPronounPrefix() {
-        return "Tag ";
+    public String getPronoun() {
+        return "Tag " + getName();
     }
 }

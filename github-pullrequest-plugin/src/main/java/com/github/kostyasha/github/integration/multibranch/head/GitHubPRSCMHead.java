@@ -14,7 +14,7 @@ public class GitHubPRSCMHead extends GitHubSCMHead {
     }
 
     public GitHubPRSCMHead(@Nonnull Integer pr, @Nonnull String targetBranch, String sourceId) {
-        super(Integer.toString(pr), sourceId);
+        super("pr-" + Integer.toString(pr), sourceId);
         this.pr = pr;
         this.targetBranch = targetBranch;
     }
@@ -28,7 +28,7 @@ public class GitHubPRSCMHead extends GitHubSCMHead {
     }
 
     @Override
-    public String getPronounPrefix() {
-        return "PR#";
+    public String getPronoun() {
+        return "PR#" + pr;
     }
 }
