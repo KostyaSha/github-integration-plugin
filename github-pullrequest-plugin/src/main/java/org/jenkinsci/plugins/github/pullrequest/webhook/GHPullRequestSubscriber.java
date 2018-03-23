@@ -7,6 +7,7 @@ import hudson.model.Job;
 import hudson.security.ACL;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.github.extension.GHEventsSubscriber;
+import com.github.kostyasha.github.integration.generic.GitHubTriggerDescriptor;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.jenkinsci.plugins.github.util.FluentIterableWrapper;
@@ -106,7 +107,8 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
 
     private PullRequestInfo extractPullRequestInfo(GHEvent event, String payload, GitHub gh) throws IOException {
         LOGGER.warn("extractPullRequestInfo(), even: " + event);
-        //LOGGER.warn("payload\n" + payload);
+        GitHubPRTrigger.DescriptorImpl desc = (GitHubPRTrigger.DescriptorImpl) Jenkins.getInstance().getDescriptor(GitHubPRTrigger.class);
+        LOGGER.warn("Users and emails\n" + desc.getUsersAndEmails());
         switch (event) {
             case ISSUE_COMMENT: {
                 IssueComment commentPayload = gh.parseEventPayload(new StringReader(payload), IssueComment.class);
