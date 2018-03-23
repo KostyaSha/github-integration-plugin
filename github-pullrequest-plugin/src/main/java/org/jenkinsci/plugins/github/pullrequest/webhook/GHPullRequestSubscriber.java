@@ -109,6 +109,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
         LOGGER.warn("extractPullRequestInfo(), even: " + event);
         GitHubPRTrigger.DescriptorImpl desc = (GitHubPRTrigger.DescriptorImpl) Jenkins.getInstance().getDescriptor(GitHubPRTrigger.class);
         LOGGER.warn("Users and emails\n" + desc.getUsersAndEmails());
+        LOGGER.warn("Payload:\n" + payload);
         switch (event) {
             case ISSUE_COMMENT: {
                 IssueComment commentPayload = gh.parseEventPayload(new StringReader(payload), IssueComment.class);
