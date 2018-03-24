@@ -25,10 +25,14 @@ public class GitHubPRLabel implements Describable<GitHubPRLabel> {
 
     @DataBoundConstructor
     public GitHubPRLabel(String labels) {
-        this.labels = new HashSet<>(Arrays.asList(labels.split("\n")));
+        this(new HashSet<>(Arrays.asList(labels.split("\n"))));
     }
 
-    //for UI binding
+    public GitHubPRLabel(Set<String> labels) {
+        this.labels = labels;
+    }
+
+    // for UI binding
     public String getLabels() {
         return Joiner.on("\n").skipNulls().join(labels);
     }

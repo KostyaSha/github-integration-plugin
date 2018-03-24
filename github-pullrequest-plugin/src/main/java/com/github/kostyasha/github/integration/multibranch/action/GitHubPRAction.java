@@ -1,8 +1,7 @@
 package com.github.kostyasha.github.integration.multibranch.action;
 
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.kohsuke.github.GHRepository;
-
-import hudson.Functions;
 
 /**
  * Add a link to repository pr
@@ -20,7 +19,7 @@ public class GitHubPRAction extends GitHubLinkAction {
 
     @Override
     public String getIconFileName() {
-        return Functions.getResourcePath() + "/plugin/github-pullrequest/git-pull-request.svg";
+        return GitHubPRPullRequest.getIconFileName();
     }
 
     @Override

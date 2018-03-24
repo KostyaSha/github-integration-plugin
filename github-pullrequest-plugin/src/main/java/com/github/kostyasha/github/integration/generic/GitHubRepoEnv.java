@@ -1,30 +1,33 @@
 package com.github.kostyasha.github.integration.generic;
 
-import hudson.model.BooleanParameterValue;
 import hudson.model.ParameterValue;
-import hudson.model.StringParameterValue;
 
-import static org.apache.commons.lang.StringUtils.trimToEmpty;
+import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author Kanstantsin Shautsou
  */
-public enum GitHubRepoEnv {
-    GIT_URL,
-    SSH_URL;
+public enum GitHubRepoEnv implements GitHubEnv<GitHubCause<?>> {
+    GIT_URL(GitHubCause::getGitUrl),
+    SSH_URL(GitHubCause::getSshUrl);
 
     public static final String PREFIX = "GITHUB_REPO_";
 
-    public ParameterValue param(String value) {
-        return new StringParameterValue(toString(), trimToEmpty(value));
+    private Function<GitHubCause<?>, ParameterValue> fun;
+
+    private GitHubRepoEnv(Function<GitHubCause<?>, String> fun) {
+        this.fun = c -> param(fun.apply(c));
     }
 
-    public ParameterValue param(boolean value) {
-        return new BooleanParameterValue(toString(), value);
+    @Override
+    public void addParam(GitHubCause<?> cause, List<ParameterValue> params) {
+        params.add(fun.apply(cause));
     }
 
     @Override
     public String toString() {
         return PREFIX.concat(name());
     }
+
 }

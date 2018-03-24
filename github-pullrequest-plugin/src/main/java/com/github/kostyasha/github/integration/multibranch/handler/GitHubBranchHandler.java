@@ -187,7 +187,7 @@ public class GitHubBranchHandler extends GitHubHandler {
 
     private static boolean isInteresting(@Nonnull GHBranch ghBranch, @Nonnull GitHubSourceContext context) throws IOException {
         GitHubBranchSCMHead head = new GitHubBranchSCMHead(ghBranch.getName(), context.getSource().getId());
-        GitHubSCMRevision revision = new GitHubSCMRevision(head, ghBranch.getSHA1(), null);
+        GitHubSCMRevision revision = new GitHubSCMRevision(head, ghBranch.getSHA1(), null).setRemoteData(ghBranch);
         return context.checkCriteria(head, revision);
     }
 

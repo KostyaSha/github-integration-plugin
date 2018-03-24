@@ -1,12 +1,15 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
 import com.github.kostyasha.github.integration.generic.GitHubCause;
+
+import hudson.model.ParameterValue;
 import hudson.model.Run;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHUser;
 import org.slf4j.Logger;
@@ -16,6 +19,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
@@ -340,6 +344,11 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
      */
     public String getCommentBodyMatch() {
         return commentBodyMatch;
+    }
+
+    @Override
+    public void fillParameters(List<ParameterValue> params) {
+        GitHubPREnv.getParams(this, params);
     }
 
     @Override

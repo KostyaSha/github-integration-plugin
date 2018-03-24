@@ -10,11 +10,17 @@ public class BranchInfo {
     private String repo;
     private String branchName;
     private String fullRef;
+    private boolean tag;
 
-    public BranchInfo(String repo, String branchName, String fullRef) {
+    public BranchInfo(String repo, String branchName, String fullRef, boolean tag) {
         this.repo = repo;
         this.branchName = branchName;
         this.fullRef = fullRef;
+        this.tag = tag;
+    }
+
+    public boolean isTag() {
+        return tag;
     }
 
     public String getRepo() {

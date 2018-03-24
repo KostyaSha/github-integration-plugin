@@ -13,6 +13,7 @@ import com.github.kostyasha.github.integration.multibranch.handler.GitHubSourceC
 import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubPRSCMHead;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubTagSCMHead;
 import com.github.kostyasha.github.integration.multibranch.repoprovider.GitHubRepoProvider2;
 import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
 
@@ -23,6 +24,8 @@ import hudson.model.CauseAction;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
 import hudson.model.Job;
+import hudson.model.ParameterValue;
+import hudson.model.ParametersAction;
 import hudson.model.TaskListener;
 import hudson.model.listeners.ItemListener;
 import hudson.scm.NullSCM;
@@ -53,6 +56,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -71,8 +75,7 @@ import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull
 public class GitHubSCMSource extends SCMSource {
     private static final Logger LOG = LoggerFactory.getLogger(GitHubSCMSource.class);
     /**
-     * This will the URL to the project main branch.
-     * One for PRs and branches... etc...
+     * This will the URL to the project main branch. One for PRs and branches... etc...
      */
     private String projectUrlStr;
 
@@ -84,8 +87,7 @@ public class GitHubSCMSource extends SCMSource {
     private transient volatile GitHubSCMSourcesLocalStorage localStorage;
 
     @DataBoundConstructor
-    public GitHubSCMSource() {
-    }
+    public GitHubSCMSource() {}
 
 
     public GitHubRepositoryName getRepoFullName() {
@@ -139,10 +141,8 @@ public class GitHubSCMSource extends SCMSource {
     }
 
     @Override
-    protected void retrieve(SCMSourceCriteria scmSourceCriteria,
-                            @Nonnull SCMHeadObserver scmHeadObserver,
-                            SCMHeadEvent<?> scmHeadEvent, // null for manual run
-                            @Nonnull TaskListener taskListener) throws IOException, InterruptedException {
+    protected void retrieve(SCMSourceCriteria scmSourceCriteria, @Nonnull SCMHeadObserver scmHeadObserver, SCMHeadEvent<?> scmHeadEvent, // null for manual run
+            @Nonnull TaskListener taskListener) throws IOException, InterruptedException {
 
         try (BulkChange bc = new BulkChange(getLocalStorage())) {
             GitHubRepo localRepo = getLocalRepo();
@@ -188,7 +188,7 @@ public class GitHubSCMSource extends SCMSource {
     @Override
     public SCM build(@Nonnull SCMHead scmHead, SCMRevision scmRevision) {
 
-//        return new GitSCM("repo url");
+        // return new GitSCM("repo url");
         return new NullSCM();
     }
 
@@ -196,16 +196,13 @@ public class GitHubSCMSource extends SCMSource {
     // It is so hard to implement good APIs...
     @Nonnull
     @Override
-    public Set<SCMRevision> parentRevisions(@Nonnull SCMHead head,
-                                            @Nonnull SCMRevision revision,
-                                            @CheckForNull TaskListener listener) throws IOException, InterruptedException {
+    public Set<SCMRevision> parentRevisions(@Nonnull SCMHead head, @Nonnull SCMRevision revision, @CheckForNull TaskListener listener) throws IOException, InterruptedException {
         return super.parentRevisions(head, revision, listener);
     }
 
     @Nonnull
     @Override
-    public Map<SCMHead, SCMRevision> parentHeads(@Nonnull SCMHead head,
-                                                 @CheckForNull TaskListener listener) throws IOException, InterruptedException {
+    public Map<SCMHead, SCMRevision> parentHeads(@Nonnull SCMHead head, @CheckForNull TaskListener listener) throws IOException, InterruptedException {
         return super.parentHeads(head, listener);
     }
 
@@ -217,20 +214,17 @@ public class GitHubSCMSource extends SCMSource {
 
     @Nonnull
     @Override
-    protected Set<SCMHead> retrieve(@CheckForNull SCMSourceCriteria criteria,
-                                    @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    protected Set<SCMHead> retrieve(@CheckForNull SCMSourceCriteria criteria, @Nonnull TaskListener listener) throws IOException, InterruptedException {
         return super.retrieve(criteria, listener);
     }
 
     @Override
-    protected SCMRevision retrieve(@Nonnull SCMHead head,
-                                   @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    protected SCMRevision retrieve(@Nonnull SCMHead head, @Nonnull TaskListener listener) throws IOException, InterruptedException {
         return super.retrieve(head, listener);
     }
 
     @Override
-    protected SCMRevision retrieve(@Nonnull String thingName,
-                                   @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    protected SCMRevision retrieve(@Nonnull String thingName, @Nonnull TaskListener listener) throws IOException, InterruptedException {
         return super.retrieve(thingName, listener);
     }
 
@@ -242,15 +236,15 @@ public class GitHubSCMSource extends SCMSource {
 
     @Nonnull
     @Override
-    protected List<Action> retrieveActions(@Nonnull SCMRevision revision,
-                                           @CheckForNull SCMHeadEvent event,
-                                           @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    protected List<Action> retrieveActions(@Nonnull SCMRevision revision, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
         GitHubSCMRevision gitHubSCMRevision = (GitHubSCMRevision) revision;
-
-        @SuppressWarnings("rawtypes")
-        GitHubCause cause = gitHubSCMRevision.getCause();
+        GitHubCause<?> cause = gitHubSCMRevision.getCause();
         if (cause != null) {
-            return Collections.singletonList(new CauseAction(cause));
+            List<ParameterValue> params = new ArrayList<>();
+            List<String> safeParams = new ArrayList<>();
+            cause.fillParameters(params);
+            params.forEach(p -> safeParams.add(p.getName()));
+            return Arrays.asList(new CauseAction(cause), new ParametersAction(params, safeParams));
         }
         return Collections.emptyList();
     }
@@ -295,16 +289,14 @@ public class GitHubSCMSource extends SCMSource {
 
     @Nonnull
     @Override
-    protected List<Action> retrieveActions(@CheckForNull SCMSourceEvent event,
-                                           @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    protected List<Action> retrieveActions(@CheckForNull SCMSourceEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
 
         return Collections.singletonList(new GitHubRepoAction(getRemoteRepo()));
     }
 
     @Nonnull
     @Override
-    public SCMRevision getTrustedRevision(@Nonnull SCMRevision revision,
-                                          @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    public SCMRevision getTrustedRevision(@Nonnull SCMRevision revision, @Nonnull TaskListener listener) throws IOException, InterruptedException {
         return super.getTrustedRevision(revision, listener);
     }
 
@@ -315,8 +307,7 @@ public class GitHubSCMSource extends SCMSource {
 
     @Nonnull
     @Override
-    protected SCMProbe createProbe(@Nonnull SCMHead head,
-                                   @CheckForNull SCMRevision revision) throws IOException {
+    protected SCMProbe createProbe(@Nonnull SCMHead head, @CheckForNull SCMRevision revision) throws IOException {
         return new GitHubSCMProbe(this, (GitHubSCMHead) head, (GitHubSCMRevision) revision);
     }
 
@@ -331,8 +322,8 @@ public class GitHubSCMSource extends SCMSource {
         @Nonnull
         @Override
         protected SCMHeadCategory[] createCategories() {
-            // array? bundled in descriptor??  seriously?
-            return new SCMHeadCategory[]{BRANCH, PR, TAG};
+            // array? bundled in descriptor?? seriously?
+            return new SCMHeadCategory[] {BRANCH, PR, TAG};
         }
 
 
@@ -371,6 +362,10 @@ public class GitHubSCMSource extends SCMSource {
 
                 plunger = r -> r.getBranchRepository().getBranches().remove(head.getName());
 
+            } else if (head instanceof GitHubTagSCMHead) {
+
+                plunger = r -> r.getTagRepository().getTags().remove(head.getName());
+
             } else if (head instanceof GitHubPRSCMHead) {
 
                 GitHubPRSCMHead prHead = (GitHubPRSCMHead) head;
@@ -378,7 +373,7 @@ public class GitHubSCMSource extends SCMSource {
 
             }
 
-            if(plunger != null) {
+            if (plunger != null) {
                 for (SCMSource src : (List<SCMSource>) mb.getSCMSources()) {
                     if (src instanceof GitHubSCMSource) {
                         GitHubSCMSource gsrc = (GitHubSCMSource) src;

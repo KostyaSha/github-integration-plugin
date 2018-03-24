@@ -23,26 +23,46 @@ public abstract class AbstractGHBranchSubscriber extends GHEventsSubscriber {
     }
 
     protected BranchInfo extractRefInfo(GHEvent event, String payload) throws IOException {
+        return extractRefInfo(event, payload, false);
+    }
+
+    protected BranchInfo extractRefInfo(GHEvent event, String payload, boolean tagsAware) throws IOException {
         JSONObject json = fromObject(payload);
         if (EVENTS.contains(event)) {
-            return fromJson(json);
+            return fromJson(json, tagsAware);
         } else {
             throw new IllegalStateException(format("Did you add event %s in events() method?", event));
         }
     }
 
     protected BranchInfo fromJson(JSONObject json) {
+        return fromJson(json, false);
+    }
+
+    protected BranchInfo fromJson(JSONObject json, boolean tagsAware) {
         JSONObject jsonRepository = json.getJSONObject("repository");
         final String repo = jsonRepository.getString("full_name");
-        final String name = jsonRepository.getString("name");
 
         String branchName = json.getString("ref");
+        String refType = json.optString("ref_type", null);
         String fullRef = branchName;
+
+        boolean tag = false;
 
         if (branchName.startsWith("refs/heads/")) {
             branchName = branchName.replace("refs/heads/", "");
         }
 
-        return new BranchInfo(repo, branchName, fullRef);
+        if ("tag".equals(refType)) {
+            tag = true;
+        } else if (branchName.startsWith("refs/tags/")) {
+            // backwards compatibility
+            if (tagsAware) {
+                branchName = branchName.replace("refs/tags/", "");
+            }
+            tag = true;
+        }
+
+        return new BranchInfo(repo, branchName, fullRef, tag);
     }
 }

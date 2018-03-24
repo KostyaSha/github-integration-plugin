@@ -1,6 +1,8 @@
 package com.github.kostyasha.github.integration.multibranch.action;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
+import com.github.kostyasha.github.integration.tag.GitHubTagRepository;
+
 import hudson.model.Action;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.kohsuke.github.GHRepository;
@@ -25,6 +27,7 @@ public class GitHubRepo implements Action {
     private transient GitHubSCMSourcesLocalStorage owner;
 
     private GitHubBranchRepository branchRepository;
+    private GitHubTagRepository tagRepository;
     private GitHubPRRepository prRepository;
 
     public GitHubRepo(GitHubSCMSourcesLocalStorage owner) {
@@ -44,12 +47,17 @@ public class GitHubRepo implements Action {
      */
     public GitHubRepo(String repoFullName, URL url) {
         branchRepository = new GitHubBranchRepository(repoFullName, url);
+        tagRepository = new GitHubTagRepository(repoFullName, url);
         prRepository = new GitHubPRRepository(repoFullName, url);
     }
 
 
     public GitHubBranchRepository getBranchRepository() {
         return branchRepository;
+    }
+    
+    public GitHubTagRepository getTagRepository() {
+        return tagRepository;
     }
 
     public GitHubPRRepository getPrRepository() {
@@ -77,6 +85,9 @@ public class GitHubRepo implements Action {
     public void actualize(GHRepository remoteRepo) throws IOException {
         if (isNull(branchRepository)) {
             branchRepository = new GitHubBranchRepository(remoteRepo);
+        }
+        if (isNull(tagRepository)) {
+            tagRepository = new GitHubTagRepository(remoteRepo);
         }
         if (isNull(prRepository)) {
             prRepository = new GitHubPRRepository(remoteRepo);

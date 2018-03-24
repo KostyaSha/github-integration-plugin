@@ -2,7 +2,6 @@ package org.jenkinsci.plugins.github.pullrequest;
 
 import com.cloudbees.jenkins.GitHubWebHook;
 import com.github.kostyasha.github.integration.generic.GitHubRepository;
-import hudson.Functions;
 import hudson.XmlFile;
 import hudson.model.Item;
 import hudson.model.Job;
@@ -98,7 +97,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
 
     @Override
     public String getIconFileName() {
-        return Functions.getResourcePath() + "/plugin/github-pullrequest/git-pull-request.svg";
+        return GitHubPRPullRequest.getIconFileName();
     }
 
     @Override

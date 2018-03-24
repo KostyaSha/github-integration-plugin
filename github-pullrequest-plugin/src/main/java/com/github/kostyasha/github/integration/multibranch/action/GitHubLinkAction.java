@@ -1,6 +1,7 @@
 package com.github.kostyasha.github.integration.multibranch.action;
 
-import hudson.Functions;
+import com.github.kostyasha.github.integration.branch.GitHubBranch;
+
 import hudson.model.Action;
 
 /**
@@ -18,7 +19,7 @@ public abstract class GitHubLinkAction implements Action {
 
     @Override
     public String getIconFileName() {
-        return Functions.getResourcePath() + "/plugin/github-pullrequest/git-branch.svg";
+        return GitHubBranch.getIconFileName();
     }
 
     @Override

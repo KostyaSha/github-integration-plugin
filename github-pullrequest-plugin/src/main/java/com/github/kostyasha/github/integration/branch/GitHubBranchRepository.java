@@ -3,7 +3,6 @@ package com.github.kostyasha.github.integration.branch;
 import com.cloudbees.jenkins.GitHubWebHook;
 import com.github.kostyasha.github.integration.branch.trigger.JobRunnerForBranchCause;
 import com.github.kostyasha.github.integration.generic.GitHubRepository;
-import hudson.Functions;
 import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -67,7 +66,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
 
     @Override
     public String getIconFileName() {
-        return Functions.getResourcePath() + "/plugin/github-pullrequest/git-branch.svg";
+        return GitHubBranch.getIconFileName();
     }
 
     @Override

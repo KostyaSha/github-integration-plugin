@@ -215,7 +215,7 @@ public class GitHubPRHandler extends GitHubHandler {
 
     private static boolean isInteresting(@Nonnull GHPullRequest pr, @Nonnull GitHubSourceContext context) throws IOException {
         GitHubPRSCMHead head = new GitHubPRSCMHead(pr.getNumber(), pr.getBase().getRef(), context.getSource().getId());
-        GitHubSCMRevision revision = new GitHubSCMRevision(head, pr.getHead().getSha(), null);
+        GitHubSCMRevision revision = new GitHubSCMRevision(head, pr.getHead().getSha(), null).setRemoteData(pr);
         return context.checkCriteria(head, revision);
     }
 

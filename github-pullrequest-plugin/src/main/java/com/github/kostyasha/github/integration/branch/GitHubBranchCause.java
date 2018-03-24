@@ -1,46 +1,35 @@
 package com.github.kostyasha.github.integration.branch;
 
-import com.github.kostyasha.github.integration.generic.GitHubCause;
-
+import hudson.model.ParameterValue;
 import hudson.model.Run;
 import org.kohsuke.github.GHBranch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
+import com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv;
+
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.List;
 
 import static org.apache.commons.io.FileUtils.writeStringToFile;
 
 /**
  * @author Kanstantsin Shautsou
  */
-public class GitHubBranchCause extends GitHubCause<GitHubBranchCause> {
+public class GitHubBranchCause extends AbstractGitHubBranchCause<GitHubBranchCause> {
     private static final Logger LOG = LoggerFactory.getLogger(GitHubBranchCause.class);
 
     private final String branchName;
 
-    /**
-     * null for deleted branch.
-     */
-    @CheckForNull
-    private final String commitSha;
-
-    @CheckForNull
-    private final String fullRef;
-
-    public GitHubBranchCause(@Nonnull GitHubBranch localBranch, @Nonnull GitHubBranchRepository localRepo,
-                             String reason, boolean skip) {
+    public GitHubBranchCause(@Nonnull GitHubBranch localBranch, @Nonnull GitHubBranchRepository localRepo, String reason, boolean skip) {
         this(localBranch.getName(), localBranch.getCommitSha());
         withReason(reason);
         withSkip(skip);
         withLocalRepo(localRepo);
     }
 
-    public GitHubBranchCause(@Nonnull GHBranch remoteBranch,
-                             @Nonnull GitHubBranchRepository localRepo,
-                             String reason, boolean skip) {
+    public GitHubBranchCause(@Nonnull GHBranch remoteBranch, @Nonnull GitHubBranchRepository localRepo, String reason, boolean skip) {
         this(remoteBranch.getName(), remoteBranch.getSHA1());
         withReason(reason);
         withSkip(skip);
@@ -48,44 +37,32 @@ public class GitHubBranchCause extends GitHubCause<GitHubBranchCause> {
     }
 
     public GitHubBranchCause(@Nonnull String branchName, String commitSha) {
+        super(commitSha, "refs/heads/" + branchName);
         this.branchName = branchName;
-        this.commitSha = commitSha;
-        this.fullRef = "refs/heads/" + branchName;
     }
 
     /**
      * Copy constructor
      */
     public GitHubBranchCause(GitHubBranchCause cause) {
-        this(cause.getBranchName(), cause.getCommitSha());
-        withGitUrl(cause.getGitUrl());
-        withSshUrl(cause.getSshUrl());
-        withHtmlUrl(cause.getHtmlUrl());
-        withPollingLog(cause.getPollingLog());
-        withReason(cause.getReason());
-        withSkip(cause.isSkip());
-        withTitle(cause.getTitle());
+        super(cause);
+        this.branchName = cause.getBranchName();
     }
 
     public String getBranchName() {
         return branchName;
     }
 
-    @CheckForNull
-    public String getCommitSha() {
-        return commitSha;
-    }
-
-    @CheckForNull
-    public String getFullRef() {
-        return fullRef;
+    @Override
+    public void fillParameters(List<ParameterValue> params) {
+        GitHubBranchEnv.getParams(this, params);
     }
 
     @Nonnull
     @Override
     public String getShortDescription() {
         if (getHtmlUrl() != null) {
-            return "GitHub Branch <a href=\"" + getHtmlUrl() + "\">" + branchName + "</a>, " + getReason();
+            return "GitHub Branch <a href=\"" + getHtmlUrl() + "\">" + getBranchName() + "</a>, " + getReason();
         } else {
             return "Deleted branch";
         }

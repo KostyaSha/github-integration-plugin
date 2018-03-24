@@ -1,6 +1,8 @@
 package com.github.kostyasha.github.integration.generic;
 
 import hudson.model.Cause;
+import hudson.model.ParameterValue;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,6 +135,8 @@ public abstract class GitHubCause<T extends GitHubCause<T>> extends Cause {
     public String getAbbreviatedTitle() {
         return abbreviate(getTitle(), 30);
     }
+
+    public abstract void fillParameters(List<ParameterValue> params);
 
     public static <T extends GitHubCause<T>> T skipTrigger(List<? extends T> causes) {
         if (causes == null) {
