@@ -28,7 +28,6 @@ public abstract class AbstractGHPullRequestSubsriber extends GHEventsSubscriber 
                 GHEventPayload.IssueComment commentPayload = gh.parseEventPayload(new StringReader(payload), GHEventPayload.IssueComment.class);
 
                 int issueNumber = commentPayload.getIssue().getNumber();
-                // FIXME this is not a pullrequest id
                 return new PullRequestInfo(commentPayload.getRepository().getFullName(), issueNumber);
             }
 
