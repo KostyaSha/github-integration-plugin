@@ -4,6 +4,8 @@ import com.github.kostyasha.github.integration.generic.GitHubCause;
 
 import hudson.model.ParameterValue;
 import hudson.model.Run;
+import jenkins.scm.api.SCMSourceOwner;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -353,6 +355,11 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
 
     @Override
     public void onAddedTo(@Nonnull Run run) {
+        if (run.getParent().getParent() instanceof SCMSourceOwner) {
+            // skip multibranch
+            return;
+        }
+
         // move polling log from cause to action
         try {
             GitHubPRPollingLogAction action = new GitHubPRPollingLogAction(run);

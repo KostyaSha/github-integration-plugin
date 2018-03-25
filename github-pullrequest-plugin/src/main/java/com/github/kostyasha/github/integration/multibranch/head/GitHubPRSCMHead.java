@@ -5,6 +5,7 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import javax.annotation.Nonnull;
 
 public class GitHubPRSCMHead extends GitHubSCMHead {
+    private static final long serialVersionUID = 1L;
 
     private final int pr;
     private final String targetBranch;

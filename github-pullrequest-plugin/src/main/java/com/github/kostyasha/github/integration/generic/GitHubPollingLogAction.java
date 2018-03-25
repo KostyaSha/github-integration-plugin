@@ -5,7 +5,6 @@ import hudson.console.AnnotatedLargeText;
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixChildAction;
 import hudson.matrix.MatrixRun;
-import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.util.FlushProofOutputStream;
@@ -26,7 +25,7 @@ import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull
 /**
  * @author Kanstantsin Shautsou
  */
-public abstract class GitHubPollingLogAction<A extends GitHubPollingLogAction<A>> implements MatrixChildAction, RunAction2 {
+public abstract class GitHubPollingLogAction implements MatrixChildAction, RunAction2 {
     @CheckForNull
     private transient Job<?, ?> job;
 

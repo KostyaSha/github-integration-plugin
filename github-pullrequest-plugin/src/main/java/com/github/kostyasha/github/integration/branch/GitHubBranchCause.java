@@ -2,6 +2,8 @@ package com.github.kostyasha.github.integration.branch;
 
 import hudson.model.ParameterValue;
 import hudson.model.Run;
+import jenkins.scm.api.SCMSourceOwner;
+
 import org.kohsuke.github.GHBranch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +72,11 @@ public class GitHubBranchCause extends AbstractGitHubBranchCause<GitHubBranchCau
 
     @Override
     public void onAddedTo(@Nonnull Run run) {
+        if (run.getParent().getParent() instanceof SCMSourceOwner) {
+            // skip multibranch
+            return;
+        }
+
         // move polling log from cause to action
         try {
             GitHubBranchPollingLogAction action = new GitHubBranchPollingLogAction(run);
