@@ -2,6 +2,7 @@ package com.github.kostyasha.github.integration.multibranch;
 
 import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.github.kostyasha.github.integration.generic.GitHubCause;
+import com.github.kostyasha.github.integration.multibranch.GitHubSCMFactory.GitHubSCMFactoryDescriptor;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubBranchAction;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubLinkAction;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubPRAction;
@@ -19,6 +20,7 @@ import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRev
 
 import hudson.BulkChange;
 import hudson.Extension;
+import hudson.ExtensionList;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Item;
@@ -28,7 +30,6 @@ import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
 import hudson.model.TaskListener;
 import hudson.model.listeners.ItemListener;
-import hudson.scm.NullSCM;
 import hudson.scm.SCM;
 import jenkins.branch.Branch;
 import jenkins.branch.MultiBranchProject;
@@ -71,7 +72,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
-
 public class GitHubSCMSource extends SCMSource {
     private static final Logger LOG = LoggerFactory.getLogger(GitHubSCMSource.class);
     /**
@@ -83,6 +83,8 @@ public class GitHubSCMSource extends SCMSource {
     private GitHubRepoProvider2 repoProvider = null;
 
     private List<GitHubHandler> handlers = new ArrayList<>();
+
+    private GitHubSCMFactory scmFactory;
 
     private transient volatile GitHubSCMSourcesLocalStorage localStorage;
 
@@ -121,6 +123,16 @@ public class GitHubSCMSource extends SCMSource {
     @DataBoundSetter
     public GitHubSCMSource setHandlers(List<GitHubHandler> handlers) {
         this.handlers = handlers;
+        return this;
+    }
+
+    public GitHubSCMFactory getScmFactory() {
+        return scmFactory;
+    }
+
+    @DataBoundSetter
+    public GitHubSCMSource setScmFactory(GitHubSCMFactory scmFactory) {
+        this.scmFactory = scmFactory;
         return this;
     }
 
@@ -183,15 +195,11 @@ public class GitHubSCMSource extends SCMSource {
         return remoteRepository;
     }
 
-
     @Nonnull
     @Override
     public SCM build(@Nonnull SCMHead scmHead, SCMRevision scmRevision) {
-
-        // return new GitSCM("repo url");
-        return new NullSCM();
+        return scmFactory.createScm(this, scmHead, scmRevision);
     }
-
 
     // It is so hard to implement good APIs...
     @Nonnull
@@ -331,6 +339,10 @@ public class GitHubSCMSource extends SCMSource {
         @Override
         public String getDisplayName() {
             return "GitHub source";
+        }
+
+        public List<GitHubSCMFactoryDescriptor> getScmFactoryDescriptors() {
+            return ExtensionList.lookup(GitHubSCMFactoryDescriptor.class);
         }
     }
 

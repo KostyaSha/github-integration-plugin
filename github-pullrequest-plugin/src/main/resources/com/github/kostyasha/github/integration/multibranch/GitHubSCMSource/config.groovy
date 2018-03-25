@@ -43,6 +43,8 @@ f.block() {
         }
     }
 
+    f.dropdownDescriptorSelector(field: "scmFactory", title: _("SCM Factory"), descriptors: descriptor.scmFactoryDescriptors)
+
     f.entry(title: "Handlers") {
         f.hetero_list(
                 name: "handlers",
