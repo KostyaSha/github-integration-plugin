@@ -9,6 +9,7 @@ import com.github.kostyasha.github.integration.multibranch.action.GitHubPRAction
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepoAction;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubSCMSourcesLocalStorage;
+import com.github.kostyasha.github.integration.multibranch.action.GitHubTagAction;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubSourceContext;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
@@ -274,6 +275,11 @@ public class GitHubSCMSource extends SCMSource {
             // mark default branch item as primary
             primary = remoteRepo.getDefaultBranch().equals(head.getName());
             link = new GitHubBranchAction(remoteRepo, head.getName());
+            desc = null;
+
+        } else if (head instanceof GitHubTagSCMHead) {
+
+            link = new GitHubTagAction(remoteRepo, head.getName());
             desc = null;
 
         } else if (head instanceof GitHubPRSCMHead) {
