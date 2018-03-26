@@ -10,6 +10,8 @@ import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepoAction;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubSCMSourcesLocalStorage;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubTagAction;
+import com.github.kostyasha.github.integration.multibranch.fs.GitHubSCMProbe;
+import com.github.kostyasha.github.integration.multibranch.fs.TreeCache;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubSourceContext;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
@@ -157,7 +159,10 @@ public class GitHubSCMSource extends SCMSource {
     protected void retrieve(SCMSourceCriteria scmSourceCriteria, @Nonnull SCMHeadObserver scmHeadObserver, SCMHeadEvent<?> scmHeadEvent, // null for manual run
             @Nonnull TaskListener taskListener) throws IOException, InterruptedException {
 
-        try (BulkChange bc = new BulkChange(getLocalStorage())) {
+        try (
+                BulkChange bc = new BulkChange(getLocalStorage());
+                TreeCache.Context ctx = TreeCache.createContext()) {
+
             GitHubRepo localRepo = getLocalRepo();
 
             // latch onto local repo state
@@ -169,7 +174,7 @@ public class GitHubSCMSource extends SCMSource {
                 getHandlers().forEach(handler -> {
                     try {
                         handler.handle(context);
-                    } catch (IOException e) {
+                    } catch (Throwable e) {
                         LOG.error("Can't process handler", e);
                         e.printStackTrace(taskListener.getLogger());
                     }

@@ -1,6 +1,10 @@
 package com.github.kostyasha.github.integration.multibranch.head;
 
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
+import org.kohsuke.github.GHPullRequest;
+import org.kohsuke.github.GHRepository;
+
+import java.io.IOException;
 
 import javax.annotation.Nonnull;
 
@@ -31,5 +35,14 @@ public class GitHubPRSCMHead extends GitHubSCMHead {
     @Override
     public String getPronoun() {
         return "PR#" + pr;
+    }
+
+    @Override
+    public String getHeadSha(GHRepository remoteRepo) throws IOException {
+        GHPullRequest pullRequest = remoteRepo.getPullRequest(pr);
+        if (pullRequest == null) {
+            throw new IOException("No PR " + pr + " in " + remoteRepo.getFullName());
+        }
+        return pullRequest.getHead().getSha();
     }
 }

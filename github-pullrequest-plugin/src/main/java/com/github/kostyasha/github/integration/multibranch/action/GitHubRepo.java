@@ -38,24 +38,26 @@ public class GitHubRepo implements Action {
      * When remote side available.
      */
     public GitHubRepo(GHRepository repository) {
-        branchRepository = new GitHubBranchRepository(repository);
-        prRepository = new GitHubPRRepository(repository);
+        this(new GitHubBranchRepository(repository), new GitHubTagRepository(repository), new GitHubPRRepository(repository));
     }
 
     /**
      * For offline initialisation from what user specified.
      */
     public GitHubRepo(String repoFullName, URL url) {
-        branchRepository = new GitHubBranchRepository(repoFullName, url);
-        tagRepository = new GitHubTagRepository(repoFullName, url);
-        prRepository = new GitHubPRRepository(repoFullName, url);
+        this(new GitHubBranchRepository(repoFullName, url), new GitHubTagRepository(repoFullName, url), new GitHubPRRepository(repoFullName, url));
     }
 
+    public GitHubRepo(GitHubBranchRepository branchRepository, GitHubTagRepository tagRepository, GitHubPRRepository prRepository) {
+        this.branchRepository = branchRepository;
+        this.tagRepository = tagRepository;
+        this.prRepository = prRepository;
+    }
 
     public GitHubBranchRepository getBranchRepository() {
         return branchRepository;
     }
-    
+
     public GitHubTagRepository getTagRepository() {
         return tagRepository;
     }
@@ -93,7 +95,9 @@ public class GitHubRepo implements Action {
             prRepository = new GitHubPRRepository(remoteRepo);
         }
 
-        owner.save();
+        if (owner != null) {
+            owner.save();
+        }
     }
 
     public void sync(GHRepository remoteRepo) {

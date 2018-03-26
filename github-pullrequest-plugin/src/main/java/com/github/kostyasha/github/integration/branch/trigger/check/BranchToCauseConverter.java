@@ -79,8 +79,21 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
 
     @Override
     public GitHubBranchCause apply(final GHBranch remoteBranch) {
+        String branchName = remoteBranch.getName();
+        GitHubBranch localBranch = localBranches.getBranches().get(branchName);
+
+        GitHubBranchDecisionContext context = newGitHubBranchDecisionContext()
+                .withListener(listener)
+                .withLocalRepo(localBranches)
+                .withRemoteBranch(remoteBranch)
+                .withLocalBranch(localBranch)
+                .withBranchTrigger(trigger)
+                .withBranchHandler(handler)
+                .withSCMSource(source)
+                .build();
+        
         List<GitHubBranchCause> causes = getEvents().stream()
-                .map(event -> toCause(event, remoteBranch))
+                .map(event -> toCause(event, context))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
@@ -106,27 +119,12 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
         return cause;
     }
 
-    private GitHubBranchCause toCause(GitHubBranchEvent event, GHBranch remoteBranch) {
-        String branchName = remoteBranch.getName();
-        GitHubBranch localBranch = localBranches.getBranches().get(branchName);
-
+    private GitHubBranchCause toCause(GitHubBranchEvent event, GitHubBranchDecisionContext context) {
         try {
-
-            GitHubBranchDecisionContext context = newGitHubBranchDecisionContext()
-                    .withListener(listener)
-                    .withLocalRepo(localBranches)
-                    .withRemoteBranch(remoteBranch)
-                    .withLocalBranch(localBranch)
-                    .withBranchTrigger(trigger)
-                    .withBranchHandler(handler)
-                    .withSCMSource(source)
-                    .build();
-
-            return event.check(context);
+            return context.checkEvent(event);
         } catch (IOException e) {
-            LOGGER.error("Event check failed, skipping branch [{}].", branchName, e);
-            listener.error("Event check failed, skipping branch [{}] {}", branchName, e);
-
+            LOGGER.error("Event check failed, skipping branch [{}].", context.getLocalBranch().getName(), e);
+            listener.error("Event check failed, skipping branch [{}] {}", context.getLocalBranch().getName(), e);
             return null;
         }
     }

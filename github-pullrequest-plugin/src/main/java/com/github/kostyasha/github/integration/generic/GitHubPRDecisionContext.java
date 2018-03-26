@@ -1,16 +1,14 @@
 package com.github.kostyasha.github.integration.generic;
 
-import com.github.kostyasha.github.integration.branch.GitHubBranch;
-import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
-import com.github.kostyasha.github.integration.multibranch.handler.GitHubBranchHandler;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubPRHandler;
-import hudson.model.Item;
 import hudson.model.TaskListener;
+
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
+import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction;
-import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHPullRequest;
 
 import javax.annotation.CheckForNull;
@@ -19,19 +17,15 @@ import javax.annotation.Nonnull;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
+
 /**
  * @author Kanstantsin Shautsou
  */
-public class GitHubPRDecisionContext extends GitHubDecisionContext {
+public class GitHubPRDecisionContext extends GitHubDecisionContext<GitHubPREvent, GitHubPRCause> {
     private final GHPullRequest remotePR;
     private final GitHubPRPullRequest localPR;
     private final GitHubPRUserRestriction prUserRestriction;
-
-    private final GitHubSCMSource source;
-    // depends on what job type it used
-    private final GitHubPRHandler prHandler;
-    private final GitHubPRTrigger prTrigger;
-
 
     protected GitHubPRDecisionContext(@CheckForNull GHPullRequest remotePR,
                                       @CheckForNull GitHubPRPullRequest localPR,
@@ -40,13 +34,10 @@ public class GitHubPRDecisionContext extends GitHubDecisionContext {
                                       GitHubPRHandler prHandler,
                                       GitHubPRTrigger prTrigger,
                                       @Nonnull TaskListener listener) {
-        super(listener);
+        super(listener, prTrigger, source, prHandler);
         this.remotePR = remotePR;
         this.localPR = localPR;
         this.prUserRestriction = prUserRestriction;
-        this.source = source;
-        this.prHandler = prHandler;
-        this.prTrigger = prTrigger;
     }
 
     /**
@@ -71,20 +62,25 @@ public class GitHubPRDecisionContext extends GitHubDecisionContext {
         return prUserRestriction;
     }
 
+    @Override
+    public GitHubPRTrigger getTrigger() {
+        return (GitHubPRTrigger) super.getTrigger();
+    }
 
-    @CheckForNull
-    public GitHubPRHandler getPrHandler() {
-        return prHandler;
+    @Override
+    public GitHubPRHandler getHandler() {
+        return (GitHubPRHandler) super.getHandler();
     }
 
     @CheckForNull
-    public GitHubSCMSource getSource() {
-        return source;
-    }
-
-    @CheckForNull
+    @Deprecated
     public GitHubPRTrigger getPrTrigger() {
-        return prTrigger;
+        return getTrigger();
+    }
+
+    @Override
+    public GitHubPRCause checkEvent(GitHubPREvent event) throws IOException {
+        return event.check(this);
     }
 
     public static class Builder {

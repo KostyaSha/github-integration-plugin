@@ -3,7 +3,9 @@ package com.github.kostyasha.github.integration.generic;
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubTagHandler;
 import com.github.kostyasha.github.integration.tag.GitHubTag;
+import com.github.kostyasha.github.integration.tag.GitHubTagCause;
 import com.github.kostyasha.github.integration.tag.GitHubTagRepository;
+import com.github.kostyasha.github.integration.tag.events.GitHubTagEvent;
 
 import hudson.model.TaskListener;
 import org.kohsuke.github.GHTag;
@@ -13,24 +15,22 @@ import javax.annotation.Nonnull;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
+
 /**
  * @author Kanstantsin Shautsou
  */
-public class GitHubTagDecisionContext extends GitHubDecisionContext {
+public class GitHubTagDecisionContext extends GitHubDecisionContext<GitHubTagEvent, GitHubTagCause> {
 
     private final GHTag remoteTag;
     private final GitHubTag localTag;
     private final GitHubTagRepository localRepo;
-    private final GitHubTagHandler tagHandler;
-    private final GitHubSCMSource scmSource;
 
     public GitHubTagDecisionContext(GHTag remoteTag, GitHubTag localTag, @Nonnull GitHubTagRepository localRepo, GitHubTagHandler tagHandler, GitHubSCMSource scmSource, TaskListener listener) {
-        super(listener);
+        super(listener, null, scmSource, tagHandler);
         this.remoteTag = remoteTag;
         this.localTag = localTag;
         this.localRepo = localRepo;
-        this.tagHandler = tagHandler;
-        this.scmSource = scmSource;
     }
 
     /**
@@ -57,12 +57,14 @@ public class GitHubTagDecisionContext extends GitHubDecisionContext {
         return localRepo;
     }
 
-    public GitHubTagHandler getTagHandler() {
-        return tagHandler;
+    @Override
+    public GitHubTagHandler getHandler() {
+        return (GitHubTagHandler) super.getHandler();
     }
-
-    public GitHubSCMSource getScmSource() {
-        return scmSource;
+    
+    @Override
+    public GitHubTagCause checkEvent(GitHubTagEvent event) throws IOException {
+        return event.check(this);
     }
 
     public static class Builder {

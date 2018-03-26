@@ -1,8 +1,10 @@
 package com.github.kostyasha.github.integration.generic;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranch;
+import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
+import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubBranchHandler;
 import hudson.model.TaskListener;
@@ -14,30 +16,26 @@ import javax.annotation.Nonnull;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
+
 /**
  * @author Kanstantsin Shautsou
  */
-public class GitHubBranchDecisionContext extends GitHubDecisionContext {
+public class GitHubBranchDecisionContext extends GitHubDecisionContext<GitHubBranchEvent, GitHubBranchCause> {
 
     private final GHBranch remoteBranch;
     private final GitHubBranch localBranch;
     private final GitHubBranchRepository localRepo;
-    private final GitHubBranchHandler branchHandler;
-    private final GitHubSCMSource scmSource;
-    private final GitHubBranchTrigger branchTrigger;
 
     public GitHubBranchDecisionContext(GHBranch remoteBranch, GitHubBranch localBranch,
                                        @Nonnull GitHubBranchRepository localRepo,
                                        GitHubBranchHandler branchHandler,
                                        GitHubSCMSource scmSource,
                                        GitHubBranchTrigger branchTrigger, TaskListener listener) {
-        super(listener);
+        super(listener, branchTrigger, scmSource, branchHandler);
         this.remoteBranch = remoteBranch;
         this.localBranch = localBranch;
         this.localRepo = localRepo;
-        this.branchHandler = branchHandler;
-        this.scmSource = scmSource;
-        this.branchTrigger = branchTrigger;
     }
 
     /**
@@ -64,16 +62,24 @@ public class GitHubBranchDecisionContext extends GitHubDecisionContext {
         return localRepo;
     }
 
-    public GitHubBranchHandler getBranchHandler() {
-        return branchHandler;
+    @Override
+    public GitHubBranchTrigger getTrigger() {
+        return (GitHubBranchTrigger) super.getTrigger();
     }
 
-    public GitHubSCMSource getScmSource() {
-        return scmSource;
+    @Override
+    public GitHubBranchHandler getHandler() {
+        return (GitHubBranchHandler) super.getHandler();
     }
 
+    @Deprecated
     public GitHubBranchTrigger getBranchTrigger() {
-        return branchTrigger;
+        return getTrigger();
+    }
+
+    @Override
+    public GitHubBranchCause checkEvent(GitHubBranchEvent event) throws IOException {
+        return event.check(this);
     }
 
     public static class Builder {

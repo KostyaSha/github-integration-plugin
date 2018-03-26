@@ -90,8 +90,9 @@ public class PullRequestToCauseConverterTest {
     public void shouldCallEventCheck() throws Exception {
         when(local.getPulls()).thenReturn(ImmutableMap.of(1, localPR));
         when(remotePR.getNumber()).thenReturn(1);
+        when(trigger.getEvents()).thenReturn(asList(event));
 
-        toGitHubPRCause(local, tlRule.getListener(), trigger).toCause(remotePR).apply(event);
+        toGitHubPRCause(local, tlRule.getListener(), trigger).apply(remotePR);
 
         verify(event).check(newGitHubPRDecisionContext()
                 .withPrTrigger(eq(trigger))
@@ -106,10 +107,12 @@ public class PullRequestToCauseConverterTest {
     public void shouldReturnCauseOnSuccessfulOpenEventCheck() throws Exception {
         when(local.getPulls()).thenReturn(new HashMap<Integer, GitHubPRPullRequest>());
         when(remotePR.getNumber()).thenReturn(1);
+        when(trigger.getEvents()).thenReturn(asList(
+                new GitHubPROpenEvent()
+        ));
 
         GitHubPRCause cause = toGitHubPRCause(local, tlRule.getListener(), trigger)
-                .toCause(remotePR)
-                .apply(new GitHubPROpenEvent());
+                .apply(remotePR);
 
         assertThat("open cause", cause, notNullValue(GitHubPRCause.class));
         assertThat("pr num in cause", cause.getNumber(), is(1));

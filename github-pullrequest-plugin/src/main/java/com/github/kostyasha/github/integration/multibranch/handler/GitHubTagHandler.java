@@ -126,8 +126,7 @@ public class GitHubTagHandler extends GitHubHandler {
             GitHubTagSCMHead scmHead = new GitHubTagSCMHead(tagCause.getTagName(), source.getId());
             GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, commitSha, tagCause);
             try {
-                context.forceNextBuild(scmRevision);
-                context.getObserver().observe(scmHead, scmRevision);
+                context.forceNextBuild(scmHead, scmRevision);
                 triggeredTags.add(scmHead.getName());
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace(listener.getLogger());
@@ -145,7 +144,7 @@ public class GitHubTagHandler extends GitHubHandler {
                     try {
                         GitHubTagSCMHead scmHead = new GitHubTagSCMHead(value.getName(), source.getId());
                         GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getCommitSha(), null);
-                        context.getObserver().observe(scmHead, scmRevision);
+                        context.preventNextBuild(scmHead, scmRevision);
                     } catch (IOException | InterruptedException e) {
                         // try as much as can
                         e.printStackTrace(listener.getLogger());

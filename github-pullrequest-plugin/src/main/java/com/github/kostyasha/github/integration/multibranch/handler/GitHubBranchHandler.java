@@ -124,8 +124,7 @@ public class GitHubBranchHandler extends GitHubHandler {
             GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(branchCause.getBranchName(), source.getId());
             GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, commitSha, branchCause);
             try {
-                context.forceNextBuild(scmRevision);
-                context.getObserver().observe(scmHead, scmRevision);
+                context.forceNextBuild(scmHead, scmRevision);
                 triggeredBranches.add(scmHead.getName());
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace(listener.getLogger());
@@ -143,7 +142,7 @@ public class GitHubBranchHandler extends GitHubHandler {
                     try {
                         GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(value.getName(), source.getId());
                         GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getCommitSha(), null);
-                        context.getObserver().observe(scmHead, scmRevision);
+                        context.preventNextBuild(scmHead, scmRevision);
                     } catch (IOException | InterruptedException e) {
                         // try as much as can
                         e.printStackTrace(listener.getLogger());

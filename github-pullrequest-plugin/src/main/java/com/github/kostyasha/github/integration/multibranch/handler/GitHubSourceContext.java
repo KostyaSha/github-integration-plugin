@@ -93,22 +93,48 @@ public class GitHubSourceContext {
 
     /**
      * Force job to unconditionally build on any next revision
+     * 
+     * @throws InterruptedException
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public void forceNextBuild(SCMRevision nextRev) throws IOException {
+    public void forceNextBuild(SCMHead scmHead, SCMRevision scmRevision) throws IOException, InterruptedException {
         SCMSourceOwner owner = source.getOwner();
         if (owner instanceof MultiBranchProject) {
             MultiBranchProject mb = (MultiBranchProject) owner;
-
             BranchProjectFactory pf = mb.getProjectFactory();
-            for (Object o : mb.getItems()) {
-                Job j = (Job) o;
+            Job j = mb.getItemByBranchName(scmHead.getName());
+            if (j != null) {
                 SCMRevision rev = pf.getRevision(j);
-                if (rev != null && rev.equals(nextRev)) {
-                    pf.setRevisionHash(j, new DummyRevision(nextRev.getHead()));
+                if (rev != null && rev.equals(scmRevision)) {
+                    pf.setRevisionHash(j, new DummyRevision(scmHead));
                 }
             }
         }
+
+        getObserver().observe(scmHead, scmRevision);
+    }
+
+    /**
+     * Force job to unconditionally build on any next revision
+     * 
+     * @throws InterruptedException
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public void preventNextBuild(SCMHead scmHead, SCMRevision scmRevision) throws IOException, InterruptedException {
+        SCMSourceOwner owner = source.getOwner();
+        if (owner instanceof MultiBranchProject) {
+            MultiBranchProject mb = (MultiBranchProject) owner;
+            BranchProjectFactory pf = mb.getProjectFactory();
+            Job j = mb.getItemByBranchName(scmHead.getName());
+            if (j != null) {
+                SCMRevision rev = pf.getRevision(j);
+                if (rev == null || !rev.equals(scmRevision)) {
+                    pf.setRevisionHash(j, scmRevision);
+                }
+            }
+        }
+
+        getObserver().observe(scmHead, scmRevision);
     }
 
     /**

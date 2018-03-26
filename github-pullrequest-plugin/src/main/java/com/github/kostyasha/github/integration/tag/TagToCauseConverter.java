@@ -91,7 +91,7 @@ public class TagToCauseConverter implements Function<GHTag, GitHubTagCause> {
                     .withSCMSource(source)
                     .build();
 
-            return event.check(context);
+            return context.checkEvent(event);
         } catch (IOException e) {
             LOGGER.error("Event check failed, skipping tag [{}].", tagName, e);
             listener.error("Event check failed, skipping tag [{}] {}", tagName, e);

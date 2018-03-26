@@ -150,8 +150,7 @@ public class GitHubPRHandler extends GitHubHandler {
             GitHubPRSCMHead scmHead = new GitHubPRSCMHead(prCause, source.getId());
             GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, prCause.getHeadSha(), prCause);
             try {
-                context.forceNextBuild(scmRevision);
-                context.getObserver().observe(scmHead, scmRevision);
+                context.forceNextBuild(scmHead, scmRevision);
                 causedPRs.add(prCause.getNumber());
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace(listener.getLogger());
@@ -169,7 +168,7 @@ public class GitHubPRHandler extends GitHubHandler {
                     try {
                         GitHubPRSCMHead scmHead = new GitHubPRSCMHead(value.getNumber(), value.getBaseRef(), source.getId());
                         GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getHeadSha(), null);
-                        context.getObserver().observe(scmHead, scmRevision);
+                        context.preventNextBuild(scmHead, scmRevision);
                     } catch (IOException | InterruptedException e) {
                         // try as much as can
                         e.printStackTrace(listener.getLogger());

@@ -98,12 +98,12 @@ public class GitHubPRDescriptionEvent extends GitHubPREvent {
     }
 
     private String getFullName(GitHubPRDecisionContext context) {
-        GitHubPRTrigger prTrigger = context.getPrTrigger();
+        GitHubPRTrigger prTrigger = context.getTrigger();
         if (nonNull(prTrigger)) {
             return prTrigger.getJob().getFullName();
         }
 
-        return context.getSource().getOwner().getFullName();
+        return context.getScmSource().getOwner().getFullName();
     }
 
     public String getSkipMsg() {
