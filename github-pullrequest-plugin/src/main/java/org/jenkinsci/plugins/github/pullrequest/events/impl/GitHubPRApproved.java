@@ -34,7 +34,7 @@ public class GitHubPRApproved extends GitHubPREvent {
     private static final String DISPLAY_NAME = "Pull Request Approved";
     private static final Logger LOG = LoggerFactory.getLogger(GitHubPRApproved.class); //NOPMD
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private GHPullRequestReview prr = new GHPullRequestReview();
+    private static final String PATH = System.getProperty("user.home") + "/.jenkins/workspace";
 
     @DataBoundConstructor
     public GitHubPRApproved() {
@@ -47,8 +47,7 @@ public class GitHubPRApproved extends GitHubPREvent {
         GitHubPRCause cause = null;
 
         // analyse the json file
-        String path = System.getProperty("user.home") + "/.jenkins/workspace";
-        File fileName = new File(path + "/pr_" + remotePR.getRepository().getName() + "_#" + String.valueOf(remotePR.getNumber()) + ".json");
+        File fileName = new File(PATH + "/pr_" + remotePR.getRepository().getName() + "_#" + String.valueOf(remotePR.getNumber()) + ".json");
         if(!fileName.exists()){
             LOG.warn("File name " + fileName.getName() + " does not exist! Impossible evaluating if the PR is approved.");
             return cause;
