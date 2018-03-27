@@ -46,6 +46,7 @@ public class GitHubPRApproved extends GitHubPREvent {
 
         GitHubPRCause cause = null;
 
+        
         // analyse the json file
         File fileName = new File(PATH + "/pr_" + remotePR.getRepository().getName() + "_#" + String.valueOf(remotePR.getNumber()) + ".json");
         if(!fileName.exists()){
@@ -76,7 +77,7 @@ public class GitHubPRApproved extends GitHubPREvent {
         if (approved){
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": state has changed (PR was approved)");
-            cause = new GitHubPRCause(remotePR, "PR was approved, triggered because: " + pras.getAction() + " commit hash: " + remotePR.getHead().getSha(), false); 
+            cause = new GitHubPRCause(remotePR, "PR was approved, triggered because: " + pras.getAction(), false); 
 
             // Set PR owner's email
             cause.withPROwnerEmail(remotePR.getUser().getEmail());
