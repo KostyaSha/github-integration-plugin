@@ -39,22 +39,13 @@ public abstract class GitHubTriggerDescriptor extends TriggerDescriptor {
     }
 
     private String publishedURL;
-    private String usersAndEmails;
 
     public String getPublishedURL() {
         return publishedURL;
     }
 
-    public String getUsersAndEmails() {
-        return usersAndEmails;
-    }
-
     public void setPublishedURL(String publishedURL) {
         this.publishedURL = publishedURL;
-    }
-
-    public void setUsersAndEmails(String usersAndEmails) {
-        this.usersAndEmails = usersAndEmails;
     }
 
     public String getJenkinsURL() {

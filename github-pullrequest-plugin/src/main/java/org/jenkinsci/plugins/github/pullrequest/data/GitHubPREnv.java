@@ -30,7 +30,8 @@ public enum GitHubPREnv {
     STATE,
     COMMENT_BODY,
     COMMENT_BODY_MATCH,
-    LABELS;
+    LABELS,
+    REVIEWERS_EMAILS;
 
     public static final String PREFIX = "GITHUB_PR_";
 

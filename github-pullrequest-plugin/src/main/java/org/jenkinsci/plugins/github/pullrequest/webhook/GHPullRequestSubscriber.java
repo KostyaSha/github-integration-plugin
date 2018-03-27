@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 import java.io.File;
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 
@@ -49,6 +50,8 @@ import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
 @Extension
 public class GHPullRequestSubscriber extends GHEventsSubscriber {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHPullRequestSubscriber.class);
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final String PATH = System.getProperty("user.home") + "/.jenkins/workspace";
 
     @Override
     protected boolean isApplicable(Job<?, ?> job) {
@@ -57,8 +60,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
 
     @Override
     protected Set<GHEvent> events() {
-        // TODO add push event
-        return immutableEnumSet(GHEvent.PULL_REQUEST, GHEvent.ISSUE_COMMENT, GHEvent.PULL_REQUEST_REVIEW,GHEvent.PULL_REQUEST_REVIEW_COMMENT);
+        return immutableEnumSet(GHEvent.PULL_REQUEST, GHEvent.ISSUE_COMMENT, GHEvent.PULL_REQUEST_REVIEW);
     }
 
     @Override
@@ -79,7 +81,6 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                     case HEAVY_HOOKS_CRON:
                     case HEAVY_HOOKS: {
                         LOGGER.debug("Queued check for {} (PR #{}) after heavy hook", job.getName(), info.getNum());
-                        LOGGER.warn("Heavy hooks");
                         //Trigger the job
                         trigger.queueRun(job, info.getNum());
                         break;
@@ -106,10 +107,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
     }
 
     private PullRequestInfo extractPullRequestInfo(GHEvent event, String payload, GitHub gh) throws IOException {
-        LOGGER.warn("extractPullRequestInfo(), even: " + event);
-        GitHubPRTrigger.DescriptorImpl desc = (GitHubPRTrigger.DescriptorImpl) Jenkins.getInstance().getDescriptor(GitHubPRTrigger.class);
-        LOGGER.warn("Users and emails\n" + desc.getUsersAndEmails());
-        LOGGER.warn("Payload:\n" + payload);
+        LOGGER.debug("Payload:\n" + payload);
         switch (event) {
             case ISSUE_COMMENT: {
                 IssueComment commentPayload = gh.parseEventPayload(new StringReader(payload), IssueComment.class);
@@ -119,14 +117,15 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
             }
 
             case PULL_REQUEST: {
-                LOGGER.warn("\nParsing the pull request\n");
                 PullRequest pr = gh.parseEventPayload(new StringReader(payload), PullRequest.class);
 
-                // If the number of reviews changed we update the PR approval state  
-                if(!pr.getAction().equals("review_requested") && !pr.getAction().equals("review_requested_removed")){
-                    String home = System.getProperty("user.home")+ "/.jenkins/workspace";
-                    File fileName = new File(home + "/pr_" + pr.getRepository().getName() + "_#" + String.valueOf(pr.getPullRequest().getNumber()) + ".json");
+                File fileName = new File(PATH + "/pr_" + pr.getRepository().getName() + "_#" + String.valueOf(pr.getNumber()) + ".json");
+
+                // If the PR's action is not review_requested or *_removed it does not contain the field
+                // requested_reviewers and throws an error.
+                if(!pr.getAction().equals("review_requested") && !pr.getAction().equals("review_request_removed")){
                     if(fileName.exists()){
+                        // If the PR is closed we delete the file
                         if(pr.getAction().equals("closed")){
                             if(fileName.delete()){
                                 LOGGER.info("PR is closed, file " + fileName.getName() + " deleted successfully");
@@ -135,46 +134,67 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                                 LOGGER.warn("PR is closed, impossible deleting file " + fileName.getName());
                             }
                         }
-                        else{
-                            ObjectMapper objectMapper = new ObjectMapper();
-                            PRApprovalState pras = objectMapper.readValue(fileName,PRApprovalState.class);
+                        else{ 
+                            // Update the action in the json file
+                            PRApprovalState pras = MAPPER.readValue(fileName,PRApprovalState.class);
                             pras.setAction(pr.getAction());
-                            objectMapper.writeValue(fileName,pras);
+                            MAPPER.writeValue(fileName,pras);
                         }
                     }
                     return new PullRequestInfo(pr.getPullRequest().getRepository().getFullName(), pr.getNumber());
                 }
 
-
-                List<GHUser> u = pr.getPullRequest().getRequestedReviewers();
-
-                if(u.size() == 0){
-                    LOGGER.warn("\nNo requested reviewers\n");
-                }
-                
                 PRApprovalState pras = new PRApprovalState();
-                pras.setAction(pr.getAction());
-                List<ReviewState> rs = new ArrayList<ReviewState>();
-                for(int i = 0; i < u.size() ; i++){
-                    LOGGER.warn("reviewer {}: {} ", i, u.get(i).getLogin());
-                    rs.add(new ReviewState(u.get(i).getLogin(),u.get(i).getEmail()));
+                // Get the reviewers and add the reviewer specified in the payload.
+                if(fileName.exists()){
+                    pras = MAPPER.readValue(fileName,PRApprovalState.class);
                 }
+
+                List<ReviewState> rs = new ArrayList<ReviewState>();
+                if(pr.getAction().equals("review_requested")){
+                
+                    // Add existing reviewers
+                    for(ReviewState reviewState : pras.getReviews_states()){
+                        rs.add(reviewState);
+                    }
+         
+                    for(GHUser user : pr.getPullRequest().getRequestedReviewers()){
+                        // check for duplicates
+                        // Notice: sometimes github might not send you all the reviewers at once but just the requested one.
+                        boolean duplicate = false;
+                        for(ReviewState review : rs){
+                            if(user.getLogin().equals(review.getReviewer()) ){
+                                duplicate = true;
+                                break;
+                            }
+                        }
+                        if(!duplicate){
+                            LOGGER.info("Added reviewer: {} ", user.getLogin());
+                            rs.add(new ReviewState(user.getLogin(),user.getEmail()));
+                        }
+                    }
+                }
+       
+                // Remove the reviewer from the json file.
+                if(pr.getAction().equals("review_request_removed")){
+                    rs = pras.getReviews_states();
+                    // Remove reviewers 
+                    for (Iterator<ReviewState> iter = rs.listIterator(); iter.hasNext(); ){
+                        ReviewState reviewState = iter.next();
+                        if(pr.getRequestedReviewer().getLogin().equals(reviewState.getReviewer())){
+                            iter.remove();
+                        }
+                    }
+                }
+
+                pras.setAction(pr.getAction());
                 pras.setReviews_states(rs);
                 
-                ObjectMapper objectMapper = new ObjectMapper();
-                // LOGGER.warn(objectMapper.writeValueAsString(pras));
                 try{
-                    //String home = System.getProperty("user.home");
-                    String home = System.getProperty("user.home")+ "/.jenkins/workspace";
-                    File fileName = new File(home + "/pr_" + pr.getRepository().getName() + "_#" + String.valueOf(pr.getNumber()) + ".json");
-                    objectMapper.writeValue(fileName,pras);
-                    TimeUnit.SECONDS.sleep(2);//wait 2 seconds to give time to fully write the .json
+                    MAPPER.writeValue(fileName,pras);
                 }
                 catch(java.lang.NullPointerException e){
-                    LOGGER.warn("Exception writin the PRApprovalObject: " + e.getMessage());
-                }
-                catch(java.lang.InterruptedException e){
-                    LOGGER.warn("Exception writin the PRApprovalObject: " + e.getMessage());    
+                    LOGGER.error("Exception writing the PRApprovalObject: " + e.getMessage());
                 }
               
                 return new PullRequestInfo(pr.getPullRequest().getRepository().getFullName(), pr.getNumber());
@@ -184,32 +204,28 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
                 PullRequestReview prr = gh.parseEventPayload(new StringReader(payload), PullRequestReview.class);
 
                 //Read the file 
-                String home = System.getProperty("user.home") + "/.jenkins/workspace";
-                File fileName = new File(home + "/pr_" + prr.getRepository().getName() + "_#" + String.valueOf(prr.getPullRequest().getNumber()) + ".json");
+                File fileName = new File(PATH + "/pr_" + prr.getRepository().getName() + "_#" + String.valueOf(prr.getPullRequest().getNumber()) + ".json");
 
                 // Update PR state 
-                // So far it just update the state of the current reviewer. 
-                ObjectMapper objectMapper = new ObjectMapper();
-                PRApprovalState pras = objectMapper.readValue(fileName,PRApprovalState.class);
+                PRApprovalState pras;
+                pras = MAPPER.readValue(fileName,PRApprovalState.class);
                 List<ReviewState> reviewStates = pras.getReviews_states();
 
                 // Update the state of the current reviewer
-                pras.setAction("reviewed");
+                pras.setAction(prr.getAction());
                 for( int i = 0; i < reviewStates.size(); i++ ){
                     if(reviewStates.get(i).getReviewer().equals(prr.getReview().getUser().getLogin()) ){
                         reviewStates.get(i).setState(prr.getReview().getState());
                     }
                 }
                 pras.setReviews_states(reviewStates);
-                LOGGER.warn(objectMapper.writeValueAsString(pras));
-                objectMapper.writeValue(fileName,pras);
-
+                try{
+                    MAPPER.writeValue(fileName,pras);
+                }
+                catch(java.lang.NullPointerException e){
+                    LOGGER.error("Exception writing the PRApprovalObject: " + e.getMessage());
+                }
                 // Here we have to return the name of the repo.
-                return new PullRequestInfo(prr.getPullRequest().getRepository().getFullName(), prr.getPullRequest().getNumber());
-            }
-            case PULL_REQUEST_REVIEW_COMMENT: {
-                PullRequestReview prr = gh.parseEventPayload(new StringReader(payload), PullRequestReview.class);
-                LOGGER.warn("\n\n PullRequestReviewComment received \n\n" + payload);
                 return new PullRequestInfo(prr.getPullRequest().getRepository().getFullName(), prr.getPullRequest().getNumber());
             }
             default:

@@ -11,7 +11,8 @@ import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREventDescriptor;
 import org.jenkinsci.plugins.github.pullrequest.utils.PRApprovalState;
 import org.jenkinsci.plugins.github.pullrequest.utils.ReviewState;
-import org.kohsuke.github.GHIssueState;
+import static com.github.kostyasha.github.integration.generic.utils.RetryableGitHubOperation.execute;
+import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHPullRequestReview;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -32,6 +33,7 @@ import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 public class GitHubPRApproved extends GitHubPREvent {
     private static final String DISPLAY_NAME = "Pull Request Approved";
     private static final Logger LOG = LoggerFactory.getLogger(GitHubPRApproved.class); //NOPMD
+    private static final ObjectMapper MAPPER = new ObjectMapper();
     private GHPullRequestReview prr = new GHPullRequestReview();
 
     @DataBoundConstructor
@@ -43,21 +45,23 @@ public class GitHubPRApproved extends GitHubPREvent {
                                GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
 
         GitHubPRCause cause = null;
-        LOG.warn("Checking\n");
 
         // analyse the json file
-        //File fileName = new File(home + "/pr_" + remotePR.getRepository().getName() + "_#" + String.valueOf(remotePR.getNumber()) + ".json");
-        String home = System.getProperty("user.home") + "/.jenkins/workspace";
-        File fileName = new File(home + "/pr_" + remotePR.getRepository().getName() + "_#" + String.valueOf(remotePR.getNumber()) + ".json");
+        String path = System.getProperty("user.home") + "/.jenkins/workspace";
+        File fileName = new File(path + "/pr_" + remotePR.getRepository().getName() + "_#" + String.valueOf(remotePR.getNumber()) + ".json");
         if(!fileName.exists()){
-            LOG.warn("File name " + fileName.getName() + " does not exist!");
+            LOG.warn("File name " + fileName.getName() + " does not exist! Impossible evaluating if the PR is approved.");
             return cause;
         }
 
         // check json file
+        PRApprovalState pras = MAPPER.readValue(fileName,PRApprovalState.class);
+        if(pras.getAction().equals("review_request_removed")){ // don't trigger the job when a reviewer is removed
+            return null;
+        }
+
+        // check if all reviewers approved the PR
         boolean approved = true;
-        ObjectMapper objectMapper = new ObjectMapper();
-        PRApprovalState pras = objectMapper.readValue(fileName,PRApprovalState.class);
         for( ReviewState r : pras.getReviews_states() ){
             if(!r.getState().equals("approved")){
                 approved = false;
@@ -74,12 +78,28 @@ public class GitHubPRApproved extends GitHubPREvent {
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": state has changed (PR was approved)");
             cause = new GitHubPRCause(remotePR, "PR was approved, triggered because: " + pras.getAction() + " commit hash: " + remotePR.getHead().getSha(), false); 
+
+            // Set PR owner's email
+            cause.withPROwnerEmail(remotePR.getUser().getEmail());
+
+            // Set reviewers emails
+            final GitHub root = GitHub.connect(); //Connect to GitHub API
+            for(ReviewState reviewState : pras.getReviews_states()){
+                try {
+                    String email = execute(() -> (root.getUser(reviewState.getReviewer())).getEmail());
+                    if(!isNull(email)){
+                        cause.withPRReviewerEmail(email);
+                    }
+                } catch (Exception e) {
+                    LOG.error("Can't get GitHub reviewer email: ", e);
+                }
+            }
         }
         
         if (isNull(cause))
-            LOG.info("PR NOT approved\n");
+            LOG.info("PR NOT approved");
         else
-            LOG.info("PR approved\n");
+            LOG.info("PR approved");
 
         return cause;
     }

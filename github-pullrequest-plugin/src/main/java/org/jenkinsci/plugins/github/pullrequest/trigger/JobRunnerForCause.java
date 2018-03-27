@@ -21,6 +21,7 @@ import hudson.model.queue.QueueTaskFuture;
 import hudson.model.queue.SubTask;
 import hudson.security.ACL;
 import jenkins.model.ParameterizedJobMixIn;
+import jenkins.model.Jenkins;
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -53,6 +54,7 @@ import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.COND_REF
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.BODY;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.HEAD_SHA;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.LABELS;
+import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.REVIEWERS_EMAILS;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.NUMBER;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.SHORT_DESC;
 import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.SOURCE_BRANCH;
@@ -291,7 +293,8 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
                 STATE.param(String.valueOf(cause.getState())),
                 COMMENT_BODY.param(String.valueOf(cause.getCommentBody())),
                 COMMENT_BODY_MATCH.param(String.valueOf(cause.getCommentBodyMatch())),
-                LABELS.param(String.join(",", cause.getLabels()))
+                LABELS.param(String.join(",", cause.getLabels())),
+                REVIEWERS_EMAILS.param(String.join(" ",cause.getPRReviewersEmails()))
         );
         parameters.addAll(pluginParameters);
 
