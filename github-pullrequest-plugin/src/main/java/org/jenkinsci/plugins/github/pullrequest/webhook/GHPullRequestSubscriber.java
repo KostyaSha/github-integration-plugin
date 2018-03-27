@@ -49,7 +49,7 @@ import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
 @Extension
 public class GHPullRequestSubscriber extends GHEventsSubscriber {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHPullRequestSubscriber.class);
-    private static final String PATH = System.getProperty("user.home") + "/.jenkins3/workspace";
+    private static final String PATH = System.getProperty("user.home") + "/.jenkins/workspace";
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Override
