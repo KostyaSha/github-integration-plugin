@@ -32,7 +32,6 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
-
 import static com.google.common.collect.Sets.immutableEnumSet;
 import static java.lang.String.format;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
@@ -50,8 +49,8 @@ import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
 @Extension
 public class GHPullRequestSubscriber extends GHEventsSubscriber {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHPullRequestSubscriber.class);
+    private static final String PATH = System.getProperty("user.home") + "/.jenkins3/workspace";
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final String PATH = System.getProperty("user.home") + "/.jenkins/workspace";
 
     @Override
     protected boolean isApplicable(Job<?, ?> job) {
@@ -108,6 +107,7 @@ public class GHPullRequestSubscriber extends GHEventsSubscriber {
 
     private PullRequestInfo extractPullRequestInfo(GHEvent event, String payload, GitHub gh) throws IOException {
         LOGGER.debug("Payload:\n" + payload);
+
         switch (event) {
             case ISSUE_COMMENT: {
                 IssueComment commentPayload = gh.parseEventPayload(new StringReader(payload), IssueComment.class);
