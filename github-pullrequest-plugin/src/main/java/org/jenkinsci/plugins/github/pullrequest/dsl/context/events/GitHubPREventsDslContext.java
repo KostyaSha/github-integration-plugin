@@ -4,6 +4,7 @@ import javaposse.jobdsl.dsl.Context;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
 import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRCloseEvent;
+import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRCloseEvent;
 import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRCommentEvent;
 import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRCommitEvent;
 import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRDescriptionEvent;

@@ -6,6 +6,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GHLabel;
+import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
@@ -54,6 +55,7 @@ public class GitHubPRPullRequest {
     private String state;
 
     private boolean inBadState = false;
+    private List<GHUser> requestedReviewers;
 
     /**
      * Save only what we need for next comparison
@@ -68,6 +70,7 @@ public class GitHubPRPullRequest {
         title = pr.getTitle();
         baseRef = pr.getBase().getRef();
         htmlUrl = pr.getHtmlUrl();
+        requestedReviewers = pr.getRequestedReviewers();
 
         try {
             Date maxDate = new Date(0);

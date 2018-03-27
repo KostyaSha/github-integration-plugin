@@ -6,6 +6,7 @@ import hudson.model.Job;
 import hudson.security.ACL;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jenkinsci.plugins.github.extension.GHEventsSubscriber;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.jenkinsci.plugins.github.util.FluentIterableWrapper;
@@ -59,6 +60,7 @@ public class GHBranchSubscriber extends GHEventsSubscriber {
 
                 GitHubPRTriggerMode triggerMode = trigger.getTriggerMode();
 
+                
                 switch (triggerMode) {
                     case HEAVY_HOOKS_CRON:
                     case HEAVY_HOOKS: {

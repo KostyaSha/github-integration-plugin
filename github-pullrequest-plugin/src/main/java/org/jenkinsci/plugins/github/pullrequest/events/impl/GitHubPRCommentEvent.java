@@ -48,7 +48,6 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
     public GitHubPRCause check(@Nonnull GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
                                @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) {
         final PrintStream llog = listener.getLogger();
-
         GitHubPRCause cause = null;
         try {
             for (GHIssueComment issueComment : remotePR.getComments()) {

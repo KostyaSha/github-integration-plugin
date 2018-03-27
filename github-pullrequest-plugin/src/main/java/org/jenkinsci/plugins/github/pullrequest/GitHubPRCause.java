@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
@@ -47,6 +49,9 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
     private String state;
     private String commentBody;
     private String commentBodyMatch;
+    private String owner_email = "";
+    private List<String> reviewers_emails = new ArrayList<String>();;
+
 
     public GitHubPRCause() {
     }
@@ -240,6 +245,27 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
         return this;
     }
 
+    public GitHubPRCause withPROwnerEmail(String owner_email) {
+        this.owner_email = owner_email;
+        return this;
+    }
+
+    /**
+     * Set the list of emails of the PR reviewers.
+     */
+    public GitHubPRCause withPRReviewersEmails(List<String> reviewers_emails) {
+        this.reviewers_emails = reviewers_emails;
+        return this;
+    }
+
+    /**
+     * Add PR reviewer's email to the list of reviewers' emails.
+     */
+    public GitHubPRCause withPRReviewerEmail(String reviewer_email) {
+        this.reviewers_emails.add(reviewer_email);
+        return this;
+    }
+
     @Override
     public String getShortDescription() {
         return "GitHub PR #<a href=\"" + getHtmlUrl() + "\">" + number + "</a>, " + getReason();
@@ -319,6 +345,14 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
      */
     public String getCommentBodyMatch() {
         return commentBodyMatch;
+    }
+
+    public String getPROwnerEmail(){
+        return this.owner_email;
+    }
+
+    public List<String> getPRReviewersEmails(){
+        return this.reviewers_emails;
     }
 
     @Override

@@ -31,11 +31,16 @@ public class UserRestrictionFilter implements Predicate<GHPullRequest> {
 
     @Override
     public boolean apply(GHPullRequest remotePR) {
-        if (!userRestriction.isWhitelisted(remotePR.getUser())) {
-            listener.info("Skipping [#{} {}] because of user restriction (user - {})",
-                    remotePR.getNumber(), remotePR.getTitle(), remotePR.getUser());
-            return false;
+        try {
+            if (!userRestriction.isWhitelisted(remotePR.getUser())) {
+                listener.info("Skipping [#{} {}] because of user restriction (user - {})",
+                        remotePR.getNumber(), remotePR.getTitle(), remotePR.getUser());
+                return false;
+            }
+        } catch (java.io.IOException e) {
+            listener.info("IOException in getting the user of the PR: ", e.getMessage());
         }
+
 
         return true;
     }
