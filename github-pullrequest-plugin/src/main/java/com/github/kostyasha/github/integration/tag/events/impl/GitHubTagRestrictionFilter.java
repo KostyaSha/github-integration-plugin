@@ -75,7 +75,6 @@ public class GitHubTagRestrictionFilter extends GitHubTagEvent {
     @Override
     public GitHubTagCause check(@Nonnull GitHubTagDecisionContext context) throws IOException {
         GHTag remoteTag = context.getRemoteTag();
-        GitHubTagRepository localRepo = context.getLocalRepo();
 
         String name = remoteTag.getName();
         if (matchCriteria.isEmpty() || tagIsAllowed(name)) {
