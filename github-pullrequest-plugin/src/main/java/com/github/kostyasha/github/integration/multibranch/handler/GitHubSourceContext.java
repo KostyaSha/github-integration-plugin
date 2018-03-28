@@ -93,36 +93,34 @@ public class GitHubSourceContext {
         return true;
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     public void observe(@Nonnull GitHubCause<?> cause) {
         try {
             GitHubSCMRevision scmRevision = cause.createSCMRevision(source.getId());
-            SCMHead scmHead = scmRevision.getHead();
-
-            SCMSourceOwner owner = source.getOwner();
-            if (owner instanceof MultiBranchProject) {
-                MultiBranchProject mb = (MultiBranchProject) owner;
-                BranchProjectFactory pf = mb.getProjectFactory();
-                Job j = mb.getItemByBranchName(scmHead.getName());
-                if (j != null) {
-                    SCMRevision rev = pf.getRevision(j);
-                    if (cause.isSkip()) {
-                        // set current rev to the same as we're triggering to prevent schedule
-                        if (rev == null || !rev.equals(scmRevision)) {
-                            pf.setRevisionHash(j, scmRevision);
-                        }
-                    } else {
-                        // set current rev to dummy, to force schedule
-                        if (rev != null && rev.equals(scmRevision)) {
-                            pf.setRevisionHash(j, new DummyRevision(scmHead));
-                        }
-                    }
-                }
+            if (!cause.isSkip()) {
+                forceScheduling(scmRevision);
             }
-
-            getObserver().observe(scmHead, scmRevision);
+            getObserver().observe(scmRevision.getHead(), scmRevision);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace(listener.getLogger());
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private void forceScheduling(GitHubSCMRevision scmRevision) throws IOException {
+        SCMSourceOwner owner = source.getOwner();
+        if (owner instanceof MultiBranchProject) {
+            MultiBranchProject mb = (MultiBranchProject) owner;
+            BranchProjectFactory pf = mb.getProjectFactory();
+
+            SCMHead scmHead = scmRevision.getHead();
+            Job j = mb.getItemByBranchName(scmHead.getName());
+            if (j != null) {
+                SCMRevision rev = pf.getRevision(j);
+                // set current rev to dummy to force scheduling
+                if (rev != null && rev.equals(scmRevision)) {
+                    pf.setRevisionHash(j, new DummyRevision(scmHead));
+                }
+            }
         }
     }
 

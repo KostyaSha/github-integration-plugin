@@ -1,0 +1,1 @@
+package com.github.kostyasha.github.integration.multibranch.GitHubBranchBuildStrategy

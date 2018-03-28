@@ -19,7 +19,7 @@ f.block() {
         f.textbox(field: "id", name: "id", value: instance.id)
     }
 
-    f.entry(field: 'projectUrlStr', title: _('github.project.url')) {
+    f.entry(field: 'projectUrlStr', title: _('GitHub project url')) {
         f.textbox()
     }
 
