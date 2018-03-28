@@ -39,7 +39,6 @@ public class GitHubBranchCreatedEvent extends GitHubBranchEvent {
     public GitHubBranchCause check(@Nonnull GitHubBranchDecisionContext context) throws IOException {
         GHBranch remoteBranch = context.getRemoteBranch();
         GitHubBranch localBranch = context.getLocalBranch();
-        GitHubBranchRepository localRepo = context.getLocalRepo();
         TaskListener listener = context.getListener();
 
         if (remoteBranch == null && localBranch == null) {
@@ -56,7 +55,7 @@ public class GitHubBranchCreatedEvent extends GitHubBranchEvent {
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": '" + remoteBranch.getName() + "'");
             LOG.debug("{}: '{}'", DISPLAY_NAME, remoteBranch.getName());
-            cause = new GitHubBranchCause(remoteBranch, localRepo, DISPLAY_NAME, false);
+            cause = context.newCause(DISPLAY_NAME, false);
         }
 
         return cause;

@@ -67,6 +67,14 @@ public class GitHubTagDecisionContext extends GitHubDecisionContext<GitHubTagEve
         return event.check(this);
     }
 
+    @Override
+    public GitHubTagCause newCause(String reason, boolean skip) {
+        if (remoteTag != null) {
+            return new GitHubTagCause(remoteTag, localRepo, reason, skip);
+        }
+        return new GitHubTagCause(localTag, localRepo, reason, skip);
+    }
+
     public static class Builder {
         private GHTag remoteTag = null;
         private GitHubTag localTag = null;

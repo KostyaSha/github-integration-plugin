@@ -204,7 +204,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
             }
 
             final GitHubPRPullRequest localPR = getPulls().get(prId);
-            final GitHubPRCause cause = new GitHubPRCause(localPR, null, false, "Manual run.");
+            final GitHubPRCause cause = new GitHubPRCause(localPR, null, this, false, "Manual run.");
 
             final JobRunnerForCause runner = new JobRunnerForCause(getJob(), ghPRTriggerFromJob(getJob()));
             final QueueTaskFuture<?> queueTaskFuture = runner.startJob(cause);

@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
 /**
  * @author Kanstantsin Shautsou
  */
-public class SkipPRInBadState implements Predicate<GHPullRequest> {
+public class SkipPRInBadState implements Predicate<GHPullRequest>, java.util.function.Predicate<GHPullRequest> {
     private static final Logger LOG = LoggerFactory.getLogger(NotUpdatedPRFilter.class);
 
     private final GitHubPRRepository localRepo;
@@ -43,5 +43,10 @@ public class SkipPRInBadState implements Predicate<GHPullRequest> {
         }
 
         return true;
+    }
+
+    @Override
+    public boolean test(GHPullRequest remotePR) {
+        return apply(remotePR);
     }
 }

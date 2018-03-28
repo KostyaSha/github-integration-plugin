@@ -5,6 +5,7 @@ import hudson.Extension;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREventDescriptor;
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction;
@@ -61,7 +62,7 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
                     llog.printf("%s: state has changed (new comment found - '%s')%n",
                             DISPLAY_NAME, issueComment.getBody());
 
-                    cause = checkComment(issueComment, prUserRestriction, remotePR, listener);
+                    cause = checkComment(prDecisionContext, issueComment, prUserRestriction, listener);
                     if (nonNull(cause)) {
                         break;
                     }
@@ -80,9 +81,9 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
         return cause;
     }
 
-    private GitHubPRCause checkComment(GHIssueComment issueComment,
+    private GitHubPRCause checkComment(GitHubPRDecisionContext prDecisionContext,
+                                       GHIssueComment issueComment,
                                        GitHubPRUserRestriction userRestriction,
-                                       GHPullRequest remotePR,
                                        TaskListener listener) {
         GitHubPRCause cause = null;
         try {
@@ -93,7 +94,7 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
                 if (matcher.matches()) {
                     listener.getLogger().println(DISPLAY_NAME + ": matching comment " + body);
                     LOG.trace("Event matches comment '{}'", body);
-                    cause = new GitHubPRCause(remotePR, "Comment matches to criteria.", false);
+                    cause = prDecisionContext.newCause("Comment matches to criteria.", false);
                     cause.withCommentBody(body);
                     if (matcher.groupCount() > 0) {
                         cause.withCommentBodyMatch(matcher.group(1));

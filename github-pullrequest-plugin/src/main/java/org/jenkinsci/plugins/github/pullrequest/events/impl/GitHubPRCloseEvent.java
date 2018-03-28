@@ -5,6 +5,7 @@ import hudson.Extension;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREventDescriptor;
 import org.kohsuke.github.GHIssueState;
@@ -48,7 +49,7 @@ public class GitHubPRCloseEvent extends GitHubPREvent {
         // must be closed once
         if (remotePR.getState().equals(GHIssueState.CLOSED)) {
             logger.println(DISPLAY_NAME + ": state has changed (PR was closed)");
-            cause = new GitHubPRCause(remotePR, "PR was closed", false);
+            cause = prDecisionContext.newCause("PR was closed", false);
         }
 
         return cause;

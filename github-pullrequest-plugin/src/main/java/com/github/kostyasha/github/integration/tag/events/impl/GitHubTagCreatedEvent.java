@@ -54,7 +54,7 @@ public class GitHubTagCreatedEvent extends GitHubTagEvent {
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": '" + remoteTag.getName() + "'");
             LOG.debug("{}: '{}'", DISPLAY_NAME, remoteTag.getName());
-            cause = new GitHubTagCause(remoteTag, localRepo, DISPLAY_NAME, false);
+            cause = context.newCause(DISPLAY_NAME, false);
         }
 
         return cause;

@@ -8,7 +8,10 @@ import javax.annotation.Nonnull;
 
 import org.kohsuke.github.GHRepository;
 
-public abstract class GitHubSCMHead extends SCMHead {
+import com.github.kostyasha.github.integration.generic.GitHubCause;
+import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
+
+public abstract class GitHubSCMHead<T extends GitHubCause<T>> extends SCMHead {
     private static final long serialVersionUID = 1L;
 
     private final String sourceId;
@@ -22,5 +25,11 @@ public abstract class GitHubSCMHead extends SCMHead {
         return sourceId;
     }
 
-    public abstract String getHeadSha(GHRepository remoteRepo) throws IOException;
+    public abstract String fetchHeadSha(GHRepository remoteRepo) throws IOException;
+
+    public abstract String getHeadSha(T cause);
+
+    public GitHubSCMRevision createSCMRevision(T cause) {
+        return new GitHubSCMRevision(this, getHeadSha(cause), cause);
+    }
 }

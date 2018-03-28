@@ -327,7 +327,7 @@ public class GitHubSCMSource extends SCMSource {
     @Nonnull
     @Override
     protected SCMProbe createProbe(@Nonnull SCMHead head, @CheckForNull SCMRevision revision) throws IOException {
-        return new GitHubSCMProbe(this, (GitHubSCMHead) head, (GitHubSCMRevision) revision);
+        return new GitHubSCMProbe(this, (GitHubSCMHead<?>) head, (GitHubSCMRevision) revision);
     }
 
     @Override

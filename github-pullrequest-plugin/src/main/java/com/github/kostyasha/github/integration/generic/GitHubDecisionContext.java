@@ -63,4 +63,6 @@ public abstract class GitHubDecisionContext<E, C extends GitHubCause<C>> {
     }
 
     public abstract C checkEvent(E event) throws IOException;
+
+    public abstract C newCause(String reason, boolean skip);
 }

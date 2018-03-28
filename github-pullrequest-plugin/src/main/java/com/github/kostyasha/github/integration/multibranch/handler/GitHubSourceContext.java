@@ -8,9 +8,9 @@ import javax.annotation.Nullable;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 
+import com.github.kostyasha.github.integration.generic.GitHubCause;
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
-import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
 import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
 
 import hudson.model.Job;
@@ -79,10 +79,12 @@ public class GitHubSourceContext {
         return source.getRepoProvider().getGitHub(source);
     }
 
-    public boolean checkCriteria(@Nonnull GitHubSCMHead head, @Nonnull GitHubSCMRevision revision) throws IOException {
+    public boolean checkCriteria(@Nonnull GitHubCause<?> cause) throws IOException {
         if (criteria != null) {
-            listener.getLogger().println("Checking " + head.getPronoun());
-            if (!criteria.isHead(source.newProbe(head, revision), listener)) {
+            GitHubSCMRevision revision = cause.createSCMRevision(source.getId());
+            listener.getLogger().println("");
+            listener.getLogger().println("Checking " + revision.getHead().getPronoun());
+            if (!criteria.isHead(source.newProbe(revision.getHead(), revision), listener)) {
                 listener.getLogger().println("  Didn't meet criteria\n");
                 return false;
             }
@@ -91,50 +93,37 @@ public class GitHubSourceContext {
         return true;
     }
 
-    /**
-     * Force job to unconditionally build on any next revision
-     * 
-     * @throws InterruptedException
-     */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public void forceNextBuild(SCMHead scmHead, SCMRevision scmRevision) throws IOException, InterruptedException {
-        SCMSourceOwner owner = source.getOwner();
-        if (owner instanceof MultiBranchProject) {
-            MultiBranchProject mb = (MultiBranchProject) owner;
-            BranchProjectFactory pf = mb.getProjectFactory();
-            Job j = mb.getItemByBranchName(scmHead.getName());
-            if (j != null) {
-                SCMRevision rev = pf.getRevision(j);
-                if (rev != null && rev.equals(scmRevision)) {
-                    pf.setRevisionHash(j, new DummyRevision(scmHead));
+    public void observe(@Nonnull GitHubCause<?> cause) {
+        try {
+            GitHubSCMRevision scmRevision = cause.createSCMRevision(source.getId());
+            SCMHead scmHead = scmRevision.getHead();
+
+            SCMSourceOwner owner = source.getOwner();
+            if (owner instanceof MultiBranchProject) {
+                MultiBranchProject mb = (MultiBranchProject) owner;
+                BranchProjectFactory pf = mb.getProjectFactory();
+                Job j = mb.getItemByBranchName(scmHead.getName());
+                if (j != null) {
+                    SCMRevision rev = pf.getRevision(j);
+                    if (cause.isSkip()) {
+                        // set current rev to the same as we're triggering to prevent schedule
+                        if (rev == null || !rev.equals(scmRevision)) {
+                            pf.setRevisionHash(j, scmRevision);
+                        }
+                    } else {
+                        // set current rev to dummy, to force schedule
+                        if (rev != null && rev.equals(scmRevision)) {
+                            pf.setRevisionHash(j, new DummyRevision(scmHead));
+                        }
+                    }
                 }
             }
+
+            getObserver().observe(scmHead, scmRevision);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace(listener.getLogger());
         }
-
-        getObserver().observe(scmHead, scmRevision);
-    }
-
-    /**
-     * Force job to unconditionally build on any next revision
-     * 
-     * @throws InterruptedException
-     */
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public void preventNextBuild(SCMHead scmHead, SCMRevision scmRevision) throws IOException, InterruptedException {
-        SCMSourceOwner owner = source.getOwner();
-        if (owner instanceof MultiBranchProject) {
-            MultiBranchProject mb = (MultiBranchProject) owner;
-            BranchProjectFactory pf = mb.getProjectFactory();
-            Job j = mb.getItemByBranchName(scmHead.getName());
-            if (j != null) {
-                SCMRevision rev = pf.getRevision(j);
-                if (rev == null || !rev.equals(scmRevision)) {
-                    pf.setRevisionHash(j, scmRevision);
-                }
-            }
-        }
-
-        getObserver().observe(scmHead, scmRevision);
     }
 
     /**

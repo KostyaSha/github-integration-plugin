@@ -2,8 +2,6 @@ package com.github.kostyasha.github.integration.branch.events.impl;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
-import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
-import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
 import com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext;
@@ -14,7 +12,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -38,7 +35,6 @@ public class GitHubBranchDeletedEvent extends GitHubBranchEvent {
         TaskListener listener = context.getListener();
         GitHubBranch localBranch = context.getLocalBranch();
         GHBranch remoteBranch = context.getRemoteBranch();
-        GitHubBranchRepository localRepo = context.getLocalRepo();
 
         GitHubBranchCause cause = null;
         if (nonNull(localBranch) && isNull(remoteBranch)) { // didn't exist before
@@ -46,7 +42,7 @@ public class GitHubBranchDeletedEvent extends GitHubBranchEvent {
             logger.println(DISPLAY_NAME + ": state has changed (branch was deleted)");
             LOG.debug("{}: state has changed (branch was deleted)", DISPLAY_NAME);
             localBranch.setCommitSha(null);
-            cause = new GitHubBranchCause(localBranch, localRepo, DISPLAY_NAME, false);
+            cause = context.newCause(DISPLAY_NAME, false);
         }
 
         return cause;

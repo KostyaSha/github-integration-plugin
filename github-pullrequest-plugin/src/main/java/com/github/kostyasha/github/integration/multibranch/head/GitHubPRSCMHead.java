@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import javax.annotation.Nonnull;
 
-public class GitHubPRSCMHead extends GitHubSCMHead {
+public class GitHubPRSCMHead extends GitHubSCMHead<GitHubPRCause> {
     private static final long serialVersionUID = 1L;
 
     private final int pr;
@@ -38,11 +38,16 @@ public class GitHubPRSCMHead extends GitHubSCMHead {
     }
 
     @Override
-    public String getHeadSha(GHRepository remoteRepo) throws IOException {
+    public String fetchHeadSha(GHRepository remoteRepo) throws IOException {
         GHPullRequest pullRequest = remoteRepo.getPullRequest(pr);
         if (pullRequest == null) {
             throw new IOException("No PR " + pr + " in " + remoteRepo.getFullName());
         }
         return pullRequest.getHead().getSha();
+    }
+
+    @Override
+    public String getHeadSha(GitHubPRCause cause) {
+        return cause.getHeadSha();
     }
 }

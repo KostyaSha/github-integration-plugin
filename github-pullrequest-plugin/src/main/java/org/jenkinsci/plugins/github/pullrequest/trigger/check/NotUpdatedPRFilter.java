@@ -18,7 +18,7 @@ import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 /**
  * @author lanwen (Merkushev Kirill)
  */
-public class NotUpdatedPRFilter implements Predicate<GHPullRequest> {
+public class NotUpdatedPRFilter implements Predicate<GHPullRequest>, java.util.function.Predicate<GHPullRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NotUpdatedPRFilter.class);
 
     private final GitHubPRRepository localRepo;
@@ -42,6 +42,11 @@ public class NotUpdatedPRFilter implements Predicate<GHPullRequest> {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public boolean test(GHPullRequest remotePR) {
+        return apply(remotePR);
     }
 
     /**

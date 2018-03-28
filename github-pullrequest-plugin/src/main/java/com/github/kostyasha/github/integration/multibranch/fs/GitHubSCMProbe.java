@@ -16,18 +16,18 @@ public class GitHubSCMProbe extends SCMProbe {
     private static final long serialVersionUID = 1L;
 
     private final GitHubSCMSource source;
-    private final GitHubSCMHead head;
+    private final GitHubSCMHead<?> head;
     private final GitHubSCMRevision revision;
     private volatile GHRepository repo;
     private volatile TreeCache tree;
 
-    public GitHubSCMProbe(GitHubSCMSource source, GitHubSCMHead head, GitHubSCMRevision revision) {
+    public GitHubSCMProbe(GitHubSCMSource source, GitHubSCMHead<?> head, GitHubSCMRevision revision) {
         this.source = source;
         this.head = head;
         this.revision = revision;
     }
 
-    public GitHubSCMHead getHead() {
+    public GitHubSCMHead<?> getHead() {
         return head;
     }
 

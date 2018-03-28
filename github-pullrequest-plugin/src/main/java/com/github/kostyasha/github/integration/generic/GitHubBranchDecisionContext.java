@@ -82,6 +82,14 @@ public class GitHubBranchDecisionContext extends GitHubDecisionContext<GitHubBra
         return event.check(this);
     }
 
+    @Override
+    public GitHubBranchCause newCause(String reason, boolean skip) {
+        if (remoteBranch != null) {
+            return new GitHubBranchCause(remoteBranch, localRepo, reason, skip);
+        }
+        return new GitHubBranchCause(localBranch, localRepo, reason, skip);
+    }
+
     public static class Builder {
         private GHBranch remoteBranch = null;
         private GitHubBranch localBranch = null;

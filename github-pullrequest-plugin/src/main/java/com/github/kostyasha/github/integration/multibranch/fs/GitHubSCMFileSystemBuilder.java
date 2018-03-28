@@ -32,7 +32,7 @@ public class GitHubSCMFileSystemBuilder extends SCMFileSystem.Builder {
         if (source instanceof GitHubSCMSource) {
             GitHubSCMSource ghSCMSource = (GitHubSCMSource) source;
             GHRepository remoteRepo = ghSCMSource.getRemoteRepo();
-            return new GitHubSCMFileSystem(remoteRepo, (GitHubSCMHead) head, (GitHubSCMRevision) rev);
+            return new GitHubSCMFileSystem(remoteRepo, (GitHubSCMHead<?>) head, (GitHubSCMRevision) rev);
         }
         return null;
     }

@@ -66,7 +66,7 @@ public class GitHubPRLabelNotExistsEvent extends GitHubPREvent {
             final PrintStream logger = listener.getLogger();
             LOG.debug("{}:{} not found", DISPLAY_NAME, label.getLabelsSet());
             logger.println(DISPLAY_NAME + ": " + label.getLabelsSet() + " not found");
-            cause = new GitHubPRCause(remotePR, label.getLabelsSet() + " labels not exist", isSkip());
+            cause = prDecisionContext.newCause(label.getLabelsSet() + " labels not exist", isSkip());
         }
 
         return cause;

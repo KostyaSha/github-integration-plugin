@@ -6,6 +6,9 @@ import hudson.model.ParameterValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
+import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
+
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -39,6 +42,8 @@ public abstract class GitHubCause<T extends GitHubCause<T>> extends Cause {
     private String sshUrl;
 
     private String pollingLog;
+
+    private Object remoteData;
 
     public GitHubCause withLocalRepo(@Nonnull GitHubRepository localRepo) {
         withGitUrl(localRepo.getGitUrl());
@@ -116,6 +121,15 @@ public abstract class GitHubCause<T extends GitHubCause<T>> extends Cause {
         return this;
     }
 
+    public Object getRemoteData() {
+        return remoteData;
+    }
+
+    public GitHubCause<T> withRemoteData(Object remoteData) {
+        this.remoteData = remoteData;
+        return this;
+    }
+
     /**
      * @return the title of the cause, never null.
      */
@@ -137,6 +151,13 @@ public abstract class GitHubCause<T extends GitHubCause<T>> extends Cause {
     }
 
     public abstract void fillParameters(List<ParameterValue> params);
+
+    public abstract GitHubSCMHead<T> createSCMHead(String sourceId);
+
+    @SuppressWarnings("unchecked")
+    public GitHubSCMRevision createSCMRevision(String sourceId) {
+        return createSCMHead(sourceId).createSCMRevision((T) this).setRemoteData(getRemoteData());
+    }
 
     public static <T extends GitHubCause<T>> T skipTrigger(List<? extends T> causes) {
         if (causes == null) {

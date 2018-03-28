@@ -67,6 +67,13 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
         return new BranchToCauseConverter(localRepo, listener, trigger);
     }
 
+    public static BranchToCauseConverter toGitHubBranchCause(GitHubBranchRepository localRepo,
+                                                             TaskListener listener,
+                                                             @Nonnull GitHubBranchHandler handler,
+                                                             @Nonnull GitHubSCMSource source) {
+        return new BranchToCauseConverter(localRepo, listener, handler, source);
+    }
+
     private List<GitHubBranchEvent> getEvents() {
         if (nonNull(trigger)) {
             return trigger.getEvents();

@@ -81,7 +81,7 @@ public class GitHubPRDescriptionEvent extends GitHubPREvent {
                             skipBuildPhrase
                     );
                     logger.println(DISPLAY_NAME + ": Pull request description contains " + skipBuildPhrase + ", skipping");
-                    cause = new GitHubPRCause(remotePR, "Pull request description contains " + skipBuildPhrase + ", skipping", true);
+                    cause = prDecisionContext.newCause("Pull request description contains " + skipBuildPhrase + ", skipping", true);
                     break;
                 } else {
                     LOG.trace("Job: '{}', trigger event: '{}', phrase: '{}' didn't match to '{}'",

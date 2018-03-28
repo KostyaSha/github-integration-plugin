@@ -56,21 +56,21 @@ public class GitHubPRNumber extends GitHubPREvent {
         if (isNull(number)) {
             // skip the whole PR because we can't trust in other checks to not get unexpected triggers.
             listener.error(DISPLAY_NAME + ": number is null -> Bad configured event, skipping other checks.");
-            return new GitHubPRCause(remotePR, "Bad configured " + DISPLAY_NAME + " event.", true);
+            return prDecisionContext.newCause("Bad configured " + DISPLAY_NAME + " event.", true);
         }
         // don't know whether it can happen, but let's be safe.
         if (isNull(remotePR)) {
             // skip the whole PR because we can't trust in other checks to not get unexpected triggers.
             listener.error(DISPLAY_NAME + ": number is null -> Bad configured event, skipping other checks.");
-            return new GitHubPRCause(remotePR, "Bad configured " + DISPLAY_NAME + " event.", true);
+            return prDecisionContext.newCause("Bad configured " + DISPLAY_NAME + " event.", true);
         }
 
         if (remotePR.getNumber() == getNumber()) {
             if (match) {
-                return new GitHubPRCause(remotePR, "PR Number is matching #" + remotePR.getNumber(), isSkip());
+                return prDecisionContext.newCause("PR Number is matching #" + remotePR.getNumber(), isSkip());
             }
         } else if (!match) {
-            return new GitHubPRCause(remotePR, "PR Number is not matching #" + remotePR.getNumber(), isSkip());
+            return prDecisionContext.newCause("PR Number is not matching #" + remotePR.getNumber(), isSkip());
         }
 
         return null;

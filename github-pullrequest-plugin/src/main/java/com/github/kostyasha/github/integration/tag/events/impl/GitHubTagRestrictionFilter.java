@@ -86,7 +86,7 @@ public class GitHubTagRestrictionFilter extends GitHubTagEvent {
             return null;
         }
 
-        return toCause(remoteTag, localRepo, true, "Tag [%s] filtered by tag name restriction filter", name);
+        return toCause(context, true, "Tag [%s] filtered by tag name restriction filter", name);
     }
 
     private boolean tagIsAllowed(String name) {
@@ -120,9 +120,9 @@ public class GitHubTagRestrictionFilter extends GitHubTagEvent {
         }
     }
 
-    private GitHubTagCause toCause(GHTag remoteTag, GitHubTagRepository localRepo, boolean skip,
+    private GitHubTagCause toCause(GitHubTagDecisionContext context, boolean skip,
                                       String message, Object... args) {
-        return new GitHubTagCause(remoteTag, localRepo, String.format(message, args), skip);
+        return context.newCause(String.format(message, args), skip);
     }
 
     @Extension

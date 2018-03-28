@@ -6,6 +6,7 @@ import hudson.model.TaskListener;
 
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction;
@@ -26,9 +27,11 @@ public class GitHubPRDecisionContext extends GitHubDecisionContext<GitHubPREvent
     private final GHPullRequest remotePR;
     private final GitHubPRPullRequest localPR;
     private final GitHubPRUserRestriction prUserRestriction;
+    private final GitHubPRRepository localRepo;
 
     protected GitHubPRDecisionContext(@CheckForNull GHPullRequest remotePR,
                                       @CheckForNull GitHubPRPullRequest localPR,
+                                      @CheckForNull GitHubPRRepository localRepo,
                                       @CheckForNull GitHubPRUserRestriction prUserRestriction,
                                       GitHubSCMSource source,
                                       GitHubPRHandler prHandler,
@@ -37,7 +40,19 @@ public class GitHubPRDecisionContext extends GitHubDecisionContext<GitHubPREvent
         super(listener, prTrigger, source, prHandler);
         this.remotePR = remotePR;
         this.localPR = localPR;
+        this.localRepo = localRepo;
         this.prUserRestriction = prUserRestriction;
+    }
+
+    @Deprecated
+    protected GitHubPRDecisionContext(@CheckForNull GHPullRequest remotePR,
+            @CheckForNull GitHubPRPullRequest localPR,
+            @CheckForNull GitHubPRUserRestriction prUserRestriction,
+            GitHubSCMSource source,
+            GitHubPRHandler prHandler,
+            GitHubPRTrigger prTrigger,
+            @Nonnull TaskListener listener) {
+        this(remotePR, localPR, null, prUserRestriction, source, prHandler, prTrigger, listener);
     }
 
     /**
@@ -55,6 +70,11 @@ public class GitHubPRDecisionContext extends GitHubDecisionContext<GitHubPREvent
     @CheckForNull
     public GitHubPRPullRequest getLocalPR() {
         return localPR;
+    }
+
+    @CheckForNull
+    public GitHubPRRepository getLocalRepo() {
+        return localRepo;
     }
 
     @CheckForNull
@@ -83,9 +103,18 @@ public class GitHubPRDecisionContext extends GitHubDecisionContext<GitHubPREvent
         return event.check(this);
     }
 
+    @Override
+    public GitHubPRCause newCause(String reason, boolean skip) {
+        if(remotePR != null) {
+            return new GitHubPRCause(remotePR, localRepo, reason, skip);
+        }
+        return new GitHubPRCause(localPR, null, localRepo, skip, reason);
+    }
+
     public static class Builder {
         private GHPullRequest remotePR = null;
         private GitHubPRPullRequest localPR = null;
+        private GitHubPRRepository localRepo = null;
         private TaskListener listener;
         private GitHubPRUserRestriction prUserRestriction = null;
 
@@ -105,6 +134,11 @@ public class GitHubPRDecisionContext extends GitHubDecisionContext<GitHubPREvent
 
         public Builder withLocalPR(@CheckForNull GitHubPRPullRequest localPR) {
             this.localPR = localPR;
+            return this;
+        }
+        
+        public Builder withLocalRepo(GitHubPRRepository localRepo) {
+            this.localRepo = localRepo;
             return this;
         }
 
@@ -139,7 +173,7 @@ public class GitHubPRDecisionContext extends GitHubDecisionContext<GitHubPREvent
 
             requireNonNull(listener);
 
-            return new GitHubPRDecisionContext(remotePR, localPR, prUserRestriction, source, prHandler, prTrigger, listener);
+            return new GitHubPRDecisionContext(remotePR, localPR, localRepo, prUserRestriction, source, prHandler, prTrigger, listener);
         }
 
     }

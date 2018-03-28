@@ -67,6 +67,13 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
         return new PullRequestToCauseConverter(localRepo, listener, trigger);
     }
 
+    public static PullRequestToCauseConverter toGitHubPRCause(@Nonnull GitHubPRRepository localRepo,
+                                                              @Nonnull TaskListener listener,
+                                                              @Nonnull GitHubPRHandler prHandler,
+                                                              @Nonnull GitHubSCMSource source) {
+        return new PullRequestToCauseConverter(localRepo, listener, source, prHandler);
+    }
+
     /**
      * TODO migrate to java8 and cleanup.
      *
@@ -82,6 +89,7 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
                 .withListener(listener)
                 .withLocalPR(localPR)
                 .withRemotePR(remotePR)
+                .withLocalRepo(localRepo)
                 .withPrTrigger(trigger)
                 .withPrHandler(prHandler)
                 .withSCMSource(source)

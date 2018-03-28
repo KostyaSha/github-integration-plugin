@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -36,6 +38,7 @@ public class GitHubBranchCause extends AbstractGitHubBranchCause<GitHubBranchCau
         withReason(reason);
         withSkip(skip);
         withLocalRepo(localRepo);
+        withRemoteData(remoteBranch);
     }
 
     public GitHubBranchCause(@Nonnull String branchName, String commitSha) {
@@ -58,6 +61,11 @@ public class GitHubBranchCause extends AbstractGitHubBranchCause<GitHubBranchCau
     @Override
     public void fillParameters(List<ParameterValue> params) {
         GitHubBranchEnv.getParams(this, params);
+    }
+
+    @Override
+    public GitHubSCMHead<GitHubBranchCause> createSCMHead(String sourceId) {
+        return new GitHubBranchSCMHead(branchName, sourceId);
     }
 
     @Nonnull

@@ -7,6 +7,8 @@ import javax.annotation.Nonnull;
 import org.kohsuke.github.GHTag;
 
 import com.github.kostyasha.github.integration.branch.AbstractGitHubBranchCause;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubTagSCMHead;
 
 import hudson.model.ParameterValue;
 
@@ -29,6 +31,7 @@ public class GitHubTagCause extends AbstractGitHubBranchCause<GitHubTagCause> {
         withReason(reason);
         withSkip(skip);
         withLocalRepo(localRepo);
+        withRemoteData(remoteTag);
     }
 
     public GitHubTagCause(@Nonnull String tagName, String commitSha) {
@@ -61,5 +64,10 @@ public class GitHubTagCause extends AbstractGitHubBranchCause<GitHubTagCause> {
     @Override
     public void fillParameters(List<ParameterValue> params) {
         GitHubTagEnv.getParams(this, params);
+    }
+    
+    @Override
+    public GitHubSCMHead<GitHubTagCause> createSCMHead(String sourceId) {
+        return new GitHubTagSCMHead(tagName, sourceId);
     }
 }

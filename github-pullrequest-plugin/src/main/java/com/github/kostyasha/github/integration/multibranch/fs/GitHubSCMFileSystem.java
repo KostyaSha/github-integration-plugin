@@ -19,17 +19,17 @@ public class GitHubSCMFileSystem extends SCMFileSystem {
     private final GHCommit commit;
     private volatile TreeCache tree;
 
-    protected GitHubSCMFileSystem(@Nonnull GHRepository remoteRepo, GitHubSCMHead head, GitHubSCMRevision rev) throws IOException {
+    protected GitHubSCMFileSystem(@Nonnull GHRepository remoteRepo, GitHubSCMHead<?> head, GitHubSCMRevision rev) throws IOException {
         super(rev);
         this.remoteRepo = remoteRepo;
         this.commit = remoteRepo.getCommit(calculateHash(remoteRepo, head, rev));
     }
 
-    private static String calculateHash(GHRepository remoteRepo, GitHubSCMHead head, GitHubSCMRevision rev) throws IOException {
+    private static String calculateHash(GHRepository remoteRepo, GitHubSCMHead<?> head, GitHubSCMRevision rev) throws IOException {
         if (rev != null) {
             return rev.getHash();
         }
-        return head.getHeadSha(remoteRepo);
+        return head.fetchHeadSha(remoteRepo);
     }
 
     @Nonnull

@@ -15,7 +15,7 @@ import static org.kohsuke.github.GHIssueState.OPEN;
 /**
  * @author lanwen (Merkushev Kirill)
  */
-public class LocalRepoUpdater implements Function<GHPullRequest, GHPullRequest> {
+public class LocalRepoUpdater implements Function<GHPullRequest, GHPullRequest>, java.util.function.Function<GHPullRequest, GHPullRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalRepoUpdater.class);
     private final GitHubPRRepository localRepo;
 
@@ -30,11 +30,7 @@ public class LocalRepoUpdater implements Function<GHPullRequest, GHPullRequest> 
     @Override
     public GHPullRequest apply(GHPullRequest remotePR) {
         if (remotePR.getState() == OPEN) {
-            try {
-                localRepo.getPulls().put(remotePR.getNumber(), new GitHubPRPullRequest(remotePR));
-            } catch (IOException e) {
-                LOGGER.warn("Can't store to local storage PR #{}", remotePR.getNumber(), e);
-            }
+            localRepo.getPulls().put(remotePR.getNumber(), new GitHubPRPullRequest(remotePR));
         } else if (remotePR.getState() == CLOSED) {
             localRepo.getPulls().remove(remotePR.getNumber()); // don't store
         }
