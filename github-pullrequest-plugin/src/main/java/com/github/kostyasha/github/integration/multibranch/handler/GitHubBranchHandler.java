@@ -7,7 +7,9 @@ import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.iop;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -84,7 +86,7 @@ public class GitHubBranchHandler extends GitHubHandler {
             localRepo.getBranches().remove(branchName);
         } else {
             listener.getLogger().println("**** Processing all branches ****");
-            branches = remoteRepo.getBranches().values().stream();
+            branches = fetchRemoteBranches(remoteRepo).values().stream();
             localRepo.getBranches().clear();
         }
 
@@ -109,6 +111,26 @@ public class GitHubBranchHandler extends GitHubHandler {
             }
             return c;
         };
+    }
+
+    private Map<String, GHBranch> fetchRemoteBranches(GHRepository remoteRepo) throws IOException {
+        Map<String, GHBranch> branches = remoteRepo.getBranches();
+
+        String defName = remoteRepo.getDefaultBranch();
+        GHBranch def = branches.get(defName);
+        if (def == null) { // just in case
+            return branches;
+        }
+
+        // reorder branches so that default branch always comes first
+        Map<String, GHBranch> ordered = new LinkedHashMap<>();
+        ordered.put(defName, def);
+        branches.entrySet().forEach(e -> {
+            if (!e.getKey().equals(defName)) {
+                ordered.put(e.getKey(), e.getValue());
+            }
+        });
+        return ordered;
     }
 
     @Extension
