@@ -20,6 +20,7 @@ public class GitHubSCMProbe extends SCMProbe {
     private final GitHubSCMHead<?> head;
     private final GitHubSCMRevision revision;
     private volatile GHRepository repo;
+    private volatile GHCommit commit;
     private volatile TreeCache tree;
 
     public GitHubSCMProbe(GitHubSCMSource source, GitHubSCMHead<?> head, GitHubSCMRevision revision) {
@@ -64,8 +65,7 @@ public class GitHubSCMProbe extends SCMProbe {
             }
         }
         try {
-            GHCommit commit = repo().getCommit(revision.getHash());
-            return commit.getCommitDate().getTime();
+            return commit().getCommitDate().getTime();
         } catch (IOException e) {
             return 0L;
         }
@@ -80,6 +80,17 @@ public class GitHubSCMProbe extends SCMProbe {
             }
         }
         return repo;
+    }
+
+    private GHCommit commit() throws IOException {
+        if (commit == null) {
+            synchronized (commit) {
+                if (commit == null) {
+                    commit = repo().getCommit(revision.getHash());
+                }
+            }
+        }
+        return commit;
     }
 
     private TreeCache tree() {
