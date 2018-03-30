@@ -3,6 +3,7 @@ package com.github.kostyasha.github.integration.multibranch.fs;
 import java.io.IOException;
 
 import org.kohsuke.github.GHCommit;
+import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
@@ -51,6 +52,17 @@ public class GitHubSCMProbe extends SCMProbe {
 
     @Override
     public long lastModified() {
+        Object rd = revision.getRemoteData();
+        if (rd instanceof GHPullRequest) {
+            GHPullRequest pr = (GHPullRequest) rd;
+            if (pr != null) {
+                try {
+                    return pr.getUpdatedAt().getTime();
+                } catch (IOException e) {
+                    // never thrown
+                }
+            }
+        }
         try {
             GHCommit commit = repo().getCommit(revision.getHash());
             return commit.getCommitDate().getTime();
