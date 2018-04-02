@@ -1,23 +1,41 @@
 package com.github.kostyasha.github.integration.multibranch;
 
-import com.cloudbees.hudson.plugins.folder.computed.ComputedFolder;
 import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.github.kostyasha.github.integration.generic.GitHubCause;
+import com.github.kostyasha.github.integration.multibranch.GitHubSCMFactory.GitHubSCMFactoryDescriptor;
+import com.github.kostyasha.github.integration.multibranch.action.GitHubBranchAction;
+import com.github.kostyasha.github.integration.multibranch.action.GitHubLinkAction;
+import com.github.kostyasha.github.integration.multibranch.action.GitHubPRAction;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
-import com.github.kostyasha.github.integration.multibranch.action.GitHubSCMSourcesReposAction;
+import com.github.kostyasha.github.integration.multibranch.action.GitHubRepoAction;
+import com.github.kostyasha.github.integration.multibranch.action.GitHubSCMSourcesLocalStorage;
+import com.github.kostyasha.github.integration.multibranch.action.GitHubTagAction;
+import com.github.kostyasha.github.integration.multibranch.fs.GitHubSCMProbe;
+import com.github.kostyasha.github.integration.multibranch.fs.TreeCache;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler;
+import com.github.kostyasha.github.integration.multibranch.handler.GitHubSourceContext;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubPRSCMHead;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
-import com.github.kostyasha.github.integration.multibranch.repoprovider.GitHubPluginRepoProvider2;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubTagSCMHead;
 import com.github.kostyasha.github.integration.multibranch.repoprovider.GitHubRepoProvider2;
 import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
-import com.google.common.base.Throwables;
+
+import hudson.BulkChange;
 import hudson.Extension;
+import hudson.ExtensionList;
 import hudson.model.Action;
 import hudson.model.CauseAction;
-import hudson.model.ReconfigurableDescribable;
+import hudson.model.Item;
+import hudson.model.ItemGroup;
+import hudson.model.Job;
+import hudson.model.ParameterValue;
+import hudson.model.ParametersAction;
 import hudson.model.TaskListener;
-import hudson.scm.NullSCM;
+import hudson.model.listeners.ItemListener;
 import hudson.scm.SCM;
+import jenkins.branch.Branch;
+import jenkins.branch.MultiBranchProject;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMHeadCategory;
 import jenkins.scm.api.SCMHeadEvent;
@@ -29,6 +47,9 @@ import jenkins.scm.api.SCMSourceCriteria;
 import jenkins.scm.api.SCMSourceDescriptor;
 import jenkins.scm.api.SCMSourceEvent;
 import jenkins.scm.api.SCMSourceOwner;
+import jenkins.scm.api.metadata.ObjectMetadataAction;
+import jenkins.scm.api.metadata.PrimaryInstanceMetadataAction;
+
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -38,13 +59,14 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static com.github.kostyasha.github.integration.multibranch.category.GitHubBranchSCMHeadCategory.BRANCH;
 import static com.github.kostyasha.github.integration.multibranch.category.GitHubPRSCMHeadCategory.PR;
@@ -53,12 +75,10 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
-
 public class GitHubSCMSource extends SCMSource {
     private static final Logger LOG = LoggerFactory.getLogger(GitHubSCMSource.class);
     /**
-     * This will the URL to the project main branch.
-     * One for PRs and branches... etc...
+     * This will the URL to the project main branch. One for PRs and branches... etc...
      */
     private String projectUrlStr;
 
@@ -67,11 +87,12 @@ public class GitHubSCMSource extends SCMSource {
 
     private List<GitHubHandler> handlers = new ArrayList<>();
 
-    private transient GitHubSCMSourcesReposAction reposAction;
+    private GitHubSCMFactory scmFactory;
+
+    private transient volatile GitHubSCMSourcesLocalStorage localStorage;
 
     @DataBoundConstructor
-    public GitHubSCMSource() {
-    }
+    public GitHubSCMSource() {}
 
 
     public GitHubRepositoryName getRepoFullName() {
@@ -108,48 +129,60 @@ public class GitHubSCMSource extends SCMSource {
         return this;
     }
 
-    protected GitHubRepo getLocalRepo() {
-        return getReposAction().getOrCreate(this);
+    public GitHubSCMFactory getScmFactory() {
+        return scmFactory;
     }
 
-    protected synchronized GitHubSCMSourcesReposAction getReposAction(){
-        ComputedFolder owner = (ComputedFolder) getOwner();
+    @DataBoundSetter
+    public GitHubSCMSource setScmFactory(GitHubSCMFactory scmFactory) {
+        this.scmFactory = scmFactory;
+        return this;
+    }
 
-        // TransientActions are not persisted between getAllActions() calls.
-        if (isNull(reposAction)) {
-            // or stop asking job for Action and work directly with folder and action
-            reposAction = owner.getAction(GitHubSCMSourcesReposAction.class);
+    public GitHubRepo getLocalRepo() {
+        return getLocalStorage().getLocalRepo();
+    }
+
+    protected synchronized GitHubSCMSourcesLocalStorage getLocalStorage() {
+        if (isNull(localStorage)) {
+            localStorage = new GitHubSCMSourcesLocalStorage(getOwner(), getId());
+            try {
+                localStorage.load();
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
         }
-
-        return reposAction;
+        return localStorage;
     }
 
     @Override
-    protected void retrieve(SCMSourceCriteria scmSourceCriteria, //useless
-                            @Nonnull SCMHeadObserver scmHeadObserver,
-                            SCMHeadEvent<?> scmHeadEvent, // null for manual run
-                            @Nonnull TaskListener taskListener) throws IOException, InterruptedException {
-        PrintStream llog = taskListener.getLogger();
-        llog.println("Source id " + getId());
+    protected void retrieve(SCMSourceCriteria scmSourceCriteria, @Nonnull SCMHeadObserver scmHeadObserver, SCMHeadEvent<?> scmHeadEvent, // null for manual run
+            @Nonnull TaskListener taskListener) throws IOException, InterruptedException {
 
-        llog.println("> GitHubSCMSource.retrieve(jenkins.scm.api.SCMSourceCriteria, jenkins.scm.api.SCMHeadObserver, jenkins.scm.api.SCMHeadEvent<?>, hudson.model.TaskListener)");
-        llog.println(">> scmSourceCriteria " + scmSourceCriteria);
-        llog.println(">> scmHeadObserver " + scmHeadObserver);
-        llog.println(">> scmHeadEvent " + scmHeadEvent);
+        try (
+                BulkChange bc = new BulkChange(getLocalStorage());
+                TreeCache.Context ctx = TreeCache.createContext()) {
 
-        GitHubRepo localRepo = getLocalRepo();
+            GitHubRepo localRepo = getLocalRepo();
 
-        // TODO actualise some repo for UI Action?
-        localRepo.actualize(getRemoteRepo());
+            // latch onto local repo state
+            synchronized (localRepo) {
+                localRepo.actualize(getRemoteRepo());
 
-        getHandlers().forEach(handler -> {
-            try {
-                handler.handle(scmHeadObserver, scmHeadEvent, localRepo, getRemoteRepo(), taskListener, this);
-            } catch (IOException e) {
-                LOG.error("Can't process handler", e);
-                e.printStackTrace(llog);
+                GitHubSourceContext context = new GitHubSourceContext(this, scmHeadObserver, scmSourceCriteria, scmHeadEvent, localRepo, getRemoteRepo(), taskListener);
+
+                getHandlers().forEach(handler -> {
+                    try {
+                        handler.handle(context);
+                    } catch (Throwable e) {
+                        LOG.error("Can't process handler", e);
+                        e.printStackTrace(taskListener.getLogger());
+                    }
+                });
             }
-        });
+
+            bc.commit();
+        }
     }
 
     @Override
@@ -168,112 +201,121 @@ public class GitHubSCMSource extends SCMSource {
         return remoteRepository;
     }
 
-
     @Nonnull
     @Override
     public SCM build(@Nonnull SCMHead scmHead, SCMRevision scmRevision) {
-
-//        return new GitSCM("repo url");
-        return new NullSCM();
+        return scmFactory.createScm(this, scmHead, scmRevision);
     }
-
 
     // It is so hard to implement good APIs...
     @Nonnull
     @Override
-    public Set<SCMRevision> parentRevisions(@Nonnull SCMHead head,
-                                            @Nonnull SCMRevision revision,
-                                            @CheckForNull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> GitHubSCMSource.parentRevisions");
+    public Set<SCMRevision> parentRevisions(@Nonnull SCMHead head, @Nonnull SCMRevision revision, @CheckForNull TaskListener listener) throws IOException, InterruptedException {
         return super.parentRevisions(head, revision, listener);
     }
 
     @Nonnull
     @Override
-    public Map<SCMHead, SCMRevision> parentHeads(@Nonnull SCMHead head,
-                                                 @CheckForNull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> .GitHubSCMSource.parentHeads(SCMHead, TaskListener");
+    public Map<SCMHead, SCMRevision> parentHeads(@Nonnull SCMHead head, @CheckForNull TaskListener listener) throws IOException, InterruptedException {
         return super.parentHeads(head, listener);
     }
 
     @Nonnull
     @Override
     protected Set<SCMHead> retrieve(@Nonnull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> Retrieve Set<SCMHead> = GitHubSCMSource.retrieve(hudson.model.TaskListener)");
         return super.retrieve(listener);
     }
 
     @Nonnull
     @Override
-    protected Set<SCMHead> retrieve(@CheckForNull SCMSourceCriteria criteria,
-                                    @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> Retrieve Set<SCMHead> GitHubSCMSource.retrieve(jenkins.scm.api.SCMSourceCriteria, hudson.model.TaskListener)");
-        listener.getLogger().println(">> criteria " + criteria);
+    protected Set<SCMHead> retrieve(@CheckForNull SCMSourceCriteria criteria, @Nonnull TaskListener listener) throws IOException, InterruptedException {
         return super.retrieve(criteria, listener);
     }
 
     @Override
-    protected SCMRevision retrieve(@Nonnull SCMHead head,
-                                   @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> Retrieve Set<SCMHead> GitHubSCMSource.retrieve(jenkins.scm.api.SCMHead, hudson.model.TaskListener)");
-        listener.getLogger().println(">> head " + head);
-
+    protected SCMRevision retrieve(@Nonnull SCMHead head, @Nonnull TaskListener listener) throws IOException, InterruptedException {
         return super.retrieve(head, listener);
     }
 
     @Override
-    protected SCMRevision retrieve(@Nonnull String thingName,
-                                   @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> SCMRevision = GitHubSCMSource.retrieve(java.lang.String, hudson.model.TaskListener)");
-        listener.getLogger().println(">> thingName " + thingName);
+    protected SCMRevision retrieve(@Nonnull String thingName, @Nonnull TaskListener listener) throws IOException, InterruptedException {
         return super.retrieve(thingName, listener);
     }
 
     @Nonnull
     @Override
     protected Set<String> retrieveRevisions(@Nonnull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> GitHubSCMSource.retrieveRevisions");
         return super.retrieveRevisions(listener);
     }
 
     @Nonnull
     @Override
-    protected List<Action> retrieveActions(@Nonnull SCMRevision revision,
-                                           @CheckForNull SCMHeadEvent event,
-                                           @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> GitHubSCMSource.retrieveActions(jenkins.scm.api.SCMRevision, jenkins.scm.api.SCMHeadEvent, hudson.model.TaskListener)");
+    protected List<Action> retrieveActions(@Nonnull SCMRevision revision, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
         GitHubSCMRevision gitHubSCMRevision = (GitHubSCMRevision) revision;
-
-        return Collections.singletonList(new CauseAction(gitHubSCMRevision.getCause()));
-    }
-
-    @Nonnull
-    @Override
-    protected List<Action> retrieveActions(@Nonnull SCMHead head,
-                                           @CheckForNull SCMHeadEvent event,
-                                           @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> GitHubSCMSource.retrieveActions(jenkins.scm.api.SCMHead, jenkins.scm.api.SCMHeadEvent, hudson.model.TaskListener)");
-        listener.getLogger().println(">> head " + head + " event " + event);
-
+        GitHubCause<?> cause = gitHubSCMRevision.getCause();
+        if (cause != null) {
+            List<ParameterValue> params = new ArrayList<>();
+            List<String> safeParams = new ArrayList<>();
+            cause.fillParameters(params);
+            params.forEach(p -> safeParams.add(p.getName()));
+            return Arrays.asList(new CauseAction(cause), new ParametersAction(params, safeParams));
+        }
         return Collections.emptyList();
     }
 
     @Nonnull
     @Override
-    protected List<Action> retrieveActions(@CheckForNull SCMSourceEvent event,
-                                           @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> GitHubSCMSource.retrieveActions(jenkins.scm.api.SCMSourceEvent, hudson.model.TaskListener)");
-        listener.getLogger().println(">> sourceEvent " + event);
-//        return Collections.singletonList(getReposAction());
-        return super.retrieveActions(event, listener);
+    protected List<Action> retrieveActions(@Nonnull SCMHead head, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+
+        List<Action> actions = new ArrayList<>();
+
+        GHRepository remoteRepo = getRemoteRepo();
+
+        boolean primary = false;
+        GitHubLinkAction link = null;
+        String desc = null;
+
+        if (head instanceof GitHubBranchSCMHead) {
+
+            // mark default branch item as primary
+            primary = remoteRepo.getDefaultBranch().equals(head.getName());
+            link = new GitHubBranchAction(remoteRepo, head.getName());
+            desc = null;
+
+        } else if (head instanceof GitHubTagSCMHead) {
+
+            link = new GitHubTagAction(remoteRepo, head.getName());
+            desc = null;
+
+        } else if (head instanceof GitHubPRSCMHead) {
+
+            GitHubPRSCMHead prh = (GitHubPRSCMHead) head;
+            link = new GitHubPRAction(remoteRepo, prh.getPr());
+            desc = remoteRepo.getPullRequest(prh.getPr()).getTitle();
+
+        }
+
+        if (link != null) {
+            actions.add(link);
+        }
+        actions.add(new ObjectMetadataAction(null, desc, link == null ? null : link.getUrlName()));
+        if (primary) {
+            actions.add(new PrimaryInstanceMetadataAction());
+        }
+
+        return actions;
     }
 
     @Nonnull
     @Override
-    public SCMRevision getTrustedRevision(@Nonnull SCMRevision revision,
-                                          @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("> GitHubSCMSource.getTrustedRevision");
-        listener.getLogger().println(">> revision " + revision);
+    protected List<Action> retrieveActions(@CheckForNull SCMSourceEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+
+        return Collections.singletonList(new GitHubRepoAction(getRemoteRepo()));
+    }
+
+    @Nonnull
+    @Override
+    public SCMRevision getTrustedRevision(@Nonnull SCMRevision revision, @Nonnull TaskListener listener) throws IOException, InterruptedException {
         return super.getTrustedRevision(revision, listener);
     }
 
@@ -284,15 +326,8 @@ public class GitHubSCMSource extends SCMSource {
 
     @Nonnull
     @Override
-    protected SCMProbe createProbe(@Nonnull SCMHead head,
-                                   @CheckForNull SCMRevision revision) throws IOException {
-        LOG.debug("CreateProbe");
-        try {
-            return fromSCMFileSystem(head, revision);
-        } catch (InterruptedException e) {
-            Throwables.propagate(e);
-        }
-        throw new IllegalStateException();
+    protected SCMProbe createProbe(@Nonnull SCMHead head, @CheckForNull SCMRevision revision) throws IOException {
+        return new GitHubSCMProbe(this, (GitHubSCMHead<?>) head, (GitHubSCMRevision) revision);
     }
 
     @Override
@@ -306,8 +341,8 @@ public class GitHubSCMSource extends SCMSource {
         @Nonnull
         @Override
         protected SCMHeadCategory[] createCategories() {
-            // array? bundled in descriptor??  seriously?
-            return new SCMHeadCategory[]{BRANCH, PR, TAG};
+            // array? bundled in descriptor?? seriously?
+            return new SCMHeadCategory[] {BRANCH, PR, TAG};
         }
 
 
@@ -315,6 +350,62 @@ public class GitHubSCMSource extends SCMSource {
         @Override
         public String getDisplayName() {
             return "GitHub source";
+        }
+
+        public List<GitHubSCMFactoryDescriptor> getScmFactoryDescriptors() {
+            return ExtensionList.lookup(GitHubSCMFactoryDescriptor.class);
+        }
+    }
+
+    /**
+     * Clean up local repo cache when items get deleted
+     */
+    @Extension
+    public static class LocalRepoPlunger extends ItemListener {
+        @Override
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        public void onDeleted(Item item) {
+
+            if (!(item instanceof Job)) {
+                return;
+            }
+
+            ItemGroup<? extends Item> parent = item.getParent();
+            if (!(parent instanceof MultiBranchProject)) {
+                return;
+            }
+
+            Job j = (Job) item;
+            MultiBranchProject mb = (MultiBranchProject) parent;
+            Branch branch = mb.getProjectFactory().getBranch(j);
+            SCMHead head = branch.getHead();
+
+            Consumer<GitHubRepo> plunger = null;
+            if (head instanceof GitHubBranchSCMHead) {
+
+                plunger = r -> r.getBranchRepository().getBranches().remove(head.getName());
+
+            } else if (head instanceof GitHubTagSCMHead) {
+
+                plunger = r -> r.getTagRepository().getTags().remove(head.getName());
+
+            } else if (head instanceof GitHubPRSCMHead) {
+
+                GitHubPRSCMHead prHead = (GitHubPRSCMHead) head;
+                plunger = r -> r.getPrRepository().getPulls().remove(prHead.getPr());
+
+            }
+
+            if (plunger != null) {
+                for (SCMSource src : (List<SCMSource>) mb.getSCMSources()) {
+                    if (src instanceof GitHubSCMSource) {
+                        GitHubSCMSource gsrc = (GitHubSCMSource) src;
+                        plunger.accept(gsrc.getLocalRepo());
+                        LOG.info("Plunging local data for {}", item.getFullName());
+                    }
+                }
+            }
+
         }
     }
 }

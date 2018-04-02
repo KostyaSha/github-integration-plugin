@@ -1,31 +1,35 @@
 package com.github.kostyasha.github.integration.multibranch.handler;
 
+import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.forEachIo;
+
+import java.io.IOException;
+import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
+
+import org.kohsuke.github.GitHub;
+
 import com.github.kostyasha.github.integration.generic.GitHubCause;
-import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
-import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
-import hudson.DescriptorExtensionList;
+
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.TaskListener;
-import jenkins.model.Jenkins;
-import jenkins.scm.api.SCMHeadEvent;
-import jenkins.scm.api.SCMHeadObserver;
-import org.kohsuke.github.GHRepository;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.util.List;
 
 /**
  * @author Kanstantsin Shautsou
  */
 public abstract class GitHubHandler extends AbstractDescribableImpl<GitHubHandler> {
 
-    public abstract void handle(@Nonnull SCMHeadObserver observer,
-                                @CheckForNull SCMHeadEvent headEvent,
-                                @Nonnull GitHubRepo localRepo,
-                                @Nonnull GHRepository remoteRepo,
-                                @Nonnull TaskListener taskListener,
-                                @Nonnull GitHubSCMSource source
-    ) throws IOException;
+    public abstract void handle(@Nonnull GitHubSourceContext context) throws IOException;
+
+    protected void processCauses(GitHubSourceContext context, Stream<? extends GitHubCause<?>> causeStream) throws IOException {
+        GitHub github = context.getGitHub();
+        TaskListener listener = context.getListener();
+
+        listener.getLogger().println("GitHub rate limit before check: " + github.getRateLimit());
+
+        // run the process
+        forEachIo(causeStream, context::observe);
+
+        listener.getLogger().println("GitHub rate limit after check: " + github.getRateLimit());
+    }
 }

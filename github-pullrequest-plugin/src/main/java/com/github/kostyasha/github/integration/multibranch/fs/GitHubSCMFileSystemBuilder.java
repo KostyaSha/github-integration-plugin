@@ -1,0 +1,52 @@
+package com.github.kostyasha.github.integration.multibranch.fs;
+
+import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
+import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
+import hudson.Extension;
+import hudson.model.Item;
+import hudson.scm.SCM;
+import jenkins.scm.api.SCMFileSystem;
+import jenkins.scm.api.SCMHead;
+import jenkins.scm.api.SCMRevision;
+import jenkins.scm.api.SCMSource;
+
+import org.kohsuke.github.GHRepository;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import java.io.IOException;
+
+/**
+ * @author Kanstantsin Shautsou
+ */
+@Extension
+public class GitHubSCMFileSystemBuilder extends SCMFileSystem.Builder {
+    @Override
+    public boolean supports(SCMSource source) {
+        return source instanceof GitHubSCMSource;
+    }
+
+    @Override
+    public SCMFileSystem build(@Nonnull SCMSource source, @Nonnull SCMHead head, @CheckForNull SCMRevision rev) throws IOException, InterruptedException {
+        if (source instanceof GitHubSCMSource) {
+            GitHubSCMSource ghSCMSource = (GitHubSCMSource) source;
+            GHRepository remoteRepo = ghSCMSource.getRemoteRepo();
+            return new GitHubSCMFileSystem(remoteRepo, (GitHubSCMHead<?>) head, (GitHubSCMRevision) rev);
+        }
+        return null;
+    }
+
+    @Override
+    public boolean supports(SCM source) {
+        return false;
+    }
+
+    @Override
+    public SCMFileSystem build(@Nonnull Item owner, @Nonnull SCM scm, @CheckForNull SCMRevision rev)
+            throws IOException, InterruptedException {
+        // I suppose we could inspect GitSCM for branch configuration
+        return null;
+    }
+
+}

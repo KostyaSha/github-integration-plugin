@@ -2,7 +2,6 @@ package com.github.kostyasha.github.integration.multibranch.category;
 
 import com.github.kostyasha.github.integration.multibranch.head.GitHubTagSCMHead;
 import jenkins.scm.api.SCMHead;
-import jenkins.scm.api.SCMHeadCategory;
 import jenkins.util.NonLocalizable;
 import org.jvnet.localizer.Localizable;
 

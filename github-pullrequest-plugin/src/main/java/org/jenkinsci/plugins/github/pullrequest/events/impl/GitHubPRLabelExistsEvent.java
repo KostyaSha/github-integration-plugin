@@ -60,7 +60,7 @@ public class GitHubPRLabelExistsEvent extends GitHubPREvent {
         if (existingLabels.containsAll(label.getLabelsSet())) {
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": " + label.getLabelsSet() + " found");
-            cause = new GitHubPRCause(remotePR, label.getLabelsSet() + " labels exist", isSkip());
+            cause = prDecisionContext.newCause(label.getLabelsSet() + " labels exist", isSkip());
         }
 
         return cause;

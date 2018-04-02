@@ -2,6 +2,7 @@ package com.github.kostyasha.github.integration.branch;
 
 import hudson.Functions;
 import org.kohsuke.github.GHBranch;
+import org.kohsuke.github.GHRepository;
 
 /**
  * Store local information about branch.
@@ -16,9 +17,13 @@ public class GitHubBranch {
     private String htmlUrl;
 
     public GitHubBranch(GHBranch ghBranch) {
-        name = ghBranch.getName();
-        commitSha = ghBranch.getSHA1();
-        htmlUrl = ghBranch.getOwner().getHtmlUrl().toString() + "/tree/" + name;
+        this(ghBranch.getName(), ghBranch.getSHA1(), ghBranch.getOwner());
+    }
+
+    public GitHubBranch(String name, String commitSha, GHRepository ghRepository) {
+        this.name = name;
+        this.commitSha = commitSha;
+        this.htmlUrl = ghRepository.getHtmlUrl().toString() + "/tree/" + name;
     }
 
     public String getName() {

@@ -48,51 +48,21 @@ public class GHMultiBranchSubscriber extends AbstractGHBranchSubscriber {
     @Override
     protected void onEvent(GHSubscriberEvent event) {
         try {
-            BranchInfo ref = extractRefInfo(event.getGHEvent(), event.getPayload());
-            SCMHeadEvent.fireNow(new GitHubBranchSCMHeadEvent(
-                    SCMEvent.Type.UPDATED,
-                    event.getTimestamp(),
-                    ref,
-                    ref.getRepo())
-            );
+            BranchInfo ref = extractRefInfo(event.getGHEvent(), event.getPayload(), true);
 
-//            final Set<MultiBranchProject> ret = new HashSet<>();
-//
-//            try (ACLContext ignored = ACL.as(SYSTEM)) {
-//                List<MultiBranchProject> jobs = Jenkins.getInstance().getAllItems(MultiBranchProject.class);
-//                ret.addAll(jobs.stream()
-//                        .filter(isBuildable())
-////                        .filter(withGitHubSCMSource(ref.getRepo()))
-//                        .filter(withBranchHandler())
-//                        .collect(Collectors.toSet())
-//                );
-//            }
-
-//            for (MultiBranchProject job : ret) {
-//                GitHubBranchTrigger trigger = ghBranchTriggerFromJob(job);
-//                if (isNull(trigger)) {
-//                    continue;
-//                }
-//
-//                GitHubPRTriggerMode triggerMode = trigger.getTriggerMode();
-//
-//                switch (triggerMode) {
-//                    case HEAVY_HOOKS_CRON:
-//                    case HEAVY_HOOKS: {
-//                        LOGGER.debug("Queued check for {} (Branch {}) after heavy hook", job.getName(),
-//                                ref.getBranchName());
-//                        trigger.queueRun(job, ref.getBranchName());
-//                        break;
-//                    }
-//                    case LIGHT_HOOKS: {
-//                        LOGGER.warn("Unsupported LIGHT_HOOKS trigger mode");
-//                        break;
-//                    }
-//                    default: {
-//                        break;
-//                    }
-//                }
-//            }
+            if (ref.isTag()) {
+                SCMHeadEvent.fireNow(new GitHubTagSCMHeadEvent( //
+                        SCMEvent.Type.UPDATED, //
+                        event.getTimestamp(), //
+                        ref, //
+                        ref.getRepo()));
+            } else {
+                SCMHeadEvent.fireNow(new GitHubBranchSCMHeadEvent( //
+                        SCMEvent.Type.UPDATED, //
+                        event.getTimestamp(), //
+                        ref, //
+                        ref.getRepo()));
+            }
 
         } catch (Exception e) {
             LOGGER.error("Can't process {} hook", event, e);

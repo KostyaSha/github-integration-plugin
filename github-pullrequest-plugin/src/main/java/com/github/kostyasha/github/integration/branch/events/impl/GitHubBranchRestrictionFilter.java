@@ -89,7 +89,7 @@ public class GitHubBranchRestrictionFilter extends GitHubBranchEvent {
             return null;
         }
 
-        return toCause(remoteBranch, localRepo, true, "Branch [%s] filtered by branch name restriction filter", name);
+        return toCause(context, true, "Branch [%s] filtered by branch name restriction filter", name);
     }
 
     private boolean branchIsAllowed(String name) {
@@ -123,9 +123,9 @@ public class GitHubBranchRestrictionFilter extends GitHubBranchEvent {
         }
     }
 
-    private GitHubBranchCause toCause(GHBranch remoteBranch, GitHubBranchRepository localRepo, boolean skip,
+    private GitHubBranchCause toCause(@Nonnull GitHubBranchDecisionContext context, boolean skip,
                                       String message, Object... args) {
-        return new GitHubBranchCause(remoteBranch, localRepo, String.format(message, args), skip);
+        return context.newCause(String.format(message, args), skip);
     }
 
     @Extension

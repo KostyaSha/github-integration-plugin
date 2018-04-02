@@ -76,7 +76,7 @@ public class GitHubPRLabelAddedEvent extends GitHubPREvent {
         if (existingLabels.containsAll(label.getLabelsSet())) {
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": state has changed (" + label.getLabelsSet() + " labels were added");
-            cause = new GitHubPRCause(remotePR, label.getLabelsSet() + " labels were added", false);
+            cause = prDecisionContext.newCause(label.getLabelsSet() + " labels were added", false);
         }
 
         return cause;

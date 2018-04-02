@@ -1,56 +1,45 @@
 package com.github.kostyasha.github.integration.multibranch.handler;
 
-import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
-import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
-import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
-import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
-import com.github.kostyasha.github.integration.branch.trigger.check.BranchToCauseConverter;
-import com.github.kostyasha.github.integration.generic.GitHubCause;
-import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
-import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
-import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
-import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
-import com.google.common.base.Throwables;
-import hudson.Extension;
-import hudson.model.TaskListener;
-import jenkins.plugins.git.AbstractGitSCMSource;
-import jenkins.scm.api.SCMHeadEvent;
-import jenkins.scm.api.SCMHeadObserver;
-import org.kohsuke.github.GHBranch;
-import org.kohsuke.github.GHRateLimit;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GitHub;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.github.kostyasha.github.integration.branch.trigger.check.BranchToCauseConverter.toGitHubBranchCause;
+import static com.github.kostyasha.github.integration.branch.trigger.check.LocalRepoUpdater.updateLocalRepo;
+import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.ioOptStream;
+import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.iop;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
-import static java.util.Collections.emptyList;
-import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
+import javax.annotation.Nonnull;
+
+import org.kohsuke.github.GHBranch;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+
+import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
+import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
+import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
+import com.github.kostyasha.github.integration.branch.webhook.BranchInfo;
+import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
+import com.github.kostyasha.github.integration.multibranch.hooks.GitHubBranchSCMHeadEvent;
+
+import hudson.Extension;
+import hudson.model.TaskListener;
+import jenkins.scm.api.SCMHeadEvent;
 
 /**
  * @author Kanstantsin Shautsou
  */
 public class GitHubBranchHandler extends GitHubHandler {
-    private static final Logger LOG = LoggerFactory.getLogger(GitHubBranchHandler.class);
-
     private List<GitHubBranchEvent> events = new ArrayList<>();
 
     @DataBoundConstructor
-    public GitHubBranchHandler() {
-    }
+    public GitHubBranchHandler() {}
 
     public List<GitHubBranchEvent> getEvents() {
         return events;
@@ -68,104 +57,80 @@ public class GitHubBranchHandler extends GitHubHandler {
     }
 
     @Override
-    public void handle(@Nonnull SCMHeadObserver observer,
-                       @CheckForNull SCMHeadEvent scmHeadEvent,
-                       @Nonnull GitHubRepo localRepo,
-                       @Nonnull GHRepository remoteRepo,
-                       @Nonnull TaskListener listener,
-                       @Nonnull GitHubSCMSource source) throws IOException {
-        GitHubBranchRepository localBranches = localRepo.getBranchRepository();
+    public void handle(@Nonnull GitHubSourceContext context) throws IOException {
 
-        GitHub github = source.getRepoProvider().getGitHub(source);
+        String branchName;
 
-        GHRateLimit rateLimitBefore = github.getRateLimit();
-        listener.getLogger().println("GitHub rate limit before check: " + rateLimitBefore);
-
-        // get local and remote list of branches
-        Set<GHBranch> remoteBranches = branchesToCheck(null, remoteRepo, localBranches);
-
-        Objects.requireNonNull(localBranches);
-
-        // triggering logic and result
-        List<GitHubBranchCause> causes = checkBranches(remoteBranches, localBranches, source, listener);
-
-        GitHubBranchTrigger.updateLocalRepository(remoteBranches, localBranches);
-
-        GHRateLimit rateLimitAfter = github.getRateLimit();
-        int consumed = rateLimitBefore.remaining - rateLimitAfter.remaining;
-        LOG.info("GitHub rate limit after check {}: {}, consumed: {}, checked branches: {}",
-                source.getRepoFullName(), rateLimitAfter, consumed, remoteBranches.size());
-        HashSet<String> triggeredBranches = new HashSet<>();
-
-        // trigger builds
-        causes.forEach(branchCause -> {
-            String commitSha = branchCause.getCommitSha();
-            String branchName = branchCause.getBranchName();
-
-            GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(branchName, source.getId());
-            GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, commitSha, false, branchCause);
-            try {
-                observer.observe(scmHead, scmRevision);
-                triggeredBranches.add(scmHead.getName());
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace(listener.getLogger());
-            }
-        });
-
-
-        // don't think that items without cause are orphaned,
-        // make com.cloudbees.hudson.plugins.folder.computed.ChildObserver.shouldUpdate() happy
-        // or don't hide childObserver
-        localBranches.getBranches().entrySet().stream()
-                .filter(it -> !triggeredBranches.contains(it.getKey()))
-                .map(Map.Entry::getValue)
-                .forEach(value -> {
-                    try {
-                        GitHubBranchSCMHead scmHead = new GitHubBranchSCMHead(value.getName(), source.getId());
-                        GitHubSCMRevision scmRevision = new GitHubSCMRevision(scmHead, value.getCommitSha(), true, null);
-                        observer.observe(scmHead, scmRevision);
-                    } catch (IOException | InterruptedException e) {
-                        // try as much as can
-                        e.printStackTrace(listener.getLogger());
-                    }
-                });
-
-    }
-
-    /**
-     * Remote branch for future analysing. null - all remote branches.
-     */
-    private Set<GHBranch> branchesToCheck(@CheckForNull String branch,
-                                          @Nonnull GHRepository remoteRepo,
-                                          GitHubBranchRepository localRepository)
-            throws IOException {
-        final LinkedHashSet<GHBranch> ghBranches = new LinkedHashSet<>();
-
-        if (branch != null) {
-            final GHBranch ghBranch = remoteRepo.getBranches().get(branch);
-            if (ghBranch != null) {
-                ghBranches.add(ghBranch);
-            }
+        SCMHeadEvent<?> scmHeadEvent = context.getScmHeadEvent();
+        if (scmHeadEvent instanceof GitHubBranchSCMHeadEvent) {
+            BranchInfo info = (BranchInfo) scmHeadEvent.getPayload();
+            branchName = info.getBranchName();
+        } else if (scmHeadEvent != null) {
+            // not our event, skip completely
+            return;
         } else {
-            ghBranches.addAll(remoteRepo.getBranches().values());
+            branchName = null;
         }
 
-        return ghBranches;
+        TaskListener listener = context.getListener();
+        GHRepository remoteRepo = context.getRemoteRepo();
+        GitHubBranchRepository localRepo = Objects.requireNonNull(context.getLocalRepo().getBranchRepository());
+        GitHubBranchRepository oldRepo = new GitHubBranchRepository(remoteRepo);
+        oldRepo.getBranches().putAll(localRepo.getBranches());
+
+        // prepare for run and fetch remote branches
+        Stream<GHBranch> branches;
+        if (branchName != null) {
+            listener.getLogger().println("**** Processing branch " + branchName + " ****");
+            branches = ioOptStream(() -> remoteRepo.getBranch(branchName));
+            localRepo.getBranches().remove(branchName);
+        } else {
+            listener.getLogger().println("**** Processing all branches ****");
+            branches = fetchRemoteBranches(remoteRepo).values().stream();
+            localRepo.getBranches().clear();
+        }
+
+        processCauses(context, branches
+                // filter out uninteresting
+                .filter(iop(b -> context.checkCriteria(new GitHubBranchCause(b, localRepo, "Check", false))))
+                // update local state
+                .map(updateLocalRepo(localRepo))
+                // create causes
+                .map(toCause(context, oldRepo)));
+
+        listener.getLogger().println("**** Done processing branches ****");
     }
 
-    private List<GitHubBranchCause> checkBranches(Set<GHBranch> remoteBranches,
-                                                  @Nonnull GitHubBranchRepository localBranches,
-                                                  @Nonnull GitHubSCMSource source,
-                                                  @Nonnull TaskListener listener) {
-        List<GitHubBranchCause> causes = remoteBranches.stream()
-                // TODO: update user whitelist filter
-                .filter(Objects::nonNull)
-                .map(new BranchToCauseConverter(localBranches, listener, this, source))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+    private Function<GHBranch, GitHubBranchCause> toCause(GitHubSourceContext context, GitHubBranchRepository localRepo) {
+        TaskListener listener = context.getListener();
+        GitHubSCMSource source = context.getSource();
+        return b -> {
+            GitHubBranchCause c = toGitHubBranchCause(localRepo, listener, this, source).apply(b);
+            if (c == null) {
+                c = new GitHubBranchCause(b, localRepo, "Skip", true);
+            }
+            return c;
+        };
+    }
 
-        LOG.debug("Build trigger count for [{}] : {}", localBranches.getFullName(), causes.size());
-        return causes;
+    private Map<String, GHBranch> fetchRemoteBranches(GHRepository remoteRepo) throws IOException {
+        Map<String, GHBranch> branches = remoteRepo.getBranches();
+
+        String defName = remoteRepo.getDefaultBranch();
+        GHBranch def = branches.get(defName);
+        if (def == null) { // just in case
+            return branches;
+        }
+
+        // reorder branches so that default branch always comes first
+        Map<String, GHBranch> ordered = new LinkedHashMap<>();
+        ordered.put(defName, def);
+        branches.entrySet().forEach(e -> {
+            if (!e.getKey().equals(defName)) {
+                ordered.put(e.getKey(), e.getValue());
+            }
+        });
+        return ordered;
     }
 
     @Extension

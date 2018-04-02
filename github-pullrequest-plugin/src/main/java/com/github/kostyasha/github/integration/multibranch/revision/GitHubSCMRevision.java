@@ -3,20 +3,17 @@ package com.github.kostyasha.github.integration.multibranch.revision;
 import com.github.kostyasha.github.integration.generic.GitHubCause;
 import jenkins.plugins.git.AbstractGitSCMSource;
 import jenkins.scm.api.SCMHead;
-import jenkins.scm.api.SCMRevision;
 
 /**
  * @author Kanstantsin Shautsou
  */
 public class GitHubSCMRevision extends AbstractGitSCMSource.SCMRevisionImpl {
-    private final boolean superEquals;
 
-    private transient GitHubCause cause = null;
+    private transient GitHubCause cause;
+    private transient Object remoteData;
 
-
-    public GitHubSCMRevision(SCMHead head, String hash, boolean superEquals, GitHubCause cause) {
+    public GitHubSCMRevision(SCMHead head, String hash, GitHubCause cause) {
         super(head, hash);
-        this.superEquals = superEquals;
         this.cause = cause;
     }
 
@@ -29,14 +26,15 @@ public class GitHubSCMRevision extends AbstractGitSCMSource.SCMRevisionImpl {
         return this;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (superEquals) {
-            return super.equals(obj);
-        }
-
-        //we control when to run outside of multibranch logic
-        return false;
+    public Object getRemoteData() {
+        return remoteData;
     }
 
+    /**
+     * Provides a way for SCMSourceCriteria implementations to get a hold of the remote data (branch, tag, etc)
+     */
+    public GitHubSCMRevision setRemoteData(Object remoteData) {
+        this.remoteData = remoteData;
+        return this;
+    }
 }

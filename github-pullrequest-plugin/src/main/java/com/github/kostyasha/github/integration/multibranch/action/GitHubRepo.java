@@ -1,10 +1,9 @@
 package com.github.kostyasha.github.integration.multibranch.action;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
-import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
+import com.github.kostyasha.github.integration.tag.GitHubTagRepository;
+
 import hudson.model.Action;
-import hudson.model.Saveable;
-import jenkins.scm.api.SCMSourceOwner;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
@@ -25,12 +24,13 @@ import static java.util.Objects.isNull;
 public class GitHubRepo implements Action {
     private static final Logger LOG = LoggerFactory.getLogger(GitHubRepo.class);
 
-    private transient GitHubSCMSourcesReposAction owner;
+    private transient GitHubSCMSourcesLocalStorage owner;
 
     private GitHubBranchRepository branchRepository;
+    private GitHubTagRepository tagRepository;
     private GitHubPRRepository prRepository;
 
-    public GitHubRepo(GitHubSCMSourcesReposAction owner) {
+    public GitHubRepo(GitHubSCMSourcesLocalStorage owner) {
         this.owner = owner;
     }
 
@@ -38,21 +38,28 @@ public class GitHubRepo implements Action {
      * When remote side available.
      */
     public GitHubRepo(GHRepository repository) {
-        branchRepository = new GitHubBranchRepository(repository);
-        prRepository = new GitHubPRRepository(repository);
+        this(new GitHubBranchRepository(repository), new GitHubTagRepository(repository), new GitHubPRRepository(repository));
     }
 
     /**
      * For offline initialisation from what user specified.
      */
     public GitHubRepo(String repoFullName, URL url) {
-        branchRepository = new GitHubBranchRepository(repoFullName, url);
-        prRepository = new GitHubPRRepository(repoFullName, url);
+        this(new GitHubBranchRepository(repoFullName, url), new GitHubTagRepository(repoFullName, url), new GitHubPRRepository(repoFullName, url));
     }
 
+    public GitHubRepo(GitHubBranchRepository branchRepository, GitHubTagRepository tagRepository, GitHubPRRepository prRepository) {
+        this.branchRepository = branchRepository;
+        this.tagRepository = tagRepository;
+        this.prRepository = prRepository;
+    }
 
     public GitHubBranchRepository getBranchRepository() {
         return branchRepository;
+    }
+
+    public GitHubTagRepository getTagRepository() {
+        return tagRepository;
     }
 
     public GitHubPRRepository getPrRepository() {
@@ -81,18 +88,23 @@ public class GitHubRepo implements Action {
         if (isNull(branchRepository)) {
             branchRepository = new GitHubBranchRepository(remoteRepo);
         }
+        if (isNull(tagRepository)) {
+            tagRepository = new GitHubTagRepository(remoteRepo);
+        }
         if (isNull(prRepository)) {
             prRepository = new GitHubPRRepository(remoteRepo);
         }
 
-        owner.save();
+        if (owner != null) {
+            owner.save();
+        }
     }
 
     public void sync(GHRepository remoteRepo) {
 
     }
 
-    public void setOwner(GitHubSCMSourcesReposAction owner) {
+    public void setOwner(GitHubSCMSourcesLocalStorage owner) {
         this.owner = owner;
     }
 

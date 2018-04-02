@@ -27,15 +27,14 @@ public abstract class AbstractGHPullRequestSubsriber extends GHEventsSubscriber 
             case ISSUE_COMMENT: {
                 GHEventPayload.IssueComment commentPayload = gh.parseEventPayload(new StringReader(payload), GHEventPayload.IssueComment.class);
 
-                int prNumber = commentPayload.getIssue().getNumber();
-
-                return new PullRequestInfo(commentPayload.getRepository().getFullName(), prNumber);
+                int issueNumber = commentPayload.getIssue().getNumber();
+                return new PullRequestInfo(commentPayload.getRepository().getFullName(), issueNumber);
             }
 
             case PULL_REQUEST: {
                 GHEventPayload.PullRequest pr = gh.parseEventPayload(new StringReader(payload), GHEventPayload.PullRequest.class);
 
-                return new PullRequestInfo(pr.getPullRequest().getRepository().getFullName(), pr.getNumber());
+                return new PullRequestInfo(pr.getPullRequest().getRepository().getFullName(), pr.getNumber(), pr.getPullRequest().getBase().getRef());
             }
 
             default:

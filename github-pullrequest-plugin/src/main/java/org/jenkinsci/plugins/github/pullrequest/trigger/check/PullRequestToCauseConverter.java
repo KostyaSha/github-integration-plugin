@@ -3,7 +3,6 @@ package org.jenkinsci.plugins.github.pullrequest.trigger.check;
 import com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext;
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubPRHandler;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
@@ -19,11 +18,11 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext.newGitHubPRDecisionContext;
-import static com.google.common.base.Predicates.notNull;
 import static java.util.Objects.nonNull;
-import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 
 /**
  * @author lanwen (Merkushev Kirill)
@@ -68,6 +67,13 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
         return new PullRequestToCauseConverter(localRepo, listener, trigger);
     }
 
+    public static PullRequestToCauseConverter toGitHubPRCause(@Nonnull GitHubPRRepository localRepo,
+                                                              @Nonnull TaskListener listener,
+                                                              @Nonnull GitHubPRHandler prHandler,
+                                                              @Nonnull GitHubSCMSource source) {
+        return new PullRequestToCauseConverter(localRepo, listener, source, prHandler);
+    }
+
     /**
      * TODO migrate to java8 and cleanup.
      *
@@ -76,22 +82,37 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
     @CheckForNull
     @Override
     public GitHubPRCause apply(final GHPullRequest remotePR) {
-        final GitHubPRCause gitHubPRCause = from(getEvents())
-                .transform(toCause(remotePR))
-                .filter(notNull())
-                .first()
-                .orNull();
+        
+        @CheckForNull
+        GitHubPRPullRequest localPR = localRepo.getPulls().get(remotePR.getNumber());
+        GitHubPRDecisionContext context = newGitHubPRDecisionContext()
+                .withListener(listener)
+                .withLocalPR(localPR)
+                .withRemotePR(remotePR)
+                .withLocalRepo(localRepo)
+                .withPrTrigger(trigger)
+                .withPrHandler(prHandler)
+                .withSCMSource(source)
+                .build();
 
-        if (gitHubPRCause == null || gitHubPRCause.isSkip()) {
+        final List<GitHubPRCause> causes = getEvents().stream()
+                .map(e -> toCause(e, context))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        GitHubPRCause cause = GitHubPRCause.skipTrigger(causes);
+
+        if (cause != null) {
+            LOGGER.debug("Cause [{}] indicated build should be skipped.", cause);
+            listener.getLogger().println(String.format("Build of pr %s skipped: %s.", remotePR.getNumber(), cause.getReason()));
             return null;
-        } else {
-            return gitHubPRCause;
+        } else if (!causes.isEmpty()) {
+            // use the first cause from the list
+            cause = causes.get(0);
+            LOGGER.debug("Using build cause [{}] as trigger for pr [{}].", cause, remotePR.getNumber());
         }
-    }
 
-    @VisibleForTesting
-    /* package */ EventToCauseConverter toCause(GHPullRequest remotePR) {
-        return new EventToCauseConverter(remotePR);
+        return cause;
     }
 
     public List<GitHubPREvent> getEvents() {
@@ -104,33 +125,15 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
         throw new IllegalArgumentException("Can't extract events");
     }
 
-    @VisibleForTesting
-    /* package */ class EventToCauseConverter implements Function<GitHubPREvent, GitHubPRCause> {
-        private final GHPullRequest remotePR;
-
-        EventToCauseConverter(GHPullRequest remotePR) {
-            this.remotePR = remotePR;
-        }
-
-        @Override
-        public GitHubPRCause apply(GitHubPREvent event) {
-            //null if local not existed before
-            @CheckForNull GitHubPRPullRequest localPR = localRepo.getPulls().get(remotePR.getNumber());
-            try {
-                return event.check(
-                        newGitHubPRDecisionContext()
-                                .withListener(listener)
-                                .withLocalPR(localPR)
-                                .withPrTrigger(trigger)
-                                .withPrHandler(prHandler)
-                                .withSCMSource(source)
-                                .build()
-                );
-            } catch (IOException e) {
-                LOGGER.warn("Can't check trigger event", e);
-                listener.error("Can't check trigger event, so skipping PR #{}. {}", remotePR.getNumber(), e);
-                return null;
-            }
+    private GitHubPRCause toCause(GitHubPREvent event, GitHubPRDecisionContext context) {
+        // null if local not existed before
+        try {
+            return context.checkEvent(event);
+        } catch (IOException e) {
+            LOGGER.warn("Can't check trigger event", e);
+            listener.error("Can't check trigger event, so skipping PR #{}. {}", context.getRemotePR().getNumber(), e);
+            return null;
         }
     }
+
 }

@@ -58,11 +58,16 @@ public class GitHubPRPullRequest {
     /**
      * Save only what we need for next comparison
      */
-    public GitHubPRPullRequest(GHPullRequest pr) throws IOException {
+    public GitHubPRPullRequest(GHPullRequest pr) {
         userLogin = pr.getUser().getLogin();
         number = pr.getNumber();
-        prUpdatedAt = pr.getUpdatedAt();
-        issueUpdatedAt = pr.getIssueUpdatedAt();
+        try {
+            prUpdatedAt = pr.getUpdatedAt();
+            issueUpdatedAt = pr.getIssueUpdatedAt();
+        } catch(IOException e) {
+            // those methods never actually throw IOExceptions
+            throw new IllegalStateException(e);
+        }
         headSha = pr.getHead().getSha();
         headRef = pr.getHead().getRef();
         title = pr.getTitle();

@@ -81,7 +81,7 @@ public class GitHubPRDescriptionEvent extends GitHubPREvent {
                             skipBuildPhrase
                     );
                     logger.println(DISPLAY_NAME + ": Pull request description contains " + skipBuildPhrase + ", skipping");
-                    cause = new GitHubPRCause(remotePR, "Pull request description contains " + skipBuildPhrase + ", skipping", true);
+                    cause = prDecisionContext.newCause("Pull request description contains " + skipBuildPhrase + ", skipping", true);
                     break;
                 } else {
                     LOG.trace("Job: '{}', trigger event: '{}', phrase: '{}' didn't match to '{}'",
@@ -98,12 +98,12 @@ public class GitHubPRDescriptionEvent extends GitHubPREvent {
     }
 
     private String getFullName(GitHubPRDecisionContext context) {
-        GitHubPRTrigger prTrigger = context.getPrTrigger();
+        GitHubPRTrigger prTrigger = context.getTrigger();
         if (nonNull(prTrigger)) {
             return prTrigger.getJob().getFullName();
         }
 
-        return context.getSource().getOwner().getFullName();
+        return context.getScmSource().getOwner().getFullName();
     }
 
     public String getSkipMsg() {

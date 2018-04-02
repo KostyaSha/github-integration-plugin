@@ -9,7 +9,6 @@ import com.google.common.base.Predicate;
 import hudson.model.Action;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
-import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
@@ -30,17 +29,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.cloudbees.jenkins.GitHubWebHook.getJenkinsInstance;
-import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.CAUSE_SKIP;
-import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.FULL_REF;
-import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.HEAD_SHA;
-import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.NAME;
-import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.SHORT_DESC;
-import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.TITLE;
-import static com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv.URL;
-import static com.github.kostyasha.github.integration.generic.GitHubRepoEnv.GIT_URL;
-import static com.github.kostyasha.github.integration.generic.GitHubRepoEnv.SSH_URL;
 import static com.google.common.base.Predicates.instanceOf;
-import static java.util.Arrays.asList;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getDefaultParametersValues;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
@@ -126,20 +115,7 @@ public class JobRunnerForBranchCause implements Predicate<GitHubBranchCause> {
     public QueueTaskFuture<?> startJob(GitHubBranchCause cause, Cause additionalCause) {
         ParametersAction parametersAction;
         List<ParameterValue> parameters = getDefaultParametersValues(job);
-        final List<ParameterValue> pluginParameters = asList(
-                //GitHubBranchEnv
-                NAME.param(cause.getBranchName()),
-                SHORT_DESC.param(cause.getShortDescription()),
-                URL.param(cause.getHtmlUrl().toString()),
-                HEAD_SHA.param(cause.getCommitSha()),
-                CAUSE_SKIP.param(cause.isSkip()),
-                FULL_REF.param(cause.getFullRef()),
-                TITLE.param(cause.getTitle()),
-                //GitHubRepoEnv
-                GIT_URL.param(cause.getGitUrl()),
-                SSH_URL.param(cause.getSshUrl())
-        );
-        parameters.addAll(pluginParameters);
+        cause.fillParameters(parameters);
 
         try {
             Constructor<ParametersAction> constructor = ParametersAction.class.getConstructor(List.class, Collection.class);

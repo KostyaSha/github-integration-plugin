@@ -43,27 +43,6 @@ import java.util.Set;
 import static com.cloudbees.jenkins.GitHubWebHook.getJenkinsInstance;
 import static com.google.common.base.Predicates.instanceOf;
 import static hudson.security.ACL.impersonate;
-import static java.util.Arrays.asList;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.AUTHOR_EMAIL;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.CAUSE_SKIP;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.COMMENT_BODY;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.COMMENT_BODY_MATCH;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.COMMIT_AUTHOR_EMAIL;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.COMMIT_AUTHOR_NAME;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.COND_REF;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.BODY;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.HEAD_SHA;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.LABELS;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.NUMBER;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.SHORT_DESC;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.SOURCE_BRANCH;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.SOURCE_REPO_OWNER;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.STATE;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TARGET_BRANCH;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TITLE;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TRIGGER_SENDER_AUTHOR;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.TRIGGER_SENDER_EMAIL;
-import static org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv.URL;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getDefaultParametersValues;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getInterruptCauses;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getInterruptStatus;
@@ -272,34 +251,12 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
     public QueueTaskFuture<?> startJob(GitHubPRCause cause, @CheckForNull Cause additionalCause) {
         ParametersAction parametersAction;
         List<ParameterValue> parameters = getDefaultParametersValues(job);
-        final List<ParameterValue> pluginParameters = asList(
-                TRIGGER_SENDER_AUTHOR.param(cause.getTriggerSenderName()),
-                TRIGGER_SENDER_EMAIL.param(cause.getTriggerSenderEmail()),
-                COMMIT_AUTHOR_NAME.param(cause.getCommitAuthorName()),
-                COMMIT_AUTHOR_EMAIL.param(cause.getCommitAuthorEmail()),
-                TARGET_BRANCH.param(cause.getTargetBranch()),
-                SOURCE_BRANCH.param(cause.getSourceBranch()),
-                AUTHOR_EMAIL.param(cause.getPRAuthorEmail()),
-                BODY.param(cause.getBody()),
-                SHORT_DESC.param(cause.getShortDescription()),
-                TITLE.param(cause.getTitle()),
-                URL.param(cause.getHtmlUrl().toString()),
-                SOURCE_REPO_OWNER.param(cause.getSourceRepoOwner()),
-                HEAD_SHA.param(cause.getHeadSha()),
-                COND_REF.param(cause.getCondRef()),
-                CAUSE_SKIP.param(cause.isSkip()),
-                NUMBER.param(String.valueOf(cause.getNumber())),
-                STATE.param(String.valueOf(cause.getState())),
-                COMMENT_BODY.param(String.valueOf(cause.getCommentBody())),
-                COMMENT_BODY_MATCH.param(String.valueOf(cause.getCommentBodyMatch())),
-                LABELS.param(String.join(",", cause.getLabels()))
-        );
-        parameters.addAll(pluginParameters);
+        cause.fillParameters(parameters);
 
         try {
             Constructor<ParametersAction> constructor = ParametersAction.class.getConstructor(List.class, Collection.class);
             Set<String> names = new HashSet<>();
-            for (ParameterValue param : pluginParameters) {
+            for (ParameterValue param : parameters) {
                 names.add(param.getName());
             }
             parametersAction = constructor.newInstance(parameters, names);

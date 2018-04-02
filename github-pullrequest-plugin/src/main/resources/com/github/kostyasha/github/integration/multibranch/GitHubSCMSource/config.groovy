@@ -19,7 +19,7 @@ f.block() {
         f.textbox(field: "id", name: "id", value: instance.id)
     }
 
-    f.entry(field: 'projectUrlStr', title: _('github.project.url')) {
+    f.entry(field: 'projectUrlStr', title: _('GitHub project url')) {
         f.textbox()
     }
 
@@ -42,6 +42,8 @@ f.block() {
             }
         }
     }
+
+    f.dropdownDescriptorSelector(field: "scmFactory", title: _("SCM Factory"), descriptors: descriptor.scmFactoryDescriptors)
 
     f.entry(title: "Handlers") {
         f.hetero_list(
