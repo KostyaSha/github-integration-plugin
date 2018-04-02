@@ -4,7 +4,6 @@ import antlr.ANTLRException;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
-import com.github.kostyasha.github.integration.branch.GitHubBranchPollingLogAction;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchCreatedEvent;
@@ -48,7 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static com.jayway.awaitility.Awaitility.await;
+import static org.awaitility.Awaitility.await;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.commons.io.FileUtils.writeStringToFile;
 import static org.hamcrest.MatcherAssert.assertThat;
