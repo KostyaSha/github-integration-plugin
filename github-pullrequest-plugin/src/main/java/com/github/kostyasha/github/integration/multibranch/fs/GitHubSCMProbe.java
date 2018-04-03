@@ -84,7 +84,7 @@ public class GitHubSCMProbe extends SCMProbe {
 
     private GHCommit commit() throws IOException {
         if (commit == null) {
-            synchronized (commit) {
+            synchronized (this) {
                 if (commit == null) {
                     commit = repo().getCommit(revision.getHash());
                 }
