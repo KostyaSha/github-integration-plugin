@@ -17,7 +17,7 @@ import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.kohsuke.github.GHEvent;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.util.Set;
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author lanwen (Merkushev Kirill)
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class GHPullRequestSubscriberTest {
 
     public static final String REPO_URL_FROM_PAYLOAD = "https://github.com/lanwen/test";
