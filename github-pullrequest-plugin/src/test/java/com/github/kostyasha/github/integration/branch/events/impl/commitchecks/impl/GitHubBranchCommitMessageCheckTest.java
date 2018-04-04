@@ -52,6 +52,7 @@ public class GitHubBranchCommitMessageCheckTest {
     public void begin() {
         MockitoAnnotations.initMocks(this);
         event = new GitHubBranchCommitMessageCheck();
+        when(mockRemoteBranch.getName()).thenReturn("remoteBranch");
     }
 
     @Test

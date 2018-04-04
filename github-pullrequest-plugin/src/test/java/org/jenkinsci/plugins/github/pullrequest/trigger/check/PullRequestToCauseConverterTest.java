@@ -95,17 +95,17 @@ public class PullRequestToCauseConverterTest {
         toGitHubPRCause(local, tlRule.getListener(), trigger).apply(remotePR);
 
         verify(event).check(newGitHubPRDecisionContext()
-                .withPrTrigger(eq(trigger))
-                .withRemotePR(eq(remotePR))
-                .withListener(any(TaskListener.class))
-                .withLocalPR(eq(localPR))
+                .withPrTrigger(trigger)
+                .withRemotePR(remotePR)
+                .withListener(tlRule.getListener())
+                .withLocalPR(localPR)
                 .build()
         );
     }
 
     @Test
     public void shouldReturnCauseOnSuccessfulOpenEventCheck() throws Exception {
-        when(local.getPulls()).thenReturn(new HashMap<Integer, GitHubPRPullRequest>());
+        when(local.getPulls()).thenReturn(new HashMap<>());
         when(remotePR.getNumber()).thenReturn(1);
         when(trigger.getEvents()).thenReturn(asList(
                 new GitHubPROpenEvent()

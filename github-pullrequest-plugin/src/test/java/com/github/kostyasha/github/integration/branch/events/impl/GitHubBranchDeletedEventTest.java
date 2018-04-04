@@ -51,6 +51,7 @@ public class GitHubBranchDeletedEventTest {
         assertThat(
                 event.check(newGitHubBranchDecisionContext()
                         .withLocalBranch(null)
+                        .withLocalRepo(localRepo)
                         .withBranchTrigger(trigger)
                         .withRemoteBranch(remoteBranch)
                         .withListener(listener)
@@ -79,7 +80,7 @@ public class GitHubBranchDeletedEventTest {
         commonExpectations();
         assertThat(
                 event.check(newGitHubBranchDecisionContext()
-                        .withLocalBranch(localBranch)
+                        .withLocalBranch(null)
                         .withBranchTrigger(trigger)
                         .withLocalRepo(localRepo)
                         .withRemoteBranch(null)

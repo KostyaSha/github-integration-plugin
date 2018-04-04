@@ -90,6 +90,7 @@ public class GitHubBranchTriggerTest {
 
         assertThat(prj.getBuilds(), hasSize(1));
         final FreeStyleBuild lastBuild = prj.getLastBuild();
+        assertThat(lastBuild, notNullValue());
 
         final GitHubBranchCause cause = lastBuild.getCause(GitHubBranchCause.class);
         assertThat(cause, notNullValue());

@@ -50,6 +50,7 @@ public class GitHubBranchDeletedEvent extends GitHubBranchEvent {
 
     @Extension
     public static class DescriptorImpl extends GitHubBranchEventDescriptor {
+        @Nonnull
         @Override
         public final String getDisplayName() {
             return DISPLAY_NAME;

@@ -130,8 +130,15 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
         try {
             return context.checkEvent(event);
         } catch (IOException e) {
-            LOGGER.error("Event check failed, skipping branch [{}].", context.getLocalBranch().getName(), e);
-            listener.error("Event check failed, skipping branch [{}] {}", context.getLocalBranch().getName(), e);
+            String branch = null;
+            if (nonNull(context.getLocalBranch())){
+                branch = context.getLocalBranch().getName();
+            } else if (nonNull(context.getRemoteBranch())) {
+                branch = context.getRemoteBranch().getName();
+            }
+
+            LOGGER.error("Event check failed, skipping branch '{}'.", branch, e);
+            listener.error("Event check failed, skipping branch '{}' {}", branch, e);
             return null;
         }
     }
