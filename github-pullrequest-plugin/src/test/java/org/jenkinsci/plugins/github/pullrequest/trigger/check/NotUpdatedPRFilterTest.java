@@ -10,7 +10,7 @@ import org.junit.runner.RunWith;
 import org.kohsuke.github.GHCommitPointer;
 import org.kohsuke.github.GHPullRequest;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author lanwen (Merkushev Kirill)
  */
-@RunWith(MockitoJUnitRunner.Silent.class)
+@RunWith(MockitoJUnitRunner.class)
 public class NotUpdatedPRFilterTest {
     @Mock
     private GitHubPRRepository localRepo;

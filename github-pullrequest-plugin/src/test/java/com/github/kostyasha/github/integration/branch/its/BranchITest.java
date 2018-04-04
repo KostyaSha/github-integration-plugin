@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghBranchTriggerFromJob;
-import static org.awaitility.Awaitility.await;
+import static com.jayway.awaitility.Awaitility.await;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;

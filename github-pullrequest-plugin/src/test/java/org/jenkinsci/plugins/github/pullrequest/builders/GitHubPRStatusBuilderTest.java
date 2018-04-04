@@ -18,7 +18,7 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.kohsuke.github.GHRepository;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Alina Karpovich
  */
-@RunWith(MockitoJUnitRunner.Silent.class)
+@RunWith(MockitoJUnitRunner.class)
 public class GitHubPRStatusBuilderTest {
     private static final String DEFAULT_MESSAGE = GitHubPRStatusBuilder.DEFAULT_MESSAGE.getContent();
     private static final String CUSTOM_MESSAGE = "Custom run message";

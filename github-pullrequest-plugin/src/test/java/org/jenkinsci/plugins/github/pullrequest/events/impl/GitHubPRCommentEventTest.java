@@ -16,7 +16,7 @@ import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHUser;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -41,7 +41,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Kanstantsin Shautsou
  */
-@RunWith(MockitoJUnitRunner.Silent.class)
+@RunWith(MockitoJUnitRunner.class)
 public class GitHubPRCommentEventTest {
 
     @Mock

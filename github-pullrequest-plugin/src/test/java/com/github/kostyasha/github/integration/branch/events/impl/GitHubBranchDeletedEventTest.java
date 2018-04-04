@@ -10,7 +10,7 @@ import org.junit.runner.RunWith;
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHRepository;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Kanstantsin Shautsou
  */
-@RunWith(MockitoJUnitRunner.Silent.class)
+@RunWith(MockitoJUnitRunner.class)
 public class GitHubBranchDeletedEventTest {
     @Mock
     private GitHubBranch localBranch;

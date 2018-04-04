@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kohsuke.github.*;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 /**
  * @author Michal Cichra
  */
-@RunWith(MockitoJUnitRunner.Silent.class)
+@RunWith(MockitoJUnitRunner.class)
 public class GitHubPRLabelNotExistsEventTest {
 
     private static final String MERGE = "merge";
