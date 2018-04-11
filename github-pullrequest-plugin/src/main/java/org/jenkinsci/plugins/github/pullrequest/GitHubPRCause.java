@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
 import com.github.kostyasha.github.integration.generic.GitHubCause;
+import com.github.kostyasha.github.integration.generic.GitHubRepository;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubPRSCMHead;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
 
@@ -141,6 +142,15 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
         this.condRef = mergeable ? "merge" : "head";
 
         this.state = state;
+    }
+
+    @Override
+    public GitHubPRCause withLocalRepo(@Nonnull GitHubRepository localRepo) {
+        withGitUrl(localRepo.getGitUrl());
+        withSshUrl(localRepo.getSshUrl());
+        // html url is set from constructor and points to pr
+        // withHtmlUrl(localRepo.getGithubUrl());
+        return this;
     }
 
     /**
