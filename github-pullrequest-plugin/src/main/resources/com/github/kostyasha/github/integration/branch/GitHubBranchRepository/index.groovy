@@ -46,7 +46,7 @@ l.layout(title: "GitHub Branch Status") {
         br()
         br()
         div(style: "display: inline-block") {
-            if (h.hasPermission(Item.BUILD)) {
+            if (l.hasPermission(Item.BUILD)) {
                 def runTrigger = "runTrigger";
                 form(method: "post", action: "runTrigger", onsubmit: "return callFeature(this, ${runTrigger})",
                         style: "float: right; margin-right: 100px") {
@@ -71,7 +71,7 @@ l.layout(title: "GitHub Branch Status") {
                     td() { printRelatedBuilds(branchBuilds) }
                 }
                 // build local Branch button
-                if (h.hasPermission(Item.BUILD)) {
+                if (l.hasPermission(Item.BUILD)) {
                     tr() {
                         td() {
                             def buildResultId = makeBuildResultId(branch.name);
@@ -104,7 +104,7 @@ l.layout(title: "GitHub Branch Status") {
         }
         br()
         div(style: "display: inline-block") {
-            if (h.hasPermission(Item.BUILD)) {
+            if (l.hasPermission(Item.BUILD)) {
                 def rebuildAllFailedId = "rebuildFailedResult";
                 form(method: "post",
                         action: "rebuildAllFailed",
@@ -115,7 +115,7 @@ l.layout(title: "GitHub Branch Status") {
                 }
             }
 
-            if (h.hasPermission(Item.DELETE)) {
+            if (l.hasPermission(Item.DELETE)) {
                 def clearRepoId = "clearRepoResult";
                 form(method: "post", action: "clearRepo", onsubmit: "return  callFeature(this, ${clearRepoId})",
                         style: "float: left") {

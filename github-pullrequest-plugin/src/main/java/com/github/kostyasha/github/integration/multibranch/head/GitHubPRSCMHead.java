@@ -11,21 +11,21 @@ import javax.annotation.Nonnull;
 public class GitHubPRSCMHead extends GitHubSCMHead<GitHubPRCause> {
     private static final long serialVersionUID = 1L;
 
-    private final int pr;
+    private final int prNumber;
     private final String targetBranch;
 
     public GitHubPRSCMHead(@Nonnull GitHubPRCause prCause, String sourceId) {
         this(prCause.getNumber(), prCause.getTargetBranch(), sourceId);
     }
 
-    public GitHubPRSCMHead(@Nonnull Integer pr, @Nonnull String targetBranch, String sourceId) {
-        super("pr-" + Integer.toString(pr), sourceId);
-        this.pr = pr;
+    public GitHubPRSCMHead(@Nonnull Integer prNumber, @Nonnull String targetBranch, String sourceId) {
+        super("pr-" + Integer.toString(prNumber), sourceId);
+        this.prNumber = prNumber;
         this.targetBranch = targetBranch;
     }
 
-    public int getPr() {
-        return pr;
+    public int getPrNumber() {
+        return prNumber;
     }
 
     public String getTargetBranch() {
@@ -34,14 +34,14 @@ public class GitHubPRSCMHead extends GitHubSCMHead<GitHubPRCause> {
 
     @Override
     public String getPronoun() {
-        return "PR#" + pr;
+        return "PR#" + prNumber;
     }
 
     @Override
     public String fetchHeadSha(GHRepository remoteRepo) throws IOException {
-        GHPullRequest pullRequest = remoteRepo.getPullRequest(pr);
+        GHPullRequest pullRequest = remoteRepo.getPullRequest(prNumber);
         if (pullRequest == null) {
-            throw new IOException("No PR " + pr + " in " + remoteRepo.getFullName());
+            throw new IOException("No PR " + prNumber + " in " + remoteRepo.getFullName());
         }
         return pullRequest.getHead().getSha();
     }

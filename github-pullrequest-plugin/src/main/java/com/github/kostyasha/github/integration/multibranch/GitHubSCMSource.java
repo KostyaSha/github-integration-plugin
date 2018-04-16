@@ -2,7 +2,8 @@ package com.github.kostyasha.github.integration.multibranch;
 
 import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.github.kostyasha.github.integration.generic.GitHubCause;
-import com.github.kostyasha.github.integration.multibranch.GitHubSCMFactory.GitHubSCMFactoryDescriptor;
+import com.github.kostyasha.github.integration.multibranch.scm.GitHubSCMFactory;
+import com.github.kostyasha.github.integration.multibranch.scm.GitHubSCMFactory.GitHubSCMFactoryDescriptor;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubBranchAction;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubLinkAction;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubPRAction;
@@ -289,9 +290,9 @@ public class GitHubSCMSource extends SCMSource {
 
         } else if (head instanceof GitHubPRSCMHead) {
 
-            GitHubPRSCMHead prh = (GitHubPRSCMHead) head;
-            link = new GitHubPRAction(remoteRepo, prh.getPr());
-            desc = remoteRepo.getPullRequest(prh.getPr()).getTitle();
+            GitHubPRSCMHead prHead = (GitHubPRSCMHead) head;
+            link = new GitHubPRAction(remoteRepo, prHead.getPrNumber());
+            desc = remoteRepo.getPullRequest(prHead.getPrNumber()).getTitle();
 
         }
 
@@ -392,7 +393,7 @@ public class GitHubSCMSource extends SCMSource {
             } else if (head instanceof GitHubPRSCMHead) {
 
                 GitHubPRSCMHead prHead = (GitHubPRSCMHead) head;
-                plunger = r -> r.getPrRepository().getPulls().remove(prHead.getPr());
+                plunger = r -> r.getPrRepository().getPulls().remove(prHead.getPrNumber());
 
             }
 
