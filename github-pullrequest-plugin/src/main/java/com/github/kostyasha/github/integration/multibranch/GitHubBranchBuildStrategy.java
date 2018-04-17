@@ -12,6 +12,8 @@ import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.SCMSource;
 import jenkins.scm.api.SCMSourceDescriptor;
 
+import javax.annotation.Nonnull;
+
 public class GitHubBranchBuildStrategy extends BranchBuildStrategy {
 
     @DataBoundConstructor
@@ -41,6 +43,7 @@ public class GitHubBranchBuildStrategy extends BranchBuildStrategy {
             return sourceDescriptor.clazz == GitHubSCMSource.class;
         }
 
+        @Nonnull
         @Override
         public String getDisplayName() {
             return "GitHub events based branch build strategy";

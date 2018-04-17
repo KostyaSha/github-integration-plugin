@@ -30,8 +30,6 @@ public class MultiLeafProject<P extends Job<P, R> & TopLevelItem,
 
     }
 
-
-
     @Override
     public MultiLeafProjectDescriptor getDescriptor() {
         return (MultiLeafProjectDescriptor) super.getDescriptor();
