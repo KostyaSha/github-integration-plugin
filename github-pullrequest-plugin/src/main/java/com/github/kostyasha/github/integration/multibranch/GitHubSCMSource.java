@@ -149,7 +149,8 @@ public class GitHubSCMSource extends SCMSource {
     }
 
     @Override
-    protected void retrieve(SCMSourceCriteria scmSourceCriteria, @Nonnull SCMHeadObserver scmHeadObserver, SCMHeadEvent<?> scmHeadEvent, // null for manual run
+    protected void retrieve(SCMSourceCriteria scmSourceCriteria, @Nonnull SCMHeadObserver scmHeadObserver,
+                            SCMHeadEvent<?> scmHeadEvent, // null for manual run
                             @Nonnull TaskListener taskListener) throws IOException, InterruptedException {
 
         try (BulkChange bc = new BulkChange(getLocalStorage());
@@ -160,7 +161,8 @@ public class GitHubSCMSource extends SCMSource {
             synchronized (localRepo) {
                 localRepo.actualize(getRemoteRepo());
 
-                GitHubSourceContext context = new GitHubSourceContext(this, scmHeadObserver, scmSourceCriteria, scmHeadEvent, localRepo, getRemoteRepo(), taskListener);
+                GitHubSourceContext context = new GitHubSourceContext(this, scmHeadObserver, scmSourceCriteria,
+                        scmHeadEvent, localRepo, getRemoteRepo(), taskListener);
 
                 getHandlers().forEach(handler -> {
                     try {
@@ -201,13 +203,17 @@ public class GitHubSCMSource extends SCMSource {
     // It is so hard to implement good APIs...
     @Nonnull
     @Override
-    public Set<SCMRevision> parentRevisions(@Nonnull SCMHead head, @Nonnull SCMRevision revision, @CheckForNull TaskListener listener) throws IOException, InterruptedException {
+    public Set<SCMRevision> parentRevisions(@Nonnull SCMHead head,
+                                            @Nonnull SCMRevision revision,
+                                            @CheckForNull TaskListener listener)
+            throws IOException, InterruptedException {
         return super.parentRevisions(head, revision, listener);
     }
 
     @Nonnull
     @Override
-    public Map<SCMHead, SCMRevision> parentHeads(@Nonnull SCMHead head, @CheckForNull TaskListener listener) throws IOException, InterruptedException {
+    public Map<SCMHead, SCMRevision> parentHeads(@Nonnull SCMHead head, @CheckForNull TaskListener listener)
+            throws IOException, InterruptedException {
         return super.parentHeads(head, listener);
     }
 
@@ -219,17 +225,20 @@ public class GitHubSCMSource extends SCMSource {
 
     @Nonnull
     @Override
-    protected Set<SCMHead> retrieve(@CheckForNull SCMSourceCriteria criteria, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    protected Set<SCMHead> retrieve(@CheckForNull SCMSourceCriteria criteria, @Nonnull TaskListener listener)
+            throws IOException, InterruptedException {
         return super.retrieve(criteria, listener);
     }
 
     @Override
-    protected SCMRevision retrieve(@Nonnull SCMHead head, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    protected SCMRevision retrieve(@Nonnull SCMHead head, @Nonnull TaskListener listener)
+            throws IOException, InterruptedException {
         return super.retrieve(head, listener);
     }
 
     @Override
-    protected SCMRevision retrieve(@Nonnull String thingName, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    protected SCMRevision retrieve(@Nonnull String thingName, @Nonnull TaskListener listener)
+            throws IOException, InterruptedException {
         return super.retrieve(thingName, listener);
     }
 
@@ -241,7 +250,8 @@ public class GitHubSCMSource extends SCMSource {
 
     @Nonnull
     @Override
-    protected List<Action> retrieveActions(@Nonnull SCMRevision revision, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    protected List<Action> retrieveActions(@Nonnull SCMRevision revision, @CheckForNull SCMHeadEvent event,
+                                           @Nonnull TaskListener listener) throws IOException, InterruptedException {
         GitHubSCMRevision gitHubSCMRevision = (GitHubSCMRevision) revision;
         GitHubCause<?> cause = gitHubSCMRevision.getCause();
         if (nonNull(cause)) {

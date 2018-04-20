@@ -16,7 +16,8 @@ import java.util.Map;
  * @author Kanstantsin Shautsou
  */
 public class GitHubPullRequestScmHeadEvent extends GitHubScmHeadEvent<PullRequestInfo> {
-    public GitHubPullRequestScmHeadEvent(@Nonnull Type type, long timestamp, @Nonnull PullRequestInfo payload, @CheckForNull String origin) {
+    public GitHubPullRequestScmHeadEvent(@Nonnull Type type, long timestamp, @Nonnull PullRequestInfo payload,
+                                         @CheckForNull String origin) {
         super(type, timestamp, payload, origin);
     }
 
@@ -32,7 +33,10 @@ public class GitHubPullRequestScmHeadEvent extends GitHubScmHeadEvent<PullReques
         if (!isMatch(source)) {
             return Collections.emptyMap();
         }
-        return Collections.singletonMap(new GitHubPRSCMHead(getPayload().getNum(), getPayload().getTarget(), source.getId()), null);
+
+        return Collections.singletonMap(
+                new GitHubPRSCMHead(getPayload().getNum(), getPayload().getTarget(), source.getId()), null
+        );
     }
 
     @Override
