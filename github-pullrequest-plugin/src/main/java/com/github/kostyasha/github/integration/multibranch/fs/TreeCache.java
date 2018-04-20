@@ -116,7 +116,7 @@ public class TreeCache {
         private List<String> subEntries;
         private boolean processed;
 
-        private volatile byte[] CACHED_CONTENT;
+        private volatile byte[] cachedContent;
 
         public SCMFile.Type getType() {
             return type;
@@ -127,9 +127,9 @@ public class TreeCache {
         }
 
         InputStream load(GHRepository repo, String revision) throws IOException {
-            if (isNull(CACHED_CONTENT)) {
+            if (isNull(cachedContent)) {
                 synchronized (this) {
-                    if (CACHED_CONTENT == null) {
+                    if (cachedContent == null) {
                         GHContent content = repo.getFileContent(path, revision);
                         long size = content.getSize();
                         if (size > CONTENT_THRESHOLD) {
@@ -141,11 +141,11 @@ public class TreeCache {
                         try (InputStream in = content.read()) {
                             IOUtils.readFully(in, buf);
                         }
-                        CACHED_CONTENT = buf;
+                        cachedContent = buf;
                     }
                 }
             }
-            return new ByteArrayInputStream(CACHED_CONTENT);
+            return new ByteArrayInputStream(cachedContent);
         }
 
         Entry(String path, GHTreeEntry entry, boolean file) {
@@ -168,7 +168,7 @@ public class TreeCache {
     }
 
     public static TreeCache get(GHRepository repo, String revision) {
-        Context ctx = context.get();
+        Context ctx = CONTEXT.get();
         if (ctx != null) {
             return ctx.get(repo, revision);
         }
@@ -180,18 +180,18 @@ public class TreeCache {
         return new Context();
     }
 
-    private static final ThreadLocal<Context> context = new ThreadLocal<>();
+    private static final ThreadLocal<Context> CONTEXT = new ThreadLocal<>();
 
     public static class Context implements AutoCloseable {
         private final boolean opened;
         private final Map<String, TreeCache> cache;
 
         public Context() {
-            if (context.get() != null) {
+            if (CONTEXT.get() != null) {
                 opened = false;
             } else {
                 opened = true;
-                context.set(this);
+                CONTEXT.set(this);
             }
             cache = new HashMap<>();
         }
@@ -208,7 +208,7 @@ public class TreeCache {
         public void close() {
             if (opened) {
                 cache.clear();
-                context.set(null);
+                CONTEXT.set(null);
             }
         }
     }
