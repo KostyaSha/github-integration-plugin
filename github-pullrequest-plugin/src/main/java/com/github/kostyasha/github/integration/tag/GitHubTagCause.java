@@ -1,16 +1,13 @@
 package com.github.kostyasha.github.integration.tag;
 
-import java.util.List;
-
-import javax.annotation.Nonnull;
-
-import org.kohsuke.github.GHTag;
-
 import com.github.kostyasha.github.integration.branch.AbstractGitHubBranchCause;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubTagSCMHead;
-
 import hudson.model.ParameterValue;
+import org.kohsuke.github.GHTag;
+
+import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * @author Kanstantsin Shautsou
@@ -65,7 +62,7 @@ public class GitHubTagCause extends AbstractGitHubBranchCause<GitHubTagCause> {
     public void fillParameters(List<ParameterValue> params) {
         GitHubTagEnv.getParams(this, params);
     }
-    
+
     @Override
     public GitHubSCMHead<GitHubTagCause> createSCMHead(String sourceId) {
         return new GitHubTagSCMHead(tagName, sourceId);

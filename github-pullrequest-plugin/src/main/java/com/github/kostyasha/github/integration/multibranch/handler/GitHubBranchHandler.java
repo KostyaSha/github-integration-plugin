@@ -1,10 +1,20 @@
 package com.github.kostyasha.github.integration.multibranch.handler;
 
-import static com.github.kostyasha.github.integration.branch.trigger.check.BranchToCauseConverter.toGitHubBranchCause;
-import static com.github.kostyasha.github.integration.branch.trigger.check.LocalRepoUpdater.updateLocalRepo;
-import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.ioOptStream;
-import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.iop;
+import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
+import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
+import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
+import com.github.kostyasha.github.integration.branch.webhook.BranchInfo;
+import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
+import com.github.kostyasha.github.integration.multibranch.hooks.GitHubBranchSCMHeadEvent;
+import hudson.Extension;
+import hudson.model.TaskListener;
+import jenkins.scm.api.SCMHeadEvent;
+import org.kohsuke.github.GHBranch;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -14,23 +24,10 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
-
-import org.kohsuke.github.GHBranch;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-
-import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
-import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
-import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
-import com.github.kostyasha.github.integration.branch.webhook.BranchInfo;
-import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
-import com.github.kostyasha.github.integration.multibranch.hooks.GitHubBranchSCMHeadEvent;
-
-import hudson.Extension;
-import hudson.model.TaskListener;
-import jenkins.scm.api.SCMHeadEvent;
+import static com.github.kostyasha.github.integration.branch.trigger.check.BranchToCauseConverter.toGitHubBranchCause;
+import static com.github.kostyasha.github.integration.branch.trigger.check.LocalRepoUpdater.updateLocalRepo;
+import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.ioOptStream;
+import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.iop;
 
 /**
  * @author Kanstantsin Shautsou
@@ -39,7 +36,8 @@ public class GitHubBranchHandler extends GitHubHandler {
     private List<GitHubBranchEvent> events = new ArrayList<>();
 
     @DataBoundConstructor
-    public GitHubBranchHandler() {}
+    public GitHubBranchHandler() {
+    }
 
     public List<GitHubBranchEvent> getEvents() {
         return events;

@@ -15,13 +15,13 @@ import org.kohsuke.github.GHRepository;
 import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.jenkinsci.plugins.github.pullrequest.pipeline.SetCommitStatusStep.DescriptorImpl.FUNC_NAME;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromRun;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 /**
  * Pipeline DSL step to update a GitHub commit status for a pull request.

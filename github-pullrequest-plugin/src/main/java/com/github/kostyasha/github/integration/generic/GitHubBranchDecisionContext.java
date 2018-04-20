@@ -12,11 +12,10 @@ import org.kohsuke.github.GHBranch;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import java.io.IOException;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
-
-import java.io.IOException;
 
 /**
  * @author Kanstantsin Shautsou

@@ -1,13 +1,12 @@
 package com.github.kostyasha.github.integration.tag;
 
+import com.github.kostyasha.github.integration.generic.GitHubEnv;
+import com.github.kostyasha.github.integration.generic.GitHubRepoEnv;
 import hudson.model.ParameterValue;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import com.github.kostyasha.github.integration.generic.GitHubEnv;
-import com.github.kostyasha.github.integration.generic.GitHubRepoEnv;
 
 /**
  * @author Kanstantsin Shautsou

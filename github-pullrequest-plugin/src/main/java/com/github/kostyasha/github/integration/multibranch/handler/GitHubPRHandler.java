@@ -1,26 +1,10 @@
 package com.github.kostyasha.github.integration.multibranch.handler;
 
-import static com.github.kostyasha.github.integration.generic.utils.RetryableGitHubOperation.execute;
-import static org.jenkinsci.plugins.github.pullrequest.trigger.check.LocalRepoUpdater.updateLocalRepo;
-import static org.jenkinsci.plugins.github.pullrequest.trigger.check.PullRequestToCauseConverter.toGitHubPRCause;
-import static org.jenkinsci.plugins.github.pullrequest.trigger.check.SkipPRInBadState.badState;
-import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.ioOptStream;
-import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.iof;
-import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.iop;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
+import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
+import com.github.kostyasha.github.integration.multibranch.hooks.GitHubPullRequestScmHeadEvent;
+import hudson.Extension;
+import hudson.model.TaskListener;
+import jenkins.scm.api.SCMHeadEvent;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
@@ -31,12 +15,25 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
-import com.github.kostyasha.github.integration.multibranch.hooks.GitHubPullRequestScmHeadEvent;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import hudson.Extension;
-import hudson.model.TaskListener;
-import jenkins.scm.api.SCMHeadEvent;
+import static com.github.kostyasha.github.integration.generic.utils.RetryableGitHubOperation.execute;
+import static org.jenkinsci.plugins.github.pullrequest.trigger.check.LocalRepoUpdater.updateLocalRepo;
+import static org.jenkinsci.plugins.github.pullrequest.trigger.check.PullRequestToCauseConverter.toGitHubPRCause;
+import static org.jenkinsci.plugins.github.pullrequest.trigger.check.SkipPRInBadState.badState;
+import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.ioOptStream;
+import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.iof;
+import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.iop;
 
 /**
  * @author Kanstantsin Shautsou
@@ -47,7 +44,8 @@ public class GitHubPRHandler extends GitHubHandler {
     private List<GitHubPREvent> events = new ArrayList<>();
 
     @DataBoundConstructor
-    public GitHubPRHandler() {}
+    public GitHubPRHandler() {
+    }
 
     public List<GitHubPREvent> getEvents() {
         return events;

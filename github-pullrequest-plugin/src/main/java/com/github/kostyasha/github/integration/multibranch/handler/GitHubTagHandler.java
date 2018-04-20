@@ -1,23 +1,5 @@
 package com.github.kostyasha.github.integration.multibranch.handler;
 
-import static com.github.kostyasha.github.integration.tag.LocalRepoUpdater.updateLocalRepo;
-import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.ioOptStream;
-import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.iop;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-import javax.annotation.Nonnull;
-
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GHTag;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-
 import com.github.kostyasha.github.integration.branch.webhook.BranchInfo;
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import com.github.kostyasha.github.integration.multibranch.hooks.GitHubTagSCMHeadEvent;
@@ -26,10 +8,25 @@ import com.github.kostyasha.github.integration.tag.GitHubTagCause;
 import com.github.kostyasha.github.integration.tag.GitHubTagRepository;
 import com.github.kostyasha.github.integration.tag.TagToCauseConverter;
 import com.github.kostyasha.github.integration.tag.events.GitHubTagEvent;
-
 import hudson.Extension;
 import hudson.model.TaskListener;
 import jenkins.scm.api.SCMHeadEvent;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GHTag;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+
+import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import static com.github.kostyasha.github.integration.tag.LocalRepoUpdater.updateLocalRepo;
+import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.ioOptStream;
+import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.iop;
 
 /**
  * @author Kanstantsin Shautsou
@@ -39,7 +36,8 @@ public class GitHubTagHandler extends GitHubHandler {
     private List<GitHubTagEvent> events = new ArrayList<>();
 
     @DataBoundConstructor
-    public GitHubTagHandler() {}
+    public GitHubTagHandler() {
+    }
 
     public List<GitHubTagEvent> getEvents() {
         return events;

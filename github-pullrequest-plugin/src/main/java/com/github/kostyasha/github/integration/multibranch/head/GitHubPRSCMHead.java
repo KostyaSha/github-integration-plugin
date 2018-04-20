@@ -4,9 +4,8 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 
-import java.io.IOException;
-
 import javax.annotation.Nonnull;
+import java.io.IOException;
 
 public class GitHubPRSCMHead extends GitHubSCMHead<GitHubPRCause> {
     private static final long serialVersionUID = 1L;

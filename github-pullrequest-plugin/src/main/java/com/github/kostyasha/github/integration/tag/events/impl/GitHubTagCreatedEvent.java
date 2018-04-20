@@ -6,7 +6,6 @@ import com.github.kostyasha.github.integration.tag.GitHubTagCause;
 import com.github.kostyasha.github.integration.tag.GitHubTagRepository;
 import com.github.kostyasha.github.integration.tag.events.GitHubTagEvent;
 import com.github.kostyasha.github.integration.tag.events.GitHubTagEventDescriptor;
-
 import hudson.Extension;
 import hudson.model.TaskListener;
 import org.kohsuke.github.GHTag;

@@ -8,7 +8,6 @@ import com.github.kostyasha.github.integration.generic.errors.impl.GitHubRepoPro
 import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider;
 import com.google.common.annotations.Beta;
 import hudson.model.Action;
-import hudson.model.Item;
 import hudson.model.Job;
 import hudson.triggers.Trigger;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
@@ -26,10 +25,10 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.codehaus.groovy.runtime.InvokerHelper.asList;
-import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.CRON;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.codehaus.groovy.runtime.InvokerHelper.asList;
+import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.CRON;
 
 /**
  * @author Kanstantsin Shautsou

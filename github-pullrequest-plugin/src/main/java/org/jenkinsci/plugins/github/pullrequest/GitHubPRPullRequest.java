@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Set;
 
 import static com.github.kostyasha.github.integration.generic.utils.RetryableGitHubOperation.execute;
-import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 
 /**
  * Maintains state about a Pull Request for a particular Jenkins job.  This is what understands the current state
@@ -64,7 +64,7 @@ public class GitHubPRPullRequest {
         try {
             prUpdatedAt = pr.getUpdatedAt();
             issueUpdatedAt = pr.getIssueUpdatedAt();
-        } catch(IOException e) {
+        } catch (IOException e) {
             // those methods never actually throw IOExceptions
             throw new IllegalStateException(e);
         }

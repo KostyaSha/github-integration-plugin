@@ -43,11 +43,11 @@ import java.util.Set;
 import static com.cloudbees.jenkins.GitHubWebHook.getJenkinsInstance;
 import static com.google.common.base.Predicates.instanceOf;
 import static hudson.security.ACL.impersonate;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getDefaultParametersValues;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getInterruptCauses;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getInterruptStatus;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.asParameterizedJobMixIn;
 

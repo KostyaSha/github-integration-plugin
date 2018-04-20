@@ -1,15 +1,12 @@
 package org.jenkinsci.plugins.github.pullrequest.events;
 
 import com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext;
-import com.github.kostyasha.github.integration.multibranch.handler.GitHubPRHandler;
 import hudson.ExtensionPoint;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.kohsuke.github.GHEventPayload;
-import org.kohsuke.github.GHPullRequest;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -25,7 +22,6 @@ public abstract class GitHubPREvent extends AbstractDescribableImpl<GitHubPREven
     /**
      * indicates that PR was changed
      *
-
      * @return cause object. null when no influence (other events will be checked.
      * If cause.isSkip() == true, then other checks wouldn't influence. And triggering for this branch will be skipped.
      * If cause.isSkip() == false, indicates that branch build should be run.

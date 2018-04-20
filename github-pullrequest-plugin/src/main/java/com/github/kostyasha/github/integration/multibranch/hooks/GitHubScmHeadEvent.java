@@ -1,14 +1,13 @@
 package com.github.kostyasha.github.integration.multibranch.hooks;
 
-import javax.annotation.Nonnull;
-
 import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
-
 import hudson.scm.SCM;
 import jenkins.scm.api.SCMHeadEvent;
 import jenkins.scm.api.SCMNavigator;
 import jenkins.scm.api.SCMSource;
+
+import javax.annotation.Nonnull;
 
 /**
  * @author Kanstantsin Shautsou

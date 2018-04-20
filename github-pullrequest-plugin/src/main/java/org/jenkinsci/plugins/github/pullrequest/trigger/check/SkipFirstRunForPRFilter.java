@@ -2,7 +2,6 @@ package org.jenkinsci.plugins.github.pullrequest.trigger.check;
 
 import com.google.common.base.Predicate;
 import hudson.model.TaskListener;
-import org.jenkinsci.plugins.github.pullrequest.utils.LoggingTaskListenerWrapper;
 import org.kohsuke.github.GHPullRequest;
 
 /**

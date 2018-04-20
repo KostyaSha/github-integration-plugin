@@ -1,17 +1,15 @@
 package com.github.kostyasha.github.integration.tag;
 
+import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import hudson.Functions;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GHTag;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GHTag;
-
-import com.github.kostyasha.github.integration.branch.GitHubBranch;
 
 /**
  * Store local information about tag.

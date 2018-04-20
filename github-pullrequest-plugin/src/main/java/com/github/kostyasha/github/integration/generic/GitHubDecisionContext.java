@@ -1,16 +1,13 @@
 package com.github.kostyasha.github.integration.generic;
 
+import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
+import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler;
 import hudson.model.TaskListener;
-
-import java.io.IOException;
+import org.kohsuke.github.GHRepository;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-
-import org.kohsuke.github.GHRepository;
-
-import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
-import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler;
+import java.io.IOException;
 
 /**
  * @author Kanstantsin Shautsou

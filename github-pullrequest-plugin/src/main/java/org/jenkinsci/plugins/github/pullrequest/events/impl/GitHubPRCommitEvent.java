@@ -22,7 +22,7 @@ import static java.util.Objects.isNull;
 
 /**
  * Triggers build when commit hash changed
-
+ *
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRCommitEvent extends GitHubPREvent {

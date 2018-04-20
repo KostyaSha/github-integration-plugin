@@ -21,7 +21,6 @@ public abstract class GitHubRepoProvider extends AbstractDescribableImpl<GitHubR
         implements ExtensionPoint {
 
     /**
-     *
      * @param trigger specific trigger type. Find by type what events wants trigger.
      */
     public abstract void registerHookFor(GitHubTrigger trigger);

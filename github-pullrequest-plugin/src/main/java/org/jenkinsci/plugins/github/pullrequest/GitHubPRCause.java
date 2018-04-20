@@ -4,11 +4,9 @@ import com.github.kostyasha.github.integration.generic.GitHubCause;
 import com.github.kostyasha.github.integration.generic.GitHubRepository;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubPRSCMHead;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
-
 import hudson.model.ParameterValue;
 import hudson.model.Run;
 import jenkins.scm.api.SCMSourceOwner;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -57,7 +55,8 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
     private String commentBody;
     private String commentBodyMatch;
 
-    public GitHubPRCause() {}
+    public GitHubPRCause() {
+    }
 
     public GitHubPRCause(GHPullRequest remotePr,
                          GitHubPRRepository localRepo,
@@ -72,43 +71,43 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
 
     @Deprecated
     public GitHubPRCause(GHPullRequest remotePr,
-            String reason,
-            boolean skip) {
+                         String reason,
+                         boolean skip) {
         this(remotePr, null, reason, skip);
     }
 
     public GitHubPRCause(GitHubPRPullRequest pr,
-            GHUser triggerSender,
-            GitHubPRRepository localRepo,
-            boolean skip,
-            String reason) {
+                         GHUser triggerSender,
+                         GitHubPRRepository localRepo,
+                         boolean skip,
+                         String reason) {
         this(pr.getHeadSha(), pr.getNumber(),
                 pr.isMergeable(), pr.getBaseRef(), pr.getHeadRef(),
                 pr.getUserEmail(), pr.getTitle(), pr.getHtmlUrl(), pr.getSourceRepoOwner(),
                 pr.getLabels(),
                 triggerSender, skip, reason, "", "", pr.getState());
         this.body = pr.getBody();
-        if(localRepo != null) {
+        if (localRepo != null) {
             withLocalRepo(localRepo);
         }
     }
 
     @Deprecated
     public GitHubPRCause(GitHubPRPullRequest pr,
-            GHUser triggerSender,
-            boolean skip,
-            String reason) {
+                         GHUser triggerSender,
+                         boolean skip,
+                         String reason) {
         this(pr, triggerSender, null, skip, reason);
     }
 
     // FIXME (sizes) ParameterNumber: More than 7 parameters (found 15).
     // CHECKSTYLE:OFF
     public GitHubPRCause(String headSha, int number, boolean mergeable,
-            String targetBranch, String sourceBranch, String prAuthorEmail,
-            String title, URL htmlUrl, String sourceRepoOwner, Set<String> labels,
-            GHUser triggerSender, boolean skip, String reason,
-            String commitAuthorName, String commitAuthorEmail,
-            String state) {
+                         String targetBranch, String sourceBranch, String prAuthorEmail,
+                         String title, URL htmlUrl, String sourceRepoOwner, Set<String> labels,
+                         GHUser triggerSender, boolean skip, String reason,
+                         String commitAuthorName, String commitAuthorEmail,
+                         String state) {
         // CHECKSTYLE:ON
         this.headSha = headSha;
         this.number = number;

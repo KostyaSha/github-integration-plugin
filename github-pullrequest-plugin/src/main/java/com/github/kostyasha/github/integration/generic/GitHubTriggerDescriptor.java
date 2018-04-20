@@ -6,7 +6,6 @@ import hudson.model.Item;
 import hudson.model.Job;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.SequentialExecutionQueue;
-import jenkins.branch.MultiBranchProject;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
@@ -20,9 +19,9 @@ import javax.annotation.Nonnull;
 import java.net.URI;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.jenkinsci.plugins.github.config.GitHubServerConfig.withHost;
-import static java.util.Objects.nonNull;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 
 /**

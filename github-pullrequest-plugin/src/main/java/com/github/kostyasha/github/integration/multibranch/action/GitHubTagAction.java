@@ -1,12 +1,11 @@
 package com.github.kostyasha.github.integration.multibranch.action;
 
-import org.kohsuke.github.GHRepository;
-
 import com.github.kostyasha.github.integration.tag.GitHubTag;
+import org.kohsuke.github.GHRepository;
 
 /**
  * Add a link to repository branch
- * 
+ *
  * @author Anton Tanasenko
  */
 public class GitHubTagAction extends GitHubLinkAction {

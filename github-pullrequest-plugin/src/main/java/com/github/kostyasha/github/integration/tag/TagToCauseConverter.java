@@ -1,26 +1,23 @@
 package com.github.kostyasha.github.integration.tag;
 
-import static com.github.kostyasha.github.integration.generic.GitHubTagDecisionContext.newGitHubTagDecisionContext;
+import com.github.kostyasha.github.integration.generic.GitHubCause;
+import com.github.kostyasha.github.integration.generic.GitHubTagDecisionContext;
+import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
+import com.github.kostyasha.github.integration.multibranch.handler.GitHubTagHandler;
+import com.github.kostyasha.github.integration.tag.events.GitHubTagEvent;
+import hudson.model.TaskListener;
+import org.kohsuke.github.GHTag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-
-import org.kohsuke.github.GHTag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.github.kostyasha.github.integration.generic.GitHubCause;
-import com.github.kostyasha.github.integration.generic.GitHubTagDecisionContext;
-import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
-import com.github.kostyasha.github.integration.multibranch.handler.GitHubTagHandler;
-import com.github.kostyasha.github.integration.tag.events.GitHubTagEvent;
-
-import hudson.model.TaskListener;
+import static com.github.kostyasha.github.integration.generic.GitHubTagDecisionContext.newGitHubTagDecisionContext;
 
 /**
  * @author Kanstantsin Shautsou
@@ -34,9 +31,9 @@ public class TagToCauseConverter implements Function<GHTag, GitHubTagCause> {
     private final GitHubSCMSource source;
 
     public TagToCauseConverter(@Nonnull GitHubTagRepository localTags,
-                                  @Nonnull TaskListener listener,
-                                  @Nonnull GitHubTagHandler handler,
-                                  @Nonnull GitHubSCMSource source) {
+                               @Nonnull TaskListener listener,
+                               @Nonnull GitHubTagHandler handler,
+                               @Nonnull GitHubSCMSource source) {
         this.localTags = localTags;
         this.listener = listener;
         this.handler = handler;

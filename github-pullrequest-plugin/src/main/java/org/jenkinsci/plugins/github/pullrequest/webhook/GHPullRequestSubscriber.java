@@ -5,26 +5,18 @@ import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
 import jenkins.model.Jenkins;
-import org.jenkinsci.plugins.github.extension.GHEventsSubscriber;
 import org.jenkinsci.plugins.github.extension.GHSubscriberEvent;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.jenkinsci.plugins.github.util.FluentIterableWrapper;
-import org.kohsuke.github.GHEvent;
-import org.kohsuke.github.GHEventPayload.IssueComment;
-import org.kohsuke.github.GHEventPayload.PullRequest;
 import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.collect.Sets.immutableEnumSet;
-import static java.lang.String.format;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
 import static org.jenkinsci.plugins.github.pullrequest.webhook.WebhookInfoPredicates.withPRTrigger;
 import static org.jenkinsci.plugins.github.pullrequest.webhook.WebhookInfoPredicates.withRepo;
@@ -84,7 +76,6 @@ public class GHPullRequestSubscriber extends AbstractGHPullRequestSubsriber {
             LOGGER.error("Can't process {} hook", event, e);
         }
     }
-
 
 
     static Set<Job> getPRTriggerJobs(final String repo) {

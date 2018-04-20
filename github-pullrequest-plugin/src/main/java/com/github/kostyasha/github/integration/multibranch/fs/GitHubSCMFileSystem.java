@@ -4,7 +4,6 @@ import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
 import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
 import jenkins.scm.api.SCMFile;
 import jenkins.scm.api.SCMFileSystem;
-
 import org.kohsuke.github.GHCommit;
 import org.kohsuke.github.GHRepository;
 

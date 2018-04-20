@@ -1,7 +1,6 @@
 package com.github.kostyasha.github.integration.branch.utils;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
-import com.google.common.base.Predicates;
 import hudson.model.Item;
 import hudson.model.Job;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;

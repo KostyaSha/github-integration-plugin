@@ -23,7 +23,7 @@ public abstract class GitHubBranchEvent extends AbstractDescribableImpl<GitHubBr
     /**
      * indicates that branch was created
      *
-      * @return cause object. null when no influence (other events will be checked.
+     * @return cause object. null when no influence (other events will be checked.
      * If cause.isSkip() == true, then other checks wouldn't influence. And triggering for this branch will be skipped.
      * If cause.isSkip() == false, indicates that branch build should be run.
      */

@@ -1,20 +1,17 @@
 package com.github.kostyasha.github.integration.tag;
 
-import static java.util.Objects.isNull;
+import com.github.kostyasha.github.integration.generic.GitHubRepository;
+import hudson.util.FormValidation;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.stapler.StaplerRequest;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.Nonnull;
-
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.stapler.StaplerRequest;
-
-import com.github.kostyasha.github.integration.generic.GitHubRepository;
-
-import hudson.util.FormValidation;
+import static java.util.Objects.isNull;
 
 /**
  * Store local state of remote tags.

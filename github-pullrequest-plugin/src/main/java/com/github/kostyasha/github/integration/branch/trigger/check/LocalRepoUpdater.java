@@ -1,7 +1,7 @@
 package com.github.kostyasha.github.integration.branch.trigger.check;
 
-import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranch;
+import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import org.kohsuke.github.GHBranch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

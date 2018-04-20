@@ -1,9 +1,8 @@
 package com.github.kostyasha.github.integration.branch;
 
-import hudson.model.Item;
+import com.github.kostyasha.github.integration.generic.GitHubPollingLogAction;
 import hudson.model.Job;
 import hudson.model.Run;
-import com.github.kostyasha.github.integration.generic.GitHubPollingLogAction;
 
 /**
  * @author Kanstantsin Shautsou

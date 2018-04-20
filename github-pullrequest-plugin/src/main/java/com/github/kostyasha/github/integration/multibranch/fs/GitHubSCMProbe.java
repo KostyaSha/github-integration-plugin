@@ -1,17 +1,15 @@
 package com.github.kostyasha.github.integration.multibranch.fs;
 
-import java.io.IOException;
-
+import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
+import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
+import jenkins.scm.api.SCMProbe;
+import jenkins.scm.api.SCMProbeStat;
 import org.kohsuke.github.GHCommit;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 
-import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
-import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
-import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
-
-import jenkins.scm.api.SCMProbe;
-import jenkins.scm.api.SCMProbeStat;
+import java.io.IOException;
 
 public class GitHubSCMProbe extends SCMProbe {
     private static final long serialVersionUID = 1L;
@@ -43,7 +41,8 @@ public class GitHubSCMProbe extends SCMProbe {
     }
 
     @Override
-    public void close() throws IOException {}
+    public void close() throws IOException {
+    }
 
     @Override
     public SCMProbeStat stat(String path) throws IOException {

@@ -1,16 +1,14 @@
 package com.github.kostyasha.github.integration.branch;
 
-import hudson.model.ParameterValue;
-import hudson.model.Run;
-import jenkins.scm.api.SCMSourceOwner;
-
-import org.kohsuke.github.GHBranch;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
+import hudson.model.ParameterValue;
+import hudson.model.Run;
+import jenkins.scm.api.SCMSourceOwner;
+import org.kohsuke.github.GHBranch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;

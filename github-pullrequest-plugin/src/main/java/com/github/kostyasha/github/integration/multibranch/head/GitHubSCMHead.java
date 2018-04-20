@@ -1,15 +1,12 @@
 package com.github.kostyasha.github.integration.multibranch.head;
 
-import jenkins.scm.api.SCMHead;
-
-import java.io.IOException;
-
-import javax.annotation.Nonnull;
-
-import org.kohsuke.github.GHRepository;
-
 import com.github.kostyasha.github.integration.generic.GitHubCause;
 import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
+import jenkins.scm.api.SCMHead;
+import org.kohsuke.github.GHRepository;
+
+import javax.annotation.Nonnull;
+import java.io.IOException;
 
 public abstract class GitHubSCMHead<T extends GitHubCause<T>> extends SCMHead {
     private static final long serialVersionUID = 1L;

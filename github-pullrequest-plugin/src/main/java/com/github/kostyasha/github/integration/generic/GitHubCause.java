@@ -1,13 +1,11 @@
 package com.github.kostyasha.github.integration.generic;
 
-import hudson.model.Cause;
-import hudson.model.ParameterValue;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
 import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
+import hudson.model.Cause;
+import hudson.model.ParameterValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -17,9 +15,9 @@ import java.net.URL;
 import java.util.List;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.apache.commons.lang.StringUtils.abbreviate;
-import static java.util.Objects.nonNull;
 
 /**
  * @author Kanstantsin Shautsou

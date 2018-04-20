@@ -1,5 +1,12 @@
 package com.github.kostyasha.github.integration.multibranch.fs;
 
+import jenkins.scm.api.SCMFile;
+import org.apache.commons.io.IOUtils;
+import org.kohsuke.github.GHContent;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GHTree;
+import org.kohsuke.github.GHTreeEntry;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,14 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.io.IOUtils;
-import org.kohsuke.github.GHContent;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GHTree;
-import org.kohsuke.github.GHTreeEntry;
-
-import jenkins.scm.api.SCMFile;
 
 public class TreeCache {
     private static final long CONTENT_THRESHOLD = 1024 * 1024; // 1MB max

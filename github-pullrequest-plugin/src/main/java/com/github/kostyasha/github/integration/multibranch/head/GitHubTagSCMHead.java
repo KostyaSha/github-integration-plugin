@@ -1,14 +1,12 @@
 package com.github.kostyasha.github.integration.multibranch.head;
 
-import java.io.IOException;
-
-import javax.annotation.Nonnull;
-
+import com.github.kostyasha.github.integration.tag.GitHubTag;
+import com.github.kostyasha.github.integration.tag.GitHubTagCause;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHTag;
 
-import com.github.kostyasha.github.integration.tag.GitHubTag;
-import com.github.kostyasha.github.integration.tag.GitHubTagCause;
+import javax.annotation.Nonnull;
+import java.io.IOException;
 
 public class GitHubTagSCMHead extends GitHubSCMHead<GitHubTagCause> {
     private static final long serialVersionUID = 1L;

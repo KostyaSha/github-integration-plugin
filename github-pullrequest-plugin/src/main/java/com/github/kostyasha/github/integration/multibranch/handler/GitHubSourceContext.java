@@ -1,18 +1,9 @@
 package com.github.kostyasha.github.integration.multibranch.handler;
 
-import java.io.IOException;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GitHub;
-
 import com.github.kostyasha.github.integration.generic.GitHubCause;
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import com.github.kostyasha.github.integration.multibranch.action.GitHubRepo;
 import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
-
 import hudson.model.Job;
 import hudson.model.TaskListener;
 import jenkins.branch.BranchProjectFactory;
@@ -23,6 +14,12 @@ import jenkins.scm.api.SCMHeadObserver;
 import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.SCMSourceCriteria;
 import jenkins.scm.api.SCMSourceOwner;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GitHub;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.IOException;
 
 public class GitHubSourceContext {
 
@@ -35,13 +32,13 @@ public class GitHubSourceContext {
     private final TaskListener listener;
 
     public GitHubSourceContext( //
-            @Nonnull GitHubSCMSource source, //
-            @Nonnull SCMHeadObserver observer, //
-            @Nonnull SCMSourceCriteria criteria, //
-            @Nullable SCMHeadEvent<?> scmHeadEvent, //
-            @Nonnull GitHubRepo localRepo, //
-            @Nonnull GHRepository remoteRepo, //
-            @Nonnull TaskListener listener) {
+                                @Nonnull GitHubSCMSource source, //
+                                @Nonnull SCMHeadObserver observer, //
+                                @Nonnull SCMSourceCriteria criteria, //
+                                @Nullable SCMHeadEvent<?> scmHeadEvent, //
+                                @Nonnull GitHubRepo localRepo, //
+                                @Nonnull GHRepository remoteRepo, //
+                                @Nonnull TaskListener listener) {
         this.source = source;
         this.observer = observer;
         this.criteria = criteria;
@@ -51,11 +48,13 @@ public class GitHubSourceContext {
         this.listener = listener;
     }
 
-    public @Nonnull GitHubSCMSource getSource() {
+    public @Nonnull
+    GitHubSCMSource getSource() {
         return source;
     }
 
-    public @Nonnull SCMHeadObserver getObserver() {
+    public @Nonnull
+    SCMHeadObserver getObserver() {
         return observer;
     }
 
@@ -63,15 +62,18 @@ public class GitHubSourceContext {
         return scmHeadEvent;
     }
 
-    public @Nonnull GitHubRepo getLocalRepo() {
+    public @Nonnull
+    GitHubRepo getLocalRepo() {
         return localRepo;
     }
 
-    public @Nonnull GHRepository getRemoteRepo() {
+    public @Nonnull
+    GHRepository getRemoteRepo() {
         return remoteRepo;
     }
 
-    public @Nonnull TaskListener getListener() {
+    public @Nonnull
+    TaskListener getListener() {
         return listener;
     }
 
@@ -143,5 +145,7 @@ public class GitHubSourceContext {
         public boolean equals(Object obj) {
             return false;
         }
-    };
+    }
+
+    ;
 }

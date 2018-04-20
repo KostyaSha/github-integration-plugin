@@ -51,17 +51,19 @@ public class GHMultiBranchSubscriber extends AbstractGHBranchSubscriber {
             BranchInfo ref = extractRefInfo(event.getGHEvent(), event.getPayload(), true);
 
             if (ref.isTag()) {
-                SCMHeadEvent.fireNow(new GitHubTagSCMHeadEvent( //
-                        SCMEvent.Type.UPDATED, //
-                        event.getTimestamp(), //
-                        ref, //
-                        ref.getRepo()));
+                SCMHeadEvent.fireNow(new GitHubTagSCMHeadEvent(
+                        SCMEvent.Type.UPDATED,
+                        event.getTimestamp(),
+                        ref,
+                        ref.getRepo())
+                );
             } else {
-                SCMHeadEvent.fireNow(new GitHubBranchSCMHeadEvent( //
-                        SCMEvent.Type.UPDATED, //
-                        event.getTimestamp(), //
-                        ref, //
-                        ref.getRepo()));
+                SCMHeadEvent.fireNow(new GitHubBranchSCMHeadEvent(
+                        SCMEvent.Type.UPDATED,
+                        event.getTimestamp(),
+                        ref,
+                        ref.getRepo())
+                );
             }
 
         } catch (Exception e) {

@@ -7,17 +7,13 @@ import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
 import jenkins.model.Jenkins;
-import net.sf.json.JSONObject;
-import org.jenkinsci.plugins.github.extension.GHEventsSubscriber;
 import org.jenkinsci.plugins.github.extension.GHSubscriberEvent;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.jenkinsci.plugins.github.util.FluentIterableWrapper;
-import org.kohsuke.github.GHEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,10 +21,7 @@ import java.util.Set;
 import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghBranchTriggerFromJob;
 import static com.github.kostyasha.github.integration.branch.webhook.WebhookInfoBranchPredicates.withBranchTrigger;
 import static com.github.kostyasha.github.integration.branch.webhook.WebhookInfoBranchPredicates.withBranchTriggerRepo;
-import static com.google.common.collect.Sets.immutableEnumSet;
 import static hudson.security.ACL.SYSTEM;
-import static java.lang.String.format;
-import static net.sf.json.JSONObject.fromObject;
 import static java.util.Objects.isNull;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
 

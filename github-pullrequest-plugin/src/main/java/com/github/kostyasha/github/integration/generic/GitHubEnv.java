@@ -1,13 +1,13 @@
 package com.github.kostyasha.github.integration.generic;
 
-import static org.apache.commons.lang.StringUtils.trimToEmpty;
-import static org.apache.commons.lang.StringEscapeUtils.escapeJava;
-
-import java.util.List;
-
 import hudson.model.BooleanParameterValue;
 import hudson.model.ParameterValue;
 import hudson.model.StringParameterValue;
+
+import java.util.List;
+
+import static org.apache.commons.lang.StringEscapeUtils.escapeJava;
+import static org.apache.commons.lang.StringUtils.trimToEmpty;
 
 public interface GitHubEnv<T extends GitHubCause<?>> {
 

@@ -4,7 +4,7 @@ import org.kohsuke.github.GHRepository;
 
 /**
  * Add a link to repository branch
- * 
+ *
  * @author Anton Tanasenko
  */
 public class GitHubBranchAction extends GitHubLinkAction {

@@ -7,8 +7,6 @@ import org.kohsuke.github.GHPullRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
 import static org.kohsuke.github.GHIssueState.CLOSED;
 import static org.kohsuke.github.GHIssueState.OPEN;
 

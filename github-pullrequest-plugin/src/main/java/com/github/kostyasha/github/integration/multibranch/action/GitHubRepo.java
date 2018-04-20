@@ -2,7 +2,6 @@ package com.github.kostyasha.github.integration.multibranch.action;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.tag.GitHubTagRepository;
-
 import hudson.model.Action;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.kohsuke.github.GHRepository;

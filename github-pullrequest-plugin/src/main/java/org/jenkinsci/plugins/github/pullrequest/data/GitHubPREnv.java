@@ -1,15 +1,13 @@
 package org.jenkinsci.plugins.github.pullrequest.data;
 
+import com.github.kostyasha.github.integration.generic.GitHubEnv;
+import com.github.kostyasha.github.integration.generic.GitHubRepoEnv;
 import hudson.model.ParameterValue;
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
-
-import com.github.kostyasha.github.integration.generic.GitHubEnv;
-import com.github.kostyasha.github.integration.generic.GitHubRepoEnv;
 
 /**
  * @author lanwen (Merkushev Kirill)

@@ -1,14 +1,13 @@
 package org.jenkinsci.plugins.github.pullrequest.pipeline;
 
-import java.io.Serializable;
-
+import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.kohsuke.github.GHCommitState;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import hudson.Extension;
+import java.io.Serializable;
 
 /**
  * Representation of the configuration for the commit status set step. An instance of this class

@@ -5,7 +5,6 @@ import hudson.XmlFile;
 import hudson.model.PersistenceRoot;
 import hudson.model.Saveable;
 import hudson.model.listeners.SaveableListener;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

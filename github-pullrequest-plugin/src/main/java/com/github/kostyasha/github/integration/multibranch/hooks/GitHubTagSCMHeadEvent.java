@@ -2,7 +2,6 @@ package com.github.kostyasha.github.integration.multibranch.hooks;
 
 import com.github.kostyasha.github.integration.branch.webhook.BranchInfo;
 import com.github.kostyasha.github.integration.multibranch.head.GitHubTagSCMHead;
-
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.SCMSource;

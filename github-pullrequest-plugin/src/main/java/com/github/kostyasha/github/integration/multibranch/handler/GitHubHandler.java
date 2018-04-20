@@ -1,18 +1,15 @@
 package com.github.kostyasha.github.integration.multibranch.handler;
 
-import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.forEachIo;
+import com.github.kostyasha.github.integration.generic.GitHubCause;
+import hudson.model.AbstractDescribableImpl;
+import hudson.model.TaskListener;
+import org.kohsuke.github.GitHub;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
-
-import org.kohsuke.github.GitHub;
-
-import com.github.kostyasha.github.integration.generic.GitHubCause;
-
-import hudson.model.AbstractDescribableImpl;
-import hudson.model.TaskListener;
+import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.forEachIo;
 
 /**
  * @author Kanstantsin Shautsou

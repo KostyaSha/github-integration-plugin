@@ -19,8 +19,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import static org.apache.commons.io.IOUtils.closeQuietly;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 /**
  * @author Kanstantsin Shautsou

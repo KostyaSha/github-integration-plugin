@@ -98,7 +98,7 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
                 .withBranchHandler(handler)
                 .withSCMSource(source)
                 .build();
-        
+
         List<GitHubBranchCause> causes = getEvents().stream()
                 .map(event -> toCause(event, context))
                 .filter(Objects::nonNull)
@@ -131,7 +131,7 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
             return context.checkEvent(event);
         } catch (IOException e) {
             String branch = null;
-            if (nonNull(context.getLocalBranch())){
+            if (nonNull(context.getLocalBranch())) {
                 branch = context.getLocalBranch().getName();
             } else if (nonNull(context.getRemoteBranch())) {
                 branch = context.getRemoteBranch().getName();

@@ -3,7 +3,6 @@ package com.github.kostyasha.github.integration.generic;
 import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import com.github.kostyasha.github.integration.multibranch.handler.GitHubPRHandler;
 import hudson.model.TaskListener;
-
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
@@ -14,11 +13,10 @@ import org.kohsuke.github.GHPullRequest;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import java.io.IOException;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
-
-import java.io.IOException;
 
 /**
  * @author Kanstantsin Shautsou
@@ -46,12 +44,12 @@ public class GitHubPRDecisionContext extends GitHubDecisionContext<GitHubPREvent
 
     @Deprecated
     protected GitHubPRDecisionContext(@CheckForNull GHPullRequest remotePR,
-            @CheckForNull GitHubPRPullRequest localPR,
-            @CheckForNull GitHubPRUserRestriction prUserRestriction,
-            GitHubSCMSource source,
-            GitHubPRHandler prHandler,
-            GitHubPRTrigger prTrigger,
-            @Nonnull TaskListener listener) {
+                                      @CheckForNull GitHubPRPullRequest localPR,
+                                      @CheckForNull GitHubPRUserRestriction prUserRestriction,
+                                      GitHubSCMSource source,
+                                      GitHubPRHandler prHandler,
+                                      GitHubPRTrigger prTrigger,
+                                      @Nonnull TaskListener listener) {
         this(remotePR, localPR, null, prUserRestriction, source, prHandler, prTrigger, listener);
     }
 
@@ -105,7 +103,7 @@ public class GitHubPRDecisionContext extends GitHubDecisionContext<GitHubPREvent
 
     @Override
     public GitHubPRCause newCause(String reason, boolean skip) {
-        if(remotePR != null) {
+        if (remotePR != null) {
             return new GitHubPRCause(remotePR, localRepo, reason, skip);
         }
         return new GitHubPRCause(localPR, null, localRepo, skip, reason);
@@ -136,7 +134,7 @@ public class GitHubPRDecisionContext extends GitHubDecisionContext<GitHubPREvent
             this.localPR = localPR;
             return this;
         }
-        
+
         public Builder withLocalRepo(GitHubPRRepository localRepo) {
             this.localRepo = localRepo;
             return this;

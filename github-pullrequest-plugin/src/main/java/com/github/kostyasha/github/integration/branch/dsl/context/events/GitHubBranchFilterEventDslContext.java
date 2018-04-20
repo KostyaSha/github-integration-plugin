@@ -1,11 +1,10 @@
 package com.github.kostyasha.github.integration.branch.dsl.context.events;
 
 import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchRestrictionFilter;
+import javaposse.jobdsl.dsl.Context;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import javaposse.jobdsl.dsl.Context;
 
 public class GitHubBranchFilterEventDslContext implements Context {
 

@@ -4,7 +4,7 @@ import org.kohsuke.github.GHRepository;
 
 /**
  * Add a link to repository
- * 
+ *
  * @author Anton Tanasenko
  */
 public class GitHubRepoAction extends GitHubLinkAction {
@@ -13,7 +13,8 @@ public class GitHubRepoAction extends GitHubLinkAction {
 
     public GitHubRepoAction(GHRepository remoteRepository) {
         super(remoteRepository.getHtmlUrl().toExternalForm());
-        this.name = remoteRepository.getFullName();;
+        this.name = remoteRepository.getFullName();
+        ;
     }
 
     @Override

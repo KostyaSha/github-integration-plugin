@@ -18,9 +18,9 @@ import java.util.Collection;
 import java.util.Collections;
 
 import static java.util.Collections.singleton;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
-import static java.util.Objects.nonNull;
 
 /**
  * Create GitHubPRRepository.

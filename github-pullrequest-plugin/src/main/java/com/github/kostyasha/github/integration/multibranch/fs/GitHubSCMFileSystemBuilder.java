@@ -10,7 +10,6 @@ import jenkins.scm.api.SCMFileSystem;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.SCMSource;
-
 import org.kohsuke.github.GHRepository;
 
 import javax.annotation.CheckForNull;

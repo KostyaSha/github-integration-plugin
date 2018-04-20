@@ -2,7 +2,6 @@ package com.github.kostyasha.github.integration.branch.events.impl.commitchecks;
 
 import hudson.DescriptorExtensionList;
 import hudson.model.Descriptor;
-
 import jenkins.model.Jenkins;
 
 /**

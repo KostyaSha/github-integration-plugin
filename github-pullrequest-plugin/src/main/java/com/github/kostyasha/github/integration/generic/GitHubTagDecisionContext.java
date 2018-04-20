@@ -6,16 +6,14 @@ import com.github.kostyasha.github.integration.tag.GitHubTag;
 import com.github.kostyasha.github.integration.tag.GitHubTagCause;
 import com.github.kostyasha.github.integration.tag.GitHubTagRepository;
 import com.github.kostyasha.github.integration.tag.events.GitHubTagEvent;
-
 import hudson.model.TaskListener;
 import org.kohsuke.github.GHTag;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
-
-import java.io.IOException;
 
 /**
  * @author Kanstantsin Shautsou
@@ -61,7 +59,7 @@ public class GitHubTagDecisionContext extends GitHubDecisionContext<GitHubTagEve
     public GitHubTagHandler getHandler() {
         return (GitHubTagHandler) super.getHandler();
     }
-    
+
     @Override
     public GitHubTagCause checkEvent(GitHubTagEvent event) throws IOException {
         return event.check(this);
@@ -86,7 +84,8 @@ public class GitHubTagDecisionContext extends GitHubDecisionContext<GitHubTagEve
 
         private GitHubTagRepository localRepo;
 
-        public Builder() {}
+        public Builder() {
+        }
 
         public Builder withRemoteTag(@CheckForNull GHTag remoteTag) {
             this.remoteTag = remoteTag;

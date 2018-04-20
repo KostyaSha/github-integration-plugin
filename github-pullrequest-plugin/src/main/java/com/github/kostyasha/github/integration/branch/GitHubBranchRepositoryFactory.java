@@ -18,8 +18,8 @@ import java.util.Collection;
 import java.util.Collections;
 
 import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghBranchTriggerFromJob;
-import static java.util.Objects.requireNonNull;
 import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Create GitHubBranchRepository.

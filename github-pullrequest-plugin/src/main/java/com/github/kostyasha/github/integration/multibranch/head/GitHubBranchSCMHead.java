@@ -1,13 +1,11 @@
 package com.github.kostyasha.github.integration.multibranch.head;
 
-import java.io.IOException;
-
-import javax.annotation.Nonnull;
-
+import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHRepository;
 
-import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
+import javax.annotation.Nonnull;
+import java.io.IOException;
 
 public class GitHubBranchSCMHead extends GitHubSCMHead<GitHubBranchCause> {
     private static final long serialVersionUID = 1L;

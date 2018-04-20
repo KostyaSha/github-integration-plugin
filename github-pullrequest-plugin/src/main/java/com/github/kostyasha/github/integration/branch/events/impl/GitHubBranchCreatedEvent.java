@@ -2,19 +2,15 @@ package com.github.kostyasha.github.integration.branch.events.impl;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
-import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
-import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
 import com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext;
-import com.github.kostyasha.github.integration.multibranch.handler.GitHubBranchHandler;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;

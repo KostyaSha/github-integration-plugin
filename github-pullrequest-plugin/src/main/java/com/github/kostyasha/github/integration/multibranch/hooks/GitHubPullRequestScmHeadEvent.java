@@ -1,7 +1,6 @@
 package com.github.kostyasha.github.integration.multibranch.hooks;
 
 import com.github.kostyasha.github.integration.multibranch.head.GitHubPRSCMHead;
-
 import hudson.scm.SCM;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMRevision;

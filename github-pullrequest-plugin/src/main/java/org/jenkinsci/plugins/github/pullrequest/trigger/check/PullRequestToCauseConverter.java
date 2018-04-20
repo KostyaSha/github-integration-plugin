@@ -82,7 +82,7 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
     @CheckForNull
     @Override
     public GitHubPRCause apply(final GHPullRequest remotePR) {
-        
+
         @CheckForNull
         GitHubPRPullRequest localPR = localRepo.getPulls().get(remotePR.getNumber());
         GitHubPRDecisionContext context = newGitHubPRDecisionContext()

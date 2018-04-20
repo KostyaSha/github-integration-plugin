@@ -3,18 +3,14 @@ package com.github.kostyasha.github.integration.branch.events.impl;
 import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
-import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
 import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheck;
 import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheckDescriptor;
-
 import com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
-
 import net.sf.json.JSONObject;
-
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.github.GHBranch;
@@ -25,9 +21,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -117,7 +111,7 @@ public class GitHubBranchCommitEvent extends GitHubBranchEvent {
     }
 
     private GitHubBranchCause check(GHBranch remoteBranch, Function<GitHubBranchCommitCheck, GitHubBranchCause> function,
-            PrintStream logger) {
+                                    PrintStream logger) {
         List<GitHubBranchCause> causes = checks.stream()
                 .map(function::apply)
                 .filter(Objects::nonNull)

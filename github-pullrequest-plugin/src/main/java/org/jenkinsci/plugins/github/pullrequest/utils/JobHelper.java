@@ -6,9 +6,9 @@ import hudson.matrix.MatrixConfiguration;
 import hudson.matrix.MatrixRun;
 import hudson.model.AbstractProject;
 import hudson.model.BuildBadgeAction;
+import hudson.model.Cause;
 import hudson.model.CauseAction;
 import hudson.model.Executor;
-import hudson.model.Cause;
 import hudson.model.Job;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
@@ -32,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -129,8 +128,8 @@ public class JobHelper {
         List<ParameterValue> defValues = new ArrayList<>();
 
         /*
-        * This check is made ONLY if someone will call this method even if isParametrized() is false.
-        */
+         * This check is made ONLY if someone will call this method even if isParametrized() is false.
+         */
         if (isNull(paramDefProp)) {
             return defValues;
         }

@@ -2,12 +2,9 @@ package com.github.kostyasha.github.integration.tag.events.impl;
 
 import com.github.kostyasha.github.integration.generic.GitHubTagDecisionContext;
 import com.github.kostyasha.github.integration.tag.GitHubTagCause;
-import com.github.kostyasha.github.integration.tag.GitHubTagRepository;
 import com.github.kostyasha.github.integration.tag.events.GitHubTagEvent;
 import com.github.kostyasha.github.integration.tag.events.GitHubTagEventDescriptor;
-
 import hudson.Extension;
-
 import org.kohsuke.github.GHTag;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -120,7 +117,7 @@ public class GitHubTagRestrictionFilter extends GitHubTagEvent {
     }
 
     private GitHubTagCause toCause(GitHubTagDecisionContext context, boolean skip,
-                                      String message, Object... args) {
+                                   String message, Object... args) {
         return context.newCause(String.format(message, args), skip);
     }
 
