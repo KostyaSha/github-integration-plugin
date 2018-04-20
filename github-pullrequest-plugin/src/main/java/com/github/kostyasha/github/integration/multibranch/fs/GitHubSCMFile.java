@@ -30,7 +30,7 @@ public class GitHubSCMFile extends SCMFile {
         this.fs = parent.fs;
     }
 
-    private Entry entry() throws IOException {
+    private Entry getEntry() throws IOException {
         if (entry == null) {
             synchronized (this) {
                 if (entry == null) {
@@ -54,7 +54,7 @@ public class GitHubSCMFile extends SCMFile {
     @Nonnull
     @Override
     public Iterable<SCMFile> children() throws IOException, InterruptedException {
-        return entry().getSubEntryNames().stream()
+        return getEntry().getSubEntryNames().stream()
                 .map(this::newChild)
                 .collect(Collectors.toList());
     }
@@ -67,13 +67,13 @@ public class GitHubSCMFile extends SCMFile {
     @Nonnull
     @Override
     protected Type type() throws IOException, InterruptedException {
-        return entry().type;
+        return getEntry().getType();
     }
 
     @Nonnull
     @Override
     public InputStream content() throws IOException, InterruptedException {
-        return fs.tree().content(entry());
+        return fs.tree().content(getEntry());
     }
 
 }
