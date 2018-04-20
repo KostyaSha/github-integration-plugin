@@ -51,6 +51,7 @@ public class GitHubBranchTriggerTest {
             ))
             .stubRateLimit()
             .stubUser()
+            .stubRepoBranchShouldChange()
             .stubRepoBranches()
             .stubRepo()
             .stubStatuses();
@@ -82,8 +83,34 @@ public class GitHubBranchTriggerTest {
 
         GitHubBranchRepository localRepo = prj.getAction(GitHubBranchRepository.class);
         assertThat(localRepo, notNullValue());
+        assertThat(localRepo.getBranches().size(), is(2));
         assertThat(localRepo.getBranches(), hasKey("for-removal"));
+        assertThat(localRepo.getBranches(), hasKey("should-change"));
+        GitHubBranch shouldChange = localRepo.getBranches().get("should-change");
+        assertThat(shouldChange.getCommitSha(), is("6dcb09b5b57875f334f61aebed695e2e4193ffbb"));
 
+        // only single branch should change in local repo
+        branchTrigger.doRun("should-change");
+        jRule.waitUntilNoActivity();
+
+        assertThat(prj.getBuilds(), hasSize(1));
+        FreeStyleBuild lastBuild = prj.getLastBuild();
+
+        GitHubBranchCause cause = lastBuild.getCause(GitHubBranchCause.class);
+        assertThat(cause, notNullValue());
+        assertThat(cause.getCommitSha(), is("6dcb09b5b57875f334f61aebed695e2e4193ffgg"));
+        assertThat(cause.getBranchName(), is("should-change"));
+
+        localRepo = prj.getAction(GitHubBranchRepository.class);
+        assertThat(localRepo, notNullValue());
+        assertThat(localRepo.getBranches().size(), is(2));
+        assertThat(localRepo.getBranches(), hasKey("for-removal"));
+        assertThat(localRepo.getBranches(), hasKey("should-change"));
+        shouldChange = localRepo.getBranches().get("should-change");
+        assertThat(shouldChange.getCommitSha(), is("6dcb09b5b57875f334f61aebed695e2e4193ffgg"));
+
+
+        // and now full trigger run()
         branchTrigger.run();
 
         jRule.waitUntilNoActivity();
@@ -92,13 +119,23 @@ public class GitHubBranchTriggerTest {
         final FreeStyleBuild lastBuild = prj.getLastBuild();
         assertThat(lastBuild, notNullValue());
 
-        final GitHubBranchCause cause = lastBuild.getCause(GitHubBranchCause.class);
+        cause = lastBuild.getCause(GitHubBranchCause.class);
         assertThat(cause, notNullValue());
         assertThat(cause.getCommitSha(), is("6dcb09b5b57875f334f61aebed695e2e4193db5e"));
-        assertThat(cause.getBranchName(), is("master"));
+        assertThat(cause.getBranchName(), is("new-branch"));
 
         localRepo = prj.getAction(GitHubBranchRepository.class);
+        assertThat(localRepo.getBranches().size(), is(2));
         assertThat(localRepo.getBranches(), not(hasKey("for-removal")));
+        assertThat(localRepo.getBranches(), hasKey("should-change"));
+
+        shouldChange = localRepo.getBranches().get("should-change");
+        assertThat(shouldChange.getCommitSha(), is("6dcb09b5b57875f334f61aebed695e2e4193ffgg"));
+
+        assertThat(localRepo.getBranches(), hasKey("new-branch"));
+        GitHubBranch branch = localRepo.getBranches().get("new-branch");
+        assertThat(branch.getCommitSha(), is("6dcb09b5b57875f334f61aebed695e2e4193db5e"));
+
     }
 
     @TestExtension

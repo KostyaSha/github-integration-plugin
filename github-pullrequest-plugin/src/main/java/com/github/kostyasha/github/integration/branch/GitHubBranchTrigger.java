@@ -29,9 +29,11 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -214,7 +216,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
      */
     private List<GitHubBranchCause> readyToBuildCauses(GitHubBranchRepository localRepository,
                                                        LoggingTaskListenerWrapper listener,
-                                                       @Nullable String branch) {
+                                                       @Nullable String requestedBranch) {
         try {
             GitHub github = getRepoProvider().getGitHub(this);
             GHRateLimit rateLimitBefore = github.getRateLimit();
@@ -222,7 +224,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
 
             // get local and remote list of branches
             GHRepository remoteRepo = getRemoteRepository();
-            Set<GHBranch> remoteBranches = branchesToCheck(branch, remoteRepo, localRepository);
+            Set<GHBranch> remoteBranches = branchesToCheck(requestedBranch, remoteRepo, localRepository);
 
             List<GitHubBranchCause> causes = checkBranches(remoteBranches, localRepository, listener);
 
@@ -230,7 +232,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
              * update details about the local repo after the causes are determined as they expect
              * new branches to not be found in the local details
              */
-            updateLocalRepository(remoteBranches, localRepository);
+            updateLocalRepository(requestedBranch, remoteBranches, localRepository);
             saveIfSkipFirstRun();
 
             GHRateLimit rateLimitAfter = github.getRateLimit();
@@ -248,16 +250,20 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
     /**
      * Remote branch for future analysing. null - all remote branches.
      */
-    private Set<GHBranch> branchesToCheck(String branch, @Nonnull GHRepository remoteRepo,
+    private Set<GHBranch> branchesToCheck(@CheckForNull String branch, @Nonnull GHRepository remoteRepo,
                                           GitHubBranchRepository localRepository)
             throws IOException {
         final LinkedHashSet<GHBranch> ghBranches = new LinkedHashSet<>();
 
         if (branch != null) {
-            final GHBranch ghBranch = remoteRepo.getBranches().get(branch);
-            if (ghBranch != null) {
-                ghBranches.add(ghBranch);
+            try {
+                GHBranch ghBranch = remoteRepo.getBranch(branch);
+                if (ghBranch != null) {
+                    ghBranches.add(ghBranch);
+                }
+            } catch (FileNotFoundException ignore) {
             }
+
         } else {
             ghBranches.addAll(remoteRepo.getBranches().values());
         }
@@ -279,13 +285,25 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
         return causes;
     }
 
-    public static void updateLocalRepository(Set<GHBranch> remoteBranches, GitHubBranchRepository localRepository) {
+    public static void updateLocalRepository(@CheckForNull String requestedBranch,
+                                             Set<GHBranch> remoteBranches, GitHubBranchRepository localRepository) {
+        //refresh checked local state for checked branches
         long count = remoteBranches.stream()
                 .map(updateLocalRepo(localRepository))
                 .count();
-
         LOG.trace("Updated local branch details with [{}] repositories.", count);
-        final Map<String, GitHubBranch> localBranches = localRepository.getBranches();
+
+        // remove deleted branches from local state
+        Map<String, GitHubBranch> localBranches;
+        if (nonNull(requestedBranch)) {
+            localBranches = new HashMap<>();
+            if (localRepository.getBranches().containsKey(requestedBranch)) {
+                localBranches.put(requestedBranch, localRepository.getBranches().get(requestedBranch));
+            }
+        } else {
+            localBranches = localRepository.getBranches();
+        }
+
         final Iterator<String> iterator = localBranches.keySet().iterator();
         while (iterator.hasNext()) {
             final String localBranch = iterator.next();

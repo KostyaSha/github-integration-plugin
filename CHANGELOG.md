@@ -2,6 +2,15 @@
 
 ## Next 
 
+## 0.1.0-rc29
+- [branch] reduce number of github api calls for hook processing.
+
+## 0.1.0-rc28
+- [branch] Single branch check shouldn't effect local storage.
+
+## 0.1.0-rc27
+- [branch] fix error in branch commit event
+
 ## 0.1.0-rc26
 - fix repoproviders job-dsl binding.
 
