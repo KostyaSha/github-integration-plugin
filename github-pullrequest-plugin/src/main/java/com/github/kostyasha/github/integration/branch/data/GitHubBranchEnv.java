@@ -25,11 +25,11 @@ public enum GitHubBranchEnv implements GitHubEnv<GitHubBranchCause> {
 
     private Function<GitHubBranchCause, ParameterValue> fun;
 
-    private GitHubBranchEnv(Function<GitHubBranchCause, String> fun) {
+    GitHubBranchEnv(Function<GitHubBranchCause, String> fun) {
         this.fun = c -> param(fun.apply(c));
     }
 
-    private GitHubBranchEnv(Predicate<GitHubBranchCause> fun) {
+    GitHubBranchEnv(Predicate<GitHubBranchCause> fun) {
         this.fun = c -> param(fun.test(c));
     }
 

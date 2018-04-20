@@ -24,7 +24,8 @@ public class GitHubTagDecisionContext extends GitHubDecisionContext<GitHubTagEve
     private final GitHubTag localTag;
     private final GitHubTagRepository localRepo;
 
-    public GitHubTagDecisionContext(GHTag remoteTag, GitHubTag localTag, @Nonnull GitHubTagRepository localRepo, GitHubTagHandler tagHandler, GitHubSCMSource scmSource, TaskListener listener) {
+    public GitHubTagDecisionContext(GHTag remoteTag, GitHubTag localTag, @Nonnull GitHubTagRepository localRepo,
+                                    GitHubTagHandler tagHandler, GitHubSCMSource scmSource, TaskListener listener) {
         super(listener, null, scmSource, tagHandler);
         this.remoteTag = remoteTag;
         this.localTag = localTag;

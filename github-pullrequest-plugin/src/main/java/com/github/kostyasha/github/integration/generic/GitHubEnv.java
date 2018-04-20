@@ -21,7 +21,9 @@ public interface GitHubEnv<T extends GitHubCause<?>> {
         return new BooleanParameterValue(toString(), value);
     }
 
-    public static <T extends GitHubCause<?>, X extends Enum<X> & GitHubEnv<T>> void getParams(Class<X> enumClass, T cause, List<ParameterValue> params) {
+    static <T extends GitHubCause<?>, X extends Enum<X> & GitHubEnv<T>> void getParams(Class<X> enumClass,
+                                                                                       T cause,
+                                                                                       List<ParameterValue> params) {
         for (GitHubEnv<T> env : enumClass.getEnumConstants()) {
             env.addParam(cause, params);
         }

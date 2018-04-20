@@ -16,7 +16,7 @@ public enum GitHubRepoEnv implements GitHubEnv<GitHubCause<?>> {
 
     private Function<GitHubCause<?>, ParameterValue> fun;
 
-    private GitHubRepoEnv(Function<GitHubCause<?>, String> fun) {
+    GitHubRepoEnv(Function<GitHubCause<?>, String> fun) {
         this.fun = c -> param(fun.apply(c));
     }
 
