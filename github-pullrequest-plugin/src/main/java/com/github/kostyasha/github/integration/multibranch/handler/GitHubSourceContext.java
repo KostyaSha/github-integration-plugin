@@ -49,13 +49,13 @@ public class GitHubSourceContext {
         this.listener = listener;
     }
 
-    public @Nonnull
-    GitHubSCMSource getSource() {
+    @Nonnull
+    public GitHubSCMSource getSource() {
         return source;
     }
 
-    public @Nonnull
-    SCMHeadObserver getObserver() {
+    @Nonnull
+    public SCMHeadObserver getObserver() {
         return observer;
     }
 
@@ -63,18 +63,18 @@ public class GitHubSourceContext {
         return scmHeadEvent;
     }
 
-    public @Nonnull
-    GitHubRepo getLocalRepo() {
+    @Nonnull
+    public GitHubRepo getLocalRepo() {
         return localRepo;
     }
 
-    public @Nonnull
-    GHRepository getRemoteRepo() {
+    @Nonnull
+    public GHRepository getRemoteRepo() {
         return remoteRepo;
     }
 
-    public @Nonnull
-    TaskListener getListener() {
+    @Nonnull
+    public TaskListener getListener() {
         return listener;
     }
 

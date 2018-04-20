@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Objects.isNull;
+
 public class TreeCache {
     private static final long CONTENT_THRESHOLD = 1024 * 1024; // 1MB max
 
@@ -114,7 +116,7 @@ public class TreeCache {
         private List<String> subEntries;
         private boolean processed;
 
-        volatile byte[] cachedContent;
+        private volatile byte[] CACHED_CONTENT;
 
         public SCMFile.Type getType() {
             return type;
@@ -125,9 +127,9 @@ public class TreeCache {
         }
 
         InputStream load(GHRepository repo, String revision) throws IOException {
-            if (cachedContent == null) {
+            if (isNull(CACHED_CONTENT)) {
                 synchronized (this) {
-                    if (cachedContent == null) {
+                    if (CACHED_CONTENT == null) {
                         GHContent content = repo.getFileContent(path, revision);
                         long size = content.getSize();
                         if (size > CONTENT_THRESHOLD) {
@@ -139,11 +141,11 @@ public class TreeCache {
                         try (InputStream in = content.read()) {
                             IOUtils.readFully(in, buf);
                         }
-                        cachedContent = buf;
+                        CACHED_CONTENT = buf;
                     }
                 }
             }
-            return new ByteArrayInputStream(cachedContent);
+            return new ByteArrayInputStream(CACHED_CONTENT);
         }
 
         Entry(String path, GHTreeEntry entry, boolean file) {
