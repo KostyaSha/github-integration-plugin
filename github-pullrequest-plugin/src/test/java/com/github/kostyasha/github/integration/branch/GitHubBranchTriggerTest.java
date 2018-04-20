@@ -116,7 +116,7 @@ public class GitHubBranchTriggerTest {
         jRule.waitUntilNoActivity();
 
         assertThat(prj.getBuilds(), hasSize(1));
-        final FreeStyleBuild lastBuild = prj.getLastBuild();
+        lastBuild = prj.getLastBuild();
         assertThat(lastBuild, notNullValue());
 
         cause = lastBuild.getCause(GitHubBranchCause.class);
