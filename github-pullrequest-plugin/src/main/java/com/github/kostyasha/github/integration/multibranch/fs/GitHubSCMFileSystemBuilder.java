@@ -27,7 +27,8 @@ public class GitHubSCMFileSystemBuilder extends SCMFileSystem.Builder {
     }
 
     @Override
-    public SCMFileSystem build(@Nonnull SCMSource source, @Nonnull SCMHead head, @CheckForNull SCMRevision rev) throws IOException, InterruptedException {
+    public SCMFileSystem build(@Nonnull SCMSource source, @Nonnull SCMHead head, @CheckForNull SCMRevision rev)
+            throws IOException, InterruptedException {
         if (source instanceof GitHubSCMSource) {
             GitHubSCMSource ghSCMSource = (GitHubSCMSource) source;
             GHRepository remoteRepo = ghSCMSource.getRemoteRepo();

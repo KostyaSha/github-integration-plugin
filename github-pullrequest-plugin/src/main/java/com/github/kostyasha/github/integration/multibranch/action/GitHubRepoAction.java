@@ -14,7 +14,6 @@ public class GitHubRepoAction extends GitHubLinkAction {
     public GitHubRepoAction(GHRepository remoteRepository) {
         super(remoteRepository.getHtmlUrl().toExternalForm());
         this.name = remoteRepository.getFullName();
-        ;
     }
 
     @Override

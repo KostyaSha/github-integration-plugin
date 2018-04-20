@@ -21,6 +21,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 
+import static java.util.Objects.nonNull;
+
 public class GitHubSourceContext {
 
     private final GitHubSCMSource source;
@@ -31,14 +33,13 @@ public class GitHubSourceContext {
     private final GHRepository remoteRepo;
     private final TaskListener listener;
 
-    public GitHubSourceContext( //
-                                @Nonnull GitHubSCMSource source, //
-                                @Nonnull SCMHeadObserver observer, //
-                                @Nonnull SCMSourceCriteria criteria, //
-                                @Nullable SCMHeadEvent<?> scmHeadEvent, //
-                                @Nonnull GitHubRepo localRepo, //
-                                @Nonnull GHRepository remoteRepo, //
-                                @Nonnull TaskListener listener) {
+    public GitHubSourceContext(@Nonnull GitHubSCMSource source,
+                               @Nonnull SCMHeadObserver observer,
+                               @Nonnull SCMSourceCriteria criteria,
+                               @Nullable SCMHeadEvent<?> scmHeadEvent,
+                               @Nonnull GitHubRepo localRepo,
+                               @Nonnull GHRepository remoteRepo,
+                               @Nonnull TaskListener listener) {
         this.source = source;
         this.observer = observer;
         this.criteria = criteria;
@@ -82,7 +83,7 @@ public class GitHubSourceContext {
     }
 
     public boolean checkCriteria(@Nonnull GitHubCause<?> cause) throws IOException {
-        if (criteria != null) {
+        if (nonNull(criteria)) {
             GitHubSCMRevision revision = cause.createSCMRevision(source.getId());
             listener.getLogger().println("");
             listener.getLogger().println("Checking " + revision.getHead().getPronoun());
@@ -146,6 +147,4 @@ public class GitHubSourceContext {
             return false;
         }
     }
-
-    ;
 }

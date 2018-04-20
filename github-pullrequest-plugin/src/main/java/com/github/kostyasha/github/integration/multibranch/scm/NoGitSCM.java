@@ -36,7 +36,8 @@ public class NoGitSCM extends GitSCM {
     }
 
     @Override
-    public void checkout(Run<?, ?> build, Launcher launcher, FilePath workspace, TaskListener listener, File changelogFile, SCMRevisionState baseline) throws IOException, InterruptedException {
+    public void checkout(Run<?, ?> build, Launcher launcher, FilePath workspace, TaskListener listener,
+                         File changelogFile, SCMRevisionState baseline) throws IOException, InterruptedException {
         listener.getLogger().println("No SCM checkout.");
     }
 }

@@ -107,12 +107,12 @@ public class TreeCache {
 
     public static class Entry {
         private static final Entry NONE = new Entry(null, null, false);
-        final String path;
-        final GHTreeEntry entry;
-        final boolean file;
-        final SCMFile.Type type;
-        List<String> subEntries;
-        boolean processed;
+        private final String path;
+        private final GHTreeEntry entry;
+        private final boolean file;
+        public final SCMFile.Type type;
+        private List<String> subEntries;
+        private boolean processed;
 
         volatile byte[] cachedContent;
 

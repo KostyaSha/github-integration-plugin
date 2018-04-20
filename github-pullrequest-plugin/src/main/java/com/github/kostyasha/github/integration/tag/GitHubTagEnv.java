@@ -24,11 +24,11 @@ public enum GitHubTagEnv implements GitHubEnv<GitHubTagCause> {
 
     private Function<GitHubTagCause, ParameterValue> fun;
 
-    private GitHubTagEnv(Function<GitHubTagCause, String> fun) {
+    GitHubTagEnv(Function<GitHubTagCause, String> fun) {
         this.fun = c -> param(fun.apply(c));
     }
 
-    private GitHubTagEnv(Predicate<GitHubTagCause> fun) {
+    GitHubTagEnv(Predicate<GitHubTagCause> fun) {
         this.fun = c -> param(fun.test(c));
     }
 

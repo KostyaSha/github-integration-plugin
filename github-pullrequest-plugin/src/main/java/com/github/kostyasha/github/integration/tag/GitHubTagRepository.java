@@ -40,8 +40,7 @@ public class GitHubTagRepository extends GitHubRepository<GitHubTagRepository> {
 
     @Nonnull
     public Map<String, GitHubTag> getTags() {
-        if (isNull(tags))
-            tags = new ConcurrentHashMap<>();
+        if (isNull(tags)) tags = new ConcurrentHashMap<>();
         return tags;
     }
 

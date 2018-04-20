@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
  */
 public class AsIsGitSCMFactory extends GitHubSCMFactory {
 
-    GitSCM gitSCM;
+    private GitSCM gitSCM;
 
     @DataBoundConstructor
     public AsIsGitSCMFactory(GitSCM gitSCM) {

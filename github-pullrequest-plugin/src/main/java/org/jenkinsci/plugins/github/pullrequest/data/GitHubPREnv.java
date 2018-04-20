@@ -38,11 +38,11 @@ public enum GitHubPREnv implements GitHubEnv<GitHubPRCause> {
 
     private Function<GitHubPRCause, ParameterValue> fun;
 
-    private GitHubPREnv(Function<GitHubPRCause, String> fun) {
+    GitHubPREnv(Function<GitHubPRCause, String> fun) {
         this.fun = c -> param(fun.apply(c));
     }
 
-    private GitHubPREnv(Predicate<GitHubPRCause> fun) {
+    GitHubPREnv(Predicate<GitHubPRCause> fun) {
         this.fun = c -> param(fun.test(c));
     }
 

@@ -12,6 +12,9 @@ import java.util.stream.Stream;
  */
 public class IOUtils {
 
+    private IOUtils() {
+    }
+
     /**
      * Wraps provided Function into an IOFunction. Users are expected to wrap stream terminal operations using
      * {@link #withIo(Runnable)} or {@link #withIo(Supplier)}
