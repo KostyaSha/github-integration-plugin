@@ -17,7 +17,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static java.util.Objects.isNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**

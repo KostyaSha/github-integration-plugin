@@ -29,7 +29,7 @@ import static com.google.common.collect.Sets.immutableEnumSet;
 import static hudson.security.ACL.SYSTEM;
 import static java.lang.String.format;
 import static net.sf.json.JSONObject.fromObject;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static java.util.Objects.isNull;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
 
 /**

@@ -27,8 +27,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRCause.class);

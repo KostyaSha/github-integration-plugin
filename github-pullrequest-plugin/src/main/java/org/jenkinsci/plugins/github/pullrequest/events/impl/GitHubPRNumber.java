@@ -13,7 +13,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static java.util.Objects.isNull;
 
 /**
  * Check that PR number #isMatch() to event configured number.

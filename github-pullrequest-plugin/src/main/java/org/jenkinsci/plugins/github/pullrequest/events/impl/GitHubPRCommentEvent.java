@@ -21,8 +21,8 @@ import java.io.PrintStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 /**
  * Trigger PR based on comment pattern.

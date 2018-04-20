@@ -48,8 +48,8 @@ import static com.google.common.base.Charsets.UTF_8;
 import static java.text.DateFormat.getDateTimeInstance;
 import static java.util.Collections.emptyList;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.LIGHT_HOOKS;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 
 /**

@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
+import static java.util.Objects.isNull;
+
 /**
  * @author Kanstantsin Shautsou
  */
@@ -31,7 +33,7 @@ public class SkipPRInBadState implements Predicate<GHPullRequest>, java.util.fun
 
     @Override
     public boolean apply(@Nullable GHPullRequest remotePR) {
-        if (remotePR == null) {
+        if (isNull(remotePR)) {
             return true;
         }
 

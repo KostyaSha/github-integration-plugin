@@ -19,7 +19,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static java.util.Objects.isNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -41,11 +41,11 @@ public class GitHubBranchCreatedEvent extends GitHubBranchEvent {
         GitHubBranch localBranch = context.getLocalBranch();
         TaskListener listener = context.getListener();
 
-        if (remoteBranch == null && localBranch == null) {
+        if (isNull(remoteBranch) && isNull(localBranch)) {
             // just in case
             LOG.debug("Remote and local branch are null");
             return null;
-        } else if (remoteBranch == null) {
+        } else if (isNull(remoteBranch)) {
             LOG.debug("Remote branch is null for localBranch '{}'. Branch can't be 'created'", localBranch.getName());
             return null;
         }

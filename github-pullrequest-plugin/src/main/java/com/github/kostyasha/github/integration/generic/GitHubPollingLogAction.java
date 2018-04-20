@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+import static java.util.Objects.nonNull;
 
 /**
  * @author Kanstantsin Shautsou

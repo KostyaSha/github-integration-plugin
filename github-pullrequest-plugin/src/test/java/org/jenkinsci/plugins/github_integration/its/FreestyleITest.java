@@ -6,6 +6,7 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRMessage;
 import org.jenkinsci.plugins.github.pullrequest.builders.GitHubPRStatusBuilder;
 import org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRBuildStatusPublisher;
 import org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRCommentPublisher;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.jenkinsci.plugins.github_integration.junit.GHRule.getPreconfiguredProperty;
@@ -14,6 +15,7 @@ import static org.jenkinsci.plugins.github_integration.junit.GHRule.getPreconfig
 /**
  * @author Kanstantsin Shautsou
  */
+@Ignore
 public class FreestyleITest extends AbstractPRTest {
 
     @Test

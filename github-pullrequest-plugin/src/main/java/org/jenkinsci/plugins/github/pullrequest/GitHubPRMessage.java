@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+import static java.util.Objects.nonNull;
 
 /**
  * Represents a comment for GitHub that can contain token macros.

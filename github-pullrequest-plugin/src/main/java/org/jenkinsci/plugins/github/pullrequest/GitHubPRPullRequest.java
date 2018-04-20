@@ -24,7 +24,7 @@ import java.util.Set;
 
 import static com.github.kostyasha.github.integration.generic.utils.RetryableGitHubOperation.execute;
 import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static java.util.Objects.isNull;
 
 /**
  * Maintains state about a Pull Request for a particular Jenkins job.  This is what understands the current state
@@ -208,7 +208,7 @@ public class GitHubPRPullRequest {
      * Indicates that remote PR wasn't fully saved locally during last check.
      */
     public boolean isInBadState() {
-        return inBadState || labels == null;
+        return inBadState || isNull(labels);
     }
 
     public static String getIconFileName() {

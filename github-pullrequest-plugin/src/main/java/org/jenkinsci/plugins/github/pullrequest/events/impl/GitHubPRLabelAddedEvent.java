@@ -22,6 +22,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import static java.util.Objects.isNull;
+
 /**
  * When label is added to pull request. Set of labels is considered added only when
  * at least one label of set was newly added (was not saved in local PR previously)
@@ -54,7 +56,7 @@ public class GitHubPRLabelAddedEvent extends GitHubPREvent {
             return null; // already closed, skip check?
         }
 
-        if (label == null) {
+        if (isNull(label)) {
             LOG.error("Label is null. Bad configured event: {}", getDescriptor().getDisplayName());
             throw new IllegalStateException("Label is null. Bad configured event: " + getDescriptor().getDisplayName());
         }

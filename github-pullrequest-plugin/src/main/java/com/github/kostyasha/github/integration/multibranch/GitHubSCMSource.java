@@ -71,8 +71,8 @@ import static com.github.kostyasha.github.integration.multibranch.category.GitHu
 import static com.github.kostyasha.github.integration.multibranch.category.GitHubPRSCMHeadCategory.PR;
 import static com.github.kostyasha.github.integration.multibranch.category.GitHubTagSCMHeadCategory.TAG;
 import static com.google.common.base.Preconditions.checkState;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 public class GitHubSCMSource extends SCMSource {
     private static final Logger LOG = LoggerFactory.getLogger(GitHubSCMSource.class);
@@ -353,47 +353,4 @@ public class GitHubSCMSource extends SCMSource {
         }
     }
 
-    /**
-     * Clean up local repo cache when items get deleted
-     */
-    @Extension
-    public static class LocalRepoPlunger extends ItemListener {
-        @Override
-        @SuppressWarnings({"rawtypes", "unchecked"})
-        public void onDeleted(Item item) {
-            if (!(item instanceof Job)) {
-                return;
-            }
-
-            ItemGroup<? extends Item> parent = item.getParent();
-            if (!(parent instanceof MultiBranchProject)) {
-                return;
-            }
-
-            Job j = (Job) item;
-            MultiBranchProject mb = (MultiBranchProject) parent;
-            Branch branch = mb.getProjectFactory().getBranch(j);
-            SCMHead head = branch.getHead();
-
-            Consumer<GitHubRepo> plunger = null;
-            if (head instanceof GitHubBranchSCMHead) {
-                plunger = r -> r.getBranchRepository().getBranches().remove(head.getName());
-            } else if (head instanceof GitHubTagSCMHead) {
-                plunger = r -> r.getTagRepository().getTags().remove(head.getName());
-            } else if (head instanceof GitHubPRSCMHead) {
-                GitHubPRSCMHead prHead = (GitHubPRSCMHead) head;
-                plunger = r -> r.getPrRepository().getPulls().remove(prHead.getPrNumber());
-            }
-
-            if (plunger != null) {
-                for (SCMSource src : (List<SCMSource>) mb.getSCMSources()) {
-                    if (src instanceof GitHubSCMSource) {
-                        GitHubSCMSource gsrc = (GitHubSCMSource) src;
-                        plunger.accept(gsrc.getLocalRepo());
-                        LOG.info("Plunging local data for {}", item.getFullName());
-                    }
-                }
-            }
-        }
-    }
 }

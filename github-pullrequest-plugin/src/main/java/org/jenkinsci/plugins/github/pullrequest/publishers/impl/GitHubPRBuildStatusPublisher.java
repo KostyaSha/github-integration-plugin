@@ -34,8 +34,8 @@ import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.addCommen
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getCommitState;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRCauseFromRun;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromRun;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 /**
  * Sets build status on GitHub.

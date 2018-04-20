@@ -19,9 +19,10 @@ import org.kohsuke.stapler.StaplerRequest;
 import javax.annotation.Nonnull;
 import java.net.URI;
 
+import static java.util.Objects.isNull;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.jenkinsci.plugins.github.config.GitHubServerConfig.withHost;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+import static java.util.Objects.nonNull;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 
 /**
@@ -33,7 +34,7 @@ public abstract class GitHubTriggerDescriptor extends TriggerDescriptor {
 
     @Nonnull
     public SequentialExecutionQueue getQueue() {
-        if (queue == null) {
+        if (isNull(queue)) {
             queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
         }
         return queue;

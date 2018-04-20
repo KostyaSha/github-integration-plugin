@@ -2,6 +2,7 @@ package com.github.kostyasha.github.integration.branch.its;
 
 import hudson.model.FreeStyleProject;
 import hudson.tasks.Shell;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.jenkinsci.plugins.github_integration.junit.GHRule.getDefaultBranchTrigger;
@@ -10,6 +11,7 @@ import static org.jenkinsci.plugins.github_integration.junit.GHRule.getPreconfig
 /**
  * @author Kanstantsin Shautsou
  */
+@Ignore
 public class GitHubBranchTriggerITest extends BranchITest {
     @Test
     public void freestyleTest() throws Exception {

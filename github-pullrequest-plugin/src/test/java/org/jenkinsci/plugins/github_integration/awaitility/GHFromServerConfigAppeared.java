@@ -9,7 +9,7 @@ import java.util.concurrent.Callable;
 
 import static java.lang.System.currentTimeMillis;
 import static org.jenkinsci.plugins.github.config.GitHubServerConfig.loginToGithub;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+import static java.util.Objects.nonNull;
 
 /**
  * @author Kanstantsin Shautsou

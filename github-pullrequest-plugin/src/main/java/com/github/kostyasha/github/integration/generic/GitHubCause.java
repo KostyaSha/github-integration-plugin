@@ -16,9 +16,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
+import static java.util.Objects.isNull;
 import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.apache.commons.lang.StringUtils.abbreviate;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+import static java.util.Objects.nonNull;
 
 /**
  * @author Kanstantsin Shautsou
@@ -160,7 +161,7 @@ public abstract class GitHubCause<T extends GitHubCause<T>> extends Cause {
     }
 
     public static <T extends GitHubCause<T>> T skipTrigger(List<? extends T> causes) {
-        if (causes == null) {
+        if (isNull(causes)) {
             return null;
         }
         T cause = causes.stream()

@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.DescriptorImpl.githubFor;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static java.util.Objects.isNull;
 
 /**
  * Whether it allowed this user or org with users to do something.

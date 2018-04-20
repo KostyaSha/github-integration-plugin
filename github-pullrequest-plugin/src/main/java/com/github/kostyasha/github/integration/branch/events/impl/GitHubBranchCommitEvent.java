@@ -36,7 +36,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static java.util.Objects.isNull;
 
 /**
  * This branch event acts as a wrapper around checks that can be performed against commit data that requires an additional round trip to
@@ -77,7 +77,7 @@ public class GitHubBranchCommitEvent extends GitHubBranchEvent {
         final PrintStream logger = listener.getLogger();
         Function<GitHubBranchCommitCheck, GitHubBranchCause> function;
 
-        if (localBranch == null) {
+        if (isNull(localBranch)) {
             GHCommit commit = getLastCommit(remoteBranch);
             function = event -> event.check(remoteBranch, localRepo, commit);
         } else {

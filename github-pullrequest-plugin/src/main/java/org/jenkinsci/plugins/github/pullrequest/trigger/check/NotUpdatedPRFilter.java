@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import java.io.IOException;
 
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static java.util.Objects.isNull;
 
 /**
  * @author lanwen (Merkushev Kirill)

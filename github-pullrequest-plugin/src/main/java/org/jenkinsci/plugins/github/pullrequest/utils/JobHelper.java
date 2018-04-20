@@ -39,8 +39,8 @@ import java.util.List;
 
 import static hudson.model.Result.SUCCESS;
 import static hudson.model.Result.UNSTABLE;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.asParameterizedJobMixIn;
 
 /**
@@ -131,7 +131,7 @@ public class JobHelper {
         /*
         * This check is made ONLY if someone will call this method even if isParametrized() is false.
         */
-        if (paramDefProp == null) {
+        if (isNull(paramDefProp)) {
             return defValues;
         }
 

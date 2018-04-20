@@ -28,8 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.codehaus.groovy.runtime.InvokerHelper.asList;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.CRON;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 /**
  * @author Kanstantsin Shautsou

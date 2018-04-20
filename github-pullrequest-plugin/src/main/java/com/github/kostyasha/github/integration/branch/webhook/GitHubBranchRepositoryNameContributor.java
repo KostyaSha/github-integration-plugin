@@ -10,7 +10,7 @@ import hudson.model.Job;
 import java.util.Collection;
 
 import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghBranchTriggerFromJob;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+import static java.util.Objects.nonNull;
 
 /**
  * Branch Trigger tied to GitHub repo. Report it for GitHub doReRegister().

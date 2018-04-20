@@ -31,8 +31,8 @@ import java.util.Set;
 import static com.cloudbees.jenkins.GitHubWebHook.getJenkinsInstance;
 import static com.google.common.base.Predicates.instanceOf;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getDefaultParametersValues;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 import static org.jenkinsci.plugins.github.util.JobInfoHelpers.asParameterizedJobMixIn;
 
