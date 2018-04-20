@@ -47,7 +47,7 @@ public class GitHubSCMProbe extends SCMProbe {
     @Override
     public SCMProbeStat stat(String path) throws IOException {
         TreeCache.Entry e = tree().entry(path);
-        return SCMProbeStat.fromType(e.type);
+        return SCMProbeStat.fromType(e.getType());
     }
 
     @Override
