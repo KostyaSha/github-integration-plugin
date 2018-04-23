@@ -1,22 +1,22 @@
 package org.jenkinsci.plugins.github.pullrequest.events.impl;
 
-import edu.umd.cs.findbugs.annotations.CheckForNull;
+import com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREventDescriptor;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import java.io.IOException;
-import java.io.PrintStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.io.PrintStream;
+
+import static java.util.Objects.isNull;
 import static org.kohsuke.github.GHIssueState.CLOSED;
 
 /**
@@ -33,8 +33,11 @@ public class GitHubPROpenEvent extends GitHubPREvent {
     }
 
     @Override
-    public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
-                               @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
+    public GitHubPRCause check(@Nonnull GitHubPRDecisionContext prDecisionContext) throws IOException {
+        TaskListener listener = prDecisionContext.getListener();
+        GitHubPRPullRequest localPR = prDecisionContext.getLocalPR();
+        GHPullRequest remotePR = prDecisionContext.getRemotePR();
+
         if (remotePR.getState() == CLOSED) {
             return null; // already closed, nothing to check
         }
@@ -44,7 +47,7 @@ public class GitHubPROpenEvent extends GitHubPREvent {
         if (isNull(localPR)) { // new
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": state has changed (PR was opened)");
-            cause = new GitHubPRCause(remotePR, causeMessage, false);
+            cause = prDecisionContext.newCause(causeMessage, false);
         }
 
         return cause;
@@ -52,6 +55,7 @@ public class GitHubPROpenEvent extends GitHubPREvent {
 
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
+        @Nonnull
         @Override
         public final String getDisplayName() {
             return DISPLAY_NAME;

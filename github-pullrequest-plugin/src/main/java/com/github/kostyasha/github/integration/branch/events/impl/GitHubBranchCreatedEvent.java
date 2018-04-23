@@ -2,21 +2,20 @@ package com.github.kostyasha.github.integration.branch.events.impl;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
-import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
-import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
+import com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
 
-import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static java.util.Objects.isNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -33,16 +32,16 @@ public class GitHubBranchCreatedEvent extends GitHubBranchEvent {
     }
 
     @Override
-    public GitHubBranchCause check(GitHubBranchTrigger trigger,
-                                   GHBranch remoteBranch,
-                                   @CheckForNull GitHubBranch localBranch,
-                                   GitHubBranchRepository locaRepo,
-                                   TaskListener listener) throws IOException {
-        if (remoteBranch == null && localBranch == null) {
+    public GitHubBranchCause check(@Nonnull GitHubBranchDecisionContext context) throws IOException {
+        GHBranch remoteBranch = context.getRemoteBranch();
+        GitHubBranch localBranch = context.getLocalBranch();
+        TaskListener listener = context.getListener();
+
+        if (isNull(remoteBranch) && isNull(localBranch)) {
             // just in case
             LOG.debug("Remote and local branch are null");
             return null;
-        } else if (remoteBranch == null) {
+        } else if (isNull(remoteBranch)) {
             LOG.debug("Remote branch is null for localBranch '{}'. Branch can't be 'created'", localBranch.getName());
             return null;
         }
@@ -52,7 +51,7 @@ public class GitHubBranchCreatedEvent extends GitHubBranchEvent {
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": '" + remoteBranch.getName() + "'");
             LOG.debug("{}: '{}'", DISPLAY_NAME, remoteBranch.getName());
-            cause = new GitHubBranchCause(remoteBranch, locaRepo, DISPLAY_NAME, false);
+            cause = context.newCause(DISPLAY_NAME, false);
         }
 
         return cause;
@@ -60,6 +59,7 @@ public class GitHubBranchCreatedEvent extends GitHubBranchEvent {
 
     @Extension
     public static class DescriptorImpl extends GitHubBranchEventDescriptor {
+        @Nonnull
         @Override
         public final String getDisplayName() {
             return DISPLAY_NAME;

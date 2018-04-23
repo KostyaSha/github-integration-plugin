@@ -20,6 +20,8 @@ import java.net.URL;
 import static java.util.Objects.isNull;
 
 /**
+ * Action as storage of critical (and not) information required for triggering decision.
+ *
  * @author Kanstantsin Shautsou
  */
 public abstract class GitHubRepository<T extends GitHubRepository> implements Action, Saveable {
@@ -127,12 +129,14 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
     }
 
     @Override
-    public synchronized void save() throws IOException {
-        if (BulkChange.contains(this)) {
-            return;
-        }
+    public void save() throws IOException {
+        synchronized (this) {
+            if (BulkChange.contains(this)) {
+                return;
+            }
 
-        configFile.write(this);
+            configFile.write(this);
+        }
         SaveableListener.fireOnChange(this, configFile);
     }
 

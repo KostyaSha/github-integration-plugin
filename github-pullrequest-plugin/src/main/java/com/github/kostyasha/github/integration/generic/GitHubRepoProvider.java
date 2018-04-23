@@ -9,6 +9,7 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 /**
  * Extension for providing GH connection for specified repository with job context.
@@ -20,7 +21,6 @@ public abstract class GitHubRepoProvider extends AbstractDescribableImpl<GitHubR
         implements ExtensionPoint {
 
     /**
-     *
      * @param trigger specific trigger type. Find by type what events wants trigger.
      */
     public abstract void registerHookFor(GitHubTrigger trigger);
@@ -44,10 +44,11 @@ public abstract class GitHubRepoProvider extends AbstractDescribableImpl<GitHubR
 
     public abstract static class GitHubRepoProviderDescriptor
             extends Descriptor<GitHubRepoProvider> {
+        @Nonnull
         public abstract String getDisplayName();
 
         public static DescriptorExtensionList allRepoProviders() {
-            return Jenkins.getActiveInstance().getDescriptorList(GitHubRepoProvider.class);
+            return Jenkins.getInstance().getDescriptorList(GitHubRepoProvider.class);
         }
     }
 }

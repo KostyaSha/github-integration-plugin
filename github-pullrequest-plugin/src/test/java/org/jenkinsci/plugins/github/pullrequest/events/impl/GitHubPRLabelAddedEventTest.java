@@ -4,6 +4,7 @@ import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -26,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext.newGitHubPRDecisionContext;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertNull;
@@ -64,6 +66,8 @@ public class GitHubPRLabelAddedEventTest {
     private TaskListener listener;
     @Mock
     private PrintStream logger;
+    @Mock
+    private GitHubPRTrigger trigger;
 
     private Set<String> checkedLabels = new HashSet<>(asList(MERGE, REVIEWED, LOCALLY_TESTED));
 
@@ -77,12 +81,19 @@ public class GitHubPRLabelAddedEventTest {
         List<GHLabel> remoteLabels = asList(testLabel, reviewedLabel);
 
         commonExpectations(localLabels);
-        
+
         when(issue.getLabels()).thenReturn(remoteLabels);
         when(testLabel.getName()).thenReturn(LOCALLY_TESTED);
         when(reviewedLabel.getName()).thenReturn(REVIEWED);
 
-        GitHubPRCause cause = new GitHubPRLabelAddedEvent(labels).check(null, remotePr, localPR, listener);
+        GitHubPRCause cause = new GitHubPRLabelAddedEvent(labels)
+                .check(newGitHubPRDecisionContext()
+                        .withPrTrigger(trigger)
+                        .withRemotePR(remotePr)
+                        .withListener(listener)
+                        .withLocalPR(localPR)
+                        .build()
+                );
         assertNull(cause);
     }
 
@@ -105,7 +116,14 @@ public class GitHubPRLabelAddedEventTest {
 
         causeCreationExpectations();
 
-        GitHubPRCause cause = new GitHubPRLabelAddedEvent(labels).check(null, remotePr, localPR, listener);
+        GitHubPRCause cause = new GitHubPRLabelAddedEvent(labels)
+                .check(newGitHubPRDecisionContext()
+                        .withPrTrigger(trigger)
+                        .withRemotePR(remotePr)
+                        .withListener(listener)
+                        .withLocalPR(localPR)
+                        .build()
+                );
         assertThat(cause.getLabels(), equalTo(localLabels));
     }
 
@@ -125,7 +143,14 @@ public class GitHubPRLabelAddedEventTest {
         when(mergeLabel.getName()).thenReturn(MERGE);
 
         GitHubPRLabelAddedEvent instance = new GitHubPRLabelAddedEvent(labels);
-        GitHubPRCause cause = instance.check(null, remotePr, localPR, listener);
+        GitHubPRCause cause = instance.check(newGitHubPRDecisionContext()
+                .withPrTrigger(trigger)
+                .withRemotePR(remotePr)
+                .withListener(listener)
+                .withLocalPR(localPR)
+                .build()
+        );
+        ;
         assertNull(cause);
     }
 
@@ -138,13 +163,21 @@ public class GitHubPRLabelAddedEventTest {
         List<GHLabel> remoteLabels = asList(testLabel, reviewedLabel, mergeLabel);
 
         commonExpectations(localLabels);
-        
+
         when(issue.getLabels()).thenReturn(remoteLabels);
         when(testLabel.getName()).thenReturn(LOCALLY_TESTED);
         when(reviewedLabel.getName()).thenReturn(REVIEWED);
         when(mergeLabel.getName()).thenReturn(MERGE);
 
-        GitHubPRCause cause = new GitHubPRLabelAddedEvent(labels).check(null, remotePr, localPR, listener);
+        GitHubPRCause cause = new GitHubPRLabelAddedEvent(labels)
+                .check(newGitHubPRDecisionContext()
+                        .withPrTrigger(trigger)
+                        .withRemotePR(remotePr)
+                        .withListener(listener)
+                        .withLocalPR(localPR)
+                        .build()
+                );
+        ;
         assertNull(cause);
     }
 

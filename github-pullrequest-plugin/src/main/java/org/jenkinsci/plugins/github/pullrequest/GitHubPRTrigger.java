@@ -36,6 +36,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import static com.github.kostyasha.github.integration.generic.utils.RetryableGitHubOperation.execute;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Predicates.and;
 import static com.google.common.base.Predicates.in;
@@ -44,7 +45,8 @@ import static com.google.common.base.Predicates.notNull;
 import static java.text.DateFormat.getDateTimeInstance;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
-import static com.github.kostyasha.github.integration.generic.utils.RetryableGitHubOperation.execute;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.LIGHT_HOOKS;
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.BranchRestrictionFilter.withBranchRestriction;
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.LocalRepoUpdater.updateLocalRepo;
@@ -53,8 +55,6 @@ import static org.jenkinsci.plugins.github.pullrequest.trigger.check.PullRequest
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.SkipFirstRunForPRFilter.ifSkippedFirstRun;
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.SkipPRInBadState.badState;
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.UserRestrictionFilter.withUserRestriction;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.PRHelperFunctions.extractPRNumber;
 import static org.jenkinsci.plugins.github.pullrequest.utils.PRHelperFunctions.fetchRemotePR;
 import static org.jenkinsci.plugins.github.pullrequest.webhook.WebhookInfoPredicates.withHookTriggerMode;
@@ -357,7 +357,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
         }
 
         // list all available descriptors for choosing in job configuration
-        public List<GitHubPREventDescriptor> getEventDescriptors() {
+        public static List<GitHubPREventDescriptor> getEventDescriptors() {
             return GitHubPREventDescriptor.all();
         }
 

@@ -6,7 +6,7 @@ import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestric
 import org.jenkinsci.plugins.github.pullrequest.utils.LoggingTaskListenerWrapper;
 import org.kohsuke.github.GHPullRequest;
 
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static java.util.Objects.isNull;
 
 /**
  * @author lanwen (Merkushev Kirill)

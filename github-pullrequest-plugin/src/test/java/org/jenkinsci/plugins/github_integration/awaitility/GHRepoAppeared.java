@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 import java.io.FileNotFoundException;
 import java.util.concurrent.Callable;
 
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 /**
  * @author Kanstantsin Shautsou

@@ -4,10 +4,8 @@ import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheck;
 import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheckDescriptor;
-
 import hudson.Extension;
 import hudson.ExtensionPoint;
-
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHCommit;
 import org.kohsuke.github.GHCompare.Commit;
@@ -16,8 +14,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
-
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,11 +49,9 @@ public class GitHubBranchCommitMessageCheck extends GitHubBranchCommitCheck impl
 
     @Override
     public GitHubBranchCause check(GHBranch remoteBranch, GitHubBranchRepository localRepo, Commit[] commits) {
-        return check(remoteBranch, localRepo, () -> {
-            return Stream.of(commits)
-                    .map(commit -> commit.getCommit().getMessage())
-                    .collect(Collectors.toList());
-        });
+        return check(remoteBranch, localRepo, () -> Stream.of(commits)
+                .map(commit -> commit.getCommit().getMessage())
+                .collect(Collectors.toList()));
     }
 
     public String getMatchCriteria() {
@@ -73,7 +68,6 @@ public class GitHubBranchCommitMessageCheck extends GitHubBranchCommitCheck impl
     }
 
     @DataBoundSetter
-    @CheckForNull
     public void setMatchCriteria(String matchCriteria) {
         this.matchCriteria = Stream.of(matchCriteria
                 .split(LINE_SEPARATOR))
@@ -134,12 +128,13 @@ public class GitHubBranchCommitMessageCheck extends GitHubBranchCommitCheck impl
     }
 
     private GitHubBranchCause toCause(GHBranch remoteBranch, GitHubBranchRepository localRepo, boolean skip, String message,
-            Object... args) {
+                                      Object... args) {
         return new GitHubBranchCause(remoteBranch, localRepo, String.format(message, args), skip);
     }
 
     @Extension
     public static class DescriptorImpl extends GitHubBranchCommitCheckDescriptor {
+        @Nonnull
         @Override
         public final String getDisplayName() {
             return DISPLAY_NAME;

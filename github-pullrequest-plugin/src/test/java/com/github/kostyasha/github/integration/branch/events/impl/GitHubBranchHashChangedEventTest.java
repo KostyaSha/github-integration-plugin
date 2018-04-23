@@ -2,6 +2,7 @@ package com.github.kostyasha.github.integration.branch.events.impl;
 
 import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
+import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import hudson.model.TaskListener;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,9 +15,10 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
 
+import static com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext.newGitHubBranchDecisionContext;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 /**
@@ -38,6 +40,8 @@ public class GitHubBranchHashChangedEventTest {
     private TaskListener listener;
     @Mock
     private PrintStream logger;
+    @Mock
+    private GitHubBranchTrigger trigger;
 
     private final GitHubBranchHashChangedEvent event = new GitHubBranchHashChangedEvent();
 
@@ -48,7 +52,13 @@ public class GitHubBranchHashChangedEventTest {
         when(remoteBranch.getSHA1()).thenReturn("57uy57u57u57u57u");
 
         assertThat(
-                event.check(null, remoteBranch, localBranch, localRepo, listener),
+                event.check(newGitHubBranchDecisionContext()
+                        .withLocalBranch(localBranch)
+                        .withBranchTrigger(trigger)
+                        .withLocalRepo(localRepo)
+                        .withRemoteBranch(remoteBranch)
+                        .withListener(listener)
+                        .build()),
                 notNullValue()
         );
     }
@@ -58,7 +68,13 @@ public class GitHubBranchHashChangedEventTest {
     public void branchCreated() throws IOException {
         commonExpectations();
         assertThat(
-                event.check(null, remoteBranch, null, localRepo, listener),
+                event.check(newGitHubBranchDecisionContext()
+                        .withLocalBranch(null)
+                        .withBranchTrigger(trigger)
+                        .withLocalRepo(localRepo)
+                        .withRemoteBranch(remoteBranch)
+                        .withListener(listener)
+                        .build()),
                 nullValue()
         );
     }
@@ -67,7 +83,13 @@ public class GitHubBranchHashChangedEventTest {
     public void branchNotChangedExisted() throws IOException {
         commonExpectations();
         assertThat(
-                event.check(null, remoteBranch, localBranch, localRepo, listener),
+                event.check(newGitHubBranchDecisionContext()
+                        .withLocalBranch(localBranch)
+                        .withBranchTrigger(trigger)
+                        .withLocalRepo(localRepo)
+                        .withRemoteBranch(remoteBranch)
+                        .withListener(listener)
+                        .build()),
                 nullValue()
         );
     }
@@ -77,7 +99,13 @@ public class GitHubBranchHashChangedEventTest {
     public void branchNotChangedNotExisted() throws IOException {
         commonExpectations();
         assertThat(
-                event.check(null, null, null, localRepo, listener),
+                event.check(newGitHubBranchDecisionContext()
+                        .withLocalBranch(null)
+                        .withBranchTrigger(trigger)
+                        .withLocalRepo(localRepo)
+                        .withRemoteBranch(null)
+                        .withListener(listener)
+                        .build()),
                 nullValue()
         );
     }
@@ -87,7 +115,13 @@ public class GitHubBranchHashChangedEventTest {
     public void branchDeleted() throws IOException {
         commonExpectations();
         assertThat(
-                event.check(null, null, localBranch, localRepo, listener),
+                event.check(newGitHubBranchDecisionContext()
+                        .withLocalBranch(localBranch)
+                        .withBranchTrigger(trigger)
+                        .withLocalRepo(localRepo)
+                        .withRemoteBranch(null)
+                        .withListener(listener)
+                        .build()),
                 nullValue()
         );
     }

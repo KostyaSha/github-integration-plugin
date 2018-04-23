@@ -1,6 +1,9 @@
 package com.github.kostyasha.github.integration.generic;
 
+import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
+import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
 import hudson.model.Cause;
+import hudson.model.ParameterValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,10 +12,12 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.apache.commons.lang.StringUtils.abbreviate;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
 /**
  * @author Kanstantsin Shautsou
@@ -36,6 +41,8 @@ public abstract class GitHubCause<T extends GitHubCause<T>> extends Cause {
     private String sshUrl;
 
     private String pollingLog;
+
+    private Object remoteData;
 
     public GitHubCause withLocalRepo(@Nonnull GitHubRepository localRepo) {
         withGitUrl(localRepo.getGitUrl());
@@ -113,6 +120,15 @@ public abstract class GitHubCause<T extends GitHubCause<T>> extends Cause {
         return this;
     }
 
+    public Object getRemoteData() {
+        return remoteData;
+    }
+
+    public GitHubCause<T> withRemoteData(Object remoteData) {
+        this.remoteData = remoteData;
+        return this;
+    }
+
     /**
      * @return the title of the cause, never null.
      */
@@ -131,5 +147,26 @@ public abstract class GitHubCause<T extends GitHubCause<T>> extends Cause {
      */
     public String getAbbreviatedTitle() {
         return abbreviate(getTitle(), 30);
+    }
+
+    public abstract void fillParameters(List<ParameterValue> params);
+
+    public abstract GitHubSCMHead<T> createSCMHead(String sourceId);
+
+    @SuppressWarnings("unchecked")
+    public GitHubSCMRevision createSCMRevision(String sourceId) {
+        return createSCMHead(sourceId).createSCMRevision((T) this).setRemoteData(getRemoteData());
+    }
+
+    public static <T extends GitHubCause<T>> T skipTrigger(List<? extends T> causes) {
+        if (isNull(causes)) {
+            return null;
+        }
+        T cause = causes.stream()
+                .filter(GitHubCause::isSkip)
+                .findFirst()
+                .orElse(null);
+
+        return cause;
     }
 }

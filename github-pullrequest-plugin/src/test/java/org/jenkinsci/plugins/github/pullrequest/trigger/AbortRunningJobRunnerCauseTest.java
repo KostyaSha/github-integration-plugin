@@ -26,6 +26,8 @@ import org.jvnet.hudson.test.RandomlyFails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Callable;
+
 import static com.jayway.awaitility.Awaitility.await;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.hamcrest.Matchers.empty;
@@ -199,11 +201,9 @@ public class AbortRunningJobRunnerCauseTest extends JobRunnerForCauseTest {
         gitHubPRTrigger3.start(job3, true); // to have working polling log files
         final JobRunnerForCause job3RunnerForCause = new JobRunnerForCause(job3, gitHubPRTrigger3);
 
-        await().timeout(5, MINUTES).until(new Runnable() {
-            @Override
-            public void run() {
-                assertThat(jenkins.getQueue().getItems(), emptyArray());
-            }
+        await().timeout(5, MINUTES).until(() -> {
+            assertThat(jenkins.getQueue().getItems(), emptyArray());
+            return true;
         });
 
         assertThat("All runs should go to executors", jenkins.getQueue().getItems(), Matchers.<Queue.Item>emptyArray());

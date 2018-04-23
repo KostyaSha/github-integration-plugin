@@ -4,6 +4,7 @@ import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext.newGitHubPRDecisionContext;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -55,6 +57,8 @@ public class GitHubPRLabelNotExistsEventTest {
     private TaskListener listener;
     @Mock
     private PrintStream logger;
+    @Mock
+    private GitHubPRTrigger trigger;
 
     /**
      * Case when there is three checked labels and there is one that exists.
@@ -71,7 +75,14 @@ public class GitHubPRLabelNotExistsEventTest {
         when(testLabel.getName()).thenReturn(LOCALLY_TESTED);
         when(reviewedLabel.getName()).thenReturn(REVIEWED);
 
-        GitHubPRCause cause = new GitHubPRLabelNotExistsEvent(labels, false).check(null, remotePr, localPR, listener);
+        GitHubPRCause cause = new GitHubPRLabelNotExistsEvent(labels, false)
+                .check(newGitHubPRDecisionContext()
+                        .withPrTrigger(trigger)
+                        .withLocalPR(localPR)
+                        .withRemotePR(remotePr)
+                        .withListener(listener)
+                        .build()
+                );
 
         assertNull(cause);
     }
@@ -92,7 +103,14 @@ public class GitHubPRLabelNotExistsEventTest {
         when(reviewedLabel.getName()).thenReturn(REVIEWED);
         when(mergeLabel.getName()).thenReturn(MERGE);
 
-        GitHubPRCause cause = new GitHubPRLabelNotExistsEvent(labels, false).check(null, remotePr, localPR, listener);
+        GitHubPRCause cause = new GitHubPRLabelNotExistsEvent(labels, false)
+                .check(newGitHubPRDecisionContext()
+                        .withPrTrigger(trigger)
+                        .withLocalPR(localPR)
+                        .withRemotePR(remotePr)
+                        .withListener(listener)
+                        .build()
+                );
         assertNull(cause);
     }
 
@@ -111,7 +129,14 @@ public class GitHubPRLabelNotExistsEventTest {
         when(reviewedLabel.getName()).thenReturn(REVIEWED);
         when(mergeLabel.getName()).thenReturn(MERGE);
 
-        GitHubPRCause cause = new GitHubPRLabelNotExistsEvent(labels, false).check(null, remotePr, localPR, listener);
+        GitHubPRCause cause = new GitHubPRLabelNotExistsEvent(labels, false)
+                .check(newGitHubPRDecisionContext()
+                        .withPrTrigger(trigger)
+                        .withLocalPR(localPR)
+                        .withRemotePR(remotePr)
+                        .withListener(listener)
+                        .build()
+                );
         assertNull(cause);
     }
 
@@ -131,7 +156,14 @@ public class GitHubPRLabelNotExistsEventTest {
         when(mergeLabel.getName()).thenReturn(MERGE);
 
 
-        GitHubPRCause cause = new GitHubPRLabelNotExistsEvent(labels, true).check(null, remotePr, localPR, listener);
+        GitHubPRCause cause = new GitHubPRLabelNotExistsEvent(labels, true)
+                .check(newGitHubPRDecisionContext()
+                        .withPrTrigger(trigger)
+                        .withLocalPR(localPR)
+                        .withRemotePR(remotePr)
+                        .withListener(listener)
+                        .build()
+                );
 
         assertNull(cause);
     }
@@ -152,7 +184,14 @@ public class GitHubPRLabelNotExistsEventTest {
         when(reviewedLabel.getName()).thenReturn(REVIEWED);
         when(mergeLabel.getName()).thenReturn(MERGE);
 
-        GitHubPRCause cause = new GitHubPRLabelNotExistsEvent(labels, true).check(null, remotePr, localPR, listener);
+        GitHubPRCause cause = new GitHubPRLabelNotExistsEvent(labels, true)
+                .check(newGitHubPRDecisionContext()
+                        .withPrTrigger(trigger)
+                        .withLocalPR(localPR)
+                        .withRemotePR(remotePr)
+                        .withListener(listener)
+                        .build()
+                );
         assertNull(cause);
     }
 
@@ -173,7 +212,14 @@ public class GitHubPRLabelNotExistsEventTest {
 
         causeCreationExpectations();
 
-        GitHubPRCause cause = new GitHubPRLabelNotExistsEvent(labels, false).check(null, remotePr, localPR, listener);
+        GitHubPRCause cause = new GitHubPRLabelNotExistsEvent(labels, false)
+                .check(newGitHubPRDecisionContext()
+                        .withPrTrigger(trigger)
+                        .withLocalPR(localPR)
+                        .withRemotePR(remotePr)
+                        .withListener(listener)
+                        .build()
+                );
 
         String reason = cause.getReason();
         assertThat(reason, reason.contains("locally tested"), is(true));
@@ -199,7 +245,14 @@ public class GitHubPRLabelNotExistsEventTest {
 
         causeCreationExpectations();
 
-        GitHubPRCause cause = new GitHubPRLabelNotExistsEvent(labels, true).check(null, remotePr, localPR, listener);
+        GitHubPRCause cause = new GitHubPRLabelNotExistsEvent(labels, true)
+                .check(newGitHubPRDecisionContext()
+                        .withPrTrigger(trigger)
+                        .withLocalPR(localPR)
+                        .withRemotePR(remotePr)
+                        .withListener(listener)
+                        .build()
+                );
 
         assertThat(cause.getReason(), equalTo("[locally tested] labels not exist"));
         assertThat(cause.isSkip(), equalTo(true));

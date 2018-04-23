@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collections;
 
+import static com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext.newGitHubPRDecisionContext;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -71,7 +72,13 @@ public class GitHubPRNonMergeableEventTest {
         when(listener.getLogger()).thenReturn(logger);
 
         assertTrue(instance.isSkip());
-        assertNull(instance.check(trigger, remotePr, localPr, listener));
+        assertNull(instance.check(newGitHubPRDecisionContext()
+                .withPrTrigger(trigger)
+                .withRemotePR(remotePr)
+                .withListener(listener)
+                .withLocalPR(localPr)
+                .build()
+        ));
     }
 
     @Test
@@ -83,7 +90,12 @@ public class GitHubPRNonMergeableEventTest {
         when(ghUser.getLogin()).thenReturn("user");
 
 
-        assertNotNull(instance.check(trigger, remotePr, localPr, listener));
+        assertNotNull(instance.check(newGitHubPRDecisionContext()
+                .withPrTrigger(trigger)
+                .withRemotePR(remotePr)
+                .withListener(listener)
+                .withLocalPR(localPr)
+                .build()));
         assertTrue(instance.isSkip());
     }
 
@@ -95,7 +107,12 @@ public class GitHubPRNonMergeableEventTest {
         when(listener.getLogger()).thenReturn(logger);
 
         assertTrue(instance.isSkip());
-        assertNotNull(instance.check(trigger, remotePr, localPr, listener));
+        assertNotNull(instance.check(newGitHubPRDecisionContext()
+                .withPrTrigger(trigger)
+                .withRemotePR(remotePr)
+                .withListener(listener)
+                .withLocalPR(localPr)
+                .build()));
     }
 
     @Test
@@ -105,6 +122,11 @@ public class GitHubPRNonMergeableEventTest {
         when(remotePr.getMergeable()).thenThrow(new IOException("test IO"));
         when(listener.getLogger()).thenReturn(logger);
 
-        assertNotNull(instance.check(trigger, remotePr, localPr, listener));
+        assertNotNull(instance.check(newGitHubPRDecisionContext()
+                .withPrTrigger(trigger)
+                .withRemotePR(remotePr)
+                .withListener(listener)
+                .withLocalPR(localPr)
+                .build()));
     }
 }

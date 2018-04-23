@@ -36,7 +36,7 @@ l.layout(title: "GitHub Pull Request Status") {
         br()
         br()
         div(style: "display: inline-block") {
-            if (h.hasPermission(Item.BUILD)) {
+            if (l.hasPermission(Item.BUILD)) {
                 def runTrigger = "runTrigger";
                 form(method: "post", action: "runTrigger", onsubmit: "return callFeature(this, ${runTrigger})",
                         style: "float: right; margin-right: 100px") {
@@ -61,7 +61,7 @@ l.layout(title: "GitHub Pull Request Status") {
                 }
 
 
-                if (h.hasPermission(Item.BUILD)) {
+                if (l.hasPermission(Item.BUILD)) {
                     tr() {
                         td() {
                             div(style: "display: inline-block") {
@@ -93,7 +93,7 @@ l.layout(title: "GitHub Pull Request Status") {
         br()
 
         div(style: "display: inline-block") {
-            if (h.hasPermission(Item.BUILD)) {
+            if (l.hasPermission(Item.BUILD)) {
                 def rebuildFailedId = "rebuildFailedResult";
                 form(method: "post",
                         action: "rebuildFailed",
@@ -104,7 +104,7 @@ l.layout(title: "GitHub Pull Request Status") {
                 }
             }
 
-            if (h.hasPermission(Item.DELETE)) {
+            if (l.hasPermission(Item.DELETE)) {
                 def clearRepoId = "clearRepoResult";
                 form(method: "post", action: "clearRepo", onsubmit: "return callFeature(this, ${clearRepoId})",
                         style: "float: left") {

@@ -3,17 +3,14 @@ package com.github.kostyasha.github.integration.branch.events.impl;
 import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
-import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
 import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheck;
 import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheckDescriptor;
-
+import com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
-
 import net.sf.json.JSONObject;
-
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.github.GHBranch;
@@ -24,9 +21,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -35,7 +30,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
+import static java.util.Objects.isNull;
 
 /**
  * This branch event acts as a wrapper around checks that can be performed against commit data that requires an additional round trip to
@@ -68,13 +63,15 @@ public class GitHubBranchCommitEvent extends GitHubBranchEvent {
     }
 
     @Override
-    public GitHubBranchCause check(GitHubBranchTrigger trigger, GHBranch remoteBranch, @CheckForNull GitHubBranch localBranch,
-            GitHubBranchRepository localRepo, TaskListener listener)
-        throws IOException {
+    public GitHubBranchCause check(@Nonnull GitHubBranchDecisionContext context) throws IOException {
+        GHBranch remoteBranch = context.getRemoteBranch();
+        GitHubBranch localBranch = context.getLocalBranch();
+        GitHubBranchRepository localRepo = context.getLocalRepo();
+        TaskListener listener = context.getListener();
         final PrintStream logger = listener.getLogger();
         Function<GitHubBranchCommitCheck, GitHubBranchCause> function;
 
-        if (localBranch == null) {
+        if (isNull(localBranch)) {
             GHCommit commit = getLastCommit(remoteBranch);
             function = event -> event.check(remoteBranch, localRepo, commit);
         } else {
@@ -114,7 +111,7 @@ public class GitHubBranchCommitEvent extends GitHubBranchEvent {
     }
 
     private GitHubBranchCause check(GHBranch remoteBranch, Function<GitHubBranchCommitCheck, GitHubBranchCause> function,
-            PrintStream logger) {
+                                    PrintStream logger) {
         List<GitHubBranchCause> causes = checks.stream()
                 .map(function::apply)
                 .filter(Objects::nonNull)

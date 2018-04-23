@@ -1,8 +1,8 @@
 package org.jenkinsci.plugins.github.pullrequest.dsl.context.events;
 
 import javaposse.jobdsl.dsl.Context;
-import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
+import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRCloseEvent;
 import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRCommentEvent;
 import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRCommitEvent;
@@ -13,8 +13,8 @@ import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRLabelNotExis
 import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRLabelPatternExistsEvent;
 import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRLabelRemovedEvent;
 import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRNonMergeableEvent;
-import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPROpenEvent;
 import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPRNumber;
+import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPROpenEvent;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -18,8 +18,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static java.util.Objects.isNull;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger.DescriptorImpl.githubFor;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 
 /**
  * Whether it allowed this user or org with users to do something.
@@ -67,7 +67,7 @@ public class GitHubPRUserRestriction implements Describable<GitHubPRUserRestrict
         GitHub github = githubFor(URI.create(member.getHtmlUrl().toString()));
         orgHasMember = github.getOrganization(organisation).hasMember(member);
         LOGGER.debug("org.hasMember(member)? user:'{}' org: '{}' == '{}'",
-            member.getLogin(), organisation, orgHasMember ? "yes" : "no");
+                member.getLogin(), organisation, orgHasMember ? "yes" : "no");
 
         return orgHasMember;
     }

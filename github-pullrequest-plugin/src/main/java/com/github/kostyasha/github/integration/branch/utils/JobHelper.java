@@ -1,9 +1,9 @@
 package com.github.kostyasha.github.integration.branch.utils;
 
-import hudson.model.Job;
-import hudson.model.Run;
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
+import hudson.model.Job;
+import hudson.model.Run;
 
 import javax.annotation.CheckForNull;
 

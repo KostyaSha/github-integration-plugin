@@ -1,13 +1,11 @@
 package org.jenkinsci.plugins.github.pullrequest.dsl.context.publishers;
 
 import hudson.model.Result;
-
+import javaposse.jobdsl.dsl.Context;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRMessage;
 import org.jenkinsci.plugins.github.pullrequest.publishers.impl.GitHubPRCommentPublisher;
 import org.jenkinsci.plugins.github.pullrequest.utils.PublisherErrorHandler;
 import org.jenkinsci.plugins.github.pullrequest.utils.StatusVerifier;
-
-import javaposse.jobdsl.dsl.Context;
 
 public class GitHubCommentPublisherDslContext implements Context {
 

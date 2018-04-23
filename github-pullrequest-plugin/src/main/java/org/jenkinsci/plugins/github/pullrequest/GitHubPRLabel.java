@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+import static java.util.Objects.nonNull;
 
 /**
  * Label object that contains user defined labels
@@ -25,10 +25,14 @@ public class GitHubPRLabel implements Describable<GitHubPRLabel> {
 
     @DataBoundConstructor
     public GitHubPRLabel(String labels) {
-        this.labels = new HashSet<>(Arrays.asList(labels.split("\n")));
+        this(new HashSet<>(Arrays.asList(labels.split("\n"))));
     }
 
-    //for UI binding
+    public GitHubPRLabel(Set<String> labels) {
+        this.labels = labels;
+    }
+
+    // for UI binding
     public String getLabels() {
         return Joiner.on("\n").skipNulls().join(labels);
     }

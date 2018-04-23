@@ -1,12 +1,14 @@
 package com.github.kostyasha.github.integration.branch.trigger.check;
 
+import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 
-import org.jenkinsci.plugins.github.pullrequest.utils.LoggingTaskListenerWrapper;
+import org.jenkinsci.plugins.github.pullrequest.util.TaskListenerWrapperRule;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.kohsuke.github.GHBranch;
 import org.mockito.Mock;
@@ -14,6 +16,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import static com.github.kostyasha.github.integration.branch.trigger.check.BranchToCauseConverter.toGitHubBranchCause;
@@ -27,7 +30,7 @@ import static org.mockito.Mockito.when;
 public class BranchToCauseConverterTest {
 
     @Mock
-    private GHBranch mockBranch;
+    private GHBranch mockRemoteBranch;
 
     @Mock
     private GitHubBranchCause mockCause;
@@ -38,18 +41,16 @@ public class BranchToCauseConverterTest {
     private GitHubBranchRepository mockLocalRepo;
 
     @Mock
-    private LoggingTaskListenerWrapper mockPollingLog;
-
-    @Mock
     private GitHubBranchTrigger mockTrigger;
 
     private GitHubBranchCause result;
 
+    @Rule
+    public TaskListenerWrapperRule tRule = new TaskListenerWrapperRule();
+
     @Before
     public void before() throws Exception {
         MockitoAnnotations.initMocks(this);
-
-        when(mockBranch.getName()).thenReturn("branch");
     }
 
     @Test
@@ -83,21 +84,21 @@ public class BranchToCauseConverterTest {
 
     private GitHubBranchEvent createExceptionEvent() throws IOException {
         GitHubBranchEvent event = mock(GitHubBranchEvent.class);
-        doThrow(IOException.class).when(event).check(any(), any(), any(), any(), any());
+        doThrow(IOException.class).when(event).check(any());
 
         return event;
     }
 
     private GitHubBranchEvent createMatchingEvent() throws IOException {
         GitHubBranchEvent event = mock(GitHubBranchEvent.class);
-        when(event.check(any(), any(), any(), any(), any())).thenReturn(mockCause);
+        when(event.check(any())).thenReturn(mockCause);
 
         return event;
     }
 
     private GitHubBranchEvent createNonMatchingEvent() throws IOException {
         GitHubBranchEvent event = mock(GitHubBranchEvent.class);
-        when(event.check(any(), any(), any(), any(), any())).thenReturn(null);
+        when(event.check(any())).thenReturn(null);
 
         return event;
     }
@@ -128,6 +129,6 @@ public class BranchToCauseConverterTest {
 
     private void whenMapToCause() {
         when(mockTrigger.getEvents()).thenReturn(mockEvents);
-        result = toGitHubBranchCause(mockLocalRepo, mockPollingLog, mockTrigger).apply(mockBranch);
+        result = toGitHubBranchCause(mockLocalRepo, tRule.getListener(), mockTrigger).apply(mockRemoteBranch);
     }
 }

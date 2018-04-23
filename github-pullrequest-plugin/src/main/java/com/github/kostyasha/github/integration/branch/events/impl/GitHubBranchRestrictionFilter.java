@@ -1,21 +1,19 @@
 package com.github.kostyasha.github.integration.branch.events.impl;
 
-import com.github.kostyasha.github.integration.branch.GitHubBranch;
 import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
-import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
-
+import com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext;
 import hudson.Extension;
-import hudson.model.TaskListener;
-
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -73,8 +71,10 @@ public class GitHubBranchRestrictionFilter extends GitHubBranchEvent {
     }
 
     @Override
-    public GitHubBranchCause check(GitHubBranchTrigger gitHubBranchTrigger, GHBranch remoteBranch, GitHubBranch localBranch,
-                                   GitHubBranchRepository localRepo, TaskListener listener) {
+    public GitHubBranchCause check(@Nonnull GitHubBranchDecisionContext context) throws IOException {
+        GHBranch remoteBranch = context.getRemoteBranch();
+        GitHubBranchRepository localRepo = context.getLocalRepo();
+
         String name = remoteBranch.getName();
         if (matchCriteria.isEmpty() || branchIsAllowed(name)) {
             if (matchCriteria.isEmpty()) {
@@ -84,7 +84,7 @@ public class GitHubBranchRestrictionFilter extends GitHubBranchEvent {
             return null;
         }
 
-        return toCause(remoteBranch, localRepo, true, "Branch [%s] filtered by branch name restriction filter", name);
+        return toCause(context, true, "Branch [%s] filtered by branch name restriction filter", name);
     }
 
     private boolean branchIsAllowed(String name) {
@@ -118,9 +118,9 @@ public class GitHubBranchRestrictionFilter extends GitHubBranchEvent {
         }
     }
 
-    private GitHubBranchCause toCause(GHBranch remoteBranch, GitHubBranchRepository localRepo, boolean skip,
+    private GitHubBranchCause toCause(@Nonnull GitHubBranchDecisionContext context, boolean skip,
                                       String message, Object... args) {
-        return new GitHubBranchCause(remoteBranch, localRepo, String.format(message, args), skip);
+        return context.newCause(String.format(message, args), skip);
     }
 
     @Extension

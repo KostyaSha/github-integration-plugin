@@ -3,7 +3,6 @@ package com.github.kostyasha.github.integration.branch;
 import com.cloudbees.jenkins.GitHubWebHook;
 import com.github.kostyasha.github.integration.branch.trigger.JobRunnerForBranchCause;
 import com.github.kostyasha.github.integration.generic.GitHubRepository;
-import hudson.Functions;
 import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -24,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghBranchCauseFromRun;
 import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghBranchTriggerFromJob;
@@ -43,7 +43,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
     public static final String FILE = GitHubBranchRepository.class.getName() + ".runtime.xml";
     private static final Logger LOG = LoggerFactory.getLogger(GitHubBranchRepository.class);
 
-    private Map<String, GitHubBranch> branches = new HashMap<>();
+    private Map<String, GitHubBranch> branches = new ConcurrentHashMap<>();
 
     /**
      * Object that represent GitHub repository to work with
@@ -60,15 +60,13 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
 
     @Nonnull
     public Map<String, GitHubBranch> getBranches() {
-        if (isNull(branches)) {
-            branches = new HashMap<>();
-        }
+        if (isNull(branches)) branches = new ConcurrentHashMap<>();
         return branches;
     }
 
     @Override
     public String getIconFileName() {
-        return Functions.getResourcePath() + "/plugin/github-pullrequest/git-branch.svg";
+        return GitHubBranch.getIconFileName();
     }
 
     @Override
@@ -117,7 +115,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
         try {
             Jenkins instance = GitHubWebHook.getJenkinsInstance();
             if (instance.hasPermission(Item.DELETE)) {
-                branches = new HashMap<>();
+                branches.clear();
                 save();
                 result = FormValidation.ok("Branches deleted");
             } else {

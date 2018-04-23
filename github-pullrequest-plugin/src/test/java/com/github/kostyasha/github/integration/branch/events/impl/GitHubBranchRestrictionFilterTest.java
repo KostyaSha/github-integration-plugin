@@ -5,6 +5,7 @@ import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.utils.LoggingTaskListenerWrapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +13,9 @@ import org.kohsuke.github.GHBranch;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.IOException;
+
+import static com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext.newGitHubBranchDecisionContext;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -32,19 +36,19 @@ public class GitHubBranchRestrictionFilterTest {
     private GitHubBranchRestrictionFilter filter;
 
     @Mock
-    private GHBranch mockRemoteBranch;
+    private GHBranch remoteBranch;
 
     @Mock
-    private GitHubBranchRepository mockRepo;
+    private GitHubBranchRepository localRepo;
 
     @Mock
-    private GitHubBranch mockLocalBranch;
+    private GitHubBranch localBranch;
 
     @Mock
-    private GitHubBranchTrigger mockTrigger;
+    private GitHubBranchTrigger trigger;
 
     @Mock
-    private LoggingTaskListenerWrapper mockPollingLog;
+    private TaskListener listener;
 
     private GitHubBranchCause result;
 
@@ -53,9 +57,8 @@ public class GitHubBranchRestrictionFilterTest {
         MockitoAnnotations.initMocks(this);
         filter = new GitHubBranchRestrictionFilter();
     }
-
     @Test
-    public void testBranchNameExclude() {
+    public void testBranchNameExclude() throws IOException {
         givenMatchAsExact();
         givenRestrictionsShouldExclude();
 
@@ -69,7 +72,7 @@ public class GitHubBranchRestrictionFilterTest {
     }
 
     @Test
-    public void testBranchNameInclude() {
+    public void testBranchNameInclude() throws IOException {
         givenMatchAsExact();
 
         givenRemoteBranchName(MASTER);
@@ -82,7 +85,7 @@ public class GitHubBranchRestrictionFilterTest {
     }
 
     @Test
-    public void testBranchNamePatternExclude() {
+    public void testBranchNamePatternExclude() throws IOException {
         givenMatchAsPatterns();
         givenRestrictionsShouldExclude();
 
@@ -100,7 +103,7 @@ public class GitHubBranchRestrictionFilterTest {
     }
 
     @Test
-    public void testBranchNamePatternInclude() {
+    public void testBranchNamePatternInclude() throws IOException {
         givenMatchAsPatterns();
 
         givenRemoteBranchName(BRANCH1);
@@ -130,7 +133,7 @@ public class GitHubBranchRestrictionFilterTest {
     }
 
     private void givenRemoteBranchName(String name) {
-        when(mockRemoteBranch.getName()).thenReturn(name);
+        when(remoteBranch.getName()).thenReturn(name);
     }
 
     private void givenRestrictionsShouldExclude() {
@@ -145,7 +148,13 @@ public class GitHubBranchRestrictionFilterTest {
         assertThat("buildable not filtered", result, nullValue());
     }
 
-    private void whenApplyBranchFilter() {
-        result = filter.check(mockTrigger, mockRemoteBranch, mockLocalBranch, mockRepo, mockPollingLog);
+    private void whenApplyBranchFilter() throws IOException {
+        result = filter.check(newGitHubBranchDecisionContext()
+                .withLocalBranch(localBranch)
+                .withBranchTrigger(trigger)
+                .withLocalRepo(localRepo)
+                .withRemoteBranch(remoteBranch)
+                .withListener(listener)
+                .build());
     }
 }

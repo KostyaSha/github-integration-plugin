@@ -1,9 +1,9 @@
 package com.github.kostyasha.github.integration.branch.dsl.context;
 
 import com.github.kostyasha.github.integration.branch.dsl.context.events.GitHubBranchEventsDslContext;
-import com.github.kostyasha.github.integration.generic.dsl.repoproviders.GitHubRepoProvidersDslContext;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.generic.GitHubRepoProvider;
+import com.github.kostyasha.github.integration.generic.dsl.repoproviders.GitHubRepoProvidersDslContext;
 import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider;
 import javaposse.jobdsl.dsl.Context;
 import javaposse.jobdsl.plugin.ContextExtensionPoint;

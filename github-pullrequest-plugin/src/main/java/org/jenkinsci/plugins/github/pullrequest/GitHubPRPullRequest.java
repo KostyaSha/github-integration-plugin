@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Set;
 
 import static com.github.kostyasha.github.integration.generic.utils.RetryableGitHubOperation.execute;
+import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
 
 /**
  * Maintains state about a Pull Request for a particular Jenkins job.  This is what understands the current state
@@ -58,11 +58,16 @@ public class GitHubPRPullRequest {
     /**
      * Save only what we need for next comparison
      */
-    public GitHubPRPullRequest(GHPullRequest pr) throws IOException {
+    public GitHubPRPullRequest(GHPullRequest pr) {
         userLogin = pr.getUser().getLogin();
         number = pr.getNumber();
-        prUpdatedAt = pr.getUpdatedAt();
-        issueUpdatedAt = pr.getIssueUpdatedAt();
+        try {
+            prUpdatedAt = pr.getUpdatedAt();
+            issueUpdatedAt = pr.getIssueUpdatedAt();
+        } catch (IOException e) {
+            // those methods never actually throw IOExceptions
+            throw new IllegalStateException(e);
+        }
         headSha = pr.getHead().getSha();
         headRef = pr.getHead().getRef();
         title = pr.getTitle();
@@ -203,7 +208,7 @@ public class GitHubPRPullRequest {
      * Indicates that remote PR wasn't fully saved locally during last check.
      */
     public boolean isInBadState() {
-        return inBadState || labels == null;
+        return inBadState || isNull(labels);
     }
 
     public static String getIconFileName() {

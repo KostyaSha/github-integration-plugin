@@ -8,8 +8,8 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 
 import java.util.Collection;
 
+import static java.util.Objects.nonNull;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
 /**
  * PR Trigger tied to GitHub repo. Report it for GitHub doReRegister().

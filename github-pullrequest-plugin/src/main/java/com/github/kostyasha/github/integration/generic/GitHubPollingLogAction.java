@@ -19,13 +19,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.io.IOUtils.closeQuietly;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
 /**
  * @author Kanstantsin Shautsou
  */
-public abstract class GitHubPollingLogAction<A extends GitHubPollingLogAction<A>> implements MatrixChildAction, RunAction2 {
+public abstract class GitHubPollingLogAction implements MatrixChildAction, RunAction2 {
     @CheckForNull
     private transient Job<?, ?> job;
 

@@ -99,16 +99,16 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
         final GitHubRepositoryName repoFullName = trigger.getRepoFullName();
 
         Optional<GitHub> client = from(GitHubPlugin.configuration().findGithubConfig(withHost(repoFullName.getHost())))
-            .firstMatch(withPermission(repoFullName, getRepoPermission()));
+                .firstMatch(withPermission(repoFullName, getRepoPermission()));
         if (client.isPresent()) {
             gitHub = client.get();
             return gitHub;
         }
 
         throw new GHPluginConfigException("GitHubPluginRepoProvider can't find appropriate client for github repo " +
-            "<%s>. Probably you didn't configure 'GitHub Plugin' global 'GitHub Server Settings' or there is no tokens" +
-            "with %s access to this repository.",
-            repoFullName.toString(), getRepoPermission());
+                "<%s>. Probably you didn't configure 'GitHub Plugin' global 'GitHub Server Settings' or there is no tokens" +
+                "with %s access to this repository.",
+                repoFullName.toString(), getRepoPermission());
     }
 
     private NullSafePredicate<GitHub> withPermission(final GitHubRepositoryName name, GHPermission permission) {

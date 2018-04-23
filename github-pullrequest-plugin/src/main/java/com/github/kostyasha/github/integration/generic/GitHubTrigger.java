@@ -25,10 +25,10 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.codehaus.groovy.runtime.InvokerHelper.asList;
 import static org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode.CRON;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
 
 /**
  * @author Kanstantsin Shautsou
@@ -203,7 +203,7 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
     }
 
     @CheckForNull
-    public Job<?, ?> getJob() {
+    public Job getJob() {
         return job;
     }
 
@@ -211,7 +211,8 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
         return getRepoFullName(getJob());
     }
 
-    public GitHubRepositoryName getRepoFullName(Job<?, ?> job) {
+    public GitHubRepositoryName getRepoFullName(Job item) {
+        Job<?, ?> job = (Job) item;
         if (isNull(repoName)) {
             checkNotNull(job, "job object is null, race condition?");
             GithubProjectProperty ghpp = job.getProperty(GithubProjectProperty.class);

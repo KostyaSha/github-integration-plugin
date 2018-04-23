@@ -1,26 +1,25 @@
 package org.jenkinsci.plugins.github.pullrequest.events.impl;
 
+import com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
-import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREventDescriptor;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Trigger run when label exists. Remove label in post-build action to exclude cycle builds.
@@ -41,8 +40,10 @@ public class GitHubPRLabelExistsEvent extends GitHubPREvent {
     }
 
     @Override
-    public GitHubPRCause check(GitHubPRTrigger gitHubPRTrigger, GHPullRequest remotePR,
-                               @CheckForNull GitHubPRPullRequest localPR, TaskListener listener) throws IOException {
+    public GitHubPRCause check(@Nonnull GitHubPRDecisionContext prDecisionContext) throws IOException {
+        TaskListener listener = prDecisionContext.getListener();
+        GHPullRequest remotePR = prDecisionContext.getRemotePR();
+
         if (remotePR.getState().equals(GHIssueState.CLOSED)) {
             return null; // already closed, skip check?
         }
@@ -50,7 +51,7 @@ public class GitHubPRLabelExistsEvent extends GitHubPREvent {
         GitHubPRCause cause = null;
 
         Collection<GHLabel> remoteLabels = remotePR.getRepository().getIssue(remotePR.getNumber()).getLabels();
-        Set<String> existingLabels = new HashSet<String>();
+        Set<String> existingLabels = new HashSet<>();
 
         for (GHLabel ghLabel : remoteLabels) {
             existingLabels.add(ghLabel.getName());
@@ -59,7 +60,7 @@ public class GitHubPRLabelExistsEvent extends GitHubPREvent {
         if (existingLabels.containsAll(label.getLabelsSet())) {
             final PrintStream logger = listener.getLogger();
             logger.println(DISPLAY_NAME + ": " + label.getLabelsSet() + " found");
-            cause = new GitHubPRCause(remotePR, label.getLabelsSet() + " labels exist", isSkip());
+            cause = prDecisionContext.newCause(label.getLabelsSet() + " labels exist", isSkip());
         }
 
         return cause;
@@ -75,7 +76,7 @@ public class GitHubPRLabelExistsEvent extends GitHubPREvent {
 
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
-
+        @Nonnull
         @Override
         public String getDisplayName() {
             return DISPLAY_NAME;

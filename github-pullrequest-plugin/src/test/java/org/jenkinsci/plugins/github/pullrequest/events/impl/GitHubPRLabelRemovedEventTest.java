@@ -1,9 +1,11 @@
 package org.jenkinsci.plugins.github.pullrequest.events.impl;
 
+import com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext.newGitHubPRDecisionContext;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -54,8 +57,10 @@ public class GitHubPRLabelRemovedEventTest {
     private TaskListener listener;
     @Mock
     private PrintStream logger;
+    @Mock
+    private GitHubPRTrigger trigger;
 
-    private Set<String> checkedLabels = new HashSet<String>();
+    private Set<String> checkedLabels = new HashSet<>();
 
     {
         checkedLabels.add(NOT_READY_FOR_MERGE);
@@ -71,7 +76,7 @@ public class GitHubPRLabelRemovedEventTest {
         Set<String> localLabels = new HashSet<>();
         localLabels.add(TESTS_FAILURE);
 
-        List<GHLabel> remoteLabels = new ArrayList<GHLabel>();
+        List<GHLabel> remoteLabels = new ArrayList<>();
         remoteLabels.add(label);
 
         commonExpectations(localLabels);
@@ -79,7 +84,13 @@ public class GitHubPRLabelRemovedEventTest {
         when(label.getName()).thenReturn(TESTS_FAILURE);
 
         GitHubPRLabelRemovedEvent instance = new GitHubPRLabelRemovedEvent(labels);
-        GitHubPRCause cause = instance.check(null, remotePr, localPR, listener);
+        GitHubPRCause cause = instance.check(newGitHubPRDecisionContext()
+                .withPrTrigger(trigger)
+                .withLocalPR(localPR)
+                .withRemotePR(remotePr)
+                .withListener(listener)
+                .build()
+        );
         Assert.assertNull(cause);
     }
 
@@ -93,11 +104,17 @@ public class GitHubPRLabelRemovedEventTest {
 
         commonExpectations(localLabels);
         when(issue.getLabels())
-                .thenReturn(new ArrayList<GHLabel>());
+                .thenReturn(new ArrayList<>());
         causeCreationExpectations();
 
         GitHubPRLabelRemovedEvent instance = new GitHubPRLabelRemovedEvent(labels);
-        GitHubPRCause cause = instance.check(null, remotePr, localPR, listener);
+        GitHubPRCause cause = instance.check(newGitHubPRDecisionContext()
+                .withPrTrigger(trigger)
+                .withLocalPR(localPR)
+                .withRemotePR(remotePr)
+                .withListener(listener)
+                .build()
+        );
         Assert.assertEquals("[tests failure, not reviewed, not ready for merge] labels were removed", cause.getReason());
     }
 
@@ -111,7 +128,7 @@ public class GitHubPRLabelRemovedEventTest {
         localLabels.add(NOT_REVIEWED);
         localLabels.add(TESTS_FAILURE);
 
-        List<GHLabel> remoteLabels = new ArrayList<GHLabel>();
+        List<GHLabel> remoteLabels = new ArrayList<>();
         for (int i = 0; i < localLabels.size(); i++) {
             remoteLabels.add(label);
         }
@@ -123,7 +140,13 @@ public class GitHubPRLabelRemovedEventTest {
         when(label.getName()).thenReturn(NOT_REVIEWED);
 
         GitHubPRLabelRemovedEvent instance = new GitHubPRLabelRemovedEvent(labels);
-        GitHubPRCause cause = instance.check(null, remotePr, localPR, listener);
+        GitHubPRCause cause = instance.check(newGitHubPRDecisionContext()
+                .withPrTrigger(trigger)
+                .withLocalPR(localPR)
+                .withRemotePR(remotePr)
+                .withListener(listener)
+                .build()
+        );
         Assert.assertNull(cause);
     }
 

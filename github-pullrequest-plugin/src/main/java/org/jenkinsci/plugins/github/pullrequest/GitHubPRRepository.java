@@ -2,7 +2,6 @@ package org.jenkinsci.plugins.github.pullrequest;
 
 import com.cloudbees.jenkins.GitHubWebHook;
 import com.github.kostyasha.github.integration.generic.GitHubRepository;
-import hudson.Functions;
 import hudson.XmlFile;
 import hudson.model.Item;
 import hudson.model.Job;
@@ -27,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -47,7 +47,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
     public static final String FILE = GitHubPRRepository.class.getName() + ".runtime.xml";
     private static final Logger LOG = LoggerFactory.getLogger(GitHubPRRepository.class);
 
-    private Map<Integer, GitHubPRPullRequest> pulls = new HashMap<>();
+    private final Map<Integer, GitHubPRPullRequest> pulls = new ConcurrentHashMap<>();
 
     /**
      * Object that represent GitHub repository to work with
@@ -64,9 +64,6 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
 
     @Nonnull
     public Map<Integer, GitHubPRPullRequest> getPulls() {
-        if (isNull(pulls)) {
-            pulls = new HashMap<>();
-        }
         return pulls;
     }
 
@@ -100,7 +97,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
 
     @Override
     public String getIconFileName() {
-        return Functions.getResourcePath() + "/plugin/github-pullrequest/git-pull-request.svg";
+        return GitHubPRPullRequest.getIconFileName();
     }
 
     @Override
@@ -119,7 +116,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
         try {
             Jenkins instance = GitHubWebHook.getJenkinsInstance();
             if (instance.hasPermission(Item.DELETE)) {
-                pulls = new HashMap<>();
+                pulls.clear();
                 save();
                 result = FormValidation.ok("Pulls deleted");
             } else {
@@ -207,7 +204,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
             }
 
             final GitHubPRPullRequest localPR = getPulls().get(prId);
-            final GitHubPRCause cause = new GitHubPRCause(localPR, null, false, "Manual run.");
+            final GitHubPRCause cause = new GitHubPRCause(localPR, null, this, false, "Manual run.");
 
             final JobRunnerForCause runner = new JobRunnerForCause(getJob(), ghPRTriggerFromJob(getJob()));
             final QueueTaskFuture<?> queueTaskFuture = runner.startJob(cause);

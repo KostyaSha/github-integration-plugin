@@ -1,14 +1,13 @@
 package com.github.kostyasha.github.integration.branch.dsl.context.events;
 
 
-import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheck;
 import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchCommitEvent;
+import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheck;
+import javaposse.jobdsl.dsl.Context;
+import javaposse.jobdsl.plugin.ContextExtensionPoint;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javaposse.jobdsl.dsl.Context;
-import javaposse.jobdsl.plugin.ContextExtensionPoint;
 
 public class GitHubBranchCommitChecksDslContext implements Context {
 

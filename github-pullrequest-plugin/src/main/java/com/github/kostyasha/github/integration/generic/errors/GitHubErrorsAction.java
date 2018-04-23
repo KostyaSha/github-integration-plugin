@@ -54,7 +54,7 @@ public class GitHubErrorsAction implements ProminentProjectAction {
         for (GitHubError curErr : current) {
             if (!found && a.equals(curErr)) {
                 found = true;
-            } else  if (curErr.getClass() == a.getClass()) {
+            } else if (curErr.getClass() == a.getClass()) {
                 old.add(curErr);
             }
         }

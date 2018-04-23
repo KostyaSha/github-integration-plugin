@@ -1,74 +1,76 @@
 package com.github.kostyasha.github.integration.branch;
 
-import com.github.kostyasha.github.integration.generic.GitHubCause;
+import com.github.kostyasha.github.integration.branch.data.GitHubBranchEnv;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubBranchSCMHead;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
+import hudson.model.ParameterValue;
 import hudson.model.Run;
+import jenkins.scm.api.SCMSourceOwner;
 import org.kohsuke.github.GHBranch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.List;
 
 import static org.apache.commons.io.FileUtils.writeStringToFile;
 
 /**
  * @author Kanstantsin Shautsou
  */
-public class GitHubBranchCause extends GitHubCause<GitHubBranchCause> {
+public class GitHubBranchCause extends AbstractGitHubBranchCause<GitHubBranchCause> {
     private static final Logger LOG = LoggerFactory.getLogger(GitHubBranchCause.class);
 
     private final String branchName;
 
-    /**
-     * null for deleted branch.
-     */
-    @CheckForNull
-    private final String commitSha;
-
-    @CheckForNull
-    private final String fullRef;
-
-    public GitHubBranchCause(@Nonnull GitHubBranch localBranch, @Nonnull GitHubBranchRepository localRepo,
-                             String reason, boolean skip) {
+    public GitHubBranchCause(@Nonnull GitHubBranch localBranch, @Nonnull GitHubBranchRepository localRepo, String reason, boolean skip) {
+        this(localBranch.getName(), localBranch.getCommitSha());
         withReason(reason);
         withSkip(skip);
         withLocalRepo(localRepo);
-        this.branchName = localBranch.getName();
-        this.commitSha = localBranch.getCommitSha();
-        this.fullRef = "refs/heads/" + branchName;
     }
 
-    public GitHubBranchCause(@Nonnull GHBranch remoteBranch,
-                             @Nonnull GitHubBranchRepository localRepo,
-                             String reason, boolean skip) {
+    public GitHubBranchCause(@Nonnull GHBranch remoteBranch, @Nonnull GitHubBranchRepository localRepo, String reason, boolean skip) {
+        this(remoteBranch.getName(), remoteBranch.getSHA1());
         withReason(reason);
         withSkip(skip);
         withLocalRepo(localRepo);
-        this.branchName = remoteBranch.getName();
-        this.commitSha = remoteBranch.getSHA1();
-        this.fullRef = "refs/heads/" + branchName;
+        withRemoteData(remoteBranch);
+    }
+
+    public GitHubBranchCause(@Nonnull String branchName, String commitSha) {
+        super(commitSha, "refs/heads/" + branchName);
+        this.branchName = branchName;
+    }
+
+    /**
+     * Copy constructor
+     */
+    public GitHubBranchCause(GitHubBranchCause cause) {
+        super(cause);
+        this.branchName = cause.getBranchName();
     }
 
     public String getBranchName() {
         return branchName;
     }
 
-    @CheckForNull
-    public String getCommitSha() {
-        return commitSha;
+    @Override
+    public void fillParameters(List<ParameterValue> params) {
+        GitHubBranchEnv.getParams(this, params);
     }
 
-    @CheckForNull
-    public String getFullRef() {
-        return fullRef;
+    @Override
+    public GitHubSCMHead<GitHubBranchCause> createSCMHead(String sourceId) {
+        return new GitHubBranchSCMHead(branchName, sourceId);
     }
 
     @Nonnull
     @Override
     public String getShortDescription() {
         if (getHtmlUrl() != null) {
-            return "GitHub Branch <a href=\"" + getHtmlUrl() + "\">" + branchName + "</a>, " + getReason();
+            return "GitHub Branch <a href=\"" + getHtmlUrl() + "\">" + getBranchName() + "</a>, " + getReason();
         } else {
             return "Deleted branch";
         }
@@ -76,6 +78,11 @@ public class GitHubBranchCause extends GitHubCause<GitHubBranchCause> {
 
     @Override
     public void onAddedTo(@Nonnull Run run) {
+        if (run.getParent().getParent() instanceof SCMSourceOwner) {
+            // skip multibranch
+            return;
+        }
+
         // move polling log from cause to action
         try {
             GitHubBranchPollingLogAction action = new GitHubBranchPollingLogAction(run);

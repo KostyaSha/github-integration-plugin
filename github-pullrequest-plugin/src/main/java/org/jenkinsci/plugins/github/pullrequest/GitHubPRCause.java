@@ -1,12 +1,18 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
 import com.github.kostyasha.github.integration.generic.GitHubCause;
+import com.github.kostyasha.github.integration.generic.GitHubRepository;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubPRSCMHead;
+import com.github.kostyasha.github.integration.multibranch.head.GitHubSCMHead;
+import hudson.model.ParameterValue;
 import hudson.model.Run;
+import jenkins.scm.api.SCMSourceOwner;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.jenkinsci.plugins.github.pullrequest.data.GitHubPREnv;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHUser;
 import org.slf4j.Logger;
@@ -16,10 +22,11 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.isNull;
-import static org.jenkinsci.plugins.github.pullrequest.utils.ObjectsUtil.nonNull;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRCause.class);
@@ -37,8 +44,8 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
     private String triggerSenderEmail = "";
     private Set<String> labels;
     /**
-     * In case triggered because of commit.
-     * See {@link org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPROpenEvent}
+     * In case triggered because of commit. See
+     * {@link org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPROpenEvent}
      */
     private String commitAuthorName;
     private String commitAuthorEmail;
@@ -52,32 +59,56 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
     }
 
     public GitHubPRCause(GHPullRequest remotePr,
+                         GitHubPRRepository localRepo,
                          String reason,
-                         boolean skip) throws IOException {
-        this(new GitHubPRPullRequest(remotePr), remotePr.getUser(), skip, reason);
+                         boolean skip) {
+        this(new GitHubPRPullRequest(remotePr), remotePr.getUser(), localRepo, skip, reason);
+        withRemoteData(remotePr);
+        if (localRepo != null) {
+            withLocalRepo(localRepo);
+        }
+    }
+
+    @Deprecated
+    public GitHubPRCause(GHPullRequest remotePr,
+                         String reason,
+                         boolean skip) {
+        this(remotePr, null, reason, skip);
     }
 
     public GitHubPRCause(GitHubPRPullRequest pr,
                          GHUser triggerSender,
+                         GitHubPRRepository localRepo,
                          boolean skip,
-                         String reason) throws IOException {
+                         String reason) {
         this(pr.getHeadSha(), pr.getNumber(),
                 pr.isMergeable(), pr.getBaseRef(), pr.getHeadRef(),
                 pr.getUserEmail(), pr.getTitle(), pr.getHtmlUrl(), pr.getSourceRepoOwner(),
                 pr.getLabels(),
                 triggerSender, skip, reason, "", "", pr.getState());
         this.body = pr.getBody();
+        if (localRepo != null) {
+            withLocalRepo(localRepo);
+        }
     }
 
-    //FIXME (sizes) ParameterNumber: More than 7 parameters (found 15).
-    //CHECKSTYLE:OFF
+    @Deprecated
+    public GitHubPRCause(GitHubPRPullRequest pr,
+                         GHUser triggerSender,
+                         boolean skip,
+                         String reason) {
+        this(pr, triggerSender, null, skip, reason);
+    }
+
+    // FIXME (sizes) ParameterNumber: More than 7 parameters (found 15).
+    // CHECKSTYLE:OFF
     public GitHubPRCause(String headSha, int number, boolean mergeable,
                          String targetBranch, String sourceBranch, String prAuthorEmail,
                          String title, URL htmlUrl, String sourceRepoOwner, Set<String> labels,
                          GHUser triggerSender, boolean skip, String reason,
                          String commitAuthorName, String commitAuthorEmail,
                          String state) {
-        //CHECKSTYLE:ON
+        // CHECKSTYLE:ON
         this.headSha = headSha;
         this.number = number;
         this.mergeable = mergeable;
@@ -112,6 +143,36 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
         this.state = state;
     }
 
+    @Override
+    public GitHubPRCause withLocalRepo(@Nonnull GitHubRepository localRepo) {
+        withGitUrl(localRepo.getGitUrl());
+        withSshUrl(localRepo.getSshUrl());
+        // html url is set from constructor and points to pr
+        // withHtmlUrl(localRepo.getGithubUrl());
+        return this;
+    }
+
+    /**
+     * Copy constructor
+     */
+    public GitHubPRCause(GitHubPRCause orig) {
+        this(orig.getHeadSha(), orig.getNumber(), orig.isMergeable(),
+                orig.getTargetBranch(), orig.getSourceBranch(),
+                orig.getPRAuthorEmail(), orig.getTitle(),
+                orig.getHtmlUrl(), orig.getSourceRepoOwner(), orig.getLabels(), null,
+                orig.isSkip(), orig.getReason(), orig.getCommitAuthorName(), orig.getCommitAuthorEmail(), orig.getState());
+        withTriggerSenderName(orig.getTriggerSenderEmail());
+        withTriggerSenderEmail(orig.getTriggerSenderEmail());
+        withBody(orig.getBody());
+        withCommentBody(orig.getCommentBody());
+        withCommentBodyMatch(orig.getCommentBodyMatch());
+        withCommitAuthorName(orig.getCommitAuthorName());
+        withCommitAuthorEmail(orig.getCommitAuthorEmail());
+        withCondRef(orig.getCondRef());
+        withGitUrl(orig.getGitUrl());
+        withSshUrl(orig.getSshUrl());
+        withPollingLog(orig.getPollingLog());
+    }
 
     public static GitHubPRCause newGitHubPRCause() {
         return new GitHubPRCause();
@@ -322,7 +383,22 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
     }
 
     @Override
+    public void fillParameters(List<ParameterValue> params) {
+        GitHubPREnv.getParams(this, params);
+    }
+
+    @Override
+    public GitHubSCMHead<GitHubPRCause> createSCMHead(String sourceId) {
+        return new GitHubPRSCMHead(number, targetBranch, sourceId);
+    }
+
+    @Override
     public void onAddedTo(@Nonnull Run run) {
+        if (run.getParent().getParent() instanceof SCMSourceOwner) {
+            // skip multibranch
+            return;
+        }
+
         // move polling log from cause to action
         try {
             GitHubPRPollingLogAction action = new GitHubPRPollingLogAction(run);
