@@ -1,6 +1,5 @@
 package com.github.kostyasha.github.integration.branch;
 
-import com.cloudbees.jenkins.GitHubWebHook;
 import com.github.kostyasha.github.integration.branch.trigger.JobRunnerForBranchCause;
 import com.github.kostyasha.github.integration.generic.GitHubRepository;
 import hudson.model.Item;
@@ -9,7 +8,6 @@ import hudson.model.Run;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
-import jenkins.model.Jenkins;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.interceptor.RequirePOST;

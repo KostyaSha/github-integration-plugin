@@ -1,8 +1,6 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
-import com.cloudbees.jenkins.GitHubWebHook;
 import com.github.kostyasha.github.integration.generic.GitHubRepository;
-import hudson.Functions;
 import hudson.XmlFile;
 import hudson.model.Item;
 import hudson.model.Job;
@@ -11,7 +9,6 @@ import hudson.model.Run;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
-import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.github.pullrequest.trigger.JobRunnerForCause;
 import org.jenkinsci.plugins.github.pullrequest.utils.JobHelper;
 import org.kohsuke.github.GHRepository;
