@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository plugin="github-pullrequest@0.1.0-SNAPSHOT">
+    <fullName>KostyaSha-auto/test</fullName>
+    <githubUrl>https://github.com/KostyaSha-auto/test/</githubUrl>
+    <gitUrl>git://github.com/KostyaSha-auto/test.git</gitUrl>
+    <sshUrl>git@github.com:KostyaSha-auto/test.git</sshUrl>
+    <pulls>
+        <entry>
+            <int>1</int>
+            <org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest>
+                <number>1</number>
+                <issueUpdatedAt>2016-04-18 06:53:41.0 UTC</issueUpdatedAt>
+                <title>Update README.md</title>
+                <prUpdatedAt>2016-04-18 06:53:41.0 UTC</prUpdatedAt>
+                <headSha>65d0f7818009811e5d5eb703ebad38bbcc816b49</headSha>
+                <headRef>KostyaSha-auto-patch-1</headRef>
+                <mergeable>true</mergeable>
+                <baseRef>master</baseRef>
+                <userLogin>KostyaSha-auto</userLogin>
+                <htmlUrl>https://github.com/KostyaSha-auto/test/pull/1</htmlUrl>
+                <labels/>
+                <lastCommentCreatedAt>2016-04-18 06:53:41.0 UTC</lastCommentCreatedAt>
+                <sourceRepoOwner>KostyaSha-auto</sourceRepoOwner>
+            </org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest>
+        </entry>
+    </pulls>
+</org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository>

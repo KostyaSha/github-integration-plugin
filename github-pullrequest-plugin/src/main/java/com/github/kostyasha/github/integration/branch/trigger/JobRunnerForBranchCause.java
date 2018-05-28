@@ -92,7 +92,7 @@ public class JobRunnerForBranchCause implements Predicate<GitHubBranchCause> {
     private static boolean cancelQueuedBuildByBranchName(final String branch) {
         Queue queue = getJenkinsInstance().getQueue();
 
-        for (Queue.Item item : queue.getApproximateItemsQuickly()) {
+        for (Queue.Item item : queue.getItems()) {
             Optional<Cause> cause = from(item.getAllActions())
                     .filter(instanceOf(CauseAction.class))
                     .transformAndConcat(new CausesFromAction())

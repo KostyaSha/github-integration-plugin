@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
-import com.cloudbees.jenkins.GitHubWebHook;
 import com.github.kostyasha.github.integration.generic.GitHubRepository;
 import hudson.XmlFile;
 import hudson.model.Item;
@@ -10,7 +9,6 @@ import hudson.model.Run;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
-import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.github.pullrequest.trigger.JobRunnerForCause;
 import org.jenkinsci.plugins.github.pullrequest.utils.JobHelper;
 import org.kohsuke.github.GHRepository;
@@ -114,8 +112,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
     public FormValidation doClearRepo() throws IOException {
         FormValidation result;
         try {
-            Jenkins instance = GitHubWebHook.getJenkinsInstance();
-            if (instance.hasPermission(Item.DELETE)) {
+            if (job.hasPermission(Item.DELETE)) {
                 pulls.clear();
                 save();
                 result = FormValidation.ok("Pulls deleted");
@@ -137,8 +134,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
     public FormValidation doRunTrigger() {
         FormValidation result;
         try {
-            Jenkins instance = GitHubWebHook.getJenkinsInstance();
-            if (instance.hasPermission(Item.BUILD)) {
+            if (job.hasPermission(Item.BUILD)) {
                 GitHubPRTrigger trigger = JobHelper.ghPRTriggerFromJob(job);
                 if (trigger != null) {
                     trigger.run();
@@ -163,8 +159,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
     public FormValidation doRebuildAllFailed() throws IOException {
         FormValidation result;
         try {
-            Jenkins instance = GitHubWebHook.getJenkinsInstance();
-            if (instance.hasPermission(Item.BUILD)) {
+            if (job.hasPermission(Item.BUILD)) {
                 Map<Integer, List<Run<?, ?>>> builds = getAllPrBuilds();
                 for (List<Run<?, ?>> buildList : builds.values()) {
                     if (!buildList.isEmpty() && Result.FAILURE.equals(buildList.get(0).getResult())) {
@@ -188,8 +183,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
         FormValidation result;
 
         try {
-            Jenkins instance = GitHubWebHook.getJenkinsInstance();
-            if (!instance.hasPermission(Item.BUILD)) {
+            if (!job.hasPermission(Item.BUILD)) {
                 return FormValidation.error("Forbidden");
             }
 
@@ -227,8 +221,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
         FormValidation result;
 
         try {
-            Jenkins instance = GitHubWebHook.getJenkinsInstance();
-            if (!instance.hasPermission(Item.BUILD)) {
+            if (!job.hasPermission(Item.BUILD)) {
                 return FormValidation.error("Forbidden");
             }
 

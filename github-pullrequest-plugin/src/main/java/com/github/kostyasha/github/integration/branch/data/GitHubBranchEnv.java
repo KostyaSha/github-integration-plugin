@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static java.util.Objects.isNull;
+
 /**
  * @author Kanstantsin Shautsou
  */
@@ -16,7 +18,7 @@ public enum GitHubBranchEnv implements GitHubEnv<GitHubBranchCause> {
     NAME(GitHubBranchCause::getBranchName),
     SHORT_DESC(GitHubBranchCause::getShortDescription),
     TITLE(GitHubBranchCause::getTitle),
-    URL((Function<GitHubBranchCause, String>) c -> c.getHtmlUrl().toString()),
+    URL((Function<GitHubBranchCause, String>) c -> isNull(c.getHtmlUrl()) ? "" : c.getHtmlUrl().toString()),
     HEAD_SHA(GitHubBranchCause::getCommitSha),
     FULL_REF(GitHubBranchCause::getFullRef),
     CAUSE_SKIP(GitHubBranchCause::isSkip);

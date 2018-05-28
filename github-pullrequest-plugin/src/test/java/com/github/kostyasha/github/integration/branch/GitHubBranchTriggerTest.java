@@ -1,6 +1,9 @@
 package com.github.kostyasha.github.integration.branch;
 
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
+import com.gargoylesoftware.htmlunit.html.HtmlForm;
+import com.gargoylesoftware.htmlunit.html.HtmlFormUtil;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchCreatedEvent;
 import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchHashChangedEvent;
@@ -8,8 +11,15 @@ import com.github.kostyasha.github.integration.branch.test.GHMockRule;
 import com.github.kostyasha.github.integration.branch.test.InjectJenkinsMembersRule;
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import hudson.model.Computer;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
+import hudson.model.Item;
+import hudson.model.Queue;
+import hudson.security.AuthorizationMatrixProperty;
+import hudson.security.Permission;
+import hudson.security.ProjectMatrixAuthorizationStrategy;
+import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.github.config.GitHubPluginConfig;
 import org.junit.Rule;
 import org.junit.Test;
@@ -20,11 +30,18 @@ import org.jvnet.hudson.test.recipes.LocalData;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import static com.gargoylesoftware.htmlunit.html.HtmlFormUtil.submit;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsMapContaining.hasKey;
 import static org.hamcrest.core.Is.is;
@@ -135,6 +152,51 @@ public class GitHubBranchTriggerTest {
         assertThat(localRepo.getBranches(), hasKey("new-branch"));
         GitHubBranch branch = localRepo.getBranches().get("new-branch");
         assertThat(branch.getCommitSha(), is("6dcb09b5b57875f334f61aebed695e2e4193db5e"));
+
+    }
+
+    @LocalData
+    @Test
+    public void buildButtonsPerms() throws Exception {
+        jRule.getInstance().setNumExecutors(0);
+
+        jRule.jenkins.setSecurityRealm(jRule.createDummySecurityRealm());
+        ProjectMatrixAuthorizationStrategy auth = new ProjectMatrixAuthorizationStrategy();
+        auth.add(Jenkins.READ, "alice");
+        auth.add(Computer.BUILD, "alice");
+
+        auth.add(Jenkins.ADMINISTER, "admin");
+
+        auth.add(Jenkins.READ, "bob");
+        auth.add(Computer.BUILD, "bob");
+
+        jRule.jenkins.setAuthorizationStrategy(auth);
+
+        final FreeStyleProject project =  (FreeStyleProject) jRule.getInstance().getItem("project");
+
+        Map<Permission,Set<String>> perms = new HashMap<>();
+
+        HashSet<String> users = new HashSet<>();
+        users.add("alice");
+        users.add("bob");
+
+        perms.put(Item.READ, users);
+
+        perms.put(Item.BUILD, Collections.singleton("bob"));
+
+        project.addProperty(new AuthorizationMatrixProperty(perms));
+
+
+        JenkinsRule.WebClient webClient = jRule.createWebClient();
+        webClient = webClient.login("bob", "bob");
+
+        HtmlPage repoPage = webClient.getPage(project, "github-branch");
+        HtmlForm form = repoPage.getFormByName("rebuildAllFailed");
+        HtmlFormUtil.getButtonByCaption(form, "Rebuild all failed builds").click();
+        HtmlPage page = (HtmlPage) submit(form);
+
+        Queue.Item[] items = jRule.getInstance().getQueue().getItems();
+        assertThat(items, arrayWithSize(0));
 
     }
 
