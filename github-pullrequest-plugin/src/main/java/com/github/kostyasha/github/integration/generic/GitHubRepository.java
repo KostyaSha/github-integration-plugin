@@ -54,16 +54,16 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
      * Should be called before trigger logic starts checks.
      */
     public void actualise(@Nonnull GHRepository ghRepository) {
-        if (isNull(fullName)) {
+        if (isNull(fullName) || !fullName.equals(ghRepository.getFullName())) {
             fullName = ghRepository.getFullName();
         }
-        if (isNull(githubUrl)) {
+        if (isNull(githubUrl) || !githubUrl.equals(ghRepository.getHtmlUrl())) {
             githubUrl = ghRepository.getHtmlUrl();
         }
-        if (isNull(gitUrl)) {
+        if (isNull(gitUrl) || !gitUrl.equals(ghRepository.getGitTransportUrl()))) {
             gitUrl = ghRepository.getGitTransportUrl();
         }
-        if (isNull(sshUrl)) {
+        if (isNull(sshUrl) || !sshUrl.equals(ghRepository.getSshUrl())) {
             sshUrl = ghRepository.getSshUrl();
         }
     }
