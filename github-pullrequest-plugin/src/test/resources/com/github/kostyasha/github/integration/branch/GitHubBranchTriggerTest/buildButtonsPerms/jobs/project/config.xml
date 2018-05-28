@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <keepDependencies>false</keepDependencies>
+    <properties>
+        <com.coravy.hudson.plugins.github.GithubProjectProperty>
+            <projectUrl>http://localhost/org/repo/</projectUrl>
+        </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    </properties>
+    <scm class="hudson.scm.NullSCM"/>
+    <canRoam>false</canRoam>
+    <disabled>false</disabled>
+    <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+    <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+    <triggers>
+        <com.github.kostyasha.github.integration.branch.GitHubBranchTrigger>
+            <spec></spec>
+            <triggerMode>CRON</triggerMode>
+            <cancelQueued>false</cancelQueued>
+            <abortRunning>false</abortRunning>
+            <skipFirstRun>false</skipFirstRun>
+            <events>
+                <com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchCreatedEvent/>
+                <com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchHashChangedEvent/>
+            </events>
+            <preStatus>false</preStatus>
+        </com.github.kostyasha.github.integration.branch.GitHubBranchTrigger>
+    </triggers>
+    <concurrentBuild>false</concurrentBuild>
+    <builders/>
+    <publishers/>
+    <buildWrappers/>
+</project>

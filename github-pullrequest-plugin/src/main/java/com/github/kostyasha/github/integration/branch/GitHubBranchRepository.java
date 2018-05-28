@@ -113,8 +113,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
         LOG.debug("Got clear GitHub Branch repo request for {}", getJob().getFullName());
         FormValidation result;
         try {
-            Jenkins instance = GitHubWebHook.getJenkinsInstance();
-            if (instance.hasPermission(Item.DELETE)) {
+            if (job.hasPermission(Item.DELETE)) {
                 branches.clear();
                 save();
                 result = FormValidation.ok("Branches deleted");
@@ -134,8 +133,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
     public FormValidation doRunTrigger() throws IOException {
         FormValidation result;
         try {
-            Jenkins instance = GitHubWebHook.getJenkinsInstance();
-            if (instance.hasPermission(Item.BUILD)) {
+            if (job.hasPermission(Item.BUILD)) {
                 GitHubBranchTrigger trigger = ghBranchTriggerFromJob(job);
                 if (trigger != null) {
                     trigger.run();
@@ -161,8 +159,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
     public FormValidation doRebuildAllFailed() throws IOException {
         FormValidation result;
         try {
-            Jenkins instance = GitHubWebHook.getJenkinsInstance();
-            if (instance.hasPermission(Item.BUILD)) {
+            if (job.hasPermission(Item.BUILD)) {
                 Map<String, List<Run<?, ?>>> builds = getAllBranchBuilds();
                 for (List<Run<?, ?>> buildList : builds.values()) {
                     if (!buildList.isEmpty() && Result.FAILURE.equals(buildList.get(0).getResult())) {
@@ -186,8 +183,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
         FormValidation result;
 
         try {
-            Jenkins instance = GitHubWebHook.getJenkinsInstance();
-            if (!instance.hasPermission(Item.BUILD)) {
+            if (!job.hasPermission(Item.BUILD)) {
                 return FormValidation.error("Forbidden");
             }
 
@@ -203,7 +199,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
             final GitHubBranch localBranch = getBranches().get(branchName);
             final GitHubBranchCause cause = new GitHubBranchCause(localBranch, this, "Manual run.", false);
             final JobRunnerForBranchCause runner = new JobRunnerForBranchCause(getJob(),
-                    ghBranchTriggerFromJob(getJob()));
+                    ghBranchTriggerFromJob(job));
             final QueueTaskFuture<?> queueTaskFuture = runner.startJob(cause);
 
             if (nonNull(queueTaskFuture)) {
@@ -225,8 +221,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
         FormValidation result;
 
         try {
-            Jenkins instance = GitHubWebHook.getJenkinsInstance();
-            if (!instance.hasPermission(Item.BUILD)) {
+            if (!job.hasPermission(Item.BUILD)) {
                 return FormValidation.error("Forbidden");
             }
 

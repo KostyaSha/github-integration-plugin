@@ -36,7 +36,7 @@ l.layout(title: "GitHub Pull Request Status") {
         br()
         br()
         div(style: "display: inline-block") {
-            if (l.hasPermission(Item.BUILD)) {
+            if (h.hasPermission(my.job, Item.BUILD)) {
                 def runTrigger = "runTrigger";
                 form(method: "post", action: "runTrigger", onsubmit: "return callFeature(this, ${runTrigger})",
                         style: "float: right; margin-right: 100px") {
@@ -61,7 +61,7 @@ l.layout(title: "GitHub Pull Request Status") {
                 }
 
 
-                if (l.hasPermission(Item.BUILD)) {
+                if (h.hasPermission(my.job, Item.BUILD)) {
                     tr() {
                         td() {
                             div(style: "display: inline-block") {
@@ -91,20 +91,20 @@ l.layout(title: "GitHub Pull Request Status") {
             }
         }
         br()
-
         div(style: "display: inline-block") {
-            if (l.hasPermission(Item.BUILD)) {
-                def rebuildFailedId = "rebuildFailedResult";
+            if (h.hasPermission(my.job, Item.BUILD)) {
+                def rebuildAllFailedId = "rebuildFailedResult";
                 form(method: "post",
-                        action: "rebuildFailed",
-                        onsubmit: "return callFeature(this, ${rebuildFailedId})",
+                        name: "rebuildAllFailed",
+                        action: "rebuildAllFailed",
+                        onsubmit: "return callFeature(this, ${rebuildAllFailedId})",
                         style: "float: right; margin-right: 100px") {
                     f.submit(value: _("Rebuild all failed builds"))
-                    div(id: rebuildFailedId)
+                    div(id: rebuildAllFailedId)
                 }
             }
 
-            if (l.hasPermission(Item.DELETE)) {
+            if (h.hasPermission(my.job, Item.DELETE)) {
                 def clearRepoId = "clearRepoResult";
                 form(method: "post", action: "clearRepo", onsubmit: "return callFeature(this, ${clearRepoId})",
                         style: "float: left") {

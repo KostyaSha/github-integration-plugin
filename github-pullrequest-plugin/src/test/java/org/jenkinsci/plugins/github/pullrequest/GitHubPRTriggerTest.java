@@ -3,20 +3,34 @@ package org.jenkinsci.plugins.github.pullrequest;
 import antlr.ANTLRException;
 import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
+import com.gargoylesoftware.htmlunit.Page;
+import com.gargoylesoftware.htmlunit.html.HtmlButton;
+import com.gargoylesoftware.htmlunit.html.HtmlElementUtil;
+import com.gargoylesoftware.htmlunit.html.HtmlForm;
+import com.gargoylesoftware.htmlunit.html.HtmlFormUtil;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import hudson.Functions;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
 import hudson.model.BuildListener;
+import hudson.model.Computer;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
+import hudson.model.Item;
+import hudson.model.Queue;
 import hudson.model.TopLevelItem;
 import hudson.plugins.git.util.BuildData;
+import hudson.security.AuthorizationMatrixProperty;
+import hudson.security.Permission;
+import hudson.security.ProjectMatrixAuthorizationStrategy;
+import jenkins.model.Jenkins;
 import org.hamcrest.Matchers;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExternalResource;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
@@ -28,11 +42,16 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import static com.gargoylesoftware.htmlunit.html.HtmlFormUtil.submit;
 import static java.lang.String.format;
+import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -175,5 +194,50 @@ public class GitHubPRTriggerTest {
             build.addAction(new BuildData());
             return true;
         }
+    }
+
+    @LocalData
+    @Test
+    public void buildButtonsPerms() throws Exception {
+        j.getInstance().setNumExecutors(0);
+
+        j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
+        ProjectMatrixAuthorizationStrategy auth = new ProjectMatrixAuthorizationStrategy();
+        auth.add(Jenkins.READ, "alice");
+        auth.add(Computer.BUILD, "alice");
+
+        auth.add(Jenkins.ADMINISTER, "admin");
+
+        auth.add(Jenkins.READ, "bob");
+        auth.add(Computer.BUILD, "bob");
+
+        j.jenkins.setAuthorizationStrategy(auth);
+
+        final FreeStyleProject project =  (FreeStyleProject) j.getInstance().getItem("project");
+
+        Map<Permission,Set<String>> perms = new HashMap<>();
+
+        HashSet<String> users = new HashSet<>();
+        users.add("alice");
+        users.add("bob");
+
+        perms.put(Item.READ, users);
+
+        perms.put(Item.BUILD, Collections.singleton("bob"));
+
+        project.addProperty(new AuthorizationMatrixProperty(perms));
+
+
+        JenkinsRule.WebClient webClient = j.createWebClient();
+        webClient = webClient.login("bob", "bob");
+
+        HtmlPage repoPage = webClient.getPage(project, "github-pullrequest");
+        HtmlForm form = repoPage.getFormByName("rebuildAllFailed");
+        HtmlFormUtil.getButtonByCaption(form, "Rebuild all failed builds").click();
+        HtmlPage page = (HtmlPage) submit(form);
+
+        Queue.Item[] items = j.getInstance().getQueue().getItems();
+        assertThat(items, arrayWithSize(0));
+
     }
 }
