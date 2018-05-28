@@ -240,7 +240,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
                 // TODO print triggering to listener?
                 from(causes).filter(new JobRunnerForCause(job, this)).toSet();
             } catch (Throwable t) {
-                listener.error("Can't end trigger check", t);
+                listener.error("Can't end trigger check: '{}'", t);
             }
 
             long duration = System.currentTimeMillis() - startTime;
