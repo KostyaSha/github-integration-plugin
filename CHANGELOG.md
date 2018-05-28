@@ -2,6 +2,16 @@
 
 ## Next 
 
+## 0.2.0-alpha-3
+- Fix logging
+- Fix build/rebuild buttons
+
+## 0.2.0-alpha-2
+- Multibranch support
+
+## 0.2.0-alpha-1 
+- failed release
+
 ## 0.1.0-rc29
 - [branch] reduce number of github api calls for hook processing.
 
