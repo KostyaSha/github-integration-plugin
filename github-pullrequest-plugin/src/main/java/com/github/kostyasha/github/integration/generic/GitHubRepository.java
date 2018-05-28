@@ -29,6 +29,7 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
 
     protected transient XmlFile configFile; // for save()
     protected transient Job<?, ?> job;  // for UI
+    protected transient boolean changed; // when something changed
 
     @CheckForNull
     private String fullName;
@@ -49,6 +50,10 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
         this.githubUrl = githubUrl;
     }
 
+    public boolean isChanged() {
+        return changed;
+    }
+
     /**
      * Repository may be created without gh connection, but trigger logic expects this fields.
      * Should be called before trigger logic starts checks.
@@ -56,11 +61,12 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
     public void actualise(@Nonnull GHRepository ghRepository) {
         if (isNull(fullName) || !fullName.equals(ghRepository.getFullName())) {
             fullName = ghRepository.getFullName();
+            changed = true;
         }
         if (isNull(githubUrl) || !githubUrl.equals(ghRepository.getHtmlUrl())) {
             githubUrl = ghRepository.getHtmlUrl();
         }
-        if (isNull(gitUrl) || !gitUrl.equals(ghRepository.getGitTransportUrl()))) {
+        if (isNull(gitUrl) || !gitUrl.equals(ghRepository.getGitTransportUrl())) {
             gitUrl = ghRepository.getGitTransportUrl();
         }
         if (isNull(sshUrl) || !sshUrl.equals(ghRepository.getSshUrl())) {
