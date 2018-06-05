@@ -20,6 +20,7 @@ import hudson.security.AuthorizationMatrixProperty;
 import hudson.security.Permission;
 import hudson.security.ProjectMatrixAuthorizationStrategy;
 import jenkins.model.Jenkins;
+import org.hamcrest.Matchers;
 import org.jenkinsci.plugins.github.config.GitHubPluginConfig;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,6 +43,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.arrayWithSize;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsMapContaining.hasKey;
 import static org.hamcrest.core.Is.is;
@@ -256,6 +258,24 @@ public class GitHubBranchTriggerTest {
         jRule.waitUntilNoActivity();
 
         assertThat(project.getBuilds(), hasSize(2));
+
+        GitHubBranchPollingLogAction logAction = project.getAction(GitHubBranchPollingLogAction.class);
+        assertThat(logAction, Matchers.notNullValue());
+        assertThat(logAction.getLog(),
+                containsString("Repository full name changed 'KostyaSha-auto/test' to 'org/repo'.\n"));
+
+        assertThat(logAction.getLog(),
+                containsString("Changing GitHub url from 'https://github.com/KostyaSha-auto/test/' " +
+                        "to 'http://localhost/org/repo'.\n"));
+        assertThat(logAction.getLog(),
+                containsString("Changing Git url from 'git://github.com/KostyaSha-auto/test.git' " +
+                        "to 'git://localhost/org/repo.git'.\n"));
+        assertThat(logAction.getLog(),
+                containsString("Changing SSH url from 'git@github.com:KostyaSha-auto/test.git' " +
+                        "to 'git@localhost:org/repo.git'.\n"));
+        assertThat(logAction.getLog(),
+                containsString("Local settings changed, removing branches in repository!"));
+
 
         localRepo = project.getAction(GitHubBranchRepository.class);
 

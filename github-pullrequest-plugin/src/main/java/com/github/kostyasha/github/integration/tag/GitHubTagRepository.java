@@ -1,6 +1,7 @@
 package com.github.kostyasha.github.integration.tag;
 
 import com.github.kostyasha.github.integration.generic.GitHubRepository;
+import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.StaplerRequest;
@@ -57,6 +58,14 @@ public class GitHubTagRepository extends GitHubRepository<GitHubTagRepository> {
     @Override
     public String getUrlName() {
         return "github-tag";
+    }
+
+    @Override
+    public void actualiseOnChange(@Nonnull GHRepository ghRepository, @Nonnull TaskListener listener) {
+        if (changed) {
+            listener.getLogger().println("Local settings changed, removing tags in repository state!");
+            getTags().clear();
+        }
     }
 
     @Override

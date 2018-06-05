@@ -6,6 +6,7 @@ import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
@@ -106,6 +107,15 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
     @Override
     public String getUrlName() {
         return "github-pullrequest";
+    }
+
+
+    @Override
+    public void actualiseOnChange(@Nonnull GHRepository ghRepository, @Nonnull TaskListener listener) {
+        if (changed) {
+            listener.getLogger().println("Local settings changed, removing PRs in repository!");
+            getPulls().clear();
+        }
     }
 
     @RequirePOST

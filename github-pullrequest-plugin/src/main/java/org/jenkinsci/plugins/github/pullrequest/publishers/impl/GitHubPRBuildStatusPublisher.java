@@ -153,6 +153,7 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
             return true;
         }
 
+        @Nonnull
         @Override
         public String getDisplayName() {
             return "GitHub PR: set PR status";
@@ -195,6 +196,7 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
 
         @Extension
         public static class DescriptorImpl extends Descriptor<BuildMessage> {
+            @Nonnull
             @Override
             public String getDisplayName() {
                 return "Build message container";

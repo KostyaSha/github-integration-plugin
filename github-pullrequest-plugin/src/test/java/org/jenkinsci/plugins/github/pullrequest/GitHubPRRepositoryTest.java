@@ -37,8 +37,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.isNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -172,6 +174,7 @@ public class GitHubPRRepositoryTest {
         when(run.getParent()).thenReturn(job);
 
         GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
+        assertThat(repo, notNullValue());
         FormValidation formValidation = repo.doRebuildAllFailed();
 
         Assert.assertEquals(FormValidation.Kind.OK, formValidation.kind);

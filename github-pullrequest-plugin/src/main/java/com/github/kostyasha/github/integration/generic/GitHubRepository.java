@@ -31,6 +31,7 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
 
     protected transient XmlFile configFile; // for save()
     protected transient Job<?, ?> job;  // for UI
+    protected transient boolean changed; // for actualisation
 
     @CheckForNull
     private String fullName;
@@ -55,38 +56,37 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
      * Repository may be created without gh connection, but trigger logic expects this fields.
      * Should be called before trigger logic starts checks.
      */
-    public void actualise(@Nonnull GHRepository ghRepository, TaskListener listener) throws IOException {
-        boolean changed = false;
+    public void actualise(@Nonnull GHRepository ghRepository, @Nonnull TaskListener listener) throws IOException {
+        changed = false;
 
         PrintStream logger = listener.getLogger();
         // just in case your organisation decided to change domain
         // take into account only repo/name
         if (isNull(fullName) || !fullName.equals(ghRepository.getFullName())) {
-            logger.printf("Repository full name changed '%s' to '%s'.", fullName, ghRepository.getFullName());
+            logger.printf("Repository full name changed '%s' to '%s'.\n", fullName, ghRepository.getFullName());
             fullName = ghRepository.getFullName();
             changed = true;
         }
 
         if (isNull(githubUrl) || !githubUrl.equals(ghRepository.getHtmlUrl())) {
-            logger.printf("Changing GitHub url from '%s' to '%s'.", githubUrl, ghRepository.getHtmlUrl());
+            logger.printf("Changing GitHub url from '%s' to '%s'.\n", githubUrl, ghRepository.getHtmlUrl());
             githubUrl = ghRepository.getHtmlUrl();
         }
 
         if (isNull(gitUrl) || !gitUrl.equals(ghRepository.getGitTransportUrl())) {
-            logger.printf("Changing Git url from '%s' to '%s'.", gitUrl, ghRepository.getGitTransportUrl());
+            logger.printf("Changing Git url from '%s' to '%s'.\n", gitUrl, ghRepository.getGitTransportUrl());
             gitUrl = ghRepository.getGitTransportUrl();
         }
 
         if (isNull(sshUrl) || !sshUrl.equals(ghRepository.getSshUrl())) {
-            logger.printf("Changing SSH url from '%s' to '%s'.", sshUrl, ghRepository.getSshUrl());
+            logger.printf("Changing SSH url from '%s' to '%s'.\n", sshUrl, ghRepository.getSshUrl());
             sshUrl = ghRepository.getSshUrl();
         }
 
-        if (changed) {
-            logger.println("Full name changed, removing branches in repository!");
-            ghRepository.getBranches().clear();
-        }
+        actualiseOnChange(ghRepository, listener);
     }
+
+    public abstract void actualiseOnChange(@Nonnull GHRepository ghRepository, @Nonnull TaskListener listener);
 
     public String getFullName() {
         return fullName;
