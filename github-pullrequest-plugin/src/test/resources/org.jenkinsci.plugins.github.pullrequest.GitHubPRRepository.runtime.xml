@@ -1,5 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository>
+  <fullName>user/repo</fullName>
+  <githubUrl>https://github.com/user/repo/</githubUrl>
   <pulls>
     <entry>
       <int>8</int>
