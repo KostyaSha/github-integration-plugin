@@ -86,7 +86,7 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
         actualiseOnChange(ghRepository, listener);
     }
 
-    public abstract void actualiseOnChange(@Nonnull GHRepository ghRepository, @Nonnull TaskListener listener);
+    protected abstract void actualiseOnChange(@Nonnull GHRepository ghRepository, @Nonnull TaskListener listener);
 
     public String getFullName() {
         return fullName;

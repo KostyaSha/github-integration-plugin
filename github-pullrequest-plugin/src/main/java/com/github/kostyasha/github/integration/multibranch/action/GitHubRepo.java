@@ -93,9 +93,13 @@ public class GitHubRepo implements Action {
 
         if (isNull(tagRepository)) {
             tagRepository = new GitHubTagRepository(remoteRepo);
+        } else  {
+            tagRepository.actualise(remoteRepo, TaskListener.NULL);
         }
         if (isNull(prRepository)) {
             prRepository = new GitHubPRRepository(remoteRepo);
+        } else {
+            prRepository.actualise(remoteRepo, TaskListener.NULL);
         }
 
         if (owner != null) {
