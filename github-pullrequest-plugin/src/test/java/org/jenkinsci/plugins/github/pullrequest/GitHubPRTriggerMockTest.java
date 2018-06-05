@@ -95,4 +95,18 @@ public class GitHubPRTriggerMockTest {
         assertThat(logAction.getLog(), not(containsString("ERROR: local PR [#1 new-feature] is in bad state")));
         assertThat(logAction.getLog(), containsString("PR [#1 new-feature] not changed"));
     }
+
+
+
+    @LocalData
+    @Test
+    public void actualiseRepo() throws InterruptedException {
+        config.getConfigs().add(github.serverConfig());
+        config.save();
+
+        Thread.sleep(1000);
+
+        FreeStyleProject project = (FreeStyleProject) jRule.getInstance().getItem("project");
+
+    }
 }

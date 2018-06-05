@@ -202,7 +202,7 @@ public class GitHubBranchTriggerTest {
 
     @LocalData
     @Test
-    public void refreshRepo() throws Exception {
+    public void actualiseRepo() throws Exception {
         config.getConfigs().add(github.serverConfig());
         config.save();
 

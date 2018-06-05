@@ -1,7 +1,6 @@
 package com.github.kostyasha.github.integration.tag;
 
 import com.github.kostyasha.github.integration.generic.GitHubRepository;
-import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.StaplerRequest;
