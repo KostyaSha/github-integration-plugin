@@ -52,7 +52,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
      *
      * @param ghRepository remote repository.
      */
-    public GitHubPRRepository(@Nonnull GHRepository ghRepository) {
+    public GitHubPRRepository(@Nonnull GHRepository ghRepository) throws IOException {
         super(ghRepository);
     }
 

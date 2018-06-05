@@ -84,7 +84,7 @@ import static org.jenkinsci.plugins.github.util.JobInfoHelpers.isBuildable;
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRTrigger.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GitHubPRTrigger.class);
     public static final String FINISH_MSG = "Finished GitHub Pull Request trigger check";
 
     @CheckForNull
@@ -153,7 +153,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
 
     @Override
     public void start(Job<?, ?> job, boolean newInstance) {
-        LOGGER.info("Starting GitHub Pull Request trigger for project {}", job.getFullName());
+        LOG.info("Starting GitHub Pull Request trigger for project {}", job.getFullName());
         super.start(job, newInstance);
 
         if (newInstance && getRepoProvider().isManageHooks(this) && withHookTriggerMode().apply(job)) {
@@ -208,18 +208,18 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
      */
     public void doRun(Integer prNumber) {
         if (not(isBuildable()).apply(job)) {
-            LOGGER.debug("Job {} is disabled, but trigger run!", isNull(job) ? "<no job>" : job.getFullName());
+            LOG.debug("Job {} is disabled, but trigger run!", isNull(job) ? "<no job>" : job.getFullName());
             return;
         }
 
         if (!isSupportedTriggerMode(getTriggerMode())) {
-            LOGGER.warn("Trigger mode {} is not supported yet ({})", getTriggerMode(), job.getFullName());
+            LOG.warn("Trigger mode {} is not supported yet ({})", getTriggerMode(), job.getFullName());
             return;
         }
 
         GitHubPRRepository localRepository = job.getAction(GitHubPRRepository.class);
         if (isNull(localRepository)) {
-            LOGGER.warn("Can't get repository info, maybe project {} misconfigured?", job.getFullName());
+            LOG.warn("Can't get repository info, maybe project {} misconfigured?", job.getFullName());
             return;
         }
 
@@ -231,7 +231,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
             listener.debug("Running GitHub Pull Request trigger check for {} on {}",
                     getDateTimeInstance().format(new Date(startTime)), localRepository.getFullName());
             try {
-                localRepository.actualise(getRemoteRepository());
+                localRepository.actualise(getRemoteRepository(), listener);
 
                 causes = readyToBuildCauses(localRepository, listener, prNumber);
 
@@ -240,7 +240,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
                 // TODO print triggering to listener?
                 from(causes).filter(new JobRunnerForCause(job, this)).toSet();
             } catch (Throwable t) {
-                listener.error("Can't end trigger check: '{}'", t);
+                listener.error("Can't end trigger check: '%s'", t);
             }
 
             long duration = System.currentTimeMillis() - startTime;
@@ -248,7 +248,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
                     localRepository.getFullName(), getDateTimeInstance().format(new Date()), duration);
         } catch (Exception e) {
             // out of UI/user viewable error
-            LOGGER.error("Can't process check ({})", e.getMessage(), e);
+            LOG.error("Can't process check ({})", e.getMessage(), e);
         }
     }
 
@@ -269,6 +269,10 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
                                                    @Nullable Integer prNumber) {
         try {
             GitHub github = getRepoProvider().getGitHub(this);
+            if (isNull(github)) {
+                LOG.error("GitHub connection is null, check Repo Providers!");
+                throw new IllegalStateException("GitHub connection is null, check Repo Providers!");
+            }
 
             GHRateLimit rateLimitBefore = github.getRateLimit();
             listener.debug("GitHub rate limit before check: {}", rateLimitBefore);
@@ -293,7 +297,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
                     .filter(notNull())
                     .toList();
 
-            LOGGER.trace("Causes count for {}: {}", localRepository.getFullName(), causes.size());
+            LOG.trace("Causes count for {}: {}", localRepository.getFullName(), causes.size());
 
             // refresh all PRs because user may add events that may trigger unexpected builds.
             from(remotePulls).transform(updateLocalRepo(localRepository)).toSet();
@@ -302,7 +306,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
 
             GHRateLimit rateLimitAfter = github.getRateLimit();
             int consumed = rateLimitBefore.remaining - rateLimitAfter.remaining;
-            LOGGER.info("GitHub rate limit after check {}: {}, consumed: {}, checked PRs: {}",
+            LOG.info("GitHub rate limit after check {}: {}, consumed: {}, checked PRs: {}",
                     localRepository.getFullName(), rateLimitAfter, consumed, remotePulls.size());
 
             return causes;
@@ -351,6 +355,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
             load();
         }
 
+        @Nonnull
         @Override
         public String getDisplayName() {
             return "GitHub Pull Requests";

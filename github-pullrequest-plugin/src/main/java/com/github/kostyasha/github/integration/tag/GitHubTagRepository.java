@@ -1,6 +1,7 @@
 package com.github.kostyasha.github.integration.tag;
 
 import com.github.kostyasha.github.integration.generic.GitHubRepository;
+import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.StaplerRequest;
@@ -30,7 +31,7 @@ public class GitHubTagRepository extends GitHubRepository<GitHubTagRepository> {
      *
      * @param remoteRepository remote repository full name.
      */
-    public GitHubTagRepository(GHRepository remoteRepository) {
+    public GitHubTagRepository(GHRepository remoteRepository) throws IOException {
         super(remoteRepository);
     }
 

@@ -3,6 +3,7 @@ package com.github.kostyasha.github.integration.multibranch.action;
 import com.github.kostyasha.github.integration.branch.GitHubBranchRepository;
 import com.github.kostyasha.github.integration.tag.GitHubTagRepository;
 import hudson.model.Action;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
@@ -36,7 +37,7 @@ public class GitHubRepo implements Action {
     /**
      * When remote side available.
      */
-    public GitHubRepo(GHRepository repository) {
+    public GitHubRepo(GHRepository repository) throws IOException {
         this(new GitHubBranchRepository(repository), new GitHubTagRepository(repository), new GitHubPRRepository(repository));
     }
 
@@ -86,7 +87,10 @@ public class GitHubRepo implements Action {
     public void actualize(GHRepository remoteRepo) throws IOException {
         if (isNull(branchRepository)) {
             branchRepository = new GitHubBranchRepository(remoteRepo);
+        } else {
+            branchRepository.actualise(remoteRepo, TaskListener.NULL);
         }
+
         if (isNull(tagRepository)) {
             tagRepository = new GitHubTagRepository(remoteRepo);
         }

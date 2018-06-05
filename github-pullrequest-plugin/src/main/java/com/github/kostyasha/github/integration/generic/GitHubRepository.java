@@ -5,8 +5,11 @@ import hudson.XmlFile;
 import hudson.model.Action;
 import hudson.model.Job;
 import hudson.model.Saveable;
+import hudson.model.TaskListener;
 import hudson.model.listeners.SaveableListener;
 import hudson.util.FormValidation;
+import hudson.util.NullStream;
+import org.jenkinsci.plugins.github.pullrequest.utils.LoggingTaskListenerWrapper;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.StaplerRequest;
 import org.slf4j.Logger;
@@ -15,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URL;
 
 import static java.util.Objects.isNull;
@@ -29,7 +33,6 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
 
     protected transient XmlFile configFile; // for save()
     protected transient Job<?, ?> job;  // for UI
-    protected transient boolean changed; // when something changed
 
     @CheckForNull
     private String fullName;
@@ -41,8 +44,8 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
     @CheckForNull
     private String sshUrl;
 
-    public GitHubRepository(@Nonnull GHRepository ghRepository) {
-        actualise(ghRepository);
+    public GitHubRepository(@Nonnull GHRepository ghRepository) throws IOException {
+        actualise(ghRepository, TaskListener.NULL);
     }
 
     public GitHubRepository(String repoFullName, URL githubUrl) {
@@ -50,27 +53,44 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
         this.githubUrl = githubUrl;
     }
 
-    public boolean isChanged() {
-        return changed;
-    }
-
     /**
      * Repository may be created without gh connection, but trigger logic expects this fields.
      * Should be called before trigger logic starts checks.
      */
-    public void actualise(@Nonnull GHRepository ghRepository) {
+    public void actualise(@Nonnull GHRepository ghRepository, TaskListener listener) throws IOException {
+        boolean changed = false;
+
+        PrintStream logger = listener.getLogger();
+        // just in case your organisation decided to change domain
+        // take into account only repo/name
         if (isNull(fullName) || !fullName.equals(ghRepository.getFullName())) {
+//        if (isNull(fullName)) {
+            logger.printf("Repository full name changed '%s' to '%s'.", fullName, ghRepository.getFullName());
             fullName = ghRepository.getFullName();
             changed = true;
         }
+
         if (isNull(githubUrl) || !githubUrl.equals(ghRepository.getHtmlUrl())) {
+//        if (isNull(githubUrl)){
+            logger.printf("Changing GitHub url from '%s' to '%s'.", githubUrl, ghRepository.getHtmlUrl());
             githubUrl = ghRepository.getHtmlUrl();
         }
+
         if (isNull(gitUrl) || !gitUrl.equals(ghRepository.getGitTransportUrl())) {
+//        if (isNull(gitUrl)){
+            logger.printf("Changing Git url from '%s' to '%s'.", gitUrl, ghRepository.getGitTransportUrl());
             gitUrl = ghRepository.getGitTransportUrl();
         }
+
         if (isNull(sshUrl) || !sshUrl.equals(ghRepository.getSshUrl())) {
+//        if (isNull(sshUrl)) {// || !sshUrl.equals(ghRepository.getSshUrl())) {
+            logger.printf("Changing SSH url from '%s' to '%s'.", sshUrl, ghRepository.getSshUrl());
             sshUrl = ghRepository.getSshUrl();
+        }
+
+        if (changed) {
+            logger.println("Full name changed, removing branches in repository!");
+            ghRepository.getBranches().clear();
         }
     }
 

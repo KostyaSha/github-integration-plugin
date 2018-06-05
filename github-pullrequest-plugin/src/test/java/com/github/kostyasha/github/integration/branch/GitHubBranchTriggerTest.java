@@ -172,9 +172,9 @@ public class GitHubBranchTriggerTest {
 
         jRule.jenkins.setAuthorizationStrategy(auth);
 
-        final FreeStyleProject project =  (FreeStyleProject) jRule.getInstance().getItem("project");
+        final FreeStyleProject project = (FreeStyleProject) jRule.getInstance().getItem("project");
 
-        Map<Permission,Set<String>> perms = new HashMap<>();
+        Map<Permission, Set<String>> perms = new HashMap<>();
 
         HashSet<String> users = new HashSet<>();
         users.add("alice");
@@ -198,6 +198,87 @@ public class GitHubBranchTriggerTest {
         Queue.Item[] items = jRule.getInstance().getQueue().getItems();
         assertThat(items, arrayWithSize(0));
 
+    }
+
+    @LocalData
+    @Test
+    public void refreshRepo() throws Exception {
+        config.getConfigs().add(github.serverConfig());
+        config.save();
+
+        Thread.sleep(1000);
+
+        FreeStyleProject project = (FreeStyleProject) jRule.getInstance().getItem("project");
+
+        final GitHubBranchTrigger branchTrigger = project.getTrigger(GitHubBranchTrigger.class);
+
+        assertThat(branchTrigger.getRemoteRepository(), notNullValue());
+
+        GitHubBranchRepository localRepo = project.getAction(GitHubBranchRepository.class);
+        assertThat(localRepo, notNullValue());
+
+        assertThat(localRepo.getFullName(), is("KostyaSha-auto/test"));
+        assertThat(localRepo.getGithubUrl(), notNullValue());
+        assertThat(localRepo.getGithubUrl().toString(), is("https://github.com/KostyaSha-auto/test/"));
+        assertThat(localRepo.getSshUrl(), is("git@github.com:KostyaSha-auto/test.git"));
+        assertThat(localRepo.getGitUrl(), is("git://github.com/KostyaSha-auto/test.git"));
+
+        assertThat(localRepo.getBranches().size(), is(2));
+        assertThat(localRepo.getBranches(), hasKey("old-repo"));
+        assertThat(localRepo.getBranches(), hasKey("old-branch"));
+
+        GitHubBranch oldRepo = localRepo.getBranches().get("old-repo");
+        assertThat(oldRepo.getCommitSha(), is("6dcb09b5b57875f334f61aebed695e2e4193fffb"));
+        assertThat(oldRepo.getHtmlUrl(), is("http://localhost/org/repo/tree/old-repo"));
+        assertThat(oldRepo.getName(), is("old-repo"));
+
+        GitHubBranch oldBranch = localRepo.getBranches().get("old-branch");
+        assertThat(oldBranch.getCommitSha(), is("6dcb09b5b57875f334f61aebed695e2e4193ffbe"));
+        assertThat(oldBranch.getHtmlUrl(), is("http://localhost/org/repo/tree/old-branch"));
+        assertThat(oldBranch.getName(), is("old-branch"));
+
+
+        project.addProperty(new GithubProjectProperty("http://localhost/org/repo"));
+
+        final List<GitHubBranchEvent> events = new ArrayList<>();
+        events.add(new GitHubBranchCreatedEvent());
+        events.add(new GitHubBranchHashChangedEvent());
+
+        final GitHubBranchTrigger trigger = new GitHubBranchTrigger("", CRON, events);
+        project.addTrigger(trigger);
+        project.save();
+        // activate trigger
+        jRule.configRoundtrip(project);
+
+        // and now full trigger run()
+        branchTrigger.run();
+
+        jRule.waitUntilNoActivity();
+
+        assertThat(project.getBuilds(), hasSize(2));
+
+        localRepo = project.getAction(GitHubBranchRepository.class);
+
+        // now expect actualisation
+        assertThat(localRepo.getFullName(), is("org/repo"));
+        assertThat(localRepo.getGithubUrl(), notNullValue());
+        assertThat(localRepo.getGithubUrl().toString(), is("http://localhost/org/repo"));
+        assertThat(localRepo.getGitUrl(), is("git://localhost/org/repo.git"));
+        assertThat(localRepo.getSshUrl(), is("git@localhost:org/repo.git"));
+
+        assertThat(localRepo.getBranches().size(), is(2));
+        assertThat(localRepo.getBranches(), not(hasKey("old-branch")));
+        assertThat(localRepo.getBranches(), not(hasKey("old-repo")));
+
+        assertThat(localRepo.getBranches(), hasKey("should-change"));
+        GitHubBranch shouldChange = localRepo.getBranches().get("should-change");
+        assertThat(shouldChange.getCommitSha(), is("6dcb09b5b57875f334f61aebed695e2e4193ffgg"));
+        assertThat(shouldChange.getHtmlUrl(), is("http://localhost/org/repo/tree/should-change"));
+
+        assertThat(localRepo.getBranches(), hasKey("new-branch"));
+        GitHubBranch newBranch = localRepo.getBranches().get("new-branch");
+        assertThat(newBranch.getCommitSha(), is("6dcb09b5b57875f334f61aebed695e2e4193db5e"));
+        assertThat(newBranch.getHtmlUrl(), is("http://localhost/org/repo/tree/new-branch"));
     }
 
     @TestExtension

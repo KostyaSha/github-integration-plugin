@@ -48,7 +48,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
      *
      * @param remoteRepository remote repository full name.
      */
-    public GitHubBranchRepository(GHRepository remoteRepository) {
+    public GitHubBranchRepository(GHRepository remoteRepository) throws IOException {
         super(remoteRepository);
     }
 

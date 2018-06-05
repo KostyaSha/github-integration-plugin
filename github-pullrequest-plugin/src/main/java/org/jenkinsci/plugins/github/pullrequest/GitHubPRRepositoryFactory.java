@@ -7,6 +7,7 @@ import hudson.Extension;
 import hudson.XmlFile;
 import hudson.model.Action;
 import hudson.model.Job;
+import hudson.model.TaskListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +74,7 @@ public class GitHubPRRepositoryFactory extends GitHubRepositoryFactory<GitHubPRR
         localRepository.setConfigFile(configFile);
 
         try {
-            localRepository.actualise(trigger.getRemoteRepository());
+            localRepository.actualise(trigger.getRemoteRepository(), TaskListener.NULL);
             localRepository.save();
         } catch (Throwable ignore) {
             //silently try actualise

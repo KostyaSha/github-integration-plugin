@@ -41,12 +41,22 @@ public abstract class GitHubTriggerDescriptor extends TriggerDescriptor {
 
     private String publishedURL;
 
+    private boolean actualiseOnFactory = false;
+
     public String getPublishedURL() {
         return publishedURL;
     }
 
     public void setPublishedURL(String publishedURL) {
         this.publishedURL = publishedURL;
+    }
+
+    public boolean isActualiseOnFactory() {
+        return actualiseOnFactory;
+    }
+
+    public void setActualiseOnFactory(boolean actualiseOnFactory) {
+        this.actualiseOnFactory = actualiseOnFactory;
     }
 
     public String getJenkinsURL() {

@@ -280,7 +280,7 @@ public class GitHubPRRepositoryTest {
 
     //to increase method coverage rate
     @Test
-    public void checkGetters() throws MalformedURLException {
+    public void checkGetters() throws IOException {
         String fullName = "fullName";
         URL url = new URL("https://github.com/user/repo/");
         String prefix = "prefix";
