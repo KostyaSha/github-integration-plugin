@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository plugin="github-pullrequest@0.1.0-SNAPSHOT">
-    <fullName>org/old-repo</fullName>
-    <githubUrl>https://localhost/org/old-repo/</githubUrl>
-    <gitUrl>git://localhost/org/old-repo.git</gitUrl>
-    <sshUrl>git@localhost:org/old-repo.git</sshUrl>
+    <fullName>org/repo</fullName>
+    <githubUrl>https://localhost/org/repo/</githubUrl>
+    <gitUrl>git://localhost/org/repo.git</gitUrl>
+    <sshUrl>git@localhost:org/repo.git</sshUrl>
     <pulls>
         <entry>
             <int>1</int>
@@ -17,7 +17,7 @@
                 <mergeable>true</mergeable>
                 <baseRef>master</baseRef>
                 <userLogin>KostyaSha-auto</userLogin>
-                <htmlUrl>https://localhost/org/old-repo/pull/1</htmlUrl>
+                <htmlUrl>https://localhost/org/repo/pull/1</htmlUrl>
                 <lastCommentCreatedAt>2016-04-18 06:53:41.0 UTC</lastCommentCreatedAt>
                 <sourceRepoOwner>KostyaSha-auto</sourceRepoOwner>
             </org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest>
