@@ -58,6 +58,7 @@ public class GitHubPRRepositoryFactory extends GitHubRepositoryFactory<GitHubPRR
         GithubProjectProperty property = job.getProperty(GithubProjectProperty.class);
         String githubUrl = property.getProjectUrl().toString();
 
+        boolean save = false;
         GitHubPRRepository localRepository;
         if (configFile.exists()) {
             try {
@@ -65,20 +66,27 @@ public class GitHubPRRepositoryFactory extends GitHubRepositoryFactory<GitHubPRR
             } catch (IOException e) {
                 LOGGER.info("Can't read saved repository, re-creating new one", e);
                 localRepository = new GitHubPRRepository(repoFullName.toString(), new URL(githubUrl));
+                save = true;
             }
         } else {
             localRepository = new GitHubPRRepository(repoFullName.toString(), new URL(githubUrl));
+            save = true;
         }
 
         localRepository.setJob(job);
         localRepository.setConfigFile(configFile);
 
-        try {
-            localRepository.actualise(trigger.getRemoteRepository(), TaskListener.NULL);
-            localRepository.save();
-        } catch (Throwable ignore) {
-            //silently try actualise
+        GitHubPRTrigger.DescriptorImpl prTriggerDescriptor = GitHubPRTrigger.DescriptorImpl.get();
+        if (prTriggerDescriptor.isActualiseOnFactory()) {
+            try {
+                localRepository.actualise(trigger.getRemoteRepository(), TaskListener.NULL);
+                save = true;
+            } catch (Throwable ignore) {
+                //silently try actualise
+            }
         }
+
+        if (save) localRepository.save();
 
         return localRepository;
     }

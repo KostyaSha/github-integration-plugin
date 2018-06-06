@@ -5,7 +5,7 @@
     <keepDependencies>false</keepDependencies>
     <properties>
         <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.18.1">
-            <projectUrl>https://localhost/org/repo/</projectUrl>
+            <projectUrl>https://localhost/org/old-repo/</projectUrl>
             <displayName>display-name</displayName>
         </com.coravy.hudson.plugins.github.GithubProjectProperty>
     </properties>

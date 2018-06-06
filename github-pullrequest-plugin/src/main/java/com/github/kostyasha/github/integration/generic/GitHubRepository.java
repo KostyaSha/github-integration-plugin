@@ -63,7 +63,7 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
         // just in case your organisation decided to change domain
         // take into account only repo/name
         if (isNull(fullName) || !fullName.equals(ghRepository.getFullName())) {
-            logger.printf("Repository full name changed '%s' to '%s'.\n", fullName, ghRepository.getFullName());
+            logger.printf("Repository full name changed from '%s' to '%s'.\n", fullName, ghRepository.getFullName());
             fullName = ghRepository.getFullName();
             changed = true;
         }

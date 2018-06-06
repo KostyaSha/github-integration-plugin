@@ -3,7 +3,7 @@
     <keepDependencies>false</keepDependencies>
     <properties>
         <com.coravy.hudson.plugins.github.GithubProjectProperty>
-            <projectUrl>http://localhost/org/repo/</projectUrl>
+            <projectUrl>https://github.com/KostyaSha-auto/test/</projectUrl>
         </com.coravy.hudson.plugins.github.GithubProjectProperty>
     </properties>
     <scm class="hudson.scm.NullSCM"/>

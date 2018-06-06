@@ -1,5 +1,6 @@
 package com.github.kostyasha.github.integration.branch;
 
+import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlFormUtil;
@@ -9,6 +10,8 @@ import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchCr
 import com.github.kostyasha.github.integration.branch.events.impl.GitHubBranchHashChangedEvent;
 import com.github.kostyasha.github.integration.branch.test.GHMockRule;
 import com.github.kostyasha.github.integration.branch.test.InjectJenkinsMembersRule;
+import com.github.kostyasha.github.integration.generic.repoprovider.GHPermission;
+import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider;
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import hudson.model.Computer;
@@ -212,9 +215,12 @@ public class GitHubBranchTriggerTest {
 
         FreeStyleProject project = (FreeStyleProject) jRule.getInstance().getItem("project");
 
-        final GitHubBranchTrigger branchTrigger = project.getTrigger(GitHubBranchTrigger.class);
+        GitHubBranchTrigger branchTrigger = project.getTrigger(GitHubBranchTrigger.class);
 
-        assertThat(branchTrigger.getRemoteRepository(), notNullValue());
+        GitHubRepositoryName repoFullName = branchTrigger.getRepoFullName();
+        assertThat(repoFullName.getHost(), Matchers.is("github.com"));
+        assertThat(repoFullName.getUserName(), Matchers.is("KostyaSha-auto"));
+        assertThat(repoFullName.getRepositoryName(), Matchers.is("test"));
 
         GitHubBranchRepository localRepo = project.getAction(GitHubBranchRepository.class);
         assertThat(localRepo, notNullValue());
@@ -231,38 +237,48 @@ public class GitHubBranchTriggerTest {
 
         GitHubBranch oldRepo = localRepo.getBranches().get("old-repo");
         assertThat(oldRepo.getCommitSha(), is("6dcb09b5b57875f334f61aebed695e2e4193fffb"));
-        assertThat(oldRepo.getHtmlUrl(), is("http://localhost/org/repo/tree/old-repo"));
+        assertThat(oldRepo.getHtmlUrl(), is("https://github.com/KostyaSha-auto/test/tree/old-repo"));
         assertThat(oldRepo.getName(), is("old-repo"));
 
         GitHubBranch oldBranch = localRepo.getBranches().get("old-branch");
         assertThat(oldBranch.getCommitSha(), is("6dcb09b5b57875f334f61aebed695e2e4193ffbe"));
-        assertThat(oldBranch.getHtmlUrl(), is("http://localhost/org/repo/tree/old-branch"));
+        assertThat(oldBranch.getHtmlUrl(), is("https://github.com/KostyaSha-auto/test/tree/old-branch"));
         assertThat(oldBranch.getName(), is("old-branch"));
 
 
         project.addProperty(new GithubProjectProperty("http://localhost/org/repo"));
 
+        GitHubPluginRepoProvider repoProvider = new GitHubPluginRepoProvider();
+        repoProvider.setManageHooks(false);
+        repoProvider.setRepoPermission(GHPermission.PULL);
+
         final List<GitHubBranchEvent> events = new ArrayList<>();
         events.add(new GitHubBranchCreatedEvent());
         events.add(new GitHubBranchHashChangedEvent());
 
-        final GitHubBranchTrigger trigger = new GitHubBranchTrigger("", CRON, events);
-        project.addTrigger(trigger);
+        branchTrigger = new GitHubBranchTrigger("", CRON, events);
+        branchTrigger.setRepoProvider(repoProvider);
+        project.addTrigger(branchTrigger);
         project.save();
         // activate trigger
         jRule.configRoundtrip(project);
 
+        branchTrigger = project.getTrigger(GitHubBranchTrigger.class);
         // and now full trigger run()
         branchTrigger.run();
 
         jRule.waitUntilNoActivity();
 
-        assertThat(project.getBuilds(), hasSize(2));
+        repoFullName = branchTrigger.getRepoFullName();
+        assertThat(repoFullName.getHost(), Matchers.is("localhost"));
+        assertThat(repoFullName.getUserName(), Matchers.is("org"));
+        assertThat(repoFullName.getRepositoryName(), Matchers.is("repo"));
+
 
         GitHubBranchPollingLogAction logAction = project.getAction(GitHubBranchPollingLogAction.class);
         assertThat(logAction, Matchers.notNullValue());
         assertThat(logAction.getLog(),
-                containsString("Repository full name changed 'KostyaSha-auto/test' to 'org/repo'.\n"));
+                containsString("Repository full name changed from 'KostyaSha-auto/test' to 'org/repo'.\n"));
 
         assertThat(logAction.getLog(),
                 containsString("Changing GitHub url from 'https://github.com/KostyaSha-auto/test/' " +
@@ -276,6 +292,7 @@ public class GitHubBranchTriggerTest {
         assertThat(logAction.getLog(),
                 containsString("Local settings changed, removing branches in repository!"));
 
+        assertThat(project.getBuilds(), hasSize(2));
 
         localRepo = project.getAction(GitHubBranchRepository.class);
 

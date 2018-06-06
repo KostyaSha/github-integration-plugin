@@ -10,7 +10,7 @@
             <com.github.kostyasha.github.integration.branch.GitHubBranch>
                 <name>old-repo</name>
                 <commitSha>6dcb09b5b57875f334f61aebed695e2e4193fffb</commitSha>
-                <htmlUrl>http://localhost/org/repo/tree/old-repo</htmlUrl>
+                <htmlUrl>https://github.com/KostyaSha-auto/test/tree/old-repo</htmlUrl>
             </com.github.kostyasha.github.integration.branch.GitHubBranch>
         </entry>
         <entry>
@@ -18,7 +18,7 @@
             <com.github.kostyasha.github.integration.branch.GitHubBranch>
                 <name>old-branch</name>
                 <commitSha>6dcb09b5b57875f334f61aebed695e2e4193ffbe</commitSha>
-                <htmlUrl>http://localhost/org/repo/tree/old-branch</htmlUrl>
+                <htmlUrl>https://github.com/KostyaSha-auto/test/tree/old-branch</htmlUrl>
             </com.github.kostyasha.github.integration.branch.GitHubBranch>
         </entry>
     </branches>
