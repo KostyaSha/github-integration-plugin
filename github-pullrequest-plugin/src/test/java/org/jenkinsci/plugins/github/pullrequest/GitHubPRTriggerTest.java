@@ -238,6 +238,5 @@ public class GitHubPRTriggerTest {
 
         Queue.Item[] items = j.getInstance().getQueue().getItems();
         assertThat(items, arrayWithSize(0));
-
     }
 }

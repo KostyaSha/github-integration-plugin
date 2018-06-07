@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <com.github.kostyasha.github.integration.branch.GitHubBranchRepository>
-    <fullName>KostyaSha-auto/test</fullName>
-    <githubUrl>https://github.com/KostyaSha-auto/test/</githubUrl>
-    <gitUrl>git://github.com/KostyaSha-auto/test.git</gitUrl>
-    <sshUrl>git@github.com:KostyaSha-auto/test.git</sshUrl>
+    <fullName>org/repo</fullName>
+    <githubUrl>http://localhost/org/repo</githubUrl>
+    <gitUrl>git://localhost/org/repo.git</gitUrl>
+    <sshUrl>git@localhost:org/repo.git</sshUrl>
     <branches>
         <entry>
             <string>for-removal</string>

@@ -5,6 +5,7 @@ import com.github.kostyasha.github.integration.generic.GitHubRepository;
 import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
@@ -48,7 +49,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
      *
      * @param remoteRepository remote repository full name.
      */
-    public GitHubBranchRepository(GHRepository remoteRepository) {
+    public GitHubBranchRepository(GHRepository remoteRepository) throws IOException {
         super(remoteRepository);
     }
 
@@ -60,6 +61,14 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
     public Map<String, GitHubBranch> getBranches() {
         if (isNull(branches)) branches = new ConcurrentHashMap<>();
         return branches;
+    }
+
+    @Override
+    public void actualiseOnChange(@Nonnull GHRepository ghRepository, @Nonnull TaskListener listener) {
+        if (changed) {
+            listener.getLogger().println("Local settings changed, removing branches in repository!");
+            getBranches().clear();
+        }
     }
 
     @Override

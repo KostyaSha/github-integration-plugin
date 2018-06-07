@@ -108,6 +108,12 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
         this.repoName = repoName;
     }
 
+    @Override
+    public void start(Job<?, ?> project, boolean newInstance) {
+        repoName = null; // reset cache
+        super.start(project, newInstance);
+    }
+
     @Beta
     @Nonnull
     public List<GitHubRepoProvider> getRepoProviders() {
@@ -152,11 +158,12 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
 
         if (isNull(repoProvider)) {
             getErrorsAction().addOrReplaceError(new GitHubRepoProviderError(
-                    String.format("Can't find repo provider for %s.<br/> All providers failed: %s", job.getName(), throwables)
+                    String.format("Can't find repo provider for %s.<br/> All providers failed: %s",
+                            job.getFullName(), throwables)
             ));
         }
 
-        checkState(nonNull(repoProvider), "Can't find repo provider for %s", job.getName());
+        checkState(nonNull(repoProvider), "Can't find repo provider for %s", job.getFullName());
         getErrorsAction().removeErrors(GitHubRepoProviderError.class);
 
         return repoProvider;
@@ -165,7 +172,7 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
     @Nonnull
     public GHRepository getRemoteRepository() throws IOException {
         GHRepository remoteRepository = getRepoProvider().getGHRepository(this);
-        checkState(nonNull(remoteRepository), "Can't get remote GH repo for %s", job.getName());
+        checkState(nonNull(remoteRepository), "Can't get remote GH repo for %s", job.getFullName());
         return remoteRepository;
     }
 
@@ -179,6 +186,7 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
 
     @Override
     public void stop() {
+        repoName = null;
         //TODO clean hooks?
         if (nonNull(job)) {
             LOG.info("Stopping '{}' for project '{}'", getDescriptor().getDisplayName(), job.getFullName());

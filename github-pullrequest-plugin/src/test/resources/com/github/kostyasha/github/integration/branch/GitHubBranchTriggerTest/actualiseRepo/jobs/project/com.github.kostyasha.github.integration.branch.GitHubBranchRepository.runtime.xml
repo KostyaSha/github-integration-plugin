@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<com.github.kostyasha.github.integration.branch.GitHubBranchRepository>
+    <fullName>KostyaSha-auto/test</fullName>
+    <githubUrl>https://github.com/KostyaSha-auto/test/</githubUrl>
+    <gitUrl>git://github.com/KostyaSha-auto/test.git</gitUrl>
+    <sshUrl>git@github.com:KostyaSha-auto/test.git</sshUrl>
+    <branches>
+        <entry>
+            <string>old-repo</string>
+            <com.github.kostyasha.github.integration.branch.GitHubBranch>
+                <name>old-repo</name>
+                <commitSha>6dcb09b5b57875f334f61aebed695e2e4193fffb</commitSha>
+                <htmlUrl>https://github.com/KostyaSha-auto/test/tree/old-repo</htmlUrl>
+            </com.github.kostyasha.github.integration.branch.GitHubBranch>
+        </entry>
+        <entry>
+            <string>old-branch</string>
+            <com.github.kostyasha.github.integration.branch.GitHubBranch>
+                <name>old-branch</name>
+                <commitSha>6dcb09b5b57875f334f61aebed695e2e4193ffbe</commitSha>
+                <htmlUrl>https://github.com/KostyaSha-auto/test/tree/old-branch</htmlUrl>
+            </com.github.kostyasha.github.integration.branch.GitHubBranch>
+        </entry>
+    </branches>
+</com.github.kostyasha.github.integration.branch.GitHubBranchRepository>

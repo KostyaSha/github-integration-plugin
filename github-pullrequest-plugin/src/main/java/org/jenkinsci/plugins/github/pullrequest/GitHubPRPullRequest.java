@@ -106,7 +106,7 @@ public class GitHubPRPullRequest {
 
         // see https://github.com/kohsuke/github-api/issues/111
         try {
-            mergeable = execute(() -> pr.getMergeable());
+            mergeable = execute(pr::getMergeable);
         } catch (IOException e) {
             LOGGER.error("Can't get mergeable status.", e);
             mergeable = false;

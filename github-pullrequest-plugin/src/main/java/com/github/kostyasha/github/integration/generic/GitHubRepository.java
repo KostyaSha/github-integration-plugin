@@ -5,6 +5,7 @@ import hudson.XmlFile;
 import hudson.model.Action;
 import hudson.model.Job;
 import hudson.model.Saveable;
+import hudson.model.TaskListener;
 import hudson.model.listeners.SaveableListener;
 import hudson.util.FormValidation;
 import org.kohsuke.github.GHRepository;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URL;
 
 import static java.util.Objects.isNull;
@@ -29,6 +31,7 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
 
     protected transient XmlFile configFile; // for save()
     protected transient Job<?, ?> job;  // for UI
+    protected transient boolean changed; // for actualisation
 
     @CheckForNull
     private String fullName;
@@ -40,8 +43,8 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
     @CheckForNull
     private String sshUrl;
 
-    public GitHubRepository(@Nonnull GHRepository ghRepository) {
-        actualise(ghRepository);
+    public GitHubRepository(@Nonnull GHRepository ghRepository) throws IOException {
+        actualise(ghRepository, TaskListener.NULL);
     }
 
     public GitHubRepository(String repoFullName, URL githubUrl) {
@@ -53,20 +56,37 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
      * Repository may be created without gh connection, but trigger logic expects this fields.
      * Should be called before trigger logic starts checks.
      */
-    public void actualise(@Nonnull GHRepository ghRepository) {
-        if (isNull(fullName)) {
+    public void actualise(@Nonnull GHRepository ghRepository, @Nonnull TaskListener listener) throws IOException {
+        changed = false;
+
+        PrintStream logger = listener.getLogger();
+        // just in case your organisation decided to change domain
+        // take into account only repo/name
+        if (isNull(fullName) || !fullName.equals(ghRepository.getFullName())) {
+            logger.printf("Repository full name changed from '%s' to '%s'.\n", fullName, ghRepository.getFullName());
             fullName = ghRepository.getFullName();
+            changed = true;
         }
-        if (isNull(githubUrl)) {
+
+        if (isNull(githubUrl) || !githubUrl.equals(ghRepository.getHtmlUrl())) {
+            logger.printf("Changing GitHub url from '%s' to '%s'.\n", githubUrl, ghRepository.getHtmlUrl());
             githubUrl = ghRepository.getHtmlUrl();
         }
-        if (isNull(gitUrl)) {
+
+        if (isNull(gitUrl) || !gitUrl.equals(ghRepository.getGitTransportUrl())) {
+            logger.printf("Changing Git url from '%s' to '%s'.\n", gitUrl, ghRepository.getGitTransportUrl());
             gitUrl = ghRepository.getGitTransportUrl();
         }
-        if (isNull(sshUrl)) {
+
+        if (isNull(sshUrl) || !sshUrl.equals(ghRepository.getSshUrl())) {
+            logger.printf("Changing SSH url from '%s' to '%s'.\n", sshUrl, ghRepository.getSshUrl());
             sshUrl = ghRepository.getSshUrl();
         }
+
+        actualiseOnChange(ghRepository, listener);
     }
+
+    protected abstract void actualiseOnChange(@Nonnull GHRepository ghRepository, @Nonnull TaskListener listener);
 
     public String getFullName() {
         return fullName;

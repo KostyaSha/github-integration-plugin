@@ -191,7 +191,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
                     getDateTimeInstance().format(new Date(startTime)), localRepository.getFullName());
 
             try {
-                localRepository.actualise(getRemoteRepository());
+                localRepository.actualise(getRemoteRepository(), listener);
 
                 causes = readyToBuildCauses(localRepository, listener, branch);
 
@@ -200,7 +200,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
                 // TODO print triggering to listener?
                 from(causes).filter(new JobRunnerForBranchCause(job, this)).toSet();
             } catch (Throwable t) {
-                listener.error("Can't end trigger check: '{}'", t);
+                listener.error("Can't end trigger check!", t);
             }
 
             long duration = System.currentTimeMillis() - startTime;
@@ -219,6 +219,11 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
                                                        @Nullable String requestedBranch) {
         try {
             GitHub github = getRepoProvider().getGitHub(this);
+            if (isNull(github)) {
+                LOG.error("GitHub connection is null, check Repo Providers!");
+                throw new IllegalStateException("GitHub connection is null, check Repo Providers!");
+            }
+
             GHRateLimit rateLimitBefore = github.getRateLimit();
             listener.debug("GitHub rate limit before check: {}", rateLimitBefore);
 

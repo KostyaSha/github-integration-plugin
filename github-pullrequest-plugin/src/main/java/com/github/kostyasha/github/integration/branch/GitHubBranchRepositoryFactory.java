@@ -7,6 +7,8 @@ import hudson.Extension;
 import hudson.XmlFile;
 import hudson.model.Action;
 import hudson.model.Job;
+import hudson.model.TaskListener;
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +29,7 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Kanstantsin Shautsou
  */
+@SuppressWarnings("unused")
 @Extension
 public class GitHubBranchRepositoryFactory
         extends GitHubRepositoryFactory<GitHubBranchRepositoryFactory, GitHubBranchTrigger> {
@@ -58,28 +61,37 @@ public class GitHubBranchRepositoryFactory
         String githubUrl = property.getProjectUrl().toString();
 
         GitHubBranchRepository localRepository;
+        boolean created = false;
         if (configFile.exists()) {
             try {
                 localRepository = (GitHubBranchRepository) configFile.read();
             } catch (IOException e) {
                 LOGGER.info("Can't read saved repository, re-creating new one", e);
                 localRepository = new GitHubBranchRepository(repoFullName.toString(), new URL(githubUrl));
+                created = true;
             }
         } else {
             LOGGER.info("Creating new Branch Repository for '{}'", job.getFullName());
             localRepository = new GitHubBranchRepository(repoFullName.toString(), new URL(githubUrl));
+            created = true;
         }
 
         // set transient cached fields
         localRepository.setJob(job);
         localRepository.setConfigFile(configFile);
 
-        try {
-            localRepository.actualise(trigger.getRemoteRepository());
-            localRepository.save();
-        } catch (Throwable ignore) {
-            //silently try actualise
+
+        GitHubPRTrigger.DescriptorImpl prTriggerDescriptor = GitHubPRTrigger.DescriptorImpl.get();
+        if (prTriggerDescriptor.isActualiseOnFactory()) {
+            try {
+                localRepository.actualise(trigger.getRemoteRepository(), TaskListener.NULL);
+                created = true;
+            } catch (Throwable ignore) {
+                //silently try actualise
+            }
         }
+
+        if (created) localRepository.save();
 
         return localRepository;
     }
