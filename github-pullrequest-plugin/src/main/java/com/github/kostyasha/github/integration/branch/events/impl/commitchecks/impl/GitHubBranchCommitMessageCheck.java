@@ -6,6 +6,7 @@ import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.G
 import com.github.kostyasha.github.integration.branch.events.impl.commitchecks.GitHubBranchCommitCheckDescriptor;
 import hudson.Extension;
 import hudson.ExtensionPoint;
+import org.jenkinsci.Symbol;
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHCommit;
 import org.kohsuke.github.GHCompare.Commit;
@@ -132,6 +133,7 @@ public class GitHubBranchCommitMessageCheck extends GitHubBranchCommitCheck impl
         return new GitHubBranchCause(remoteBranch, localRepo, String.format(message, args), skip);
     }
 
+    @Symbol("commitMessagePattern")
     @Extension
     public static class DescriptorImpl extends GitHubBranchCommitCheckDescriptor {
         @Nonnull

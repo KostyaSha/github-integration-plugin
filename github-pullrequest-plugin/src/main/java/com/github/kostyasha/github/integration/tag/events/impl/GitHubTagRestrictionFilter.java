@@ -5,6 +5,7 @@ import com.github.kostyasha.github.integration.tag.GitHubTagCause;
 import com.github.kostyasha.github.integration.tag.events.GitHubTagEvent;
 import com.github.kostyasha.github.integration.tag.events.GitHubTagEventDescriptor;
 import hudson.Extension;
+import org.jenkinsci.Symbol;
 import org.kohsuke.github.GHTag;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -121,8 +122,10 @@ public class GitHubTagRestrictionFilter extends GitHubTagEvent {
         return context.newCause(String.format(message, args), skip);
     }
 
+    @Symbol("restrictions")
     @Extension
     public static class Descriptor extends GitHubTagEventDescriptor {
+        @Nonnull
         @Override
         public String getDisplayName() {
             return DISPLAY_NAME;

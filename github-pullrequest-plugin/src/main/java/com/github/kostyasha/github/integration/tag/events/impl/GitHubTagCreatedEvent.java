@@ -8,6 +8,7 @@ import com.github.kostyasha.github.integration.tag.events.GitHubTagEvent;
 import com.github.kostyasha.github.integration.tag.events.GitHubTagEventDescriptor;
 import hudson.Extension;
 import hudson.model.TaskListener;
+import org.jenkinsci.Symbol;
 import org.kohsuke.github.GHTag;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
@@ -59,6 +60,7 @@ public class GitHubTagCreatedEvent extends GitHubTagEvent {
         return cause;
     }
 
+    @Symbol("created")
     @Extension
     public static class DescriptorImpl extends GitHubTagEventDescriptor {
         @Nonnull

@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.github.pullrequest.events.impl;
 import com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREventDescriptor;
@@ -58,6 +59,7 @@ public class GitHubPRNonMergeableEvent extends GitHubPREvent {
         return skip;
     }
 
+    @Symbol("nonMergeable")
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
         @Nonnull

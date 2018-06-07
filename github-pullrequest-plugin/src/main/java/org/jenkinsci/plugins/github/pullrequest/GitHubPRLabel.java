@@ -5,6 +5,7 @@ import hudson.Extension;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
 import jenkins.model.Jenkins;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
@@ -46,6 +47,7 @@ public class GitHubPRLabel implements Describable<GitHubPRLabel> {
         return (DescriptorImpl) Jenkins.getInstance().getDescriptor(GitHubPRLabel.class);
     }
 
+    @Symbol("githubLabels")
     @Extension
     public static class DescriptorImpl extends Descriptor<GitHubPRLabel> {
         @Override

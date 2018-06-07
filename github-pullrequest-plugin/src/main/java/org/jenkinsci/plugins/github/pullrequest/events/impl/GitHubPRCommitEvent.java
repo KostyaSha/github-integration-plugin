@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.github.pullrequest.events.impl;
 import com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
@@ -62,6 +63,7 @@ public class GitHubPRCommitEvent extends GitHubPREvent {
         return cause;
     }
 
+    @Symbol("commitChanged")
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
         @Nonnull

@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.github.pullrequest.events.impl;
 import com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
@@ -97,9 +98,11 @@ public class GitHubPRLabelRemovedEvent extends GitHubPREvent {
         return label;
     }
 
+    @Symbol("LabelsRemoved")
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
 
+        @Nonnull
         @Override
         public String getDisplayName() {
             return DISPLAY_NAME;

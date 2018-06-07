@@ -11,6 +11,7 @@ import com.github.kostyasha.github.integration.tag.events.GitHubTagEvent;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import jenkins.scm.api.SCMHeadEvent;
+import org.jenkinsci.Symbol;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHTag;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -111,6 +112,7 @@ public class GitHubTagHandler extends GitHubHandler {
         };
     }
 
+    @Symbol("tag")
     @Extension
     public static class DescriptorImpl extends GitHubHandlerDescriptor {
         @Nonnull

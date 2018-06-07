@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.github.pullrequest.events.impl;
 import com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
@@ -84,6 +85,7 @@ public class GitHubPRLabelAddedEvent extends GitHubPREvent {
         return cause;
     }
 
+    @Symbol("labelsAdded")
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
 

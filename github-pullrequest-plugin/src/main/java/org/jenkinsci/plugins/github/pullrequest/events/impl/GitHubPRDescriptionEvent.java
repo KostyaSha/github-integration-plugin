@@ -4,6 +4,7 @@ import com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
@@ -110,6 +111,7 @@ public class GitHubPRDescriptionEvent extends GitHubPREvent {
         return skipMsg;
     }
 
+    @Symbol("description")
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
         @Nonnull

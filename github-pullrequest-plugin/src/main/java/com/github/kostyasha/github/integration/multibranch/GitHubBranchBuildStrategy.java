@@ -8,6 +8,7 @@ import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.SCMSource;
 import jenkins.scm.api.SCMSourceDescriptor;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
@@ -35,6 +36,7 @@ public class GitHubBranchBuildStrategy extends BranchBuildStrategy {
         return !gr.getCause().isSkip();
     }
 
+    @Symbol("gitHubEvents")
     @Extension
     public static class DescriptorImpl extends BranchBuildStrategyDescriptor {
         @Override

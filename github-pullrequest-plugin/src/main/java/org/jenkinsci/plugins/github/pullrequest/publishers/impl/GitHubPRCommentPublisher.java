@@ -7,6 +7,7 @@ import hudson.model.Api;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRMessage;
 import org.jenkinsci.plugins.github.pullrequest.publishers.GitHubPRAbstractPublisher;
 import org.jenkinsci.plugins.github.pullrequest.utils.PublisherErrorHandler;
@@ -91,6 +92,7 @@ public class GitHubPRCommentPublisher extends GitHubPRAbstractPublisher {
         return (DescriptorImpl) Jenkins.getInstance().getDescriptor(GitHubPRCommentPublisher.class);
     }
 
+    @Symbol("githubPRComment")
     @Extension
     public static class DescriptorImpl extends GitHubPRAbstractPublisher.DescriptorImpl {
         @Override

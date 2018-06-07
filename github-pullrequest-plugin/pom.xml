@@ -225,6 +225,14 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- https://wiki.jenkins-ci.org/display/JENKINS/Structs+plugin -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>structs</artifactId>
+            <version>1.14</version>
+            <optional>true</optional>
+        </dependency>
+
         <!-- workflow for tests -->
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>

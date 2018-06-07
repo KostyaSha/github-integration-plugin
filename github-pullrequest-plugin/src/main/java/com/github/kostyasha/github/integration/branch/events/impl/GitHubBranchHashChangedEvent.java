@@ -7,6 +7,7 @@ import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDe
 import com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
+import org.jenkinsci.Symbol;
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
@@ -53,6 +54,7 @@ public class GitHubBranchHashChangedEvent extends GitHubBranchEvent {
         return cause;
     }
 
+    @Symbol("hashChanged")
     @Extension
     public static class DescriptorImpl extends GitHubBranchEventDescriptor {
         @Nonnull

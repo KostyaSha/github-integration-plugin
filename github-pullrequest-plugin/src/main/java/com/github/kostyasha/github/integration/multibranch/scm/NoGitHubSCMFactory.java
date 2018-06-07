@@ -5,6 +5,7 @@ import hudson.Extension;
 import hudson.plugins.git.GitSCM;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMRevision;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
@@ -23,6 +24,7 @@ public class NoGitHubSCMFactory extends GitHubSCMFactory {
         return new NoGitSCM(null);
     }
 
+    @Symbol("noGITScm")
     @Extension
     public static class DescriptorImpl extends GitHubSCMFactoryDescriptor {
         @Nonnull

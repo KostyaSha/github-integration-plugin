@@ -11,6 +11,7 @@ import com.github.kostyasha.github.integration.generic.GitHubBranchDecisionConte
 import hudson.Extension;
 import hudson.model.TaskListener;
 import net.sf.json.JSONObject;
+import org.jenkinsci.Symbol;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.github.GHBranch;
@@ -130,6 +131,7 @@ public class GitHubBranchCommitEvent extends GitHubBranchEvent {
         return cause;
     }
 
+    @Symbol("commit")
     @Extension
     public static class DescriptorImpl extends GitHubBranchEventDescriptor {
         @Override
@@ -140,6 +142,7 @@ public class GitHubBranchCommitEvent extends GitHubBranchEvent {
             return super.configure(req, formData);
         }
 
+        @Nonnull
         @Override
         public final String getDisplayName() {
             return DISPLAY_NAME;

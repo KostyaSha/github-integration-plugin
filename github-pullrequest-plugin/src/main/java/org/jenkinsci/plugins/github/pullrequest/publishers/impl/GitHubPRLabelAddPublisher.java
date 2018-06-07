@@ -7,6 +7,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import jenkins.model.Jenkins;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
 import org.jenkinsci.plugins.github.pullrequest.publishers.GitHubPRAbstractPublisher;
 import org.jenkinsci.plugins.github.pullrequest.utils.PublisherErrorHandler;
@@ -82,6 +83,7 @@ public class GitHubPRLabelAddPublisher extends GitHubPRAbstractPublisher {
         return (DescriptorImpl) Jenkins.getInstance().getDescriptor(GitHubPRLabelAddPublisher.class);
     }
 
+    @Symbol("githubPRAddLabels")
     @Extension
     public static class DescriptorImpl extends GitHubPRAbstractPublisher.DescriptorImpl {
         @Override

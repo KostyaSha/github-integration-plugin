@@ -8,6 +8,7 @@ import hudson.model.Descriptor;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
+import org.jenkinsci.Symbol;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -107,6 +108,7 @@ public class GitHubPRMessage extends AbstractDescribableImpl<GitHubPRMessage> {
         return (DescriptorImpl) super.getDescriptor();
     }
 
+    @Symbol("githubPRMessage")
     @Extension
     public static class DescriptorImpl extends Descriptor<GitHubPRMessage> {
         @Override

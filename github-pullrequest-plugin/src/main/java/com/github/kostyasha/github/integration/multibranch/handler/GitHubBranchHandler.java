@@ -9,6 +9,7 @@ import com.github.kostyasha.github.integration.multibranch.hooks.GitHubBranchSCM
 import hudson.Extension;
 import hudson.model.TaskListener;
 import jenkins.scm.api.SCMHeadEvent;
+import org.jenkinsci.Symbol;
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -131,6 +132,7 @@ public class GitHubBranchHandler extends GitHubHandler {
         return ordered;
     }
 
+    @Symbol("branch")
     @Extension
     public static class DescriptorImpl extends GitHubHandlerDescriptor {
         @Nonnull
