@@ -2,15 +2,21 @@
 
 ## Next 
 
+## 0.2.0-rc-1
+- Reset github connection cache in "GitHub plugin" repo provider.
+- (Acutalisation of internal state) Change urls, repository name and remove old data on org/repo settings change.
+- Reduce number of connections to github during startup (actualisation happens on first trigger run).  
+- Symbols.
+
 ## 0.2.0-alpha-3
-- Fix logging
-- Fix build/rebuild buttons
+- Fix logging.
+- Fix build/rebuild buttons.
 
 ## 0.2.0-alpha-2
-- Multibranch support
+- Multibranch support with branches, PRs, tags.
 
 ## 0.2.0-alpha-1 
-- failed release
+- failed release.
 
 ## 0.1.0-rc29
 - [branch] reduce number of github api calls for hook processing.
