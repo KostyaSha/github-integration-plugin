@@ -111,6 +111,7 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
     @Override
     public void start(Job<?, ?> project, boolean newInstance) {
         repoName = null; // reset cache
+        getRepoProviders().forEach(GitHubRepoProvider::onTriggerStart);
         super.start(project, newInstance);
     }
 
@@ -187,6 +188,7 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
     @Override
     public void stop() {
         repoName = null;
+        getRepoProviders().forEach(GitHubRepoProvider::onTriggerStop);
         //TODO clean hooks?
         if (nonNull(job)) {
             LOG.info("Stopping '{}' for project '{}'", getDescriptor().getDisplayName(), job.getFullName());
