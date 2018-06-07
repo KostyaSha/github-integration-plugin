@@ -62,23 +62,24 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
         PrintStream logger = listener.getLogger();
         // just in case your organisation decided to change domain
         // take into account only repo/name
-        if (isNull(fullName) || !fullName.equals(ghRepository.getFullName())) {
+        if (isNull(fullName) || !fullName.equalsIgnoreCase(ghRepository.getFullName())) {
             logger.printf("Repository full name changed from '%s' to '%s'.\n", fullName, ghRepository.getFullName());
             fullName = ghRepository.getFullName();
             changed = true;
         }
 
-        if (isNull(githubUrl) || !githubUrl.equals(ghRepository.getHtmlUrl())) {
+        if (isNull(githubUrl)
+                || !githubUrl.toExternalForm().equalsIgnoreCase(ghRepository.getHtmlUrl().toExternalForm())) {
             logger.printf("Changing GitHub url from '%s' to '%s'.\n", githubUrl, ghRepository.getHtmlUrl());
             githubUrl = ghRepository.getHtmlUrl();
         }
 
-        if (isNull(gitUrl) || !gitUrl.equals(ghRepository.getGitTransportUrl())) {
+        if (isNull(gitUrl) || !gitUrl.equalsIgnoreCase(ghRepository.getGitTransportUrl())) {
             logger.printf("Changing Git url from '%s' to '%s'.\n", gitUrl, ghRepository.getGitTransportUrl());
             gitUrl = ghRepository.getGitTransportUrl();
         }
 
-        if (isNull(sshUrl) || !sshUrl.equals(ghRepository.getSshUrl())) {
+        if (isNull(sshUrl) || !sshUrl.equalsIgnoreCase(ghRepository.getSshUrl())) {
             logger.printf("Changing SSH url from '%s' to '%s'.\n", sshUrl, ghRepository.getSshUrl());
             sshUrl = ghRepository.getSshUrl();
         }
