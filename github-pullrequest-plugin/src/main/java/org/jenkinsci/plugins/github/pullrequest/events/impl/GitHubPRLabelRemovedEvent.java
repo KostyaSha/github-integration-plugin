@@ -98,7 +98,7 @@ public class GitHubPRLabelRemovedEvent extends GitHubPREvent {
         return label;
     }
 
-    @Symbol("LabelsRemoved")
+    @Symbol("labelsRemoved")
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
 

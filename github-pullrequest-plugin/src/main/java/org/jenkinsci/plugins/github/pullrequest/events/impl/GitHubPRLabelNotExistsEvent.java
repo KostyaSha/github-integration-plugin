@@ -78,7 +78,7 @@ public class GitHubPRLabelNotExistsEvent extends GitHubPREvent {
         return skip;
     }
 
-    @Symbol("labelNotExists")
+    @Symbol("labelsNotExist")
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
         @Nonnull

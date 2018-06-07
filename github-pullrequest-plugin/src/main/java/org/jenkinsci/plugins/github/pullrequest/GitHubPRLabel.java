@@ -47,9 +47,10 @@ public class GitHubPRLabel implements Describable<GitHubPRLabel> {
         return (DescriptorImpl) Jenkins.getInstance().getDescriptor(GitHubPRLabel.class);
     }
 
-    @Symbol("githubLabels")
+    @Symbol("labels")
     @Extension
     public static class DescriptorImpl extends Descriptor<GitHubPRLabel> {
+        @Nonnull
         @Override
         public String getDisplayName() {
             return "Labels";
