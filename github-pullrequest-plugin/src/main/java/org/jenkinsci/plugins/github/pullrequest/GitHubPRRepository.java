@@ -46,7 +46,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
     public static final String FILE = GitHubPRRepository.class.getName() + ".runtime.xml";
     private static final Logger LOG = LoggerFactory.getLogger(GitHubPRRepository.class);
 
-    private final Map<Integer, GitHubPRPullRequest> pulls = new ConcurrentHashMap<>();
+    private Map<Integer, GitHubPRPullRequest> pulls = new ConcurrentHashMap<>();
 
     /**
      * Object that represent GitHub repository to work with
@@ -63,6 +63,10 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
 
     @Nonnull
     public Map<Integer, GitHubPRPullRequest> getPulls() {
+        if (isNull(pulls)) {
+            pulls = new ConcurrentHashMap<>();
+        }
+
         return pulls;
     }
 

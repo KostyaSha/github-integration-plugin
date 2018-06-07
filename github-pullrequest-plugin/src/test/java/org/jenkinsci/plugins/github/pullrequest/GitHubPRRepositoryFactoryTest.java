@@ -38,7 +38,8 @@ import static org.mockito.Mockito.when;
  * @author Alina_Karpovich
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({GithubProjectProperty.class, GithubUrl.class, JobHelper.class, AbstractItem.class})
+@PrepareForTest({GithubProjectProperty.class, GithubUrl.class, JobHelper.class, AbstractItem.class,
+        GitHubPRTrigger.DescriptorImpl.class})
 public class GitHubPRRepositoryFactoryTest {
     public static final String CONFIG_PATH = "src/test/resources";
 
@@ -51,6 +52,9 @@ public class GitHubPRRepositoryFactoryTest {
     private Job job;
     @Mock
     private GitHubPRTrigger trigger;
+
+    @Mock
+    private GitHubPRTrigger.DescriptorImpl descriptor;
 
     @Test
     public void createForConfigFileExists() throws IOException, NoSuchFieldException, IllegalAccessException {
@@ -94,6 +98,11 @@ public class GitHubPRRepositoryFactoryTest {
     }
 
     private void createForCommonTest(String filePath) throws IOException, NoSuchFieldException, IllegalAccessException {
+        PowerMockito.mockStatic(GitHubPRTrigger.DescriptorImpl.class);
+        given(GitHubPRTrigger.DescriptorImpl.get())
+                .willReturn(descriptor);
+        when(descriptor.isActualiseOnFactory()).thenReturn(false);
+
         createForCommonExpectations(filePath, job, trigger);
 
         when(trigger.getRemoteRepository()).thenReturn(ghRepository);
