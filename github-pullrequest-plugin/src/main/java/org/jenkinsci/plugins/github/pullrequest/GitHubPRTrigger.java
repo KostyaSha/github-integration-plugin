@@ -9,6 +9,7 @@ import hudson.Util;
 import hudson.model.Job;
 import hudson.triggers.Trigger;
 import jenkins.model.Jenkins;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREventDescriptor;
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRBranchRestriction;
@@ -348,6 +349,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
         return FINISH_MSG;
     }
 
+    @Symbol("githubPullRequests")
     @Extension
     public static class DescriptorImpl extends GitHubTriggerDescriptor {
 

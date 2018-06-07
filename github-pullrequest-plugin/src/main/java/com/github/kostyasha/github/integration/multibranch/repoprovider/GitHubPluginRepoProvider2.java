@@ -7,6 +7,7 @@ import com.github.kostyasha.github.integration.multibranch.GitHubSCMSource;
 import com.google.common.base.Optional;
 import hudson.Extension;
 import org.apache.commons.lang3.BooleanUtils;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.github.GitHubPlugin;
 import org.jenkinsci.plugins.github.config.GitHubServerConfig;
 import org.jenkinsci.plugins.github.internal.GHPluginConfigException;
@@ -161,6 +162,7 @@ public class GitHubPluginRepoProvider2 extends GitHubRepoProvider2 {
         return (GitHubPluginRepoProviderDescriptor2) super.getDescriptor();
     }
 
+    @Symbol("gitHubPlugin")
     @Extension
     public static class GitHubPluginRepoProviderDescriptor2 extends GitHubRepoProviderDescriptor2 {
         @Nonnull

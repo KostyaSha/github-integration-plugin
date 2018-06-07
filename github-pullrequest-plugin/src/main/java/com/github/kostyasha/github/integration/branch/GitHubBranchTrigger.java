@@ -11,6 +11,7 @@ import com.github.kostyasha.github.integration.generic.errors.impl.GitHubHookReg
 import hudson.Extension;
 import hudson.model.Job;
 import hudson.triggers.Trigger;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRBranchRestriction;
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction;
@@ -327,6 +328,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
         return mode != LIGHT_HOOKS;
     }
 
+    @Symbol("githubBranches")
     @Extension
     public static class DescriptorImpl extends GitHubTriggerDescriptor {
 

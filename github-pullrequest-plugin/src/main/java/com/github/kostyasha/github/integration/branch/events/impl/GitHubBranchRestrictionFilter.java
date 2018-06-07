@@ -6,6 +6,7 @@ import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
 import com.github.kostyasha.github.integration.generic.GitHubBranchDecisionContext;
 import hudson.Extension;
+import org.jenkinsci.Symbol;
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -123,8 +124,10 @@ public class GitHubBranchRestrictionFilter extends GitHubBranchEvent {
         return context.newCause(String.format(message, args), skip);
     }
 
+    @Symbol("restriction")
     @Extension
     public static class Descriptor extends GitHubBranchEventDescriptor {
+        @Nonnull
         @Override
         public String getDisplayName() {
             return DISPLAY_NAME;

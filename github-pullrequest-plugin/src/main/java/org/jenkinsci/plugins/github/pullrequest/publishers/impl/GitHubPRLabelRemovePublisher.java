@@ -5,6 +5,7 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
 import org.jenkinsci.plugins.github.pullrequest.publishers.GitHubPRAbstractPublisher;
 import org.jenkinsci.plugins.github.pullrequest.utils.PublisherErrorHandler;
@@ -74,6 +75,7 @@ public class GitHubPRLabelRemovePublisher extends GitHubPRAbstractPublisher {
         this.labelProperty = labelProperty;
     }
 
+    @Symbol("githubPRRemoveLabels")
     @Extension
     public static class DescriptorImpl extends GitHubPRAbstractPublisher.DescriptorImpl {
         @Override

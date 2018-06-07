@@ -6,6 +6,7 @@ import hudson.model.Descriptor;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.util.ListBoxModel;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
@@ -30,6 +31,7 @@ public class StatusVerifier extends AbstractDescribableImpl<StatusVerifier> {
         return buildStatus;
     }
 
+    @Symbol("allowRunOnStatus")
     @Extension
     public static class DescriptorImpl extends Descriptor<StatusVerifier> {
         @Override

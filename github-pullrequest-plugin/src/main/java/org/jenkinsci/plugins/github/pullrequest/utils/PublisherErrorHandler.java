@@ -6,7 +6,10 @@ import hudson.model.Descriptor;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.util.ListBoxModel;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import javax.annotation.Nonnull;
 
 /**
  * Allows to change build result to specified value if there was publisher error.
@@ -31,8 +34,10 @@ public class PublisherErrorHandler extends AbstractDescribableImpl<PublisherErro
         return buildStatus;
     }
 
+    @Symbol("statusOnPublisherError")
     @Extension
     public static class DescriptorImpl extends Descriptor<PublisherErrorHandler> {
+        @Nonnull
         @Override
         public String getDisplayName() {
             return "Set build status if publisher failed";

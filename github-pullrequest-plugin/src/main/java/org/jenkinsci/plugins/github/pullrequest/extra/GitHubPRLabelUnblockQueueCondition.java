@@ -4,6 +4,7 @@ import hudson.Extension;
 import hudson.model.Cause;
 import hudson.model.Job;
 import hudson.model.Queue;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.blockqueuedjob.condition.BlockQueueCondition;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRLabel;
@@ -11,6 +12,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
 
@@ -57,9 +59,11 @@ public class GitHubPRLabelUnblockQueueCondition extends BlockQueueCondition {
         return false;
     }
 
+    @Symbol("unblockGitHubPRLabel")
     @Extension(optional = true)
     public static class DescriptorImpl extends BlockQueueConditionDescriptor {
 
+        @Nonnull
         @Override
         public String getDisplayName() {
             return "Unblock when GitHub PR label exists";

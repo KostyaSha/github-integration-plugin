@@ -5,6 +5,7 @@ import com.github.kostyasha.github.integration.multibranch.hooks.GitHubPullReque
 import hudson.Extension;
 import hudson.model.TaskListener;
 import jenkins.scm.api.SCMHeadEvent;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
@@ -136,6 +137,7 @@ public class GitHubPRHandler extends GitHubHandler {
         return Stream.concat(remotePulls.values().stream(), closed);
     }
 
+    @Symbol("PullRequest")
     @Extension
     public static class DescriptorImpl extends GitHubHandlerDescriptor {
         @Nonnull

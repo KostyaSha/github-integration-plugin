@@ -9,6 +9,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.github.pullrequest.publishers.GitHubPRAbstractPublisher;
 import org.jenkinsci.plugins.github.pullrequest.utils.PublisherErrorHandler;
 import org.jenkinsci.plugins.github.pullrequest.utils.StatusVerifier;
@@ -70,6 +71,7 @@ public class GitHubPRClosePublisher extends GitHubPRAbstractPublisher {
         return (DescriptorImpl) super.getDescriptor();
     }
 
+    @Symbol("githubPRClosePublisher")
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
