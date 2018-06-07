@@ -49,7 +49,7 @@ public class GitHubBranchDeletedEvent extends GitHubBranchEvent {
         return cause;
     }
 
-    @Symbol("branchDeleted")
+    @Symbol("deleted")
     @Extension
     public static class DescriptorImpl extends GitHubBranchEventDescriptor {
         @Nonnull
