@@ -89,6 +89,18 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
         return isManageHooks() && GitHubPlugin.configuration().isManageHooks();
     }
 
+    @Override
+    public void onTriggerStart() {
+        gitHub = null;
+        remoteRepository = null;
+    }
+
+    @Override
+    public void onTriggerStop() {
+        gitHub = null;
+        remoteRepository = null;
+    }
+
     @Nonnull
     @Override
     public synchronized GitHub getGitHub(GitHubTrigger trigger) {
@@ -157,6 +169,7 @@ public class GitHubPluginRepoProvider extends GitHubRepoProvider {
 
     @Extension
     public static class DescriptorImpl extends GitHubRepoProviderDescriptor {
+        @Nonnull
         @Override
         public String getDisplayName() {
             return "GitHub Plugin Repository Provider";

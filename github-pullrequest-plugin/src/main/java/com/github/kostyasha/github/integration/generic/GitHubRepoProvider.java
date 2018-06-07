@@ -37,10 +37,21 @@ public abstract class GitHubRepoProvider extends AbstractDescribableImpl<GitHubR
     public abstract GitHub getGitHub(GitHubTrigger trigger);
 
     /**
+     * Called on trigger start. I.e. reset cache after some changes.
+     */
+    public void onTriggerStart() {}
+
+    /**
+     * Called on trigger stop. I.e. reset cache after some changes.
+     */
+    public void onTriggerStop() {}
+
+    /**
      * alive connection to remote repo.
      */
     @CheckForNull
     public abstract GHRepository getGHRepository(GitHubTrigger trigger);
+
 
     public abstract static class GitHubRepoProviderDescriptor
             extends Descriptor<GitHubRepoProvider> {
