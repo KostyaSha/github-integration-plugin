@@ -17,13 +17,10 @@ public class SetCommitStatusStep extends AbstractStepImpl implements Serializabl
 
     private static final long serialVersionUID = 1L;
 
-    @DataBoundSetter
     private String context;
 
-    @DataBoundSetter
     private GHCommitState state;
 
-    @DataBoundSetter
     private String message;
 
     @DataBoundConstructor
@@ -40,11 +37,22 @@ public class SetCommitStatusStep extends AbstractStepImpl implements Serializabl
         return context;
     }
 
+    @DataBoundSetter
+    public void setContext(String context) {
+        this.context = context;
+    }
+
     /**
      * The desired state of the status.
      */
     public GHCommitState getState() {
         return state;
+    }
+
+
+    @DataBoundSetter
+    public void setState(GHCommitState state) {
+        this.state = state;
     }
 
     /**
@@ -53,6 +61,12 @@ public class SetCommitStatusStep extends AbstractStepImpl implements Serializabl
     public String getMessage() {
         return message;
     }
+
+    @DataBoundSetter
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
 
     @Extension
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
