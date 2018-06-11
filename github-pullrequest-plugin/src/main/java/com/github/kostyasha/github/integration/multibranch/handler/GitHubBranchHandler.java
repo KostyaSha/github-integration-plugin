@@ -132,7 +132,7 @@ public class GitHubBranchHandler extends GitHubHandler {
         return ordered;
     }
 
-    @Symbol("branch")
+    @Symbol({"branches", "branch"})
     @Extension
     public static class DescriptorImpl extends GitHubHandlerDescriptor {
         @Nonnull

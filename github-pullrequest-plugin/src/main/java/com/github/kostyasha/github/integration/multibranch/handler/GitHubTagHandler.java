@@ -112,13 +112,13 @@ public class GitHubTagHandler extends GitHubHandler {
         };
     }
 
-    @Symbol("tag")
+    @Symbol({"tags", "tag"})
     @Extension
     public static class DescriptorImpl extends GitHubHandlerDescriptor {
         @Nonnull
         @Override
         public String getDisplayName() {
-            return "Tag Handler";
+            return "Tags Handler";
         }
     }
 }
