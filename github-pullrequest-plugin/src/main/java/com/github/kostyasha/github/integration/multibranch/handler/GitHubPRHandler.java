@@ -137,13 +137,13 @@ public class GitHubPRHandler extends GitHubHandler {
         return Stream.concat(remotePulls.values().stream(), closed);
     }
 
-    @Symbol("pullRequest")
+    @Symbol({"pullRequests", "pullRequest"})
     @Extension
     public static class DescriptorImpl extends GitHubHandlerDescriptor {
         @Nonnull
         @Override
         public String getDisplayName() {
-            return "GitHub PR Handler";
+            return "Pull Requests Handler";
         }
     }
 }
