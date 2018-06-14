@@ -42,7 +42,7 @@ public abstract class GitHubCause<T extends GitHubCause<T>> extends Cause {
 
     private String pollingLog;
 
-    private Object remoteData;
+    private transient Object remoteData;
 
     public GitHubCause withLocalRepo(@Nonnull GitHubRepository localRepo) {
         withGitUrl(localRepo.getGitUrl());
