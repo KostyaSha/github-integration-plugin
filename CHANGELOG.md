@@ -2,6 +2,13 @@
 
 ## Next 
 
+## 0.2.1
+- Don't serialise github api object in Causes (appeared with multibranch support).
+
+## 0.2.0
+- Don't use DataBoundSetter on fields.
+- Temporary don't use symbol that conflicts with buggos pipeline.
+
 ## 0.2.0-rc-1
 - Reset github connection cache in "GitHub plugin" repo provider.
 - (Acutalisation of internal state) Change urls, repository name and remove old data on org/repo settings change.
