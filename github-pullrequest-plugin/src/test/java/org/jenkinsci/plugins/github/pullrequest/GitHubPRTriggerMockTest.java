@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
+import com.cloudbees.jenkins.GitHubPushTrigger;
 import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import com.github.kostyasha.github.integration.branch.test.GHMockRule;
@@ -8,20 +9,33 @@ import com.github.kostyasha.github.integration.generic.repoprovider.GHPermission
 import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider;
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.jayway.awaitility.Awaitility;
+import hudson.model.Descriptor;
 import hudson.model.FreeStyleProject;
+import hudson.model.Queue;
 import hudson.model.TopLevelItem;
+import hudson.util.SequentialExecutionQueue;
+import jenkins.model.Jenkins;
 import org.hamcrest.Matchers;
 import org.jenkinsci.plugins.github.config.GitHubPluginConfig;
+import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPROpenEvent;
+import org.jfree.util.Log;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.SleepBuilder;
 import org.jvnet.hudson.test.TestExtension;
 import org.jvnet.hudson.test.recipes.LocalData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.hamcrest.CoreMatchers.not;
@@ -35,6 +49,8 @@ import static org.junit.Assert.assertThat;
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRTriggerMockTest {
+    private static final Logger LOG = LoggerFactory.getLogger(GitHubPRTriggerMockTest.class);
+
     @Inject
     public GitHubPluginConfig config;
 
@@ -59,14 +75,17 @@ public class GitHubPRTriggerMockTest {
     @TestExtension
     public static final GHMockRule.FixedGHRepoNameTestContributor CONTRIBUTOR = new GHMockRule.FixedGHRepoNameTestContributor();
 
-
-    @LocalData
-    @Test
-    public void badStatePR() throws InterruptedException, IOException {
+    @Before
+    public void before() throws InterruptedException {
         config.getConfigs().add(github.serverConfig());
         config.save();
 
         Thread.sleep(1000);
+    }
+
+    @LocalData
+    @Test
+    public void badStatePR() throws InterruptedException, IOException {
 
         final TopLevelItem item = jRule.getInstance().getItem("test-job");
         assertThat(item, notNullValue());
@@ -103,16 +122,69 @@ public class GitHubPRTriggerMockTest {
     }
 
 
+    @Test
+    public void asyncTestQueue() throws Exception {
+        Jenkins jenkins = jRule.getInstance();
+        Thread.sleep(2000);
+
+        github.service().setGlobalFixedDelay(4_000);
+
+        FreeStyleProject project = jRule.getInstance().createProject(FreeStyleProject.class, "new-job");
+
+        project.addProperty(new GithubProjectProperty("http://localhost/org/repo"));
+        project.save();
+
+        GitHubPRTrigger trigger = new GitHubPRTrigger("", GitHubPRTriggerMode.CRON, Arrays.asList(new GitHubPROpenEvent()));
+
+        GitHubPluginRepoProvider repoProvider = new GitHubPluginRepoProvider();
+        repoProvider.setManageHooks(false);
+        repoProvider.setRepoPermission(GHPermission.PULL);
+
+        trigger.setRepoProvider(repoProvider);
+
+        project.addTrigger(trigger);
+        project.getBuildersList().add(new SleepBuilder(20_000));
+        project.save();
+
+        // activate trigger
+        jRule.configRoundtrip(project);
+
+        trigger = project.getTrigger(GitHubPRTrigger.class);
+
+        jenkins.setNumExecutors(0);
+
+        GitHubPRTrigger.DescriptorImpl descriptor = (GitHubPRTrigger.DescriptorImpl) jenkins.getDescriptor(GitHubPRTrigger.class);
+        SequentialExecutionQueue queue = descriptor.getQueue();
+
+        // now fill queue
+        for (int i = 1; i < 10; i++) {
+            //        trigger.run();
+            trigger.queueRun(null);
+            LOG.info("in progress: {}", queue.getInProgress());
+        }
+
+        Awaitility.await()
+                .timeout(360, TimeUnit.SECONDS)
+                .until(() -> {
+                    Queue.Item[] items = jenkins.getQueue().getItems();
+                    LOG.info("Jenkins Queue: {}", items.length);
+
+                    return items.length == 1;
+                });
+
+        //thread break point
+        //jRule.waitUntilNoActivity();
+
+        assertThat(project.getBuilds(), hasSize(1));
+
+    }
+
     /**
      * loading old local state data, running trigger and checking that old disappeared and new appeared
      */
     @LocalData
     @Test
     public void actualiseRepo() throws Exception {
-        config.getConfigs().add(github.serverConfig());
-        config.save();
-
-        Thread.sleep(1000);
 
         FreeStyleProject project = (FreeStyleProject) jRule.getInstance().getItem("project");
         assertThat(project, notNullValue());

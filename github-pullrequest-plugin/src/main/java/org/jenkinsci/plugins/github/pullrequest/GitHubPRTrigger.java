@@ -191,14 +191,21 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
 
     @Override
     public DescriptorImpl getDescriptor() {
-        return (DescriptorImpl) Jenkins.getActiveInstance().getDescriptor(this.getClass());
+        return (DescriptorImpl) Jenkins.getInstance().getDescriptor(this.getClass());
     }
 
     /**
      * For running from external places. Goes to queue.
+     * <p>
+     * @deprecated Why do we need to pass job here? Trigger.start() should happen when job is configured/loaded...
      */
+    @Deprecated
     public void queueRun(Job<?, ?> job, final int prNumber) {
         this.job = job;
+        queueRun(prNumber);
+    }
+
+    public void queueRun(final Integer prNumber) {
         getDescriptor().getQueue().execute(() -> doRun(prNumber));
     }
 
