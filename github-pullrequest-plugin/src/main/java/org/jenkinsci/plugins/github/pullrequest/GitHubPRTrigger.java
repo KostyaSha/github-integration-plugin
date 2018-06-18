@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.github.kostyasha.github.integration.generic.utils.RetryableGitHubOperation.execute;
@@ -197,6 +198,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
     /**
      * For running from external places. Goes to queue.
      * <p>
+     *
      * @deprecated Why do we need to pass job here? Trigger.start() should happen when job is configured/loaded...
      */
     @Deprecated
@@ -206,7 +208,36 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
     }
 
     public void queueRun(final Integer prNumber) {
-        getDescriptor().getQueue().execute(() -> doRun(prNumber));
+        getDescriptor().getQueue().execute(new ItemRunnable(this, prNumber));
+    }
+
+    private static final class ItemRunnable implements Runnable {
+
+        private GitHubPRTrigger trigger;
+        private Integer prNumber;
+
+        private ItemRunnable(final GitHubPRTrigger trigger, final Integer prNumber) {
+            this.trigger = trigger;
+            this.prNumber = prNumber;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (super.equals(obj)) return true;
+
+            if (obj instanceof ItemRunnable) {
+                ItemRunnable itemRunnable = (ItemRunnable) obj;
+                return itemRunnable.trigger == trigger &&
+                        Objects.equals(itemRunnable.prNumber, prNumber);
+            }
+
+            return false;
+        }
+
+        @Override
+        public void run() {
+            trigger.doRun(prNumber);
+        }
     }
 
     /**

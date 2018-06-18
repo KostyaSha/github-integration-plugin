@@ -10,6 +10,8 @@ import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPlugin
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.jayway.awaitility.Awaitility;
+import hudson.model.Action;
+import hudson.model.CauseAction;
 import hudson.model.Descriptor;
 import hudson.model.FreeStyleProject;
 import hudson.model.Queue;
@@ -34,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -127,7 +130,7 @@ public class GitHubPRTriggerMockTest {
         Jenkins jenkins = jRule.getInstance();
         Thread.sleep(2000);
 
-        github.service().setGlobalFixedDelay(4_000);
+        github.service().setGlobalFixedDelay(2_000);
 
         FreeStyleProject project = jRule.getInstance().createProject(FreeStyleProject.class, "new-job");
 
@@ -156,11 +159,10 @@ public class GitHubPRTriggerMockTest {
         GitHubPRTrigger.DescriptorImpl descriptor = (GitHubPRTrigger.DescriptorImpl) jenkins.getDescriptor(GitHubPRTrigger.class);
         SequentialExecutionQueue queue = descriptor.getQueue();
 
-        // now fill queue
+        // now fill sequential queue
         for (int i = 1; i < 10; i++) {
             //        trigger.run();
             trigger.queueRun(null);
-            LOG.info("in progress: {}", queue.getInProgress());
         }
 
         Awaitility.await()
@@ -171,6 +173,13 @@ public class GitHubPRTriggerMockTest {
 
                     return items.length == 1;
                 });
+
+        Queue.Item item = jenkins.getQueue().getItem(project);
+
+        CauseAction causeAction = item.getAction(CauseAction.class);
+        assertThat(causeAction, notNullValue());
+
+        assertThat(causeAction.getCauses(), not(hasSize(6)));
 
         //thread break point
         //jRule.waitUntilNoActivity();
