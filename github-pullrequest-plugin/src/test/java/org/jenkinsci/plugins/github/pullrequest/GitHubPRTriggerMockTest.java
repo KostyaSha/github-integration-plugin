@@ -162,11 +162,12 @@ public class GitHubPRTriggerMockTest {
         // now fill sequential queue
         for (int i = 1; i < 10; i++) {
             //        trigger.run();
+//            trigger.queueRun(1);
             trigger.queueRun(null);
         }
 
         Awaitility.await()
-                .timeout(360, TimeUnit.SECONDS)
+                .timeout(120, TimeUnit.SECONDS)
                 .until(() -> {
                     Queue.Item[] items = jenkins.getQueue().getItems();
                     LOG.info("Jenkins Queue: {}", items.length);

@@ -227,8 +227,16 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
 
             if (obj instanceof ItemRunnable) {
                 ItemRunnable itemRunnable = (ItemRunnable) obj;
-                return itemRunnable.trigger == trigger &&
-                        Objects.equals(itemRunnable.prNumber, prNumber);
+                if (itemRunnable.trigger == trigger) {
+                    if (isNull(itemRunnable.prNumber) && isNull(prNumber)) {
+                        // do not allow to run full scan async
+                        return true;
+                    }
+
+                    if (Objects.equals(itemRunnable.prNumber, prNumber)) {
+                        return true;
+                    }
+                }
             }
 
             return false;
@@ -237,6 +245,11 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
         @Override
         public void run() {
             trigger.doRun(prNumber);
+        }
+
+        @Override
+        public int hashCode() {
+            return super.hashCode();
         }
     }
 
