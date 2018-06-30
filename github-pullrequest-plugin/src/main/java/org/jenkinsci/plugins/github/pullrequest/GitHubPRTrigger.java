@@ -219,7 +219,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
      *
      * @param prNumber - PR number for check, if null - then all PRs
      */
-    public /*synchronized */ void doRun(Integer prNumber) {
+    public synchronized void doRun(Integer prNumber) {
         if (not(isBuildable()).apply(job)) {
             LOG.debug("Job {} is disabled, but trigger run!", isNull(job) ? "<no job>" : job.getFullName());
             return;
