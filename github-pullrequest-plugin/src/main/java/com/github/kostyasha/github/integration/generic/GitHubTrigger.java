@@ -65,8 +65,9 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
         this.triggerMode = triggerMode;
     }
 
+    @Nonnull
     public GitHubPRTriggerMode getTriggerMode() {
-        return triggerMode;
+        return isNull(triggerMode) ? CRON : triggerMode;
     }
 
     public void setTriggerMode(GitHubPRTriggerMode triggerMode) {

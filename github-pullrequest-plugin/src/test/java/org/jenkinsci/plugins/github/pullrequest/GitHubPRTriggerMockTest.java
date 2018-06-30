@@ -40,6 +40,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -146,12 +147,11 @@ public class GitHubPRTriggerMockTest {
         // activate trigger
         jRule.configRoundtrip(project);
 
-        trigger = project.getTrigger(GitHubPRTrigger.class);
+        trigger = ghPRTriggerFromJob(project);
 
         jenkins.setNumExecutors(0);
 
         GitHubPRTrigger.DescriptorImpl descriptor = (GitHubPRTrigger.DescriptorImpl) jenkins.getDescriptor(GitHubPRTrigger.class);
-        SequentialExecutionQueue queue = descriptor.getQueue();
 
         // now fill sequential queue
         for (int i = 1; i < 10; i++) {

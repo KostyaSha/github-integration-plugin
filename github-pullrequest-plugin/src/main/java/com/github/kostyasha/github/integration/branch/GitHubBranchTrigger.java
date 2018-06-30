@@ -8,6 +8,7 @@ import com.github.kostyasha.github.integration.branch.utils.ItemHelpers;
 import com.github.kostyasha.github.integration.generic.GitHubTrigger;
 import com.github.kostyasha.github.integration.generic.GitHubTriggerDescriptor;
 import com.github.kostyasha.github.integration.generic.errors.impl.GitHubHookRegistrationError;
+import com.google.common.annotations.VisibleForTesting;
 import hudson.Extension;
 import hudson.model.Job;
 import hudson.triggers.Trigger;
@@ -134,7 +135,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
     @Override
     public void run() {
         if (getTriggerMode() != LIGHT_HOOKS) {
-            doRun(null);
+            queueRun(null);
         }
     }
 
@@ -155,9 +156,15 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
 
     /**
      * For running from external places. Goes to queue.
+     * @deprecated use {@link #queueRun(String)}
      */
+    @Deprecated
     public void queueRun(Job<?, ?> job, final String branch) {
         this.job = job;
+        queueRun(branch);
+    }
+
+    public void queueRun(final String branch) {
         getDescriptor().getQueue().execute(() -> doRun(branch));
     }
 
@@ -166,7 +173,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
      *
      * @param branch - branch for check, if null - then all PRs
      */
-    public void doRun(String branch) {
+    public synchronized void doRun(String branch) {
         if (!ItemHelpers.isBuildable().test(job)) {
             LOG.debug("Job {} is disabled, but trigger run!", isNull(job) ? "<no job>" : job.getFullName());
             return;

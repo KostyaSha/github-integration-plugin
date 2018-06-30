@@ -14,6 +14,8 @@ import com.github.kostyasha.github.integration.generic.repoprovider.GHPermission
 import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider;
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.jayway.awaitility.Awaitility;
+import hudson.model.CauseAction;
 import hudson.model.Computer;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
@@ -25,23 +27,29 @@ import hudson.security.ProjectMatrixAuthorizationStrategy;
 import jenkins.model.Jenkins;
 import org.hamcrest.Matchers;
 import org.jenkinsci.plugins.github.config.GitHubPluginConfig;
+import org.jenkinsci.plugins.github.pullrequest.GitHubPRTriggerMode;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestExtension;
 import org.jvnet.hudson.test.recipes.LocalData;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static com.gargoylesoftware.htmlunit.html.HtmlFormUtil.submit;
+import static com.github.kostyasha.github.integration.branch.utils.JobHelper.ghBranchTriggerFromJob;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -57,6 +65,8 @@ import static org.junit.Assert.assertThat;
  * @author Kanstantsin Shautsou
  */
 public class GitHubBranchTriggerTest {
+    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(GitHubBranchTriggerTest.class);
+
     @Inject
     public GitHubPluginConfig config;
 
@@ -78,14 +88,17 @@ public class GitHubBranchTriggerTest {
             .stubRepo()
             .stubStatuses();
 
-    @LocalData
-    @Test
-    public void someTest() throws Exception {
+    @Before
+    public void before() throws InterruptedException {
         config.getConfigs().add(github.serverConfig());
         config.save();
 
         Thread.sleep(1000);
+    }
 
+    @LocalData
+    @Test
+    public void someTest() throws Exception {
         FreeStyleProject prj = jRule.createFreeStyleProject("project");
         prj.addProperty(new GithubProjectProperty("http://localhost/org/repo"));
 
@@ -208,14 +221,11 @@ public class GitHubBranchTriggerTest {
     @LocalData
     @Test
     public void actualiseRepo() throws Exception {
-        config.getConfigs().add(github.serverConfig());
-        config.save();
-
         Thread.sleep(1000);
 
         FreeStyleProject project = (FreeStyleProject) jRule.getInstance().getItem("project");
 
-        GitHubBranchTrigger branchTrigger = project.getTrigger(GitHubBranchTrigger.class);
+        GitHubBranchTrigger branchTrigger = ghBranchTriggerFromJob(project);
 
         GitHubRepositoryName repoFullName = branchTrigger.getRepoFullName();
         assertThat(repoFullName.getHost(), Matchers.is("github.com"));
@@ -316,6 +326,73 @@ public class GitHubBranchTriggerTest {
         GitHubBranch newBranch = localRepo.getBranches().get("new-branch");
         assertThat(newBranch.getCommitSha(), is("6dcb09b5b57875f334f61aebed695e2e4193db5e"));
         assertThat(newBranch.getHtmlUrl(), is("http://localhost/org/repo/tree/new-branch"));
+    }
+
+    @Test
+    public void asyncTestQueue() throws Exception {
+        Jenkins jenkins = jRule.getInstance();
+        Thread.sleep(2000);
+
+        github.service().setGlobalFixedDelay(2_000);
+
+        FreeStyleProject project = jRule.getInstance().createProject(FreeStyleProject.class, "new-job");
+
+        project.addProperty(new GithubProjectProperty("http://localhost/org/repo"));
+        project.save();
+
+        GitHubBranchTrigger trigger = new GitHubBranchTrigger("", GitHubPRTriggerMode.CRON,
+                Arrays.asList(new GitHubBranchCreatedEvent()));
+
+        GitHubPluginRepoProvider repoProvider = new GitHubPluginRepoProvider();
+        repoProvider.setManageHooks(false);
+        repoProvider.setRepoPermission(GHPermission.PULL);
+
+        trigger.setRepoProvider(repoProvider);
+
+        project.addTrigger(trigger);
+//        project.getBuildersList().add(new SleepBuilder(20_000));
+        project.save();
+
+        // activate trigger
+        jRule.configRoundtrip(project);
+
+        trigger = ghBranchTriggerFromJob(project);
+
+        jenkins.setNumExecutors(0);
+
+        // now fill sequential queue
+        for (int i = 1; i < 10; i++) {
+//            trigger.queueRun(1);
+            trigger.queueRun(null);
+        }
+
+        Awaitility.await()
+                .timeout(120, TimeUnit.SECONDS)
+                .until(() -> {
+                    Queue.Item[] items = jenkins.getQueue().getItems();
+                    LOG.info("Jenkins Queue: {}", items.length);
+
+                    return items.length == 2;
+                });
+
+        List<Queue.Item> items = jenkins.getQueue().getItems(project);
+
+        assertThat(items, hasSize(2));
+
+        for (Queue.Item item : items) {
+            CauseAction causeAction = item.getAction(CauseAction.class);
+            assertThat(causeAction, notNullValue());
+
+            assertThat("Async issues in doRun()", causeAction.getCauses(), not(hasSize(6)));
+            assertThat(causeAction.getCauses(), hasSize(1));
+        }
+
+        jenkins.setNumExecutors(2);
+        //thread break point
+        jRule.waitUntilNoActivity();
+
+        assertThat(project.getBuilds(), hasSize(2));
+
     }
 
     @TestExtension
