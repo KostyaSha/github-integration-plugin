@@ -175,10 +175,10 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
     @Override
     public void run() {
         if (getTriggerMode() != LIGHT_HOOKS) {
-            doRun(null);
+            // don't consume Timer threads
+            queueRun(null);
         }
     }
-
 
     @CheckForNull
     @Override
