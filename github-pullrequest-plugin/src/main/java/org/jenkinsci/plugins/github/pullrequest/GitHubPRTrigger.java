@@ -208,57 +208,18 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
     }
 
     public void queueRun(final Integer prNumber) {
-        getDescriptor().getQueue().execute(new ItemRunnable(this, prNumber));
-    }
-
-    private static final class ItemRunnable implements Runnable {
-
-        private GitHubPRTrigger trigger;
-        private Integer prNumber;
-
-        private ItemRunnable(final GitHubPRTrigger trigger, final Integer prNumber) {
-            this.trigger = trigger;
-            this.prNumber = prNumber;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (super.equals(obj)) return true;
-
-            if (obj instanceof ItemRunnable) {
-                ItemRunnable itemRunnable = (ItemRunnable) obj;
-                if (itemRunnable.trigger == trigger) {
-                    if (isNull(itemRunnable.prNumber) && isNull(prNumber)) {
-                        // do not allow to run full scan async
-                        return true;
-                    }
-
-                    if (Objects.equals(itemRunnable.prNumber, prNumber)) {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        @Override
-        public void run() {
-            trigger.doRun(prNumber);
-        }
-
-        @Override
-        public int hashCode() {
-            return super.hashCode();
-        }
+        getDescriptor().getQueue().execute(() -> doRun(prNumber));
     }
 
     /**
-     * Runs check
+     * Runs check.
+     * Synchronised because localRepository state is persisted after trigger decisions were made.
+     * When multiple events triggering runs in queue they triggering builds in parallel.
+     * TODO implement special queue for parallel prNumbers scans and make polling long async.
      *
      * @param prNumber - PR number for check, if null - then all PRs
      */
-    public void doRun(Integer prNumber) {
+    public /*synchronized */ void doRun(Integer prNumber) {
         if (not(isBuildable()).apply(job)) {
             LOG.debug("Job {} is disabled, but trigger run!", isNull(job) ? "<no job>" : job.getFullName());
             return;

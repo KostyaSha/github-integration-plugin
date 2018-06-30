@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
-import com.cloudbees.jenkins.GitHubPushTrigger;
 import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import com.github.kostyasha.github.integration.branch.test.GHMockRule;
@@ -10,9 +9,7 @@ import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPlugin
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.jayway.awaitility.Awaitility;
-import hudson.model.Action;
 import hudson.model.CauseAction;
-import hudson.model.Descriptor;
 import hudson.model.FreeStyleProject;
 import hudson.model.Queue;
 import hudson.model.TopLevelItem;
@@ -21,13 +18,11 @@ import jenkins.model.Jenkins;
 import org.hamcrest.Matchers;
 import org.jenkinsci.plugins.github.config.GitHubPluginConfig;
 import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPROpenEvent;
-import org.jfree.util.Log;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.SleepBuilder;
 import org.jvnet.hudson.test.TestExtension;
 import org.jvnet.hudson.test.recipes.LocalData;
 import org.slf4j.Logger;
@@ -36,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -146,7 +140,7 @@ public class GitHubPRTriggerMockTest {
         trigger.setRepoProvider(repoProvider);
 
         project.addTrigger(trigger);
-        project.getBuildersList().add(new SleepBuilder(20_000));
+//        project.getBuildersList().add(new SleepBuilder(20_000));
         project.save();
 
         // activate trigger
@@ -161,7 +155,6 @@ public class GitHubPRTriggerMockTest {
 
         // now fill sequential queue
         for (int i = 1; i < 10; i++) {
-            //        trigger.run();
 //            trigger.queueRun(1);
             trigger.queueRun(null);
         }
@@ -180,10 +173,12 @@ public class GitHubPRTriggerMockTest {
         CauseAction causeAction = item.getAction(CauseAction.class);
         assertThat(causeAction, notNullValue());
 
-        assertThat(causeAction.getCauses(), not(hasSize(6)));
+        assertThat("Async issues in doRun()", causeAction.getCauses(), not(hasSize(6)));
+        assertThat(causeAction.getCauses(), hasSize(1));
 
+        jenkins.setNumExecutors(2);
         //thread break point
-        //jRule.waitUntilNoActivity();
+        jRule.waitUntilNoActivity();
 
         assertThat(project.getBuilds(), hasSize(1));
 
