@@ -65,8 +65,9 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
         this.triggerMode = triggerMode;
     }
 
+    @Nonnull
     public GitHubPRTriggerMode getTriggerMode() {
-        return triggerMode;
+        return isNull(triggerMode) ? CRON : triggerMode;
     }
 
     public void setTriggerMode(GitHubPRTriggerMode triggerMode) {
@@ -199,6 +200,11 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
     public abstract String getFinishMsg();
 
     public abstract GitHubPollingLogAction getPollingLogAction();
+
+    /**
+     * Run full scan.
+     */
+    public abstract void doRun();
 
     @Nonnull
     @Override

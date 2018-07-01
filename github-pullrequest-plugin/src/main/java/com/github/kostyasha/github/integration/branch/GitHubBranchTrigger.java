@@ -131,11 +131,22 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
         }
     }
 
+    /**
+     * non-blocking run.
+     */
     @Override
     public void run() {
         if (getTriggerMode() != LIGHT_HOOKS) {
-            doRun(null);
+            queueRun(null);
         }
+    }
+
+    /**
+     * blocking run.
+     */
+    @Override
+    public void doRun() {
+        doRun(null);
     }
 
     @Override
@@ -155,9 +166,16 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
 
     /**
      * For running from external places. Goes to queue.
+     *
+     * @deprecated use {@link #queueRun(String)}
      */
+    @Deprecated
     public void queueRun(Job<?, ?> job, final String branch) {
         this.job = job;
+        queueRun(branch);
+    }
+
+    public void queueRun(final String branch) {
         getDescriptor().getQueue().execute(() -> doRun(branch));
     }
 
@@ -166,7 +184,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
      *
      * @param branch - branch for check, if null - then all PRs
      */
-    public void doRun(String branch) {
+    public synchronized void doRun(String branch) {
         if (!ItemHelpers.isBuildable().test(job)) {
             LOG.debug("Job {} is disabled, but trigger run!", isNull(job) ? "<no job>" : job.getFullName());
             return;

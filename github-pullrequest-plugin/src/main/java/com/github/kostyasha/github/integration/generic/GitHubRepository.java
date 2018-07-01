@@ -56,7 +56,7 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
      * Repository may be created without gh connection, but trigger logic expects this fields.
      * Should be called before trigger logic starts checks.
      */
-    public void actualise(@Nonnull GHRepository ghRepository, @Nonnull TaskListener listener) throws IOException {
+    public synchronized void actualise(@Nonnull GHRepository ghRepository, @Nonnull TaskListener listener) throws IOException {
         changed = false;
 
         PrintStream logger = listener.getLogger();

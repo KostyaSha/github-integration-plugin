@@ -171,13 +171,24 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
         }
     }
 
+    /**
+     * Blocking run.
+     */
+    @Override
+    public void doRun() {
+        doRun(null);
+    }
+
+    /**
+     * non-blocking run.
+     */
     @Override
     public void run() {
         if (getTriggerMode() != LIGHT_HOOKS) {
-            doRun(null);
+            // don't consume Timer threads
+            queueRun(null);
         }
     }
-
 
     @CheckForNull
     @Override
@@ -191,23 +202,34 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
 
     @Override
     public DescriptorImpl getDescriptor() {
-        return (DescriptorImpl) Jenkins.getActiveInstance().getDescriptor(this.getClass());
+        return (DescriptorImpl) Jenkins.getInstance().getDescriptor(this.getClass());
     }
 
     /**
      * For running from external places. Goes to queue.
+     * <p>
+     *
+     * @deprecated Why do we need to pass job here? Trigger.start() should happen when job is configured/loaded...
      */
+    @Deprecated
     public void queueRun(Job<?, ?> job, final int prNumber) {
         this.job = job;
+        queueRun(prNumber);
+    }
+
+    public void queueRun(final Integer prNumber) {
         getDescriptor().getQueue().execute(() -> doRun(prNumber));
     }
 
     /**
-     * Runs check
+     * Runs check.
+     * Synchronised because localRepository state is persisted after trigger decisions were made.
+     * When multiple events triggering runs in queue they triggering builds in parallel.
+     * TODO implement special queue for parallel prNumbers scans and make polling long async.
      *
      * @param prNumber - PR number for check, if null - then all PRs
      */
-    public void doRun(Integer prNumber) {
+    public synchronized void doRun(Integer prNumber) {
         if (not(isBuildable()).apply(job)) {
             LOG.debug("Job {} is disabled, but trigger run!", isNull(job) ? "<no job>" : job.getFullName());
             return;

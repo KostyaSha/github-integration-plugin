@@ -39,7 +39,7 @@ public class GHTriggerRunAndEnd implements Callable<Boolean> {
 
         oldLog = oldAction.getLog();
 
-        trigger.run();
+        trigger.doRun();
     }
 
     @Override

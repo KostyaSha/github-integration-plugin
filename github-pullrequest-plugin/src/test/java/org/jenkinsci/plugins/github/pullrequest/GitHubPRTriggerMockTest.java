@@ -8,20 +8,31 @@ import com.github.kostyasha.github.integration.generic.repoprovider.GHPermission
 import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider;
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.jayway.awaitility.Awaitility;
+import hudson.model.CauseAction;
 import hudson.model.FreeStyleProject;
+import hudson.model.Queue;
 import hudson.model.TopLevelItem;
+import hudson.util.SequentialExecutionQueue;
+import jenkins.model.Jenkins;
 import org.hamcrest.Matchers;
 import org.jenkinsci.plugins.github.config.GitHubPluginConfig;
+import org.jenkinsci.plugins.github.pullrequest.events.impl.GitHubPROpenEvent;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestExtension;
 import org.jvnet.hudson.test.recipes.LocalData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.hamcrest.CoreMatchers.not;
@@ -29,12 +40,15 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
 import static org.junit.Assert.assertThat;
 
 /**
  * @author Kanstantsin Shautsou
  */
 public class GitHubPRTriggerMockTest {
+    private static final Logger LOG = LoggerFactory.getLogger(GitHubPRTriggerMockTest.class);
+
     @Inject
     public GitHubPluginConfig config;
 
@@ -59,14 +73,17 @@ public class GitHubPRTriggerMockTest {
     @TestExtension
     public static final GHMockRule.FixedGHRepoNameTestContributor CONTRIBUTOR = new GHMockRule.FixedGHRepoNameTestContributor();
 
-
-    @LocalData
-    @Test
-    public void badStatePR() throws InterruptedException, IOException {
+    @Before
+    public void before() throws InterruptedException {
         config.getConfigs().add(github.serverConfig());
         config.save();
 
         Thread.sleep(1000);
+    }
+
+    @LocalData
+    @Test
+    public void badStatePR() throws InterruptedException, IOException {
 
         final TopLevelItem item = jRule.getInstance().getItem("test-job");
         assertThat(item, notNullValue());
@@ -87,14 +104,14 @@ public class GitHubPRTriggerMockTest {
         final GitHubPRTrigger trigger = project.getTrigger(GitHubPRTrigger.class);
         assertThat(trigger, notNullValue());
 
-        trigger.run();
+        trigger.doRun();
 
         GitHubPRPollingLogAction logAction = project.getAction(GitHubPRPollingLogAction.class);
         assertThat(logAction, notNullValue());
 
         assertThat(logAction.getLog(), containsString("ERROR: local PR [#1 new-feature] is in bad state"));
 
-        trigger.run();
+        trigger.doRun();
 
         logAction = project.getAction(GitHubPRPollingLogAction.class);
 
@@ -103,15 +120,76 @@ public class GitHubPRTriggerMockTest {
     }
 
 
+    @Test
+    public void asyncTestQueue() throws Exception {
+        Jenkins jenkins = jRule.getInstance();
+        Thread.sleep(2000);
+
+        github.service().setGlobalFixedDelay(2_000);
+
+        FreeStyleProject project = jRule.getInstance().createProject(FreeStyleProject.class, "new-job");
+
+        project.addProperty(new GithubProjectProperty("http://localhost/org/repo"));
+        project.save();
+
+        GitHubPRTrigger trigger = new GitHubPRTrigger("", GitHubPRTriggerMode.CRON, Arrays.asList(new GitHubPROpenEvent()));
+
+        GitHubPluginRepoProvider repoProvider = new GitHubPluginRepoProvider();
+        repoProvider.setManageHooks(false);
+        repoProvider.setRepoPermission(GHPermission.PULL);
+
+        trigger.setRepoProvider(repoProvider);
+
+        project.addTrigger(trigger);
+//        project.getBuildersList().add(new SleepBuilder(20_000));
+        project.save();
+
+        // activate trigger
+        jRule.configRoundtrip(project);
+
+        trigger = ghPRTriggerFromJob(project);
+
+        jenkins.setNumExecutors(0);
+
+        GitHubPRTrigger.DescriptorImpl descriptor = (GitHubPRTrigger.DescriptorImpl) jenkins.getDescriptor(GitHubPRTrigger.class);
+
+        // now fill sequential queue
+        for (int i = 1; i < 10; i++) {
+//            trigger.queueRun(1);
+            trigger.queueRun(null);
+        }
+
+        Awaitility.await()
+                .timeout(120, TimeUnit.SECONDS)
+                .until(() -> {
+                    Queue.Item[] items = jenkins.getQueue().getItems();
+                    LOG.info("Jenkins Queue: {}", items.length);
+
+                    return items.length == 1;
+                });
+
+        Queue.Item item = jenkins.getQueue().getItem(project);
+
+        CauseAction causeAction = item.getAction(CauseAction.class);
+        assertThat(causeAction, notNullValue());
+
+        assertThat("Async issues in doRun()", causeAction.getCauses(), not(hasSize(6)));
+        assertThat(causeAction.getCauses(), hasSize(1));
+
+        jenkins.setNumExecutors(2);
+        //thread break point
+        jRule.waitUntilNoActivity();
+
+        assertThat(project.getBuilds(), hasSize(1));
+
+    }
+
     /**
      * loading old local state data, running trigger and checking that old disappeared and new appeared
      */
     @LocalData
     @Test
     public void actualiseRepo() throws Exception {
-        config.getConfigs().add(github.serverConfig());
-        config.save();
-
         Thread.sleep(1000);
 
         FreeStyleProject project = (FreeStyleProject) jRule.getInstance().getItem("project");
@@ -159,9 +237,9 @@ public class GitHubPRTriggerMockTest {
         // activate trigger
         jRule.configRoundtrip(project);
 
-        trigger = project.getTrigger(GitHubPRTrigger.class);
+        trigger = ghPRTriggerFromJob(project);
 
-        trigger.run();
+        trigger.doRun();
 
         jRule.waitUntilNoActivity();
 

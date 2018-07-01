@@ -271,6 +271,7 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
 
         // remove after switch to newer core
         int quietPeriod = 0;
+
         try {
             Object mixinJob = FieldUtils.readField(parameterizedJobMixIn, "val$job", true);
             ParameterizedJobMixIn.ParameterizedJob parameterizedJob = (ParameterizedJobMixIn.ParameterizedJob) mixinJob;
