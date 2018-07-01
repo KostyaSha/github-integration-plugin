@@ -2,6 +2,9 @@
 
 ## Next 
 
+## 0.2.2
+- Fix async issues caused multiple builds running while one should be, uncomplete "polling log" attached to build.
+
 ## 0.2.1
 - Don't serialise github api object in Causes (appeared with multibranch support).
 
