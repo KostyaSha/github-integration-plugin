@@ -2,6 +2,9 @@
 
 ## Next 
 
+## 0.2.3
+- Remove garbage classes.
+
 ## 0.2.2
 - Fix async issues caused multiple builds running while one should be, uncomplete "polling log" attached to build.
 
