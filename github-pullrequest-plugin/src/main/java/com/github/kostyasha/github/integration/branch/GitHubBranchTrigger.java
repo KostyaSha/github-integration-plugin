@@ -8,7 +8,6 @@ import com.github.kostyasha.github.integration.branch.utils.ItemHelpers;
 import com.github.kostyasha.github.integration.generic.GitHubTrigger;
 import com.github.kostyasha.github.integration.generic.GitHubTriggerDescriptor;
 import com.github.kostyasha.github.integration.generic.errors.impl.GitHubHookRegistrationError;
-import com.google.common.annotations.VisibleForTesting;
 import hudson.Extension;
 import hudson.model.Job;
 import hudson.triggers.Trigger;
@@ -132,11 +131,22 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
         }
     }
 
+    /**
+     * non-blocking run.
+     */
     @Override
     public void run() {
         if (getTriggerMode() != LIGHT_HOOKS) {
             queueRun(null);
         }
+    }
+
+    /**
+     * blocking run.
+     */
+    @Override
+    public void doRun() {
+        doRun(null);
     }
 
     @Override
@@ -156,6 +166,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
 
     /**
      * For running from external places. Goes to queue.
+     *
      * @deprecated use {@link #queueRun(String)}
      */
     @Deprecated

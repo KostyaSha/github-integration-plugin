@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import static com.github.kostyasha.github.integration.generic.utils.RetryableGitHubOperation.execute;
@@ -172,6 +171,17 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
         }
     }
 
+    /**
+     * Blocking run.
+     */
+    @Override
+    public void doRun() {
+        doRun(null);
+    }
+
+    /**
+     * non-blocking run.
+     */
     @Override
     public void run() {
         if (getTriggerMode() != LIGHT_HOOKS) {

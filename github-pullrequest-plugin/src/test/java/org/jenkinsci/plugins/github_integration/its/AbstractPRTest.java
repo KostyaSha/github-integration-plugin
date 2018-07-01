@@ -100,7 +100,7 @@ public abstract class AbstractPRTest {
         // now push changes that should trigger again
         ghRule.commitFileToBranch(BRANCH1, BRANCH1 + ".file2", "content", "commit 2 for " + BRANCH1);
 
-        trigger.run();
+        trigger.doRun(null);
 
         await().pollInterval(5, TimeUnit.SECONDS)
                 .timeout(100, SECONDS)

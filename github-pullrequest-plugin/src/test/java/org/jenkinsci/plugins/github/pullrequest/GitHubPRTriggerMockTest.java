@@ -104,14 +104,14 @@ public class GitHubPRTriggerMockTest {
         final GitHubPRTrigger trigger = project.getTrigger(GitHubPRTrigger.class);
         assertThat(trigger, notNullValue());
 
-        trigger.run();
+        trigger.doRun();
 
         GitHubPRPollingLogAction logAction = project.getAction(GitHubPRPollingLogAction.class);
         assertThat(logAction, notNullValue());
 
         assertThat(logAction.getLog(), containsString("ERROR: local PR [#1 new-feature] is in bad state"));
 
-        trigger.run();
+        trigger.doRun();
 
         logAction = project.getAction(GitHubPRPollingLogAction.class);
 
@@ -239,7 +239,7 @@ public class GitHubPRTriggerMockTest {
 
         trigger = ghPRTriggerFromJob(project);
 
-        trigger.doRun(null);
+        trigger.doRun();
 
         jRule.waitUntilNoActivity();
 
