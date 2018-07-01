@@ -35,6 +35,7 @@ import org.junit.rules.RuleChain;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestExtension;
 import org.jvnet.hudson.test.recipes.LocalData;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
@@ -65,7 +66,7 @@ import static org.junit.Assert.assertThat;
  * @author Kanstantsin Shautsou
  */
 public class GitHubBranchTriggerTest {
-    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(GitHubBranchTriggerTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GitHubBranchTriggerTest.class);
 
     @Inject
     public GitHubPluginConfig config;
