@@ -275,7 +275,7 @@ public class GitHubBranchTriggerTest {
 
         branchTrigger = project.getTrigger(GitHubBranchTrigger.class);
         // and now full trigger run()
-        branchTrigger.run();
+        branchTrigger.doRun(null);
 
         jRule.waitUntilNoActivity();
 

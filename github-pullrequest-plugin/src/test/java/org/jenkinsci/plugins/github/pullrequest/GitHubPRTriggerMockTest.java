@@ -190,6 +190,7 @@ public class GitHubPRTriggerMockTest {
     @LocalData
     @Test
     public void actualiseRepo() throws Exception {
+        Thread.sleep(1000);
 
         FreeStyleProject project = (FreeStyleProject) jRule.getInstance().getItem("project");
         assertThat(project, notNullValue());
@@ -236,9 +237,9 @@ public class GitHubPRTriggerMockTest {
         // activate trigger
         jRule.configRoundtrip(project);
 
-        trigger = project.getTrigger(GitHubPRTrigger.class);
+        trigger = ghPRTriggerFromJob(project);
 
-        trigger.run();
+        trigger.doRun(null);
 
         jRule.waitUntilNoActivity();
 
