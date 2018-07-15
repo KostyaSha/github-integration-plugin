@@ -23,6 +23,7 @@ public class GitHubPRTriggerDslContext implements Context {
     private boolean setPreStatus;
     private boolean cancelQueued;
     private boolean abortRunning;
+    private boolean skipFirstRun;
     private List<GitHubPREvent> events = new ArrayList<>();
     private List<GitHubRepoProvider> repoProviders = new ArrayList<>(asList(new GitHubPluginRepoProvider()));
 
@@ -48,6 +49,10 @@ public class GitHubPRTriggerDslContext implements Context {
 
     public void abortRunning() {
         abortRunning = true;
+    }
+
+    public void skipFirstRun() {
+        skipFirstRun = true;
     }
 
     public void events(Runnable closure) {
@@ -83,6 +88,10 @@ public class GitHubPRTriggerDslContext implements Context {
 
     public boolean isAbortRunning() {
         return abortRunning;
+    }
+
+    public boolean isSkipFirstRun() {
+        return skipFirstRun;
     }
 
     public List<GitHubPREvent> events() {

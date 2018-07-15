@@ -4,6 +4,8 @@ freeStyleJob('gh-pull-request') {
         onPullRequest {
             setPreStatus()
             cancelQueued()
+            abortRunning()
+            skipFirstRun()
 
             mode {
                 cron()
