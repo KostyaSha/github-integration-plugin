@@ -27,7 +27,6 @@ import hudson.ExtensionList;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.ParameterValue;
-import hudson.model.ParametersAction;
 import hudson.model.TaskListener;
 import hudson.scm.SCM;
 import jenkins.scm.api.SCMHead;
@@ -257,10 +256,8 @@ public class GitHubSCMSource extends SCMSource {
         GitHubCause<?> cause = gitHubSCMRevision.getCause();
         if (nonNull(cause)) {
             List<ParameterValue> params = new ArrayList<>();
-            List<String> safeParams = new ArrayList<>();
             cause.fillParameters(params);
-            params.forEach(p -> safeParams.add(p.getName()));
-            return Arrays.asList(new CauseAction(cause), new ParametersAction(params, safeParams));
+            return Arrays.asList(new CauseAction(cause), new GitHubParametersAction(params));
         }
 
         return Collections.emptyList();
