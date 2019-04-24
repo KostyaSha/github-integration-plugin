@@ -38,10 +38,9 @@ public class NotUpdatedPRFilter implements Predicate<GHPullRequest>, java.util.f
         @CheckForNull GitHubPRPullRequest localPR = localRepo.getPulls().get(remotePR.getNumber());
 
         if (!isUpdated(remotePR, localPR)) { // light check
-
-			String logMessage = String.format("PR [#%s %s] not changed", remotePR.getNumber(), remotePR.getTitle());
+            String logMessage = String.format("PR [#%s %s] not changed", remotePR.getNumber(), remotePR.getTitle());
             logger.getLogger().println(logMessage);
-			LOGGER.info(logMessage);
+            LOGGER.info(logMessage);
             return false;
         }
         return true;
