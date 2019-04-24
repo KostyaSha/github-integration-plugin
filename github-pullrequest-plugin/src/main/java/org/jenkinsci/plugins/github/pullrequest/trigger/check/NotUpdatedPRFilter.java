@@ -40,7 +40,7 @@ public class NotUpdatedPRFilter implements Predicate<GHPullRequest>, java.util.f
         if (!isUpdated(remotePR, localPR)) { // light check
             String logMessage = String.format("PR [#%s %s] not changed", remotePR.getNumber(), remotePR.getTitle());
             logger.getLogger().println(logMessage);
-            LOGGER.info(logMessage);
+            LOGGER.debug(logMessage);
             return false;
         }
         return true;
