@@ -79,6 +79,12 @@ public class PullRequestToCauseConverterTest {
 
     @Before
     public void setUp() throws Exception {
+        GHRepository headRepo = mock(GHRepository.class);
+        when(headRepo.getOwnerName()).thenReturn("owner");
+
+        when(commit.getRepository()).thenReturn(headRepo);
+
+
         when(remotePR.getUser()).thenReturn(user);
         when(remotePR.getHead()).thenReturn(commit);
         when(remotePR.getBase()).thenReturn(commit);

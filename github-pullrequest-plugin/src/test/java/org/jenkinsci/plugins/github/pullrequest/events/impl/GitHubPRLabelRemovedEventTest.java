@@ -50,6 +50,8 @@ public class GitHubPRLabelRemovedEventTest {
     @Mock
     private GHRepository repository;
     @Mock
+    private GHRepository headRepository;
+    @Mock
     private GHIssue issue;
     @Mock
     private GHLabel label;
@@ -162,7 +164,8 @@ public class GitHubPRLabelRemovedEventTest {
     private void causeCreationExpectations() throws IOException {
         GHUser mockUser = mock(GHUser.class);
         GHCommitPointer mockPointer = mock(GHCommitPointer.class);
-
+        when(mockPointer.getRepository()).thenReturn(headRepository);
+        when(headRepository.getOwnerName()).thenReturn("owner");
         when(remotePr.getUser()).thenReturn(mockUser);
         when(remotePr.getHead()).thenReturn(mockPointer);
         when(remotePr.getBase()).thenReturn(mockPointer);

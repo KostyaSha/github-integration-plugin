@@ -214,7 +214,10 @@ public class GitHubPRCommentEventTest {
     private void causeCreationExpectations() throws IOException {
         GHUser mockUser = mock(GHUser.class);
         GHCommitPointer mockPointer = mock(GHCommitPointer.class);
+        GHRepository headRepo = mock(GHRepository.class);
+        when(headRepo.getOwnerName()).thenReturn("owner");
 
+        when(mockPointer.getRepository()).thenReturn(headRepo);
         when(remotePr.getUser()).thenReturn(mockUser);
         when(remotePr.getHead()).thenReturn(mockPointer);
         when(remotePr.getBase()).thenReturn(mockPointer);
