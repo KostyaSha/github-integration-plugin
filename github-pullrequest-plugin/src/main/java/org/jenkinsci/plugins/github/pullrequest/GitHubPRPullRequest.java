@@ -4,6 +4,7 @@ import hudson.Functions;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.kohsuke.github.GHCommitPointer;
 import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHPullRequest;
@@ -68,8 +69,12 @@ public class GitHubPRPullRequest {
             // those methods never actually throw IOExceptions
             throw new IllegalStateException(e);
         }
-        headSha = pr.getHead().getSha();
-        headRef = pr.getHead().getRef();
+
+        GHCommitPointer prHead = pr.getHead();
+        headSha = prHead.getSha();
+        headRef = prHead.getRef();
+        sourceRepoOwner = prHead.getRepository().getOwnerName();
+
         title = pr.getTitle();
         baseRef = pr.getBase().getRef();
         htmlUrl = pr.getHtmlUrl();
@@ -112,7 +117,6 @@ public class GitHubPRPullRequest {
             mergeable = false;
         }
 
-        sourceRepoOwner = remoteRepo.getOwnerName();
         state = pr.getState().toString();
         body = pr.getBody();
     }
