@@ -24,6 +24,7 @@ import static com.github.kostyasha.github.integration.generic.GitHubPRDecisionCo
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -54,10 +55,17 @@ public class GitHubPRNonMergeableEventTest {
     @Before
     public void before() throws IOException {
         when(remotePr.getUser()).thenReturn(ghUser);
+
+        GHRepository headRepo = mock(GHRepository.class);
+        when(headRepo.getOwnerName()).thenReturn("owner");
+
         when(remotePr.getHead()).thenReturn(ghCommitPointer);
         when(remotePr.getBase()).thenReturn(ghCommitPointer);
+
         when(ghCommitPointer.getSha()).thenReturn("1r134rsha324");
         when(ghCommitPointer.getRef()).thenReturn("some/branch");
+        when(ghCommitPointer.getRepository()).thenReturn(headRepo);
+
         when(remotePr.getRepository()).thenReturn(ghRepository);
         when(ghRepository.getIssue(0)).thenReturn(ghIssue);
         when(ghIssue.getLabels()).thenReturn(Collections.<GHLabel>emptySet());

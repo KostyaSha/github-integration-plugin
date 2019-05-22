@@ -21,6 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -48,6 +49,12 @@ public class LocalRepoUpdaterTest {
     @Before
     public void setUp() throws Exception {
         localRepo = new GitHubPRRepository(remoteRepo);
+
+        GHRepository headRepo = mock(GHRepository.class);
+        when(headRepo.getOwnerName()).thenReturn("owner");
+
+        when(commit.getRepository()).thenReturn(headRepo);
+
 
         when(remotePR.getUser()).thenReturn(new GHUser());
         when(remotePR.getHead()).thenReturn(commit);

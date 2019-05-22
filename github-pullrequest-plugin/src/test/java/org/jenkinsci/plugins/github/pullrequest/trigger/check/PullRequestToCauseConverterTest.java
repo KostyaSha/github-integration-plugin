@@ -79,6 +79,11 @@ public class PullRequestToCauseConverterTest {
 
     @Before
     public void setUp() throws Exception {
+        GHRepository headRepo = mock(GHRepository.class);
+        when(headRepo.getOwnerName()).thenReturn("owner");
+
+        when(commit.getRepository()).thenReturn(headRepo);
+
         when(remotePR.getUser()).thenReturn(user);
         when(remotePR.getHead()).thenReturn(commit);
         when(remotePR.getBase()).thenReturn(commit);
@@ -149,6 +154,10 @@ public class PullRequestToCauseConverterTest {
     @Test
     public void shouldSkipSkippableEvents() throws Exception {
         GHCommitPointer commitPtr = mock(GHCommitPointer.class);
+        GHRepository headRepo = mock(GHRepository.class);
+        when(headRepo.getOwnerName()).thenReturn("owner");
+        when(commitPtr.getRepository()).thenReturn(headRepo);
+
         when(local.getPulls()).thenReturn(ImmutableMap.of(3, localPR));
         when(localPR.getHeadSha()).thenReturn("this is not the sha you are looking for");
         when(remotePR.getNumber()).thenReturn(3);

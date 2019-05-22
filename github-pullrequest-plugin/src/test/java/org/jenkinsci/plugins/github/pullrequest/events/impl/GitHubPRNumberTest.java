@@ -167,6 +167,11 @@ public class GitHubPRNumberTest {
     }
 
     private void causeCreationExpectations() throws IOException {
+        GHRepository headRepo = mock(GHRepository.class);
+        when(headRepo.getOwnerName()).thenReturn("owner");
+
+        when(mockPointer.getRepository()).thenReturn(headRepo);
+
         when(remotePr.getUser()).thenReturn(mockUser);
         when(remotePr.getHead()).thenReturn(mockPointer);
         when(remotePr.getBase()).thenReturn(mockPointer);
