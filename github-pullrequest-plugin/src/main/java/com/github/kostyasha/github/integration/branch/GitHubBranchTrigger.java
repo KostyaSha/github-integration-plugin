@@ -4,6 +4,7 @@ import antlr.ANTLRException;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEvent;
 import com.github.kostyasha.github.integration.branch.events.GitHubBranchEventDescriptor;
 import com.github.kostyasha.github.integration.branch.trigger.JobRunnerForBranchCause;
+import com.github.kostyasha.github.integration.branch.trigger.check.LocalRepoUpdater;
 import com.github.kostyasha.github.integration.branch.utils.ItemHelpers;
 import com.github.kostyasha.github.integration.generic.GitHubTrigger;
 import com.github.kostyasha.github.integration.generic.GitHubTriggerDescriptor;
@@ -44,7 +45,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.github.kostyasha.github.integration.branch.trigger.check.BranchToCauseConverter.toGitHubBranchCause;
-import static com.github.kostyasha.github.integration.branch.trigger.check.LocalRepoUpdater.updateLocalRepo;
 import static com.github.kostyasha.github.integration.branch.trigger.check.SkipFirstRunForBranchFilter.ifSkippedFirstRun;
 import static com.github.kostyasha.github.integration.branch.webhook.WebhookInfoBranchPredicates.withHookTriggerMode;
 import static com.google.common.base.Charsets.UTF_8;
@@ -312,10 +312,8 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
     public static void updateLocalRepository(@CheckForNull String requestedBranch,
                                              Set<GHBranch> remoteBranches, GitHubBranchRepository localRepository) {
         //refresh checked local state for checked branches
-        long count = remoteBranches.stream()
-                .map(updateLocalRepo(localRepository))
-                .count();
-        LOG.trace("Updated local branch details with [{}] repositories.", count);
+        remoteBranches.forEach(branch -> LocalRepoUpdater.updateLocalRepo(localRepository).apply(branch));
+        LOG.trace("Updated local branch details with [{}] repositories.", remoteBranches.size());
 
         // remove deleted branches from local state
         Map<String, GitHubBranch> localBranches;
