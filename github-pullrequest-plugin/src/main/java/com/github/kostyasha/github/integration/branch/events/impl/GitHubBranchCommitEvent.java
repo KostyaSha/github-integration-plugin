@@ -113,7 +113,7 @@ public class GitHubBranchCommitEvent extends GitHubBranchEvent {
 
     private GitHubBranchCause check(GHBranch remoteBranch, Function<GitHubBranchCommitCheck, GitHubBranchCause> function,
                                     PrintStream logger) {
-        List<GitHubBranchCause> causes = checks.stream()
+        List<GitHubBranchCause> causes = getChecks().stream()
                 .map(function::apply)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
