@@ -4,7 +4,7 @@
 === Triggers common configuration:
 - Configure https://wiki.jenkins-ci.org/display/JENKINS/GitHub+Plugin[github-plugin] according to it's documentation.
 - Set `GitHub project property` with link to your GitHub repository in Job settings.
-image::images/github-project-property.png[]
+image:github-project-property.png[]
 - Advanced section contains configuration for configuring `GitHub Repository Provider`. Provider is source of connection to 
 GitHub used by Triggers. Trigger may do automatic hooks registration, but it requires `ADMIN` level access for user and OAuth scopes for token based connection. Trigger may not work when it can't get connection to GitHub so you may want to tune it for example with using `PULL` perms for building some upstream project or `PUSH` with ability to set commit status contexts (green/red checkboxes per commit).
 
