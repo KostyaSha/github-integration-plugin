@@ -52,7 +52,7 @@ public class GitHubTagCause extends AbstractGitHubBranchCause<GitHubTagCause> {
     @Override
     public String getShortDescription() {
         if (getHtmlUrl() != null) {
-            return "GitHub Tag <a href=\"" + getHtmlUrl() + "\">" + getTagName() + "</a>, " + getReason();
+            return "GitHub tag " + getTagName() + ", " + getReason();
         } else {
             return "Deleted tag";
         }

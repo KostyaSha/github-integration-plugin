@@ -303,7 +303,7 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
 
     @Override
     public String getShortDescription() {
-        return "GitHub PR #<a href=\"" + getHtmlUrl() + "\">" + number + "</a>, " + getReason();
+        return "GitHub PR #" + number + ", " + getReason();
     }
 
     public String getHeadSha() {
@@ -336,7 +336,7 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
 
     @Nonnull
     public Set<String> getLabels() {
-        return isNull(labels) ? Collections.<String>emptySet() : labels;
+        return isNull(labels) ? Collections.emptySet() : labels;
     }
 
     public String getTriggerSenderName() {
