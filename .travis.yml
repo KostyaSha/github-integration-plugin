@@ -1,6 +1,6 @@
 #sudo: required
 language: java
-jdk: oraclejdk9
+jdk: openjdk9
 #addons:
 #  apt:
 #    packages:
