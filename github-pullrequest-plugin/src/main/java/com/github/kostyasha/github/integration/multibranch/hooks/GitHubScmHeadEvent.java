@@ -7,7 +7,11 @@ import jenkins.scm.api.SCMHeadEvent;
 import jenkins.scm.api.SCMNavigator;
 import jenkins.scm.api.SCMSource;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import java.util.Objects;
+
+import static java.util.Objects.*;
 
 /**
  * @author Kanstantsin Shautsou
@@ -22,7 +26,7 @@ public abstract class GitHubScmHeadEvent<T> extends SCMHeadEvent<T> {
     protected abstract String getSourceRepo();
 
     @Override
-    public boolean isMatch(SCMSource source) {
+    public boolean isMatch(@Nonnull SCMSource source) {
         if (!(source instanceof GitHubSCMSource)) {
             return false;
         }
@@ -35,12 +39,12 @@ public abstract class GitHubScmHeadEvent<T> extends SCMHeadEvent<T> {
         return getSourceRepo();
     }
 
-    @Nonnull
-    protected String getSourceRepo(SCMSource source) {
+    @CheckForNull
+    protected String getSourceRepo(@Nonnull SCMSource source) {
         GitHubSCMSource gitHubSCMSource = (GitHubSCMSource) source;
         String projectUrlStr = gitHubSCMSource.getProjectUrlStr();
         GitHubRepositoryName repo = GitHubRepositoryName.create(projectUrlStr);
-        return String.format("%s/%s", repo.getUserName(), repo.getRepositoryName());
+        return isNull(repo) ? null : String.format("%s/%s", repo.getUserName(), repo.getRepositoryName());
     }
 
     @Override
