@@ -1,10 +1,10 @@
 #sudo: required
 language: java
 jdk: oraclejdk9
-addons:
-  apt:
-    packages:
-      - oracle-java8-installer
+#addons:
+#  apt:
+#    packages:
+#      - oracle-java8-installer
 before_install:
  - pip install --user codecov
 after_success:
