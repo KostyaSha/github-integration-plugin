@@ -81,7 +81,7 @@ public class JobHelper {
         } else if (guessJob instanceof ParameterizedJobMixIn.ParameterizedJob) {
             ParameterizedJobMixIn.ParameterizedJob pJob = (ParameterizedJobMixIn.ParameterizedJob) guessJob;
 
-            for (Trigger candidate : pJob.getTriggers().values()) {
+            for (Object candidate : pJob.getTriggers().values()) {
                 if (tClass.isInstance(candidate)) {
                     return tClass.cast(candidate);
                 }

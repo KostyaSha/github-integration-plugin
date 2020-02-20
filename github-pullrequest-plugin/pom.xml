@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -48,6 +49,7 @@
         <workflow.version>1.15</workflow.version>
         <matrix.version>1.7.1</matrix.version>
         <excluded.tests>**/its/*.java</excluded.tests>
+        <access-modifier-checker.skip>true</access-modifier-checker.skip>
     </properties>
 
     <repositories>
@@ -128,9 +130,9 @@
             <version>6.2.1</version>
         </dependency>
         <!--<dependency>-->
-            <!--<groupId>com.infradna.tool</groupId>-->
-            <!--<artifactId>bridge-method-annotation</artifactId>-->
-            <!--<version>1.14</version>-->
+        <!--<groupId>com.infradna.tool</groupId>-->
+        <!--<artifactId>bridge-method-annotation</artifactId>-->
+        <!--<version>1.14</version>-->
         <!--</dependency>-->
         <dependency>
             <groupId>commons-codec</groupId>
@@ -315,17 +317,17 @@
 
         <!-- tests logging -->
         <!--<dependency>-->
-            <!--<groupId>ch.qos.logback</groupId>-->
-            <!--<artifactId>logback-core</artifactId>-->
-            <!--<version>${logback.version}</version>-->
-            <!--<scope>test</scope>-->
+        <!--<groupId>ch.qos.logback</groupId>-->
+        <!--<artifactId>logback-core</artifactId>-->
+        <!--<version>${logback.version}</version>-->
+        <!--<scope>test</scope>-->
         <!--</dependency>-->
 
         <!--<dependency>-->
-            <!--<groupId>ch.qos.logback</groupId>-->
-            <!--<artifactId>logback-classic</artifactId>-->
-            <!--<version>${logback.version}</version>-->
-            <!--<scope>test</scope>-->
+        <!--<groupId>ch.qos.logback</groupId>-->
+        <!--<artifactId>logback-classic</artifactId>-->
+        <!--<version>${logback.version}</version>-->
+        <!--<scope>test</scope>-->
         <!--</dependency>-->
 
         <dependency>
@@ -377,17 +379,17 @@
         </dependency>
 
         <!--<dependency>-->
-            <!--<groupId>xml-apis</groupId>-->
-            <!--<artifactId>xml-apis</artifactId>-->
-            <!--<version>1.4.01</version>-->
-            <!--<scope>test</scope>-->
+        <!--<groupId>xml-apis</groupId>-->
+        <!--<artifactId>xml-apis</artifactId>-->
+        <!--<version>1.4.01</version>-->
+        <!--<scope>test</scope>-->
         <!--</dependency>-->
         <!--<dependency>-->
-            <!--<groupId>com.coravy.hudson.plugins.github</groupId>-->
-            <!--<artifactId>github</artifactId>-->
-            <!--<version>1.21.1</version>-->
-            <!--<classifier>test-jar</classifier>-->
-            <!--<scope>test</scope>-->
+        <!--<groupId>com.coravy.hudson.plugins.github</groupId>-->
+        <!--<artifactId>github</artifactId>-->
+        <!--<version>1.21.1</version>-->
+        <!--<classifier>test-jar</classifier>-->
+        <!--<scope>test</scope>-->
         <!--</dependency>-->
     </dependencies>
 
@@ -396,11 +398,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.2</version>
+                <version>3.7.0</version>
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-<!--                <version>2.19.1</version>-->
+                <!--                <version>2.19.1</version>-->
                 <configuration>
                     <excludes>
                         <exclude>InjectedTest.java</exclude>
