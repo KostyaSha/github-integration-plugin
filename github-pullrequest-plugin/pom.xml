@@ -48,7 +48,6 @@
         <workflow.version>1.15</workflow.version>
         <matrix.version>1.7.1</matrix.version>
         <excluded.tests>**/its/*.java</excluded.tests>
-        <java.level>8</java.level>
     </properties>
 
     <repositories>

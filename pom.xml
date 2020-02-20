@@ -35,6 +35,7 @@
         <!--<hpi-plugin.version>1.120</hpi-plugin.version>-->
         <ignore.random.failures>true</ignore.random.failures>
         <enforcer.fail>false</enforcer.fail>
+        <java.version>8</java.version>
     </properties>
 
     <scm>
