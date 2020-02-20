@@ -178,7 +178,7 @@ public class JobHelper {
     }
 
     public static void addComment(final int id, final String comment, final Run<?, ?> run, final TaskListener listener) {
-        if (comment.trim().isEmpty()) {
+        if (comment == null || comment.trim().isEmpty()) {
             return;
         }
 
