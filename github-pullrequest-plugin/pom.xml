@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -42,13 +43,12 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven-release-plugin.version>2.5.1</maven-release-plugin.version>
-        <maven-findbugs-plugin.version>3.0.2</maven-findbugs-plugin.version>
         <powermock.version>1.7.4</powermock.version>
         <logback.version>1.1.3</logback.version>
         <workflow.version>1.15</workflow.version>
         <matrix.version>1.7.1</matrix.version>
         <excluded.tests>**/its/*.java</excluded.tests>
-        <java.level>8</java.level>
+        <access-modifier-checker.skip>true</access-modifier-checker.skip>
     </properties>
 
     <repositories>
@@ -128,11 +128,6 @@
             <artifactId>cloudbees-folder</artifactId>
             <version>6.2.1</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>com.infradna.tool</groupId>-->
-            <!--<artifactId>bridge-method-annotation</artifactId>-->
-            <!--<version>1.14</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
@@ -314,21 +309,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- tests logging -->
-        <!--<dependency>-->
-            <!--<groupId>ch.qos.logback</groupId>-->
-            <!--<artifactId>logback-core</artifactId>-->
-            <!--<version>${logback.version}</version>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-            <!--<groupId>ch.qos.logback</groupId>-->
-            <!--<artifactId>logback-classic</artifactId>-->
-            <!--<version>${logback.version}</version>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
-
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy</artifactId>
@@ -376,20 +356,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-        <!--<dependency>-->
-            <!--<groupId>xml-apis</groupId>-->
-            <!--<artifactId>xml-apis</artifactId>-->
-            <!--<version>1.4.01</version>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>com.coravy.hudson.plugins.github</groupId>-->
-            <!--<artifactId>github</artifactId>-->
-            <!--<version>1.21.1</version>-->
-            <!--<classifier>test-jar</classifier>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
     </dependencies>
 
     <build>
@@ -401,7 +367,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version>
                 <configuration>
                     <excludes>
                         <exclude>InjectedTest.java</exclude>
@@ -413,7 +378,6 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.6.201602180812</version>
                 <executions>
                     <execution>
                         <goals>
@@ -447,7 +411,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -502,9 +465,8 @@
                     </plugin>
 
                     <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>findbugs-maven-plugin</artifactId>
-                        <version>${maven-findbugs-plugin.version}</version>
+                        <groupId>com.github.spotbugs</groupId>
+                        <artifactId>spotbugs-maven-plugin</artifactId>
                         <configuration>
                             <effort>Max</effort>
                             <threshold>Low</threshold>

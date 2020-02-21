@@ -81,7 +81,7 @@ public class JobHelper {
         } else if (guessJob instanceof ParameterizedJobMixIn.ParameterizedJob) {
             ParameterizedJobMixIn.ParameterizedJob pJob = (ParameterizedJobMixIn.ParameterizedJob) guessJob;
 
-            for (Trigger candidate : pJob.getTriggers().values()) {
+            for (Object candidate : pJob.getTriggers().values()) {
                 if (tClass.isInstance(candidate)) {
                     return tClass.cast(candidate);
                 }
@@ -178,7 +178,7 @@ public class JobHelper {
     }
 
     public static void addComment(final int id, final String comment, final Run<?, ?> run, final TaskListener listener) {
-        if (comment.trim().isEmpty()) {
+        if (comment == null || comment.trim().isEmpty()) {
             return;
         }
 

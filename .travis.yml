@@ -1,6 +1,7 @@
 #sudo: required
+dist: trusty
 language: java
-jdk: oraclejdk9
+jdk: oraclejdk8
 #addons:
 #  apt:
 #    packages:
