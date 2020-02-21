@@ -88,10 +88,10 @@ public class GitHubSourceContext {
             listener.getLogger().println("");
             listener.getLogger().println("Checking " + revision.getHead().getPronoun());
             if (!criteria.isHead(source.newProbe(revision.getHead(), revision), listener)) {
-                listener.getLogger().println("  Didn't meet criteria\n");
+                listener.getLogger().println("  Didn't meet criteria");
                 return false;
             }
-            listener.getLogger().println("  Met criteria\n");
+            listener.getLogger().println("  Met criteria");
         }
         return true;
     }
