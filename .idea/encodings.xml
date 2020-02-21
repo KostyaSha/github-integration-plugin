@@ -4,6 +4,13 @@
     <file url="file://$PROJECT_DIR$" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/github-pullrequest-plugin" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/../jenkins" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../jenkins/bom" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../jenkins/cli" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../jenkins/core" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../jenkins/test" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../jenkins/test-jdk8" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../jenkins/test-pom" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../jenkins/war" charset="UTF-8" />
     <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>

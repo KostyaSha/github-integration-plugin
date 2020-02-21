@@ -35,7 +35,7 @@ public class WorkflowITest extends AbstractPRTest {
         workflowJob.setQuietPeriod(10);
 
         workflowJob.setDefinition(
-                new CpsFlowDefinition(classpath(this.getClass(), "workflowTest.groovy"))
+                new CpsFlowDefinition(classpath(this.getClass(), "workflowTest.groovy"), false)
         );
         workflowJob.save();
 
@@ -50,7 +50,7 @@ public class WorkflowITest extends AbstractPRTest {
         workflowJob.addTrigger(getPreconfiguredPRTrigger());
 
         workflowJob.setDefinition(
-                new CpsFlowDefinition(classpath(this.getClass(), "testContextStatuses.groovy"))
+                new CpsFlowDefinition(classpath(this.getClass(), "testContextStatuses.groovy"), false)
         );
         workflowJob.save();
 
