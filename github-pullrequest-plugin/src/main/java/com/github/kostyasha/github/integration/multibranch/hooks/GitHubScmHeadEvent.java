@@ -9,9 +9,8 @@ import jenkins.scm.api.SCMSource;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import java.util.Objects;
 
-import static java.util.Objects.*;
+import static java.util.Objects.isNull;
 
 /**
  * @author Kanstantsin Shautsou

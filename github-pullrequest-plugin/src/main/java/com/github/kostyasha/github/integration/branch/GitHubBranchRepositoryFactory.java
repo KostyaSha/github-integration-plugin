@@ -50,7 +50,7 @@ public class GitHubBranchRepositoryFactory
     }
 
     @Nonnull
-    private static GitHubBranchRepository forProject(Job<?, ?> job) throws IOException {
+    private static GitHubBranchRepository forProject(@Nonnull Job<?, ?> job) throws IOException {
         XmlFile configFile = new XmlFile(new File(job.getRootDir(), GitHubBranchRepository.FILE));
 
         GitHubBranchTrigger trigger = ghBranchTriggerFromJob(job);
