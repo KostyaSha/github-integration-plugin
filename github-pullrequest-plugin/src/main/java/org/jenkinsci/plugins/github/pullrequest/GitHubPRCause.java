@@ -303,7 +303,7 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
 
     @Override
     public String getShortDescription() {
-        return "GitHub PR #" + number + ", " + getReason();
+        return "GitHub PR #" + number + ": " + getReason();
     }
 
     public String getHeadSha() {
