@@ -70,7 +70,7 @@ public class GitHubBranchCause extends AbstractGitHubBranchCause<GitHubBranchCau
     @Override
     public String getShortDescription() {
         if (getHtmlUrl() != null) {
-            return "GitHub Branch " + getBranchName() + ", " + getReason();
+            return "GitHub branch " + getBranchName() + ": " + getReason();
         } else {
             return "Deleted branch";
         }

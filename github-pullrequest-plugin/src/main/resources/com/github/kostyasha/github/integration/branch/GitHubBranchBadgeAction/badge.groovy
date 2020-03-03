@@ -8,11 +8,11 @@ def l = namespace(LayoutTagLib);
 def f = namespace(FormTagLib);
 def j = namespace("jelly:core");
 
-a(href: my.htmlUrl + "/tree/" + my.branchName) {
+a(href: "${my.htmlUrl}/tree/${my.branchName}") {
     img(src: "${rootURL}${GitHubBranch.iconFileName}",
             title: my.title,
             width: "16",
             height: "16"
     )
-    text("${my.getBranchName()}")
+    text("${my.branchName}")
 }
