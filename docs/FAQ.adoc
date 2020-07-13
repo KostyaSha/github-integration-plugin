@@ -10,7 +10,7 @@ UPD workarounded in latest versions.
 Please see https://github.com/KostyaSha/github-integration-plugin/issues/60#issuecomment-200060734
 Example of workaround: https://gist.github.com/kad/4a5a8f669d4a4090b43be1f1c5461df3
 
-==== Webhook is recieved, but the build is not triggered
+==== Build is not triggered, "GitHub PR Polling Log" shows "PR [#PR_NUMBER PR_TITLE] not changed"
 
 Set `GitHub client cache size (MB)` in Jenkins system configuration to `0`.
 Please see https://github.com/KostyaSha/github-integration-plugin/issues/244 for more details.
