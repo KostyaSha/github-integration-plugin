@@ -8,8 +8,8 @@ import jenkins.model.Jenkins;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * Extension for providing GH connection for specified repository with job context.
@@ -55,7 +55,7 @@ public abstract class GitHubRepoProvider extends AbstractDescribableImpl<GitHubR
 
     public abstract static class GitHubRepoProviderDescriptor
             extends Descriptor<GitHubRepoProvider> {
-        @Nonnull
+        @NonNull
         public abstract String getDisplayName();
 
         public static DescriptorExtensionList allRepoProviders() {

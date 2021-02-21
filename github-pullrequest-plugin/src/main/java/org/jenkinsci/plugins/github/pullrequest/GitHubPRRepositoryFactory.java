@@ -11,7 +11,7 @@ import hudson.model.TaskListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -34,8 +34,8 @@ public class GitHubPRRepositoryFactory extends GitHubRepositoryFactory<GitHubPRR
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRRepositoryFactory.class);
 
     @Override
-    @Nonnull
-    public Collection<? extends Action> createFor(@Nonnull Job job) {
+    @NonNull
+    public Collection<? extends Action> createFor(@NonNull Job job) {
         try {
             if (nonNull(ghPRTriggerFromJob(job))) {
                 return singleton(forProject(job));
@@ -47,7 +47,7 @@ public class GitHubPRRepositoryFactory extends GitHubRepositoryFactory<GitHubPRR
         return Collections.emptyList();
     }
 
-    @Nonnull
+    @NonNull
     private static GitHubPRRepository forProject(Job<?, ?> job) throws IOException {
         XmlFile configFile = new XmlFile(new File(job.getRootDir(), GitHubPRRepository.FILE));
 

@@ -7,7 +7,7 @@ import jenkins.scm.api.SCMFileSystem;
 import org.kohsuke.github.GHCommit;
 import org.kohsuke.github.GHRepository;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 /**
@@ -18,7 +18,7 @@ public class GitHubSCMFileSystem extends SCMFileSystem {
     private final GHCommit commit;
     private volatile TreeCache tree;
 
-    protected GitHubSCMFileSystem(@Nonnull GHRepository remoteRepo, GitHubSCMHead<?> head, GitHubSCMRevision rev) throws IOException {
+    protected GitHubSCMFileSystem(@NonNull GHRepository remoteRepo, GitHubSCMHead<?> head, GitHubSCMRevision rev) throws IOException {
         super(rev);
         this.remoteRepo = remoteRepo;
         this.commit = remoteRepo.getCommit(calculateHash(remoteRepo, head, rev));
@@ -31,12 +31,12 @@ public class GitHubSCMFileSystem extends SCMFileSystem {
         return head.fetchHeadSha(remoteRepo);
     }
 
-    @Nonnull
+    @NonNull
     public String getCommitSha() {
         return commit.getSHA1();
     }
 
-    @Nonnull
+    @NonNull
     public GHRepository getRemoteRepo() {
         return remoteRepo;
     }
@@ -46,7 +46,7 @@ public class GitHubSCMFileSystem extends SCMFileSystem {
         return commit.getCommitDate().getTime();
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public SCMFile getRoot() {
         return new GitHubSCMFile(this);

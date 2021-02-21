@@ -9,7 +9,7 @@ import jenkins.model.Jenkins;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * @author Kanstantsin Shautsou
@@ -21,14 +21,14 @@ public abstract class GitHubRepoProvider2 extends AbstractDescribableImpl<GitHub
 
     public abstract boolean isManageHooks(GitHubSCMSource source);
 
-    @Nonnull
+    @NonNull
     public abstract GitHub getGitHub(GitHubSCMSource source);
 
     public abstract GHRepository getGHRepository(GitHubSCMSource source);
 
     public abstract static class GitHubRepoProviderDescriptor2
             extends Descriptor<GitHubRepoProvider2> {
-        @Nonnull
+        @NonNull
         public abstract String getDisplayName();
 
         public static DescriptorExtensionList allRepoProviders2() {

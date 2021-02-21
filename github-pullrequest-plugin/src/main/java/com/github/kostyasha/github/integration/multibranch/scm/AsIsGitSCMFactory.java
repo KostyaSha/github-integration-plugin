@@ -8,7 +8,7 @@ import jenkins.scm.api.SCMRevision;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * @author Kanstantsin Shautsou
@@ -42,7 +42,7 @@ public class AsIsGitSCMFactory extends GitHubSCMFactory {
     @Symbol("asIsGITScm")
     @Extension
     public static class DescriptorImpl extends GitHubSCMFactoryDescriptor {
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "As Is Git SCM";

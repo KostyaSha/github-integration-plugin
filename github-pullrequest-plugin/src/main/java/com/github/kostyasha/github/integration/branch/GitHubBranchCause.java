@@ -10,7 +10,7 @@ import org.kohsuke.github.GHBranch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.util.List;
 
@@ -24,14 +24,14 @@ public class GitHubBranchCause extends AbstractGitHubBranchCause<GitHubBranchCau
 
     private final String branchName;
 
-    public GitHubBranchCause(@Nonnull GitHubBranch localBranch, @Nonnull GitHubBranchRepository localRepo, String reason, boolean skip) {
+    public GitHubBranchCause(@NonNull GitHubBranch localBranch, @NonNull GitHubBranchRepository localRepo, String reason, boolean skip) {
         this(localBranch.getName(), localBranch.getCommitSha());
         withReason(reason);
         withSkip(skip);
         withLocalRepo(localRepo);
     }
 
-    public GitHubBranchCause(@Nonnull GHBranch remoteBranch, @Nonnull GitHubBranchRepository localRepo, String reason, boolean skip) {
+    public GitHubBranchCause(@NonNull GHBranch remoteBranch, @NonNull GitHubBranchRepository localRepo, String reason, boolean skip) {
         this(remoteBranch.getName(), remoteBranch.getSHA1());
         withReason(reason);
         withSkip(skip);
@@ -39,7 +39,7 @@ public class GitHubBranchCause extends AbstractGitHubBranchCause<GitHubBranchCau
         withRemoteData(remoteBranch);
     }
 
-    public GitHubBranchCause(@Nonnull String branchName, String commitSha) {
+    public GitHubBranchCause(@NonNull String branchName, String commitSha) {
         super(commitSha, "refs/heads/" + branchName);
         this.branchName = branchName;
     }
@@ -66,7 +66,7 @@ public class GitHubBranchCause extends AbstractGitHubBranchCause<GitHubBranchCau
         return new GitHubBranchSCMHead(branchName, sourceId);
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public String getShortDescription() {
         if (getHtmlUrl() != null) {
@@ -77,7 +77,7 @@ public class GitHubBranchCause extends AbstractGitHubBranchCause<GitHubBranchCau
     }
 
     @Override
-    public void onAddedTo(@Nonnull Run run) {
+    public void onAddedTo(@NonNull Run run) {
         if (run.getParent().getParent() instanceof SCMSourceOwner) {
             // skip multibranch
             return;

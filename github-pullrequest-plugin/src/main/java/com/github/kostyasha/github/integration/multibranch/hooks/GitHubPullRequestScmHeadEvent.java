@@ -7,8 +7,8 @@ import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.SCMSource;
 import org.jenkinsci.plugins.github.pullrequest.webhook.PullRequestInfo;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Collections;
 import java.util.Map;
 
@@ -16,20 +16,20 @@ import java.util.Map;
  * @author Kanstantsin Shautsou
  */
 public class GitHubPullRequestScmHeadEvent extends GitHubScmHeadEvent<PullRequestInfo> {
-    public GitHubPullRequestScmHeadEvent(@Nonnull Type type, long timestamp, @Nonnull PullRequestInfo payload,
+    public GitHubPullRequestScmHeadEvent(@NonNull Type type, long timestamp, @NonNull PullRequestInfo payload,
                                          @CheckForNull String origin) {
         super(type, timestamp, payload, origin);
     }
 
-    @Nonnull
+    @NonNull
     @Override
     protected String getSourceRepo() {
         return getPayload().getRepo();
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public Map<SCMHead, SCMRevision> heads(@Nonnull SCMSource source) {
+    public Map<SCMHead, SCMRevision> heads(@NonNull SCMSource source) {
         if (!isMatch(source)) {
             return Collections.emptyMap();
         }
@@ -40,7 +40,7 @@ public class GitHubPullRequestScmHeadEvent extends GitHubScmHeadEvent<PullReques
     }
 
     @Override
-    public boolean isMatch(@Nonnull SCM scm) {
+    public boolean isMatch(@NonNull SCM scm) {
         return false;
     }
 }

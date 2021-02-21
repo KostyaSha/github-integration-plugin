@@ -2,7 +2,7 @@ package com.github.kostyasha.github.integration.generic.errors.impl;
 
 import com.github.kostyasha.github.integration.generic.errors.GitHubError;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * Used during {@link com.github.kostyasha.github.integration.generic.GitHubRepoProvider} resolve.
@@ -11,11 +11,11 @@ import javax.annotation.Nonnull;
  */
 public class GitHubRepoProviderError extends GitHubError {
 
-    public GitHubRepoProviderError(@Nonnull String description) {
+    public GitHubRepoProviderError(@NonNull String description) {
         super(description);
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public String getTitle() {
         return "GitHub Repo Provider Error";

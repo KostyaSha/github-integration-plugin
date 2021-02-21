@@ -8,7 +8,7 @@ import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -55,7 +55,7 @@ public final class PRHelperFunctions {
 
     private static class ExtractPRNumberFunction extends NullSafeFunction<GHPullRequest, Integer> {
         @Override
-        protected Integer applyNullSafe(@Nonnull GHPullRequest input) {
+        protected Integer applyNullSafe(@NonNull GHPullRequest input) {
             return input.getNumber();
         }
     }

@@ -12,8 +12,8 @@ import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.SCMSource;
 import org.kohsuke.github.GHRepository;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 /**
@@ -27,7 +27,7 @@ public class GitHubSCMFileSystemBuilder extends SCMFileSystem.Builder {
     }
 
     @Override
-    public SCMFileSystem build(@Nonnull SCMSource source, @Nonnull SCMHead head, @CheckForNull SCMRevision rev)
+    public SCMFileSystem build(@NonNull SCMSource source, @NonNull SCMHead head, @CheckForNull SCMRevision rev)
             throws IOException, InterruptedException {
         if (source instanceof GitHubSCMSource) {
             GitHubSCMSource ghSCMSource = (GitHubSCMSource) source;
@@ -43,7 +43,7 @@ public class GitHubSCMFileSystemBuilder extends SCMFileSystem.Builder {
     }
 
     @Override
-    public SCMFileSystem build(@Nonnull Item owner, @Nonnull SCM scm, @CheckForNull SCMRevision rev)
+    public SCMFileSystem build(@NonNull Item owner, @NonNull SCM scm, @CheckForNull SCMRevision rev)
             throws IOException, InterruptedException {
         // I suppose we could inspect GitSCM for branch configuration
         return null;

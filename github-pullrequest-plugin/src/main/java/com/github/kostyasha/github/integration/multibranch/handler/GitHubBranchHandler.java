@@ -15,7 +15,7 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -56,7 +56,7 @@ public class GitHubBranchHandler extends GitHubHandler {
     }
 
     @Override
-    public void handle(@Nonnull GitHubSourceContext context) throws IOException {
+    public void handle(@NonNull GitHubSourceContext context) throws IOException {
 
         String branchName;
 
@@ -135,7 +135,7 @@ public class GitHubBranchHandler extends GitHubHandler {
     @Symbol("branches"/**, "branch"}**/)
     @Extension
     public static class DescriptorImpl extends GitHubHandlerDescriptor {
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "Branch Handler";

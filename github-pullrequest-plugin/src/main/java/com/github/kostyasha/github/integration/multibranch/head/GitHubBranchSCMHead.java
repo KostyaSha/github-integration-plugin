@@ -4,13 +4,13 @@ import com.github.kostyasha.github.integration.branch.GitHubBranchCause;
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHRepository;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 public class GitHubBranchSCMHead extends GitHubSCMHead<GitHubBranchCause> {
     private static final long serialVersionUID = 1L;
 
-    public GitHubBranchSCMHead(@Nonnull String name, String sourceId) {
+    public GitHubBranchSCMHead(@NonNull String name, String sourceId) {
         super(name, sourceId);
     }
 

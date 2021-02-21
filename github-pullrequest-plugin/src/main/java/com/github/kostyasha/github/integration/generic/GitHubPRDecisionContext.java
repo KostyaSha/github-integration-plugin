@@ -11,8 +11,8 @@ import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREvent;
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction;
 import org.kohsuke.github.GHPullRequest;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 import static java.util.Objects.isNull;
@@ -34,7 +34,7 @@ public class GitHubPRDecisionContext extends GitHubDecisionContext<GitHubPREvent
                                       GitHubSCMSource source,
                                       GitHubPRHandler prHandler,
                                       GitHubPRTrigger prTrigger,
-                                      @Nonnull TaskListener listener) {
+                                      @NonNull TaskListener listener) {
         super(listener, prTrigger, source, prHandler);
         this.remotePR = remotePR;
         this.localPR = localPR;
@@ -49,7 +49,7 @@ public class GitHubPRDecisionContext extends GitHubDecisionContext<GitHubPREvent
                                       GitHubSCMSource source,
                                       GitHubPRHandler prHandler,
                                       GitHubPRTrigger prTrigger,
-                                      @Nonnull TaskListener listener) {
+                                      @NonNull TaskListener listener) {
         this(remotePR, localPR, null, prUserRestriction, source, prHandler, prTrigger, listener);
     }
 
@@ -57,7 +57,7 @@ public class GitHubPRDecisionContext extends GitHubDecisionContext<GitHubPREvent
      * remotePR current PR state fetched from GH
      * remotePRs are always existing on gh.
      */
-    @Nonnull
+    @NonNull
     public GHPullRequest getRemotePR() {
         return remotePR;
     }
@@ -140,7 +140,7 @@ public class GitHubPRDecisionContext extends GitHubDecisionContext<GitHubPREvent
             return this;
         }
 
-        public Builder withListener(@Nonnull TaskListener listener) {
+        public Builder withListener(@NonNull TaskListener listener) {
             this.listener = listener;
             return this;
         }
@@ -176,7 +176,7 @@ public class GitHubPRDecisionContext extends GitHubDecisionContext<GitHubPREvent
 
     }
 
-    @Nonnull
+    @NonNull
     public static Builder newGitHubPRDecisionContext() {
         return new Builder();
     }

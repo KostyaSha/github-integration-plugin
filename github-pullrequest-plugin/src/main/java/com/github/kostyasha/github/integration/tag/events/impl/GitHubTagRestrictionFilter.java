@@ -12,7 +12,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -71,7 +71,7 @@ public class GitHubTagRestrictionFilter extends GitHubTagEvent {
     }
 
     @Override
-    public GitHubTagCause check(@Nonnull GitHubTagDecisionContext context) throws IOException {
+    public GitHubTagCause check(@NonNull GitHubTagDecisionContext context) throws IOException {
         GHTag remoteTag = context.getRemoteTag();
 
         String name = remoteTag.getName();
@@ -125,7 +125,7 @@ public class GitHubTagRestrictionFilter extends GitHubTagEvent {
     @Symbol("restrictions")
     @Extension
     public static class Descriptor extends GitHubTagEventDescriptor {
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return DISPLAY_NAME;

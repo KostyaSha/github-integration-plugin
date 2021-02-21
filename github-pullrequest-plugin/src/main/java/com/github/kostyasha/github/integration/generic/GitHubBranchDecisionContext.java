@@ -10,8 +10,8 @@ import com.github.kostyasha.github.integration.multibranch.handler.GitHubBranchH
 import hudson.model.TaskListener;
 import org.kohsuke.github.GHBranch;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 import static java.util.Objects.isNull;
@@ -27,7 +27,7 @@ public class GitHubBranchDecisionContext extends GitHubDecisionContext<GitHubBra
     private final GitHubBranchRepository localRepo;
 
     public GitHubBranchDecisionContext(GHBranch remoteBranch, GitHubBranch localBranch,
-                                       @Nonnull GitHubBranchRepository localRepo,
+                                       @NonNull GitHubBranchRepository localRepo,
                                        GitHubBranchHandler branchHandler,
                                        GitHubSCMSource scmSource,
                                        GitHubBranchTrigger branchTrigger, TaskListener listener) {
@@ -56,7 +56,7 @@ public class GitHubBranchDecisionContext extends GitHubDecisionContext<GitHubBra
     /**
      * @return local repository state. Useful to extract repo URLs for example.
      */
-    @Nonnull
+    @NonNull
     public GitHubBranchRepository getLocalRepo() {
         return localRepo;
     }
@@ -124,7 +124,7 @@ public class GitHubBranchDecisionContext extends GitHubDecisionContext<GitHubBra
             return this;
         }
 
-        public Builder withListener(@Nonnull TaskListener listener) {
+        public Builder withListener(@NonNull TaskListener listener) {
             this.listener = listener;
             return this;
         }
@@ -158,7 +158,7 @@ public class GitHubBranchDecisionContext extends GitHubDecisionContext<GitHubBra
 
     }
 
-    @Nonnull
+    @NonNull
     public static Builder newGitHubBranchDecisionContext() {
         return new Builder();
     }

@@ -5,7 +5,7 @@ import hudson.model.AbstractDescribableImpl;
 import hudson.model.TaskListener;
 import org.kohsuke.github.GitHub;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.util.stream.Stream;
 
@@ -16,7 +16,7 @@ import static org.jenkinsci.plugins.github.pullrequest.utils.IOUtils.forEachIo;
  */
 public abstract class GitHubHandler extends AbstractDescribableImpl<GitHubHandler> {
 
-    public abstract void handle(@Nonnull GitHubSourceContext context) throws IOException;
+    public abstract void handle(@NonNull GitHubSourceContext context) throws IOException;
 
     protected void processCauses(GitHubSourceContext context, Stream<? extends GitHubCause<?>> causeStream) throws IOException {
         GitHub github = context.getGitHub();

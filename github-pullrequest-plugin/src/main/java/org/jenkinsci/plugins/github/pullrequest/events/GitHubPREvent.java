@@ -8,8 +8,8 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.kohsuke.github.GHEventPayload;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 /**
@@ -27,7 +27,7 @@ public abstract class GitHubPREvent extends AbstractDescribableImpl<GitHubPREven
      * If cause.isSkip() == false, indicates that branch build should be run.
      */
     @CheckForNull
-    public GitHubPRCause check(@Nonnull GitHubPRDecisionContext prDecisionContext) throws IOException {
+    public GitHubPRCause check(@NonNull GitHubPRDecisionContext prDecisionContext) throws IOException {
         return null;
     }
 

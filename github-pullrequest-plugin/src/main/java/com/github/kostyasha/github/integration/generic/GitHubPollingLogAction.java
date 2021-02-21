@@ -13,8 +13,8 @@ import org.apache.commons.jelly.XMLOutput;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -93,7 +93,7 @@ public abstract class GitHubPollingLogAction implements MatrixChildAction, RunAc
         new AnnotatedLargeText<>(getPollingLogFile(), Charset.defaultCharset(), true, this).writeHtmlTo(0, out.asWriter());
     }
 
-    @Nonnull
+    @NonNull
     public File getPollingLogFile() {
         File pollingFile;
         if (nonNull(job)) {

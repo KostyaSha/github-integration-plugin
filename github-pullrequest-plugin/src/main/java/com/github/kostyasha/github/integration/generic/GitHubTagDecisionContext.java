@@ -9,8 +9,8 @@ import com.github.kostyasha.github.integration.tag.events.GitHubTagEvent;
 import hudson.model.TaskListener;
 import org.kohsuke.github.GHTag;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
@@ -24,7 +24,7 @@ public class GitHubTagDecisionContext extends GitHubDecisionContext<GitHubTagEve
     private final GitHubTag localTag;
     private final GitHubTagRepository localRepo;
 
-    public GitHubTagDecisionContext(GHTag remoteTag, GitHubTag localTag, @Nonnull GitHubTagRepository localRepo,
+    public GitHubTagDecisionContext(GHTag remoteTag, GitHubTag localTag, @NonNull GitHubTagRepository localRepo,
                                     GitHubTagHandler tagHandler, GitHubSCMSource scmSource, TaskListener listener) {
         super(listener, null, scmSource, tagHandler);
         this.remoteTag = remoteTag;
@@ -51,7 +51,7 @@ public class GitHubTagDecisionContext extends GitHubDecisionContext<GitHubTagEve
     /**
      * @return local repository state. Useful to extract repo URLs for example.
      */
-    @Nonnull
+    @NonNull
     public GitHubTagRepository getLocalRepo() {
         return localRepo;
     }
@@ -103,7 +103,7 @@ public class GitHubTagDecisionContext extends GitHubDecisionContext<GitHubTagEve
             return this;
         }
 
-        public Builder withListener(@Nonnull TaskListener listener) {
+        public Builder withListener(@NonNull TaskListener listener) {
             this.listener = listener;
             return this;
         }
@@ -130,7 +130,7 @@ public class GitHubTagDecisionContext extends GitHubDecisionContext<GitHubTagEve
 
     }
 
-    @Nonnull
+    @NonNull
     public static Builder newGitHubTagDecisionContext() {
         return new Builder();
     }

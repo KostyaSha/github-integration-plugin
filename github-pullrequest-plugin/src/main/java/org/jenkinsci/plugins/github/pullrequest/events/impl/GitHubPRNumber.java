@@ -10,8 +10,8 @@ import org.jenkinsci.plugins.github.pullrequest.events.GitHubPREventDescriptor;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 import static java.util.Objects.isNull;
@@ -50,7 +50,7 @@ public class GitHubPRNumber extends GitHubPREvent {
     }
 
     @Override
-    public GitHubPRCause check(@Nonnull GitHubPRDecisionContext prDecisionContext) throws IOException {
+    public GitHubPRCause check(@NonNull GitHubPRDecisionContext prDecisionContext) throws IOException {
         TaskListener listener = prDecisionContext.getListener();
         GHPullRequest remotePR = prDecisionContext.getRemotePR();
 
@@ -80,7 +80,7 @@ public class GitHubPRNumber extends GitHubPREvent {
     @Symbol("Number")
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return DISPLAY_NAME;

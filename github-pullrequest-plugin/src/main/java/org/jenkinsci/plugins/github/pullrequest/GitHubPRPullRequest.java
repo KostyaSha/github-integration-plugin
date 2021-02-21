@@ -12,8 +12,8 @@ import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
@@ -153,7 +153,7 @@ public class GitHubPRPullRequest {
         return body;
     }
 
-    @Nonnull
+    @NonNull
     public Set<String> getLabels() {
         return isNull(labels) ? Collections.<String>emptySet() : labels;
     }

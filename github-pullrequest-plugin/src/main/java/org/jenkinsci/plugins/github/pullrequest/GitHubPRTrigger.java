@@ -28,9 +28,9 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -139,7 +139,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
         return preStatus;
     }
 
-    @Nonnull
+    @NonNull
     public List<GitHubPREvent> getEvents() {
         return nonNull(events) ? events : emptyList();
     }
@@ -287,8 +287,8 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
      * @param prNumber        pull request number to fetch only required num. Can be null
      * @return causes which ready to be converted to job-starts. One cause per repo.
      */
-    private List<GitHubPRCause> readyToBuildCauses(@Nonnull GitHubPRRepository localRepository,
-                                                   @Nonnull LoggingTaskListenerWrapper listener,
+    private List<GitHubPRCause> readyToBuildCauses(@NonNull GitHubPRRepository localRepository,
+                                                   @NonNull LoggingTaskListenerWrapper listener,
                                                    @Nullable Integer prNumber) {
         try {
             GitHub github = getRepoProvider().getGitHub(this);
@@ -347,8 +347,8 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
      * @return remote pull requests for future analysing.
      */
     private static Set<GHPullRequest> pullRequestsToCheck(@Nullable Integer prNumber,
-                                                          @Nonnull GHRepository remoteRepo,
-                                                          @Nonnull GitHubPRRepository localRepo) throws IOException {
+                                                          @NonNull GHRepository remoteRepo,
+                                                          @NonNull GitHubPRRepository localRepo) throws IOException {
         if (prNumber != null) {
             return execute(() -> singleton(remoteRepo.getPullRequest(prNumber)));
         } else {
@@ -379,7 +379,7 @@ public class GitHubPRTrigger extends GitHubTrigger<GitHubPRTrigger> {
             load();
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "GitHub Pull Requests";

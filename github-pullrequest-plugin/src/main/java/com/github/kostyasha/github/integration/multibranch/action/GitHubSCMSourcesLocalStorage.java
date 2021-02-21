@@ -9,7 +9,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.File;
 import java.io.IOException;
 
@@ -19,13 +19,13 @@ import java.io.IOException;
 public class GitHubSCMSourcesLocalStorage implements Saveable {
     private static final Logger LOG = LoggerFactory.getLogger(GitHubSCMSourcesLocalStorage.class);
 
-    @Nonnull
+    @NonNull
     protected transient PersistenceRoot project;
 
     private final String sourceId;
     private final GitHubRepo repoState;
 
-    public GitHubSCMSourcesLocalStorage(@Nonnull PersistenceRoot project, @Nonnull String sourceId) {
+    public GitHubSCMSourcesLocalStorage(@NonNull PersistenceRoot project, @NonNull String sourceId) {
         this.project = project;
         this.sourceId = sourceId;
         repoState = new GitHubRepo(this);

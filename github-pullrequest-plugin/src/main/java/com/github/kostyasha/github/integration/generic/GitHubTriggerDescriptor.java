@@ -15,7 +15,7 @@ import org.jenkinsci.plugins.github.internal.GHPluginConfigException;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.stapler.StaplerRequest;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.net.URI;
 
 import static java.util.Objects.isNull;
@@ -31,7 +31,7 @@ public abstract class GitHubTriggerDescriptor extends TriggerDescriptor {
     private transient SequentialExecutionQueue queue =
             new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
 
-    @Nonnull
+    @NonNull
     public SequentialExecutionQueue getQueue() {
         if (isNull(queue)) {
             queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
@@ -70,7 +70,7 @@ public abstract class GitHubTriggerDescriptor extends TriggerDescriptor {
         return GitHubWebHook.getJenkinsInstance().getRootUrl();
     }
 
-    @Nonnull
+    @NonNull
     public static GitHub githubFor(URI uri) {
         Optional<GitHub> client = from(GitHubPlugin.configuration()
                 .findGithubConfig(withHost(uri.getHost()))).first();

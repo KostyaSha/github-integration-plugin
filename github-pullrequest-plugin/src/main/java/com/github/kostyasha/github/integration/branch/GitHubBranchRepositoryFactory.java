@@ -12,7 +12,7 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -35,9 +35,9 @@ public class GitHubBranchRepositoryFactory
         extends GitHubRepositoryFactory<GitHubBranchRepositoryFactory, GitHubBranchTrigger> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubBranchRepositoryFactory.class);
 
-    @Nonnull
+    @NonNull
     @Override
-    public Collection<? extends Action> createFor(@Nonnull Job job) {
+    public Collection<? extends Action> createFor(@NonNull Job job) {
         try {
             if (nonNull(ghBranchTriggerFromJob(job))) {
                 return Collections.singleton(forProject(job));
@@ -49,8 +49,8 @@ public class GitHubBranchRepositoryFactory
         return Collections.emptyList();
     }
 
-    @Nonnull
-    private static GitHubBranchRepository forProject(@Nonnull Job<?, ?> job) throws IOException {
+    @NonNull
+    private static GitHubBranchRepository forProject(@NonNull Job<?, ?> job) throws IOException {
         XmlFile configFile = new XmlFile(new File(job.getRootDir(), GitHubBranchRepository.FILE));
 
         GitHubBranchTrigger trigger = ghBranchTriggerFromJob(job);

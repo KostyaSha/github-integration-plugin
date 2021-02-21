@@ -5,8 +5,8 @@ import com.github.kostyasha.github.integration.tag.GitHubTagCause;
 import hudson.ExtensionPoint;
 import hudson.model.AbstractDescribableImpl;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 /**
@@ -25,7 +25,7 @@ public abstract class GitHubTagEvent extends AbstractDescribableImpl<GitHubTagEv
      * If cause.isSkip() == false, indicates that branch build should be run.
      */
     @CheckForNull
-    public GitHubTagCause check(@Nonnull GitHubTagDecisionContext context) throws IOException {
+    public GitHubTagCause check(@NonNull GitHubTagDecisionContext context) throws IOException {
         return null;
     }
 

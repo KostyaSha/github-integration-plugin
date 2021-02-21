@@ -15,7 +15,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -136,7 +136,7 @@ public class GitHubBranchCommitMessageCheck extends GitHubBranchCommitCheck impl
     @Symbol("commitMessagePattern")
     @Extension
     public static class DescriptorImpl extends GitHubBranchCommitCheckDescriptor {
-        @Nonnull
+        @NonNull
         @Override
         public final String getDisplayName() {
             return DISPLAY_NAME;

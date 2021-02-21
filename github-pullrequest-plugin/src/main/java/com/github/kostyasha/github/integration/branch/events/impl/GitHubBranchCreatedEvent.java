@@ -12,7 +12,7 @@ import org.kohsuke.github.GHBranch;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.io.PrintStream;
 
@@ -33,7 +33,7 @@ public class GitHubBranchCreatedEvent extends GitHubBranchEvent {
     }
 
     @Override
-    public GitHubBranchCause check(@Nonnull GitHubBranchDecisionContext context) throws IOException {
+    public GitHubBranchCause check(@NonNull GitHubBranchDecisionContext context) throws IOException {
         GHBranch remoteBranch = context.getRemoteBranch();
         GitHubBranch localBranch = context.getLocalBranch();
         TaskListener listener = context.getListener();
@@ -61,7 +61,7 @@ public class GitHubBranchCreatedEvent extends GitHubBranchEvent {
     @Symbol("branchCreated")
     @Extension
     public static class DescriptorImpl extends GitHubBranchEventDescriptor {
-        @Nonnull
+        @NonNull
         @Override
         public final String getDisplayName() {
             return DISPLAY_NAME;

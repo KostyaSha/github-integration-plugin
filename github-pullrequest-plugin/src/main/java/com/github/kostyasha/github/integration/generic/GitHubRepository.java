@@ -13,8 +13,8 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
@@ -43,7 +43,7 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
     @CheckForNull
     private String sshUrl;
 
-    public GitHubRepository(@Nonnull GHRepository ghRepository) throws IOException {
+    public GitHubRepository(@NonNull GHRepository ghRepository) throws IOException {
         actualise(ghRepository, TaskListener.NULL);
     }
 
@@ -56,7 +56,7 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
      * Repository may be created without gh connection, but trigger logic expects this fields.
      * Should be called before trigger logic starts checks.
      */
-    public synchronized void actualise(@Nonnull GHRepository ghRepository, @Nonnull TaskListener listener) throws IOException {
+    public synchronized void actualise(@NonNull GHRepository ghRepository, @NonNull TaskListener listener) throws IOException {
         changed = false;
 
         PrintStream logger = listener.getLogger();
@@ -87,7 +87,7 @@ public abstract class GitHubRepository<T extends GitHubRepository> implements Ac
         actualiseOnChange(ghRepository, listener);
     }
 
-    protected abstract void actualiseOnChange(@Nonnull GHRepository ghRepository, @Nonnull TaskListener listener);
+    protected abstract void actualiseOnChange(@NonNull GHRepository ghRepository, @NonNull TaskListener listener);
 
     public String getFullName() {
         return fullName;

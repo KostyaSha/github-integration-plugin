@@ -18,7 +18,7 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
      *
      * @param ghRepository remote repository.
      */
-    public GitHubPRRepository(@Nonnull GHRepository ghRepository) throws IOException {
+    public GitHubPRRepository(@NonNull GHRepository ghRepository) throws IOException {
         super(ghRepository);
     }
 
@@ -61,7 +61,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
         super(repoFullName, githubUrl);
     }
 
-    @Nonnull
+    @NonNull
     public Map<Integer, GitHubPRPullRequest> getPulls() {
         if (isNull(pulls)) {
             pulls = new ConcurrentHashMap<>();
@@ -75,7 +75,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
      *
      * @return map with keys - numbers of built PRs and values - lists of related builds.
      */
-    @Nonnull
+    @NonNull
     public Map<Integer, List<Run<?, ?>>> getAllPrBuilds() {
 
         Map<Integer, List<Run<?, ?>>> map = new HashMap<>();
@@ -115,7 +115,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
 
 
     @Override
-    public void actualiseOnChange(@Nonnull GHRepository ghRepository, @Nonnull TaskListener listener) {
+    public void actualiseOnChange(@NonNull GHRepository ghRepository, @NonNull TaskListener listener) {
         if (changed) {
             listener.getLogger().println("Local settings changed, removing PRs in repository!");
             getPulls().clear();

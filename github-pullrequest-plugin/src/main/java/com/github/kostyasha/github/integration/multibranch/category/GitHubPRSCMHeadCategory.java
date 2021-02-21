@@ -5,17 +5,17 @@ import jenkins.scm.api.SCMHead;
 import jenkins.util.NonLocalizable;
 import org.jvnet.localizer.Localizable;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 public class GitHubPRSCMHeadCategory extends GitHubSCMHeadCategory {
     public static final GitHubPRSCMHeadCategory PR = new GitHubPRSCMHeadCategory("pr", new NonLocalizable("Pull Requests"));
 
-    public GitHubPRSCMHeadCategory(@Nonnull String urlName, Localizable pronoun) {
+    public GitHubPRSCMHeadCategory(@NonNull String urlName, Localizable pronoun) {
         super(urlName, pronoun);
     }
 
     @Override
-    public boolean isMatch(@Nonnull SCMHead instance) {
+    public boolean isMatch(@NonNull SCMHead instance) {
         return instance instanceof GitHubPRSCMHead;
     }
 }

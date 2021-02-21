@@ -28,9 +28,9 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -103,7 +103,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
         return preStatus;
     }
 
-    @Nonnull
+    @NonNull
     public List<GitHubBranchEvent> getEvents() {
         return nonNull(events) ? events : emptyList();
     }
@@ -274,7 +274,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
     /**
      * Remote branch for future analysing. null - all remote branches.
      */
-    private Set<GHBranch> branchesToCheck(@CheckForNull String branch, @Nonnull GHRepository remoteRepo,
+    private Set<GHBranch> branchesToCheck(@CheckForNull String branch, @NonNull GHRepository remoteRepo,
                                           GitHubBranchRepository localRepository)
             throws IOException {
         final LinkedHashSet<GHBranch> ghBranches = new LinkedHashSet<>();
@@ -352,7 +352,7 @@ public class GitHubBranchTrigger extends GitHubTrigger<GitHubBranchTrigger> {
             load();
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "GitHub Branches";

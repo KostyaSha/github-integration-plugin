@@ -2,7 +2,7 @@ package com.github.kostyasha.github.integration.generic.errors;
 
 import hudson.model.ProminentProjectAction;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,7 +19,7 @@ public class GitHubErrorsAction implements ProminentProjectAction {
     private String description;
     private final Set<GitHubError> errors = synchronizedSet(new HashSet<>());
 
-    public GitHubErrorsAction(@Nonnull String description) {
+    public GitHubErrorsAction(@NonNull String description) {
         this.description = description;
     }
 
@@ -34,17 +34,17 @@ public class GitHubErrorsAction implements ProminentProjectAction {
         return hasVisible;
     }
 
-    @Nonnull
+    @NonNull
     public String getDescription() {
         return description;
     }
 
-    @Nonnull
+    @NonNull
     public Set<GitHubError> getErrors() {
         return errors;
     }
 
-    public boolean addOrReplaceError(@Nonnull GitHubError a) {
+    public boolean addOrReplaceError(@NonNull GitHubError a) {
         if (isNull(a)) {
             throw new IllegalArgumentException("Action must be non-null");
         }
@@ -65,7 +65,7 @@ public class GitHubErrorsAction implements ProminentProjectAction {
         return !found || !old.isEmpty();
     }
 
-    public boolean removeErrors(@Nonnull Class<? extends GitHubError> clazz) {
+    public boolean removeErrors(@NonNull Class<? extends GitHubError> clazz) {
         if (isNull(clazz)) {
             throw new IllegalArgumentException("Action type must be non-null");
         }
@@ -79,7 +79,7 @@ public class GitHubErrorsAction implements ProminentProjectAction {
         return current.removeAll(old);
     }
 
-    @Nonnull
+    @NonNull
     public Set<GitHubError> getErrorsSnapshot() {
         synchronized (errors) {
             return new HashSet<>(getErrors());

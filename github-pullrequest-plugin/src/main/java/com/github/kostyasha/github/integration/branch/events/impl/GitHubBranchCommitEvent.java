@@ -22,7 +22,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -64,7 +64,7 @@ public class GitHubBranchCommitEvent extends GitHubBranchEvent {
     }
 
     @Override
-    public GitHubBranchCause check(@Nonnull GitHubBranchDecisionContext context) throws IOException {
+    public GitHubBranchCause check(@NonNull GitHubBranchDecisionContext context) throws IOException {
         GHBranch remoteBranch = context.getRemoteBranch();
         GitHubBranch localBranch = context.getLocalBranch();
         GitHubBranchRepository localRepo = context.getLocalRepo();
@@ -99,7 +99,7 @@ public class GitHubBranchCommitEvent extends GitHubBranchEvent {
         return remoteBranch.getOwner().getCommit(remoteBranch.getSHA1());
     }
 
-    @Nonnull
+    @NonNull
     public List<GitHubBranchCommitCheck> getChecks() {
         if (isNull(checks)) {
             checks = new ArrayList<>();
@@ -142,7 +142,7 @@ public class GitHubBranchCommitEvent extends GitHubBranchEvent {
             return super.configure(req, formData);
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public final String getDisplayName() {
             return DISPLAY_NAME;

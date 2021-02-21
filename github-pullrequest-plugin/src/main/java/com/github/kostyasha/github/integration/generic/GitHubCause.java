@@ -7,8 +7,8 @@ import hudson.model.ParameterValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -44,7 +44,7 @@ public abstract class GitHubCause<T extends GitHubCause<T>> extends Cause {
 
     private transient Object remoteData;
 
-    public GitHubCause withLocalRepo(@Nonnull GitHubRepository localRepo) {
+    public GitHubCause withLocalRepo(@NonNull GitHubRepository localRepo) {
         withGitUrl(localRepo.getGitUrl());
         withSshUrl(localRepo.getSshUrl());
         withHtmlUrl(localRepo.getGithubUrl());
@@ -132,7 +132,7 @@ public abstract class GitHubCause<T extends GitHubCause<T>> extends Cause {
     /**
      * @return the title of the cause, never null.
      */
-    @Nonnull
+    @NonNull
     public String getTitle() {
         return nonNull(title) ? title : "";
     }

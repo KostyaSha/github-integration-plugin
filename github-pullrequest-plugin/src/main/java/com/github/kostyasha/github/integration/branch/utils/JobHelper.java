@@ -5,7 +5,7 @@ import com.github.kostyasha.github.integration.branch.GitHubBranchTrigger;
 import hudson.model.Job;
 import hudson.model.Run;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghCauseFromRun;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.triggerFrom;

@@ -5,7 +5,7 @@ import hudson.model.Item;
 import hudson.model.Job;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRRepository;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.function.Predicate;
 
 import static java.util.Objects.nonNull;

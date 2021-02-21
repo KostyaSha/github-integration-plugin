@@ -13,7 +13,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -72,7 +72,7 @@ public class GitHubBranchRestrictionFilter extends GitHubBranchEvent {
     }
 
     @Override
-    public GitHubBranchCause check(@Nonnull GitHubBranchDecisionContext context) throws IOException {
+    public GitHubBranchCause check(@NonNull GitHubBranchDecisionContext context) throws IOException {
         GHBranch remoteBranch = context.getRemoteBranch();
         GitHubBranchRepository localRepo = context.getLocalRepo();
 
@@ -119,7 +119,7 @@ public class GitHubBranchRestrictionFilter extends GitHubBranchEvent {
         }
     }
 
-    private GitHubBranchCause toCause(@Nonnull GitHubBranchDecisionContext context, boolean skip,
+    private GitHubBranchCause toCause(@NonNull GitHubBranchDecisionContext context, boolean skip,
                                       String message, Object... args) {
         return context.newCause(String.format(message, args), skip);
     }
@@ -127,7 +127,7 @@ public class GitHubBranchRestrictionFilter extends GitHubBranchEvent {
     @Symbol("restriction")
     @Extension
     public static class Descriptor extends GitHubBranchEventDescriptor {
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return DISPLAY_NAME;
