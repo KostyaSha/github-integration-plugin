@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>github-integration-parent</artifactId>
-    <version>0.2.9-SNAPSHOT</version>
+    <version>0.3.0</version>
     <packaging>pom</packaging>
 
     <name>GitHub Integration Parent</name>
@@ -42,7 +42,7 @@
         <connection>scm:git:ssh://github.com/KostyaSha/github-integration-plugin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/KostyaSha/github-integration-plugin.git</developerConnection>
         <url>https://github.com/KostyaSha/github-integration-plugin.git</url>
-        <tag>HEAD</tag>
+        <tag>0.3.0</tag>
     </scm>
 
     <distributionManagement>
