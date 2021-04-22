@@ -8,7 +8,7 @@ import jenkins.model.Jenkins;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -38,7 +38,7 @@ public class GitHubPRLabel implements Describable<GitHubPRLabel> {
         return Joiner.on("\n").skipNulls().join(labels);
     }
 
-    @Nonnull
+    @NonNull
     public Set<String> getLabelsSet() {
         return nonNull(labels) ? labels : Collections.<String>emptySet();
     }
@@ -50,7 +50,7 @@ public class GitHubPRLabel implements Describable<GitHubPRLabel> {
     @Symbol("labels")
     @Extension
     public static class DescriptorImpl extends Descriptor<GitHubPRLabel> {
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "Labels";

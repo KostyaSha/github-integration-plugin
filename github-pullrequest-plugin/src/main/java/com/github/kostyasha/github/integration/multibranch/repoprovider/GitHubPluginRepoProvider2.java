@@ -19,8 +19,8 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 import static java.util.Objects.isNull;
@@ -88,7 +88,7 @@ public class GitHubPluginRepoProvider2 extends GitHubRepoProvider2 {
         return isManageHooks() && GitHubPlugin.configuration().isManageHooks();
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public synchronized GitHub getGitHub(GitHubSCMSource source) {
         if (isTrue(cacheConnection) && nonNull(gitHub)) {
@@ -114,7 +114,7 @@ public class GitHubPluginRepoProvider2 extends GitHubRepoProvider2 {
     private NullSafePredicate<GitHub> withPermission(final GitHubRepositoryName name, GHPermission permission) {
         return new NullSafePredicate<GitHub>() {
             @Override
-            protected boolean applyNullSafe(@Nonnull GitHub gh) {
+            protected boolean applyNullSafe(@NonNull GitHub gh) {
                 try {
                     final GHRepository repo = gh.getRepository(name.getUserName() + "/" + name.getRepositoryName());
                     if (permission == GHPermission.ADMIN) {
@@ -165,7 +165,7 @@ public class GitHubPluginRepoProvider2 extends GitHubRepoProvider2 {
     @Symbol("gitHubPlugin")
     @Extension
     public static class GitHubPluginRepoProviderDescriptor2 extends GitHubRepoProviderDescriptor2 {
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "GitHub Plugin from Global Settings";

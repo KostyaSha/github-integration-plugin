@@ -5,12 +5,12 @@ import jenkins.scm.api.SCMHead;
 import jenkins.util.NonLocalizable;
 import org.jvnet.localizer.Localizable;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 public class GitHubBranchSCMHeadCategory extends GitHubSCMHeadCategory {
     public static final GitHubBranchSCMHeadCategory BRANCH = new GitHubBranchSCMHeadCategory(new NonLocalizable("Branches"));
 
-    public GitHubBranchSCMHeadCategory(@Nonnull String urlName, Localizable pronoun) {
+    public GitHubBranchSCMHeadCategory(@NonNull String urlName, Localizable pronoun) {
         super(urlName, pronoun);
     }
 
@@ -19,7 +19,7 @@ public class GitHubBranchSCMHeadCategory extends GitHubSCMHeadCategory {
     }
 
     @Override
-    public boolean isMatch(@Nonnull SCMHead instance) {
+    public boolean isMatch(@NonNull SCMHead instance) {
         return instance instanceof GitHubBranchSCMHead;
     }
 }

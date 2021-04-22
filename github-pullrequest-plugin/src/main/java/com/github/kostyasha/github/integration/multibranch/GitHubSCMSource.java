@@ -49,8 +49,8 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -149,9 +149,9 @@ public class GitHubSCMSource extends SCMSource {
     }
 
     @Override
-    protected void retrieve(SCMSourceCriteria scmSourceCriteria, @Nonnull SCMHeadObserver scmHeadObserver,
+    protected void retrieve(SCMSourceCriteria scmSourceCriteria, @NonNull SCMHeadObserver scmHeadObserver,
                             SCMHeadEvent<?> scmHeadEvent, // null for manual run
-                            @Nonnull TaskListener taskListener) throws IOException, InterruptedException {
+                            @NonNull TaskListener taskListener) throws IOException, InterruptedException {
 
         try (BulkChange bc = new BulkChange(getLocalStorage());
              TreeCache.Context ctx = TreeCache.createContext()) {
@@ -186,7 +186,7 @@ public class GitHubSCMSource extends SCMSource {
         }
     }
 
-    @Nonnull
+    @NonNull
     public GHRepository getRemoteRepo() throws IOException {
         Objects.requireNonNull(repoProvider);
         GHRepository remoteRepository = repoProvider.getGHRepository(this);
@@ -194,64 +194,64 @@ public class GitHubSCMSource extends SCMSource {
         return remoteRepository;
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public SCM build(@Nonnull SCMHead scmHead, SCMRevision scmRevision) {
+    public SCM build(@NonNull SCMHead scmHead, SCMRevision scmRevision) {
         return scmFactory.createScm(this, scmHead, scmRevision);
     }
 
     // It is so hard to implement good APIs...
-    @Nonnull
+    @NonNull
     @Override
-    public Set<SCMRevision> parentRevisions(@Nonnull SCMHead head,
-                                            @Nonnull SCMRevision revision,
+    public Set<SCMRevision> parentRevisions(@NonNull SCMHead head,
+                                            @NonNull SCMRevision revision,
                                             @CheckForNull TaskListener listener)
             throws IOException, InterruptedException {
         return super.parentRevisions(head, revision, listener);
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public Map<SCMHead, SCMRevision> parentHeads(@Nonnull SCMHead head, @CheckForNull TaskListener listener)
+    public Map<SCMHead, SCMRevision> parentHeads(@NonNull SCMHead head, @CheckForNull TaskListener listener)
             throws IOException, InterruptedException {
         return super.parentHeads(head, listener);
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    protected Set<SCMHead> retrieve(@Nonnull TaskListener listener) throws IOException, InterruptedException {
+    protected Set<SCMHead> retrieve(@NonNull TaskListener listener) throws IOException, InterruptedException {
         return super.retrieve(listener);
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    protected Set<SCMHead> retrieve(@CheckForNull SCMSourceCriteria criteria, @Nonnull TaskListener listener)
+    protected Set<SCMHead> retrieve(@CheckForNull SCMSourceCriteria criteria, @NonNull TaskListener listener)
             throws IOException, InterruptedException {
         return super.retrieve(criteria, listener);
     }
 
     @Override
-    protected SCMRevision retrieve(@Nonnull SCMHead head, @Nonnull TaskListener listener)
+    protected SCMRevision retrieve(@NonNull SCMHead head, @NonNull TaskListener listener)
             throws IOException, InterruptedException {
         return super.retrieve(head, listener);
     }
 
     @Override
-    protected SCMRevision retrieve(@Nonnull String thingName, @Nonnull TaskListener listener)
+    protected SCMRevision retrieve(@NonNull String thingName, @NonNull TaskListener listener)
             throws IOException, InterruptedException {
         return super.retrieve(thingName, listener);
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    protected Set<String> retrieveRevisions(@Nonnull TaskListener listener) throws IOException, InterruptedException {
+    protected Set<String> retrieveRevisions(@NonNull TaskListener listener) throws IOException, InterruptedException {
         return super.retrieveRevisions(listener);
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    protected List<Action> retrieveActions(@Nonnull SCMRevision revision, @CheckForNull SCMHeadEvent event,
-                                           @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    protected List<Action> retrieveActions(@NonNull SCMRevision revision, @CheckForNull SCMHeadEvent event,
+                                           @NonNull TaskListener listener) throws IOException, InterruptedException {
         GitHubSCMRevision gitHubSCMRevision = (GitHubSCMRevision) revision;
         GitHubCause<?> cause = gitHubSCMRevision.getCause();
         if (nonNull(cause)) {
@@ -263,11 +263,11 @@ public class GitHubSCMSource extends SCMSource {
         return Collections.emptyList();
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    protected List<Action> retrieveActions(@Nonnull SCMHead head,
+    protected List<Action> retrieveActions(@NonNull SCMHead head,
                                            @CheckForNull SCMHeadEvent event,
-                                           @Nonnull TaskListener listener)
+                                           @NonNull TaskListener listener)
             throws IOException, InterruptedException {
         List<Action> actions = new ArrayList<>();
 
@@ -303,16 +303,16 @@ public class GitHubSCMSource extends SCMSource {
         return actions;
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    protected List<Action> retrieveActions(@CheckForNull SCMSourceEvent event, @Nonnull TaskListener listener)
+    protected List<Action> retrieveActions(@CheckForNull SCMSourceEvent event, @NonNull TaskListener listener)
             throws IOException, InterruptedException {
         return Collections.singletonList(new GitHubRepoAction(getRemoteRepo()));
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public SCMRevision getTrustedRevision(@Nonnull SCMRevision revision, @Nonnull TaskListener listener)
+    public SCMRevision getTrustedRevision(@NonNull SCMRevision revision, @NonNull TaskListener listener)
             throws IOException, InterruptedException {
         return super.getTrustedRevision(revision, listener);
     }
@@ -322,14 +322,14 @@ public class GitHubSCMSource extends SCMSource {
         return true;
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    protected SCMProbe createProbe(@Nonnull SCMHead head, @CheckForNull SCMRevision revision) throws IOException {
+    protected SCMProbe createProbe(@NonNull SCMHead head, @CheckForNull SCMRevision revision) throws IOException {
         return new GitHubSCMProbe(this, (GitHubSCMHead<?>) head, (GitHubSCMRevision) revision);
     }
 
     @Override
-    protected boolean isCategoryEnabled(@Nonnull SCMHeadCategory category) {
+    protected boolean isCategoryEnabled(@NonNull SCMHeadCategory category) {
         return true;
     }
 
@@ -337,14 +337,14 @@ public class GitHubSCMSource extends SCMSource {
     @Extension
     public static class DescriptorImpl extends SCMSourceDescriptor {
 
-        @Nonnull
+        @NonNull
         @Override
         protected SCMHeadCategory[] createCategories() {
             // array? bundled in descriptor?? seriously?
             return new SCMHeadCategory[]{BRANCH, PR, TAG};
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "GitHub source";

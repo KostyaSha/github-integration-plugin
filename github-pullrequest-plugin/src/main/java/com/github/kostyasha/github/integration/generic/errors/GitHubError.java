@@ -2,7 +2,7 @@ package com.github.kostyasha.github.integration.generic.errors;
 
 import hudson.ExtensionPoint;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * Custom errors that participate in list of {@link GitHubErrorsAction}.
@@ -13,11 +13,11 @@ import javax.annotation.Nonnull;
 public abstract class GitHubError implements ExtensionPoint {
     private String description;
 
-    public GitHubError(@Nonnull String description) {
+    public GitHubError(@NonNull String description) {
         this.description = description;
     }
 
-    @Nonnull
+    @NonNull
     public abstract String getTitle();
 
     /**
@@ -30,7 +30,7 @@ public abstract class GitHubError implements ExtensionPoint {
     /**
      * Raw displayed html content as description.
      */
-    @Nonnull
+    @NonNull
     public String getHtmlDescription() {
         return description;
     }

@@ -3,7 +3,7 @@ package com.github.kostyasha.github.integration.multibranch.fs;
 import com.github.kostyasha.github.integration.multibranch.fs.TreeCache.Entry;
 import jenkins.scm.api.SCMFile;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.stream.Collectors;
@@ -25,7 +25,7 @@ public class GitHubSCMFile extends SCMFile {
         this.fs = fs;
     }
 
-    public GitHubSCMFile(@Nonnull GitHubSCMFile parent, String name) {
+    public GitHubSCMFile(@NonNull GitHubSCMFile parent, String name) {
         super(parent, name);
         this.fs = parent.fs;
     }
@@ -41,17 +41,17 @@ public class GitHubSCMFile extends SCMFile {
         return entry;
     }
 
-    private SCMFile newChild(@Nonnull String child) {
+    private SCMFile newChild(@NonNull String child) {
         return new GitHubSCMFile(this, child);
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    protected SCMFile newChild(@Nonnull String child, boolean assumeIsDirectory) {
+    protected SCMFile newChild(@NonNull String child, boolean assumeIsDirectory) {
         return newChild(child);
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public Iterable<SCMFile> children() throws IOException, InterruptedException {
         return getEntry().getSubEntryNames().stream()
@@ -64,13 +64,13 @@ public class GitHubSCMFile extends SCMFile {
         return fs.lastModified();
     }
 
-    @Nonnull
+    @NonNull
     @Override
     protected Type type() throws IOException, InterruptedException {
         return getEntry().getType();
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public InputStream content() throws IOException, InterruptedException {
         return fs.tree().content(getEntry());

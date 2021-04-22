@@ -4,7 +4,7 @@ import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 public class GitHubPRSCMHead extends GitHubSCMHead<GitHubPRCause> {
@@ -13,11 +13,11 @@ public class GitHubPRSCMHead extends GitHubSCMHead<GitHubPRCause> {
     private final int prNumber;
     private final String targetBranch;
 
-    public GitHubPRSCMHead(@Nonnull GitHubPRCause prCause, String sourceId) {
+    public GitHubPRSCMHead(@NonNull GitHubPRCause prCause, String sourceId) {
         this(prCause.getNumber(), prCause.getTargetBranch(), sourceId);
     }
 
-    public GitHubPRSCMHead(@Nonnull Integer prNumber, @Nonnull String targetBranch, String sourceId) {
+    public GitHubPRSCMHead(@NonNull Integer prNumber, @NonNull String targetBranch, String sourceId) {
         super("pr-" + Integer.toString(prNumber), sourceId);
         this.prNumber = prNumber;
         this.targetBranch = targetBranch;

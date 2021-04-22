@@ -5,8 +5,8 @@ import com.github.kostyasha.github.integration.multibranch.handler.GitHubHandler
 import hudson.model.TaskListener;
 import org.kohsuke.github.GHRepository;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 /**
@@ -18,19 +18,19 @@ public abstract class GitHubDecisionContext<E, C extends GitHubCause<C>> {
     private final GitHubSCMSource scmSource;
     private final GitHubHandler handler;
 
-    protected GitHubDecisionContext(@Nonnull TaskListener listener, GitHubTrigger<?> trigger, GitHubSCMSource scmSource, GitHubHandler handler) {
+    protected GitHubDecisionContext(@NonNull TaskListener listener, GitHubTrigger<?> trigger, GitHubSCMSource scmSource, GitHubHandler handler) {
         this.listener = listener;
         this.trigger = trigger;
         this.scmSource = scmSource;
         this.handler = handler;
     }
 
-    @Nonnull
+    @NonNull
     public TaskListener getListener() {
         return listener;
     }
 
-    @Nonnull
+    @NonNull
     public GHRepository getRemoteRepository() throws IOException {
         GHRepository repo = null;
         if (scmSource != null) {

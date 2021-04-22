@@ -5,13 +5,13 @@ import com.github.kostyasha.github.integration.tag.GitHubTagCause;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHTag;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 public class GitHubTagSCMHead extends GitHubSCMHead<GitHubTagCause> {
     private static final long serialVersionUID = 1L;
 
-    public GitHubTagSCMHead(@Nonnull String name, String sourceId) {
+    public GitHubTagSCMHead(@NonNull String name, String sourceId) {
         super(name, sourceId);
     }
 

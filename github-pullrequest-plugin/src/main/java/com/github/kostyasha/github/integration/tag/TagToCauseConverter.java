@@ -10,7 +10,7 @@ import org.kohsuke.github.GHTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
@@ -30,10 +30,10 @@ public class TagToCauseConverter implements Function<GHTag, GitHubTagCause> {
     private final GitHubTagHandler handler;
     private final GitHubSCMSource source;
 
-    public TagToCauseConverter(@Nonnull GitHubTagRepository localTags,
-                               @Nonnull TaskListener listener,
-                               @Nonnull GitHubTagHandler handler,
-                               @Nonnull GitHubSCMSource source) {
+    public TagToCauseConverter(@NonNull GitHubTagRepository localTags,
+                               @NonNull TaskListener listener,
+                               @NonNull GitHubTagHandler handler,
+                               @NonNull GitHubSCMSource source) {
         this.localTags = localTags;
         this.listener = listener;
         this.handler = handler;

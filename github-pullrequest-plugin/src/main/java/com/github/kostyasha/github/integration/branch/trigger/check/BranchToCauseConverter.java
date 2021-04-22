@@ -14,8 +14,8 @@ import org.kohsuke.github.GHBranch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -40,9 +40,9 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
     private final GitHubBranchHandler handler;
     private final GitHubSCMSource source;
 
-    private BranchToCauseConverter(@Nonnull GitHubBranchRepository localBranches,
-                                   @Nonnull TaskListener listener,
-                                   @Nonnull GitHubBranchTrigger trigger) {
+    private BranchToCauseConverter(@NonNull GitHubBranchRepository localBranches,
+                                   @NonNull TaskListener listener,
+                                   @NonNull GitHubBranchTrigger trigger) {
         this.localBranches = localBranches;
         this.listener = listener;
         this.trigger = trigger;
@@ -50,10 +50,10 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
         this.source = null;
     }
 
-    public BranchToCauseConverter(@Nonnull GitHubBranchRepository localBranches,
-                                  @Nonnull TaskListener listener,
-                                  @Nonnull GitHubBranchHandler handler,
-                                  @Nonnull GitHubSCMSource source) {
+    public BranchToCauseConverter(@NonNull GitHubBranchRepository localBranches,
+                                  @NonNull TaskListener listener,
+                                  @NonNull GitHubBranchHandler handler,
+                                  @NonNull GitHubSCMSource source) {
         this.localBranches = localBranches;
         this.listener = listener;
         this.handler = handler;
@@ -69,8 +69,8 @@ public class BranchToCauseConverter implements Function<GHBranch, GitHubBranchCa
 
     public static BranchToCauseConverter toGitHubBranchCause(GitHubBranchRepository localRepo,
                                                              TaskListener listener,
-                                                             @Nonnull GitHubBranchHandler handler,
-                                                             @Nonnull GitHubSCMSource source) {
+                                                             @NonNull GitHubBranchHandler handler,
+                                                             @NonNull GitHubSCMSource source) {
         return new BranchToCauseConverter(localRepo, listener, handler, source);
     }
 

@@ -5,23 +5,23 @@ import jenkins.scm.api.SCMHead;
 import jenkins.util.NonLocalizable;
 import org.jvnet.localizer.Localizable;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 public class GitHubTagSCMHeadCategory extends GitHubSCMHeadCategory {
     public static final GitHubTagSCMHeadCategory TAG = new GitHubTagSCMHeadCategory("tag", new NonLocalizable("Tags"));
 
-    public GitHubTagSCMHeadCategory(@Nonnull String name, Localizable displayName) {
+    public GitHubTagSCMHeadCategory(@NonNull String name, Localizable displayName) {
         super(name, displayName);
     }
 
-    @Nonnull
+    @NonNull
     @Override
     protected Localizable defaultDisplayName() {
         return new NonLocalizable("Tag");
     }
 
     @Override
-    public boolean isMatch(@Nonnull SCMHead instance) {
+    public boolean isMatch(@NonNull SCMHead instance) {
         return instance instanceof GitHubTagSCMHead;
     }
 }

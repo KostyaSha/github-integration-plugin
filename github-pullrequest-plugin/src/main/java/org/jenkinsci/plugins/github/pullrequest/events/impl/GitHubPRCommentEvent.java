@@ -15,7 +15,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.regex.Matcher;
@@ -45,7 +45,7 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
     }
 
     @Override
-    public GitHubPRCause check(@Nonnull GitHubPRDecisionContext prDecisionContext) {
+    public GitHubPRCause check(@NonNull GitHubPRDecisionContext prDecisionContext) {
         final TaskListener listener = prDecisionContext.getListener();
         final PrintStream llog = listener.getLogger();
         final GitHubPRPullRequest localPR = prDecisionContext.getLocalPR();
@@ -110,7 +110,7 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
     @Symbol("commentPattern")
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return DISPLAY_NAME;

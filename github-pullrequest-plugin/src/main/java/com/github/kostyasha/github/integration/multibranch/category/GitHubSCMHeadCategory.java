@@ -3,11 +3,11 @@ package com.github.kostyasha.github.integration.multibranch.category;
 import jenkins.scm.api.SCMHeadCategory;
 import org.jvnet.localizer.Localizable;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 public abstract class GitHubSCMHeadCategory extends SCMHeadCategory {
 
-    public GitHubSCMHeadCategory(@Nonnull String urlName, Localizable pronoun) {
+    public GitHubSCMHeadCategory(@NonNull String urlName, Localizable pronoun) {
         super(urlName, pronoun);
     }
 

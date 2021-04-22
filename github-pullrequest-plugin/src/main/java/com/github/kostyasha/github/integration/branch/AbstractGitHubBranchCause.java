@@ -2,7 +2,7 @@ package com.github.kostyasha.github.integration.branch;
 
 import com.github.kostyasha.github.integration.generic.GitHubCause;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 /**
  * @author Kanstantsin Shautsou

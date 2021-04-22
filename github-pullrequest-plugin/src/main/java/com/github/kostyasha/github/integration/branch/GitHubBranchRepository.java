@@ -15,7 +15,7 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -57,14 +57,14 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
         super(repoFullName, url);
     }
 
-    @Nonnull
+    @NonNull
     public Map<String, GitHubBranch> getBranches() {
         if (isNull(branches)) branches = new ConcurrentHashMap<>();
         return branches;
     }
 
     @Override
-    public void actualiseOnChange(@Nonnull GHRepository ghRepository, @Nonnull TaskListener listener) {
+    public void actualiseOnChange(@NonNull GHRepository ghRepository, @NonNull TaskListener listener) {
         if (changed) {
             listener.getLogger().println("Local settings changed, removing branches in repository!");
             getBranches().clear();

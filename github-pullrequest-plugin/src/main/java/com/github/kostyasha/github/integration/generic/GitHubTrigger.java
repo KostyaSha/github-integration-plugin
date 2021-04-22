@@ -16,8 +16,8 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -65,7 +65,7 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
         this.triggerMode = triggerMode;
     }
 
-    @Nonnull
+    @NonNull
     public GitHubPRTriggerMode getTriggerMode() {
         return isNull(triggerMode) ? CRON : triggerMode;
     }
@@ -117,7 +117,7 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
     }
 
     @Beta
-    @Nonnull
+    @NonNull
     public List<GitHubRepoProvider> getRepoProviders() {
         if (isNull(repoProviders)) {
             repoProviders = asList(new GitHubPluginRepoProvider()); // old default behaviour
@@ -132,7 +132,7 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
     }
 
     @Beta
-    public void setRepoProvider(@Nonnull GitHubRepoProvider prov) {
+    public void setRepoProvider(@NonNull GitHubRepoProvider prov) {
         repoProviders = asList(prov);
     }
 
@@ -171,14 +171,14 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
         return repoProvider;
     }
 
-    @Nonnull
+    @NonNull
     public GHRepository getRemoteRepository() throws IOException {
         GHRepository remoteRepository = getRepoProvider().getGHRepository(this);
         checkState(nonNull(remoteRepository), "Can't get remote GH repo for %s", job.getFullName());
         return remoteRepository;
     }
 
-    @Nonnull
+    @NonNull
     public GitHubErrorsAction getErrorsAction() {
         if (isNull(errorsAction)) {
             errorsAction = new GitHubErrorsAction(getDescriptor().getDisplayName() + " Trigger Errors");
@@ -206,7 +206,7 @@ public abstract class GitHubTrigger<T extends GitHubTrigger<T>> extends Trigger<
      */
     public abstract void doRun();
 
-    @Nonnull
+    @NonNull
     @Override
     public Collection<? extends Action> getProjectActions() {
         final ArrayList<Action> actions = new ArrayList<>();

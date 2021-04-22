@@ -18,7 +18,7 @@ import org.kohsuke.github.GHUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
@@ -144,7 +144,7 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
     }
 
     @Override
-    public GitHubPRCause withLocalRepo(@Nonnull GitHubRepository localRepo) {
+    public GitHubPRCause withLocalRepo(@NonNull GitHubRepository localRepo) {
         withGitUrl(localRepo.getGitUrl());
         withSshUrl(localRepo.getSshUrl());
         // html url is set from constructor and points to pr
@@ -334,7 +334,7 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
         return sourceRepoOwner;
     }
 
-    @Nonnull
+    @NonNull
     public Set<String> getLabels() {
         return isNull(labels) ? Collections.emptySet() : labels;
     }
@@ -363,7 +363,7 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
         return state;
     }
 
-    @Nonnull
+    @NonNull
     public String getCondRef() {
         return condRef;
     }
@@ -393,7 +393,7 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
     }
 
     @Override
-    public void onAddedTo(@Nonnull Run run) {
+    public void onAddedTo(@NonNull Run run) {
         if (run.getParent().getParent() instanceof SCMSourceOwner) {
             // skip multibranch
             return;

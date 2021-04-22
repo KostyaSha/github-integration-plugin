@@ -25,7 +25,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.io.PrintStream;
 
@@ -71,8 +71,8 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher,
-                        @Nonnull TaskListener listener) throws InterruptedException, IOException {
+    public void perform(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull Launcher launcher,
+                        @NonNull TaskListener listener) throws InterruptedException, IOException {
         PrintStream listenerLogger = listener.getLogger();
         String publishedURL = getTriggerDescriptor().getJenkinsURL();
 
@@ -155,7 +155,7 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
             return true;
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "GitHub PR: set PR status";
@@ -199,7 +199,7 @@ public class GitHubPRBuildStatusPublisher extends GitHubPRAbstractPublisher {
         @Symbol("message")
         @Extension
         public static class DescriptorImpl extends Descriptor<BuildMessage> {
-            @Nonnull
+            @NonNull
             @Override
             public String getDisplayName() {
                 return "Build message container";

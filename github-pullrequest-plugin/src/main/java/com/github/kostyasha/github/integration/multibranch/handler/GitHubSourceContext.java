@@ -17,8 +17,8 @@ import jenkins.scm.api.SCMSourceOwner;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 
 import static java.util.Objects.nonNull;
@@ -33,13 +33,13 @@ public class GitHubSourceContext {
     private final GHRepository remoteRepo;
     private final TaskListener listener;
 
-    public GitHubSourceContext(@Nonnull GitHubSCMSource source,
-                               @Nonnull SCMHeadObserver observer,
-                               @Nonnull SCMSourceCriteria criteria,
+    public GitHubSourceContext(@NonNull GitHubSCMSource source,
+                               @NonNull SCMHeadObserver observer,
+                               @NonNull SCMSourceCriteria criteria,
                                @Nullable SCMHeadEvent<?> scmHeadEvent,
-                               @Nonnull GitHubRepo localRepo,
-                               @Nonnull GHRepository remoteRepo,
-                               @Nonnull TaskListener listener) {
+                               @NonNull GitHubRepo localRepo,
+                               @NonNull GHRepository remoteRepo,
+                               @NonNull TaskListener listener) {
         this.source = source;
         this.observer = observer;
         this.criteria = criteria;
@@ -49,12 +49,12 @@ public class GitHubSourceContext {
         this.listener = listener;
     }
 
-    @Nonnull
+    @NonNull
     public GitHubSCMSource getSource() {
         return source;
     }
 
-    @Nonnull
+    @NonNull
     public SCMHeadObserver getObserver() {
         return observer;
     }
@@ -63,17 +63,17 @@ public class GitHubSourceContext {
         return scmHeadEvent;
     }
 
-    @Nonnull
+    @NonNull
     public GitHubRepo getLocalRepo() {
         return localRepo;
     }
 
-    @Nonnull
+    @NonNull
     public GHRepository getRemoteRepo() {
         return remoteRepo;
     }
 
-    @Nonnull
+    @NonNull
     public TaskListener getListener() {
         return listener;
     }
@@ -82,7 +82,7 @@ public class GitHubSourceContext {
         return source.getRepoProvider().getGitHub(source);
     }
 
-    public boolean checkCriteria(@Nonnull GitHubCause<?> cause) throws IOException {
+    public boolean checkCriteria(@NonNull GitHubCause<?> cause) throws IOException {
         if (nonNull(criteria)) {
             GitHubSCMRevision revision = cause.createSCMRevision(source.getId());
             listener.getLogger().println("");
@@ -96,7 +96,7 @@ public class GitHubSourceContext {
         return true;
     }
 
-    public void observe(@Nonnull GitHubCause<?> cause) {
+    public void observe(@NonNull GitHubCause<?> cause) {
         try {
             GitHubSCMRevision scmRevision = cause.createSCMRevision(source.getId());
             if (!cause.isSkip()) {

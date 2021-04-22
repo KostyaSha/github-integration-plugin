@@ -13,7 +13,7 @@ import org.kohsuke.github.GHTag;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.io.PrintStream;
 
@@ -34,7 +34,7 @@ public class GitHubTagCreatedEvent extends GitHubTagEvent {
     }
 
     @Override
-    public GitHubTagCause check(@Nonnull GitHubTagDecisionContext context) throws IOException {
+    public GitHubTagCause check(@NonNull GitHubTagDecisionContext context) throws IOException {
         GHTag remoteTag = context.getRemoteTag();
         GitHubTag localTag = context.getLocalTag();
         GitHubTagRepository localRepo = context.getLocalRepo();
@@ -63,7 +63,7 @@ public class GitHubTagCreatedEvent extends GitHubTagEvent {
     @Symbol("created")
     @Extension
     public static class DescriptorImpl extends GitHubTagEventDescriptor {
-        @Nonnull
+        @NonNull
         @Override
         public final String getDisplayName() {
             return DISPLAY_NAME;

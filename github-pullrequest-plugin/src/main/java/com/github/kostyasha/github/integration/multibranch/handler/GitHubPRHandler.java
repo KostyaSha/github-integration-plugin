@@ -16,8 +16,8 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -64,7 +64,7 @@ public class GitHubPRHandler extends GitHubHandler {
     }
 
     @Override
-    public void handle(@Nonnull GitHubSourceContext context) throws IOException {
+    public void handle(@NonNull GitHubSourceContext context) throws IOException {
 
         Integer prNumber;
 
@@ -140,7 +140,7 @@ public class GitHubPRHandler extends GitHubHandler {
     @Symbol({"pullRequests", "pullRequest"})
     @Extension
     public static class DescriptorImpl extends GitHubHandlerDescriptor {
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "Pull Requests Handler";

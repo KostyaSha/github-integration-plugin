@@ -14,8 +14,8 @@ import org.kohsuke.github.GHPullRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
@@ -50,10 +50,10 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
         prHandler = null;
     }
 
-    public PullRequestToCauseConverter(@Nonnull GitHubPRRepository localRepo,
-                                       @Nonnull TaskListener listener,
-                                       @Nonnull GitHubSCMSource source,
-                                       @Nonnull GitHubPRHandler prHandler) {
+    public PullRequestToCauseConverter(@NonNull GitHubPRRepository localRepo,
+                                       @NonNull TaskListener listener,
+                                       @NonNull GitHubSCMSource source,
+                                       @NonNull GitHubPRHandler prHandler) {
         this.localRepo = localRepo;
         this.listener = listener;
         this.source = source;
@@ -61,16 +61,16 @@ public class PullRequestToCauseConverter implements Function<GHPullRequest, GitH
         trigger = null;
     }
 
-    public static PullRequestToCauseConverter toGitHubPRCause(@Nonnull GitHubPRRepository localRepo,
-                                                              @Nonnull TaskListener listener,
-                                                              @Nonnull GitHubPRTrigger trigger) {
+    public static PullRequestToCauseConverter toGitHubPRCause(@NonNull GitHubPRRepository localRepo,
+                                                              @NonNull TaskListener listener,
+                                                              @NonNull GitHubPRTrigger trigger) {
         return new PullRequestToCauseConverter(localRepo, listener, trigger);
     }
 
-    public static PullRequestToCauseConverter toGitHubPRCause(@Nonnull GitHubPRRepository localRepo,
-                                                              @Nonnull TaskListener listener,
-                                                              @Nonnull GitHubPRHandler prHandler,
-                                                              @Nonnull GitHubSCMSource source) {
+    public static PullRequestToCauseConverter toGitHubPRCause(@NonNull GitHubPRRepository localRepo,
+                                                              @NonNull TaskListener listener,
+                                                              @NonNull GitHubPRHandler prHandler,
+                                                              @NonNull GitHubSCMSource source) {
         return new PullRequestToCauseConverter(localRepo, listener, source, prHandler);
     }
 

@@ -14,7 +14,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.io.PrintStream;
 
@@ -34,7 +34,7 @@ public class GitHubPRCloseEvent extends GitHubPREvent {
     }
 
     @Override
-    public GitHubPRCause check(@Nonnull GitHubPRDecisionContext prDecisionContext) throws IOException {
+    public GitHubPRCause check(@NonNull GitHubPRDecisionContext prDecisionContext) throws IOException {
         TaskListener listener = prDecisionContext.getListener();
         GHPullRequest remotePR = prDecisionContext.getRemotePR();
         final PrintStream logger = listener.getLogger();
@@ -58,7 +58,7 @@ public class GitHubPRCloseEvent extends GitHubPREvent {
     @Symbol("close")
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return DISPLAY_NAME;

@@ -6,7 +6,7 @@ import hudson.util.FormValidation;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.StaplerRequest;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
@@ -39,7 +39,7 @@ public class GitHubTagRepository extends GitHubRepository<GitHubTagRepository> {
         super(repoFullName, url);
     }
 
-    @Nonnull
+    @NonNull
     public Map<String, GitHubTag> getTags() {
         if (isNull(tags)) tags = new ConcurrentHashMap<>();
         return tags;
@@ -61,7 +61,7 @@ public class GitHubTagRepository extends GitHubRepository<GitHubTagRepository> {
     }
 
     @Override
-    public void actualiseOnChange(@Nonnull GHRepository ghRepository, @Nonnull TaskListener listener) {
+    public void actualiseOnChange(@NonNull GHRepository ghRepository, @NonNull TaskListener listener) {
         if (changed) {
             listener.getLogger().println("Local settings changed, removing tags in repository state!");
             getTags().clear();

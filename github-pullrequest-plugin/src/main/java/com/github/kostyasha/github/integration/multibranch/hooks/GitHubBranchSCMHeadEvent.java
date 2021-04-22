@@ -6,8 +6,8 @@ import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.SCMSource;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Collections;
 import java.util.Map;
 
@@ -15,19 +15,19 @@ import java.util.Map;
  * @author Kanstantsin Shautsou
  */
 public class GitHubBranchSCMHeadEvent extends GitHubScmHeadEvent<BranchInfo> {
-    public GitHubBranchSCMHeadEvent(@Nonnull Type type, long timestamp, @Nonnull BranchInfo payload, @CheckForNull String origin) {
+    public GitHubBranchSCMHeadEvent(@NonNull Type type, long timestamp, @NonNull BranchInfo payload, @CheckForNull String origin) {
         super(type, timestamp, payload, origin);
     }
 
-    @Nonnull
+    @NonNull
     @Override
     protected String getSourceRepo() {
         return getPayload().getRepo();
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public Map<SCMHead, SCMRevision> heads(@Nonnull SCMSource source) {
+    public Map<SCMHead, SCMRevision> heads(@NonNull SCMSource source) {
         if (!isMatch(source)) {
             return Collections.emptyMap();
         }

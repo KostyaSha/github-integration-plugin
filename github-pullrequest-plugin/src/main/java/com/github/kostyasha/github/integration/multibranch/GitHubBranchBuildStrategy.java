@@ -11,7 +11,7 @@ import jenkins.scm.api.SCMSourceDescriptor;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 public class GitHubBranchBuildStrategy extends BranchBuildStrategy {
 
@@ -44,7 +44,7 @@ public class GitHubBranchBuildStrategy extends BranchBuildStrategy {
             return sourceDescriptor.clazz == GitHubSCMSource.class;
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "GitHub events based branch build strategy";

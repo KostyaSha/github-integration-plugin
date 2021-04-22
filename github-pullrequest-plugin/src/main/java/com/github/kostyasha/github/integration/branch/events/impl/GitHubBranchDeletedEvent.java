@@ -13,7 +13,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.io.PrintStream;
 
@@ -32,7 +32,7 @@ public class GitHubBranchDeletedEvent extends GitHubBranchEvent {
     }
 
     @Override
-    public GitHubBranchCause check(@Nonnull GitHubBranchDecisionContext context) throws IOException {
+    public GitHubBranchCause check(@NonNull GitHubBranchDecisionContext context) throws IOException {
         TaskListener listener = context.getListener();
         GitHubBranch localBranch = context.getLocalBranch();
         GHBranch remoteBranch = context.getRemoteBranch();
@@ -52,7 +52,7 @@ public class GitHubBranchDeletedEvent extends GitHubBranchEvent {
     @Symbol("deleted")
     @Extension
     public static class DescriptorImpl extends GitHubBranchEventDescriptor {
-        @Nonnull
+        @NonNull
         @Override
         public final String getDisplayName() {
             return DISPLAY_NAME;

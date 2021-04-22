@@ -11,7 +11,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
@@ -72,7 +72,7 @@ public class GitHubPRUserRestriction implements Describable<GitHubPRUserRestrict
         return orgHasMember;
     }
 
-    private boolean isInWhitelistedOrg(@Nonnull GHUser user) {
+    private boolean isInWhitelistedOrg(@NonNull GHUser user) {
         boolean ret = false;
         for (String organisation : orgsSet) {
             try {

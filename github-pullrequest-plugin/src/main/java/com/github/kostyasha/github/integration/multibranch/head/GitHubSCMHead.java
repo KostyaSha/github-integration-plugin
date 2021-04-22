@@ -5,7 +5,7 @@ import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRev
 import jenkins.scm.api.SCMHead;
 import org.kohsuke.github.GHRepository;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 public abstract class GitHubSCMHead<T extends GitHubCause<T>> extends SCMHead {
@@ -13,7 +13,7 @@ public abstract class GitHubSCMHead<T extends GitHubCause<T>> extends SCMHead {
 
     private final String sourceId;
 
-    public GitHubSCMHead(@Nonnull String name, String sourceId) {
+    public GitHubSCMHead(@NonNull String name, String sourceId) {
         super(name);
         this.sourceId = sourceId;
     }

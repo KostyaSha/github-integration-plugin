@@ -7,8 +7,8 @@ import jenkins.scm.api.SCMHeadEvent;
 import jenkins.scm.api.SCMNavigator;
 import jenkins.scm.api.SCMSource;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import static java.util.Objects.isNull;
 
@@ -21,25 +21,25 @@ public abstract class GitHubScmHeadEvent<T> extends SCMHeadEvent<T> {
         super(type, timestamp, payload, origin);
     }
 
-    @Nonnull
+    @NonNull
     protected abstract String getSourceRepo();
 
     @Override
-    public boolean isMatch(@Nonnull SCMSource source) {
+    public boolean isMatch(@NonNull SCMSource source) {
         if (!(source instanceof GitHubSCMSource)) {
             return false;
         }
         return getSourceRepo().equals(getSourceRepo(source));
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public String getSourceName() {
         return getSourceRepo();
     }
 
     @CheckForNull
-    protected String getSourceRepo(@Nonnull SCMSource source) {
+    protected String getSourceRepo(@NonNull SCMSource source) {
         GitHubSCMSource gitHubSCMSource = (GitHubSCMSource) source;
         String projectUrlStr = gitHubSCMSource.getProjectUrlStr();
         GitHubRepositoryName repo = GitHubRepositoryName.create(projectUrlStr);

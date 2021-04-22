@@ -36,8 +36,8 @@ import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -72,10 +72,10 @@ public class GHRule implements TestRule {
     @CheckForNull
     private GitHubServerConfig gitHubServerConfig;
 
-    @Nonnull
+    @NonNull
     private static JenkinsRule jRule;
 
-    @Nonnull
+    @NonNull
     private static TemporaryFolder temporaryFolder;
     private File gitRootDir;
 

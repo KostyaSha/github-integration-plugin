@@ -9,7 +9,7 @@ import hudson.util.ListBoxModel;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * Allows to change build result to specified value if there was publisher error.
@@ -37,7 +37,7 @@ public class PublisherErrorHandler extends AbstractDescribableImpl<PublisherErro
     @Symbol("statusOnPublisherError")
     @Extension
     public static class DescriptorImpl extends Descriptor<PublisherErrorHandler> {
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "Set build status if publisher failed";

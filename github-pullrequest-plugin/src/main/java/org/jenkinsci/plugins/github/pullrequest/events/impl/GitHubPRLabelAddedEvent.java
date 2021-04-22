@@ -16,7 +16,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collection;
@@ -48,7 +48,7 @@ public class GitHubPRLabelAddedEvent extends GitHubPREvent {
     }
 
     @Override
-    public GitHubPRCause check(@Nonnull GitHubPRDecisionContext prDecisionContext) throws IOException {
+    public GitHubPRCause check(@NonNull GitHubPRDecisionContext prDecisionContext) throws IOException {
         TaskListener listener = prDecisionContext.getListener();
         GitHubPRPullRequest localPR = prDecisionContext.getLocalPR();
         GHPullRequest remotePR = prDecisionContext.getRemotePR();
@@ -89,7 +89,7 @@ public class GitHubPRLabelAddedEvent extends GitHubPREvent {
     @Extension
     public static class DescriptorImpl extends GitHubPREventDescriptor {
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return DISPLAY_NAME;

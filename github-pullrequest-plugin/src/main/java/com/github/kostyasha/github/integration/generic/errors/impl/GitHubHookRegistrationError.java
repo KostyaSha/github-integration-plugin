@@ -2,7 +2,7 @@ package com.github.kostyasha.github.integration.generic.errors.impl;
 
 import com.github.kostyasha.github.integration.generic.errors.GitHubError;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * When hook registration in trigger fails.
@@ -10,11 +10,11 @@ import javax.annotation.Nonnull;
  * @author Kanstantsin Shautsou
  */
 public class GitHubHookRegistrationError extends GitHubError {
-    public GitHubHookRegistrationError(@Nonnull String description) {
+    public GitHubHookRegistrationError(@NonNull String description) {
         super(description);
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public String getTitle() {
         return "GitHub Hook Registration error";

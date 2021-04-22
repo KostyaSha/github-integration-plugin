@@ -8,7 +8,7 @@ import hudson.plugins.git.util.BuildData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -25,7 +25,7 @@ public class GitHubPRBuildListener extends RunListener<Run<?, ?>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubPRBuildListener.class);
 
     @Override
-    public void onCompleted(Run<?, ?> run, @Nonnull TaskListener listener) {
+    public void onCompleted(Run<?, ?> run, @NonNull TaskListener listener) {
         GitHubPRTrigger trigger = ghPRTriggerFromRun(run);
         if (isNull(trigger)) {
             return;
