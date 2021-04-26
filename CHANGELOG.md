@@ -2,6 +2,9 @@
 
 ## Next 
 
+## 0.3.0
+- removed icon-shim plugin dependency
+
 ## 0.2.3
 - Remove garbage classes.
 
