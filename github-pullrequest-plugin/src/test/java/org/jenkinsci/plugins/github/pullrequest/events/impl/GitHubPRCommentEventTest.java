@@ -28,9 +28,8 @@ import static com.github.kostyasha.github.integration.generic.GitHubPRDecisionCo
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.anyInt;
@@ -121,8 +120,8 @@ public class GitHubPRCommentEventTest {
                         .build()
                 );
 
-        assertEquals(cause.getCommentAuthorName(), "commentOwnerName");
-        assertEquals(cause.getCommentAuthorEmail(), "commentOwner@email.com");
+        assertThat(cause.getCommentAuthorName(), is("commentOwnerName"));
+        assertThat(cause.getCommentAuthorEmail(), is("commentOwner@email.com"));
         assertThat(cause.getCommentBody(), is(body));
         assertThat(cause.getCommentBodyMatch(), is("foo, bar"));
         assertNotNull(cause);
@@ -160,10 +159,10 @@ public class GitHubPRCommentEventTest {
                         .withListener(listener)
                         .build()
                 );
-        assertEquals(cause.getCommentAuthorName(), "commentOwnerName");
-        assertEquals(cause.getCommentAuthorEmail(), "commentOwner@email.com");
-        assertNotEquals(cause.getCommentAuthorName(), "commentOwnerName2");
-        assertNotEquals(cause.getCommentAuthorEmail(), "commentOwner2@email.com");
+        assertThat(cause.getCommentAuthorName(), is("commentOwnerName"));
+        assertThat(cause.getCommentAuthorEmail(), is("commentOwner@email.com"));
+        assertThat(cause.getCommentAuthorName(), not("commentOwnerName2"));
+        assertThat(cause.getCommentAuthorEmail(), not("commentOwner2@email.com"));
         assertNotNull(cause);
         assertThat(cause.getCommentBody(), is(body));
         assertThat(cause.getCommentBodyMatch(), is("foo, bar"));
@@ -208,8 +207,8 @@ public class GitHubPRCommentEventTest {
                         .build()
                 ); // localPR is null
 
-        assertEquals(cause.getCommentAuthorName(), "commentOwnerName");
-        assertEquals(cause.getCommentAuthorEmail(), "commentOwner@email.com");
+        assertThat(cause.getCommentAuthorName(), is("commentOwnerName"));
+        assertThat(cause.getCommentAuthorEmail(), is("commentOwner@email.com"));
         assertThat(cause.getCommentBody(), is(body));
         assertThat(cause.getCommentBodyMatch(), is("foo, bar"));
         assertNotNull(cause);
