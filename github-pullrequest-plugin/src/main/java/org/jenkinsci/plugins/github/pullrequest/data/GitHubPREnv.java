@@ -30,6 +30,8 @@ public enum GitHubPREnv implements GitHubEnv<GitHubPRCause> {
     CAUSE_SKIP(GitHubPRCause::isSkip),
     NUMBER((Function<GitHubPRCause, String>) c -> String.valueOf(c.getNumber())),
     STATE(GitHubPRCause::getState),
+    COMMENT_AUTHOR_NAME(GitHubPRCause::getCommentAuthorName),
+    COMMENT_AUTHOR_EMAIL(GitHubPRCause::getCommentAuthorEmail),
     COMMENT_BODY(GitHubPRCause::getCommentBody),
     COMMENT_BODY_MATCH(GitHubPRCause::getCommentBodyMatch),
     LABELS((Function<GitHubPRCause, String>) c -> String.join(",", c.getLabels()));
