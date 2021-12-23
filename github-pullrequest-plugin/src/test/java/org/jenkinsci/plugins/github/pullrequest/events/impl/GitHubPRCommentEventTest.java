@@ -122,7 +122,7 @@ public class GitHubPRCommentEventTest {
                 );
 
         assertEquals(cause.getCommentAuthorName(), "commentOwnerName");
-        assertEquals(cause.getCommentAuthorEmail(), "commentOwnerName@email.com");
+        assertEquals(cause.getCommentAuthorEmail(), "commentOwner@email.com");
         assertThat(cause.getCommentBody(), is(body));
         assertThat(cause.getCommentBodyMatch(), is("foo, bar"));
         assertNotNull(cause);
@@ -161,7 +161,7 @@ public class GitHubPRCommentEventTest {
                         .build()
                 );
         assertEquals(cause.getCommentAuthorName(), "commentOwnerName");
-        assertEquals(cause.getCommentAuthorEmail(), "commentOwnerName@email.com");
+        assertEquals(cause.getCommentAuthorEmail(), "commentOwner@email.com");
         assertNotEquals(cause.getCommentAuthorName(), "commentOwnerName2");
         assertNotEquals(cause.getCommentAuthorEmail(), "commentOwner2@email.com");
         assertNotNull(cause);
