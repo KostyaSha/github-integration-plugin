@@ -96,6 +96,8 @@ public class GitHubPRCommentEvent extends GitHubPREvent {
                     LOG.trace("Event matches comment '{}'", body);
                     cause = prDecisionContext.newCause("Comment matches to criteria.", false);
                     cause.withCommentBody(body);
+                    cause.withCommentAuthorName(issueComment.getUser().getName());
+                    cause.withCommentAuthorEmail(issueComment.getUser().getEmail());
                     if (matcher.groupCount() > 0) {
                         cause.withCommentBodyMatch(matcher.group(1));
                     }

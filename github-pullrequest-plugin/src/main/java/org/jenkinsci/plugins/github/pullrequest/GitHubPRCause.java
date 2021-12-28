@@ -52,6 +52,8 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
 
     private String condRef;
     private String state;
+    private String commentAuthorName;
+    private String commentAuthorEmail;
     private String commentBody;
     private String commentBodyMatch;
 
@@ -164,6 +166,8 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
         withTriggerSenderName(orig.getTriggerSenderEmail());
         withTriggerSenderEmail(orig.getTriggerSenderEmail());
         withBody(orig.getBody());
+        withCommentAuthorName(orig.getCommentAuthorName());
+        withCommentAuthorEmail(orig.getCommentAuthorEmail());
         withCommentBody(orig.getCommentBody());
         withCommentBodyMatch(orig.getCommentBodyMatch());
         withCommitAuthorName(orig.getCommitAuthorName());
@@ -282,6 +286,16 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
         return this;
     }
 
+    public GitHubPRCause withCommentAuthorName(String commentAuthorName) {
+        this.commentAuthorName = commentAuthorName;
+        return this;
+    }
+
+    public GitHubPRCause withCommentAuthorEmail(String commentAuthorEmail) {
+        this.commentAuthorEmail = commentAuthorEmail;
+        return this;
+    }
+
     public GitHubPRCause withCommentBody(String commentBody) {
         this.commentBody = commentBody;
         return this;
@@ -366,6 +380,20 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
     @NonNull
     public String getCondRef() {
         return condRef;
+    }
+
+    /**
+     * When trigger by comment, author of comment.
+     */
+    public String getCommentAuthorName() {
+        return commentAuthorName;
+    }
+
+    /**
+     * When trigger by comment, author email of comment.
+     */
+    public String getCommentAuthorEmail() {
+        return commentAuthorEmail;
     }
 
     /**

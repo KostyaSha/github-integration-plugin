@@ -28,13 +28,11 @@ import static com.github.kostyasha.github.integration.generic.GitHubPRDecisionCo
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.isNotNull;
-import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -68,6 +66,10 @@ public class GitHubPRCommentEventTest {
     @Mock
     private GitHubPRTrigger trigger;
 
+    @Mock
+    private GHUser author;
+    @Mock
+    private GHUser author2;
     @Mock
     private GHIssueComment comment;
     @Mock
@@ -118,6 +120,8 @@ public class GitHubPRCommentEventTest {
                         .build()
                 );
 
+        assertThat(cause.getCommentAuthorName(), is("commentOwnerName"));
+        assertThat(cause.getCommentAuthorEmail(), is("commentOwner@email.com"));
         assertThat(cause.getCommentBody(), is(body));
         assertThat(cause.getCommentBodyMatch(), is("foo, bar"));
         assertNotNull(cause);
@@ -135,8 +139,11 @@ public class GitHubPRCommentEventTest {
         when(comment.getCreatedAt()).thenReturn(new Date());
 
         final String body2 = "no matching in second comment";
+        when(comment2.getUser()).thenReturn(author2);
         when(comment2.getBody()).thenReturn(body2);
         when(comment2.getCreatedAt()).thenReturn(new Date());
+        when(author2.getName()).thenReturn("commentOwnerName2");
+        when(author2.getEmail()).thenReturn("commentOwner2@email.com");
 
 
         final ArrayList<GHIssueComment> ghIssueComments = new ArrayList<>();
@@ -152,7 +159,11 @@ public class GitHubPRCommentEventTest {
                         .withListener(listener)
                         .build()
                 );
-        assertThat(cause, notNullValue());
+        assertThat(cause.getCommentAuthorName(), is("commentOwnerName"));
+        assertThat(cause.getCommentAuthorEmail(), is("commentOwner@email.com"));
+        assertThat(cause.getCommentAuthorName(), not("commentOwnerName2"));
+        assertThat(cause.getCommentAuthorEmail(), not("commentOwner2@email.com"));
+        assertNotNull(cause);
         assertThat(cause.getCommentBody(), is(body));
         assertThat(cause.getCommentBodyMatch(), is("foo, bar"));
     }
@@ -196,6 +207,8 @@ public class GitHubPRCommentEventTest {
                         .build()
                 ); // localPR is null
 
+        assertThat(cause.getCommentAuthorName(), is("commentOwnerName"));
+        assertThat(cause.getCommentAuthorEmail(), is("commentOwner@email.com"));
         assertThat(cause.getCommentBody(), is(body));
         assertThat(cause.getCommentBodyMatch(), is("foo, bar"));
         assertNotNull(cause);
@@ -209,6 +222,9 @@ public class GitHubPRCommentEventTest {
         when(repository.getIssue(anyInt())).thenReturn(issue);
         when(repository.getOwnerName()).thenReturn("ownerName");
         when(listener.getLogger()).thenReturn(logger);
+        when(comment.getUser()).thenReturn(author);
+        when(author.getName()).thenReturn("commentOwnerName");
+        when(author.getEmail()).thenReturn("commentOwner@email.com");
     }
 
     private void causeCreationExpectations() throws IOException {
