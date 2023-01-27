@@ -2,6 +2,9 @@
 
 ## Next 
 
+## 0.4.0
+- #347 Add two properties for comment author name and email 
+
 ## 0.3.0
 - removed icon-shim plugin dependency
 
