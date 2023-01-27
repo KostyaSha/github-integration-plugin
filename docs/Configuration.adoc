@@ -67,5 +67,5 @@ url `${GITHUB_REPO_GIT_URL}`, branchspec `${GITHUB_BRANCH_NAME}`.
 - `GITHUB_BRANCH_CAUSE_SKIP` - `true` or `false`
 
 ===== Specific for repo:
-- `GITHUB_REPO_GIT_URL` - `git://github.com/KostyaSha-org/test-branches.git`
+- `GITHUB_REPO_GIT_URL` - `https://github.com/KostyaSha-org/test-branches.git`
 - `GITHUB_REPO_SSH_URL` - `git@github.com:KostyaSha-org/test-branches.git`
