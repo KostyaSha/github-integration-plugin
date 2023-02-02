@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
@@ -64,10 +65,18 @@ public class GitHubPRCause extends GitHubCause<GitHubPRCause> {
                          GitHubPRRepository localRepo,
                          String reason,
                          boolean skip) {
-        this(new GitHubPRPullRequest(remotePr), remotePr.getUser(), localRepo, skip, reason);
+        this(new GitHubPRPullRequest(remotePr), unwrapUser(remotePr), localRepo, skip, reason);
         withRemoteData(remotePr);
         if (localRepo != null) {
             withLocalRepo(localRepo);
+        }
+    }
+
+    private static GHUser unwrapUser(GHPullRequest remotePr) {
+        try {
+            return remotePr.getUser();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 

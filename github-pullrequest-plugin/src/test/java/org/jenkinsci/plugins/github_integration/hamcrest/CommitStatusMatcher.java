@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.github_integration.hamcrest;
 
-import org.hamcrest.Factory;
+//import org.hamcrest.Factory;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
 import org.kohsuke.github.GHCommitState;
@@ -33,7 +33,7 @@ public class CommitStatusMatcher extends FeatureMatcher<GHCommitStatus, Boolean>
                 commitStatus.getDescription().equals(description);
     }
 
-    @Factory
+    //@Factory
     public static CommitStatusMatcher commitStatus(String context,
                                                    GHCommitState state,
                                                    String description) {

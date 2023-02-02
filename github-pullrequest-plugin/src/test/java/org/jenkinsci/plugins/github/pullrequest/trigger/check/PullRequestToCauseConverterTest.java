@@ -24,9 +24,8 @@ import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHUser;
-import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.HashMap;
 
@@ -38,8 +37,8 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.PullRequestToCauseConverter.toGitHubPRCause;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -89,7 +88,7 @@ public class PullRequestToCauseConverterTest {
         when(remotePR.getBase()).thenReturn(commit);
         when(remotePR.getRepository()).thenReturn(remoteRepo);
         when(remotePR.getState()).thenReturn(GHIssueState.OPEN);
-        when(remoteRepo.getIssue(Matchers.any(Integer.class))).thenReturn(new GHIssue());
+        when(remoteRepo.getIssue(any(Integer.class))).thenReturn(new GHIssue());
     }
 
     @Ignore("fails after multibranch")

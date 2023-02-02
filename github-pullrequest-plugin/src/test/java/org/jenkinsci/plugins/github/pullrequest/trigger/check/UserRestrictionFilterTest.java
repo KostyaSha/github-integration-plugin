@@ -8,12 +8,12 @@ import org.junit.runner.RunWith;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHUser;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.UserRestrictionFilter.withUserRestriction;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 /**
@@ -24,6 +24,12 @@ public class UserRestrictionFilterTest {
     
     @Mock
     private GitHubPRUserRestriction uRestr;
+
+    @Mock
+    private GHUser ghUser;
+
+    @Mock
+    private GHPullRequest ghPullRequest;
 
     @Rule
     public TaskListenerWrapperRule tlRule = new TaskListenerWrapperRule();
@@ -37,16 +43,18 @@ public class UserRestrictionFilterTest {
     @Test
     public void shouldNotFilterWithNotRestrictedBranchRestriction() throws Exception {
         when(uRestr.isWhitelisted(any(GHUser.class))).thenReturn(true);
+        when(ghPullRequest.getUser()).thenReturn(ghUser);
 
         assertThat("when allowed", 
-                withUserRestriction(tlRule.getListener(), uRestr).apply(new GHPullRequest()), is(true));
+                withUserRestriction(tlRule.getListener(), uRestr).apply(ghPullRequest), is(true));
     }
 
     @Test
     public void shouldFilterWithRestrictedBranchRestriction() throws Exception {
         when(uRestr.isWhitelisted(any(GHUser.class))).thenReturn(false);
+        when(ghPullRequest.getUser()).thenReturn(ghUser);
 
         assertThat("when not allowed",
-                withUserRestriction(tlRule.getListener(), uRestr).apply(new GHPullRequest()), is(false));
+                withUserRestriction(tlRule.getListener(), uRestr).apply(ghPullRequest), is(false));
     }
 }

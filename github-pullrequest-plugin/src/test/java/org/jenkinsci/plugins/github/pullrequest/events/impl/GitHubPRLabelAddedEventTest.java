@@ -17,7 +17,7 @@ import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHUser;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -52,17 +52,17 @@ public class GitHubPRLabelAddedEventTest {
     private GitHubPRPullRequest localPR;
     @Mock
     private GitHubPRLabel labels;
-    @Mock
+    @Mock(lenient = true)
     private GHRepository repository;
-    @Mock
+    @Mock(lenient = true)
     private GHIssue issue;
-    @Mock
+    @Mock(lenient = true)
     private GHLabel mergeLabel;
-    @Mock
+    @Mock(lenient = true)
     private GHLabel reviewedLabel;
-    @Mock
+    @Mock(lenient = true)
     private GHLabel testLabel;
-    @Mock
+    @Mock(lenient = true)
     private TaskListener listener;
     @Mock
     private PrintStream logger;

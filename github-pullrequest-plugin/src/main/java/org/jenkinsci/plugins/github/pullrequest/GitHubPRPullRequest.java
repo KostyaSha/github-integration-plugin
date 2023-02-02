@@ -60,9 +60,9 @@ public class GitHubPRPullRequest {
      * Save only what we need for next comparison
      */
     public GitHubPRPullRequest(GHPullRequest pr) {
-        userLogin = pr.getUser().getLogin();
-        number = pr.getNumber();
         try {
+            userLogin = pr.getUser().getLogin();
+            number = pr.getNumber();
             prUpdatedAt = pr.getUpdatedAt();
             issueUpdatedAt = pr.getIssueUpdatedAt();
         } catch (IOException e) {

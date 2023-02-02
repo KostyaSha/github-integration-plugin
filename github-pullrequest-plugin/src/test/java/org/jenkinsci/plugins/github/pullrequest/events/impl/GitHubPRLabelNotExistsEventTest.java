@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kohsuke.github.*;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -39,19 +39,19 @@ public class GitHubPRLabelNotExistsEventTest {
 
     @Mock
     private GHPullRequest remotePr;
-    @Mock
+    @Mock(lenient = true)
     private GitHubPRPullRequest localPR;
     @Mock
     private GitHubPRLabel labels;
-    @Mock
+    @Mock(lenient = true)
     private GHRepository repository;
     @Mock
     private GHIssue issue;
-    @Mock
+    @Mock(lenient = true)
     private GHLabel mergeLabel;
     @Mock
     private GHLabel reviewedLabel;
-    @Mock
+    @Mock(lenient = true)
     private GHLabel testLabel;
     @Mock
     private TaskListener listener;

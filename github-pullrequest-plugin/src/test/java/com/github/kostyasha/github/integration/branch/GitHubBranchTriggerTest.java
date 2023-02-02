@@ -14,7 +14,7 @@ import com.github.kostyasha.github.integration.generic.repoprovider.GHPermission
 import com.github.kostyasha.github.integration.generic.repoprovider.GitHubPluginRepoProvider;
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import com.jayway.awaitility.Awaitility;
+import org.awaitility.Awaitility;
 import hudson.model.CauseAction;
 import hudson.model.Computer;
 import hudson.model.FreeStyleBuild;

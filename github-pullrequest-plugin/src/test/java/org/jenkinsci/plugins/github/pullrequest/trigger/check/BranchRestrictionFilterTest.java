@@ -7,12 +7,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kohsuke.github.GHPullRequest;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.plugins.github.pullrequest.trigger.check.BranchRestrictionFilter.withBranchRestriction;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 
 /**
@@ -34,7 +35,7 @@ public class BranchRestrictionFilterTest {
 
     @Test
     public void shouldNotFilterWithNotRestrictedBranchRestriction() throws Exception {
-        when(bRestr.isBranchBuildAllowed(any(GHPullRequest.class))).thenReturn(true);
+        when(bRestr.isBranchBuildAllowed(nullable(GHPullRequest.class))).thenReturn(true);
         
         assertThat("when allowed", withBranchRestriction(tlRule.getListener(), bRestr).apply(null), is(true));
     }

@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kohsuke.github.GHPullRequest;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,7 +27,7 @@ public class SkipPRInBadStateTest {
     @Mock
     private GitHubPRRepository localRepo;
 
-    @Mock
+    @Mock(lenient = true)
     private GitHubPRPullRequest localPR;
 
     @Mock

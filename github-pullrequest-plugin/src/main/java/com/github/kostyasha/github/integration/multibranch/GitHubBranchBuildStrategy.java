@@ -2,6 +2,7 @@ package com.github.kostyasha.github.integration.multibranch;
 
 import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRevision;
 import hudson.Extension;
+import hudson.model.TaskListener;
 import jenkins.branch.BranchBuildStrategy;
 import jenkins.branch.BranchBuildStrategyDescriptor;
 import jenkins.scm.api.SCMHead;
@@ -34,6 +35,12 @@ public class GitHubBranchBuildStrategy extends BranchBuildStrategy {
             return false;
         }
         return !gr.getCause().isSkip();
+    }
+
+    @Override
+    public boolean isAutomaticBuild(@NonNull SCMSource source, @NonNull SCMHead head, @NonNull SCMRevision currRevision,
+            SCMRevision lastBuiltRevision, SCMRevision lastSeenRevision, @NonNull TaskListener listener) {
+        return isAutomaticBuild(source, head, currRevision);
     }
 
     @Symbol("gitHubEvents")

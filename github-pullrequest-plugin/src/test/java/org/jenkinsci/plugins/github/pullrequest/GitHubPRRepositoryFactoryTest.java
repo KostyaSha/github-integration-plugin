@@ -91,7 +91,7 @@ public class GitHubPRRepositoryFactoryTest {
                 .willReturn(trigger);
 
         when(parent.getFullName()).thenReturn("mocked job");
-        when(job.getParent()).thenReturn(parent);
+//        when(job.getParent()).thenReturn(parent);
         when(trigger.getRepoFullName(job)).thenThrow(new RuntimeException());
 
         assertThat(new GitHubPRRepositoryFactory().createFor(job), hasSize(0));
