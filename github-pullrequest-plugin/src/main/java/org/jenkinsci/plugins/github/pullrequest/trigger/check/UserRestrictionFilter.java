@@ -5,6 +5,8 @@ import com.google.common.base.Predicates;
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction;
 import org.jenkinsci.plugins.github.pullrequest.utils.LoggingTaskListenerWrapper;
 import org.kohsuke.github.GHPullRequest;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 
 import static java.util.Objects.isNull;
 
@@ -31,10 +33,14 @@ public class UserRestrictionFilter implements Predicate<GHPullRequest> {
 
     @Override
     public boolean apply(GHPullRequest remotePR) {
-        if (!userRestriction.isWhitelisted(remotePR.getUser())) {
-            listener.info("Skipping [#{} {}] because of user restriction (user - {})",
-                    remotePR.getNumber(), remotePR.getTitle(), remotePR.getUser());
-            return false;
+        try {
+            if (!userRestriction.isWhitelisted(remotePR.getUser())) {
+                listener.info("Skipping [#{} {}] because of user restriction (user - {})",
+                        remotePR.getNumber(), remotePR.getTitle(), remotePR.getUser());
+                return false;
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
 
         return true;

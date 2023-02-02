@@ -10,7 +10,7 @@ import org.junit.runner.RunWith;
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHRepository;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -29,12 +29,12 @@ import static org.mockito.Mockito.when;
 public class GitHubBranchDeletedEventTest {
     @Mock
     private GitHubBranch localBranch;
-    @Mock
+    @Mock(lenient = true)
     private GHRepository repository;
 
     @Mock
     private GitHubBranchRepository localRepo;
-    @Mock
+    @Mock(lenient = true)
     private GHBranch remoteBranch;
     @Mock
     private TaskListener listener;

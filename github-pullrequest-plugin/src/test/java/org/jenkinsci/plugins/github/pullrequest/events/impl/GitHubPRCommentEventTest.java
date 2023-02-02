@@ -16,7 +16,7 @@ import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHUser;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -32,7 +32,7 @@ import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -44,13 +44,13 @@ public class GitHubPRCommentEventTest {
 
     @Mock
     private GHPullRequest remotePr;
-    @Mock
+    @Mock(lenient = true)
     private GitHubPRPullRequest localPR;
-    @Mock
+    @Mock(lenient = true)
     private GitHubPRLabel labels;
-    @Mock
+    @Mock(lenient = true)
     private GHRepository repository;
-    @Mock
+    @Mock(lenient = true)
     private GHIssue issue;
     @Mock
     private GHLabel mergeLabel;
@@ -68,11 +68,11 @@ public class GitHubPRCommentEventTest {
 
     @Mock
     private GHUser author;
-    @Mock
+    @Mock(lenient = true)
     private GHUser author2;
     @Mock
     private GHIssueComment comment;
-    @Mock
+    @Mock(lenient = true)
     private GHIssueComment comment2;
 
     @Test

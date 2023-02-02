@@ -11,9 +11,9 @@ import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHUser;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.HashMap;
 
@@ -38,7 +38,7 @@ public class LocalRepoUpdaterTest {
     @Mock
     private GHRepository remoteRepo;
 
-    @Mock
+    @Mock(lenient = true)
     private GitHubPRPullRequest localPR;
 
     @Mock
@@ -60,7 +60,7 @@ public class LocalRepoUpdaterTest {
         when(remotePR.getHead()).thenReturn(commit);
         when(remotePR.getBase()).thenReturn(commit);
         when(remotePR.getRepository()).thenReturn(remoteRepo);
-        when(remoteRepo.getIssue(Matchers.any(Integer.class))).thenReturn(new GHIssue());
+        when(remoteRepo.getIssue(ArgumentMatchers.any(Integer.class))).thenReturn(new GHIssue());
 
         when(commit.getSha()).thenReturn(SHA_REMOTE);
     }

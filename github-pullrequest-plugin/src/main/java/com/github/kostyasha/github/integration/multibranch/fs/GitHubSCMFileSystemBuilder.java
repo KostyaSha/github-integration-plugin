@@ -6,10 +6,12 @@ import com.github.kostyasha.github.integration.multibranch.revision.GitHubSCMRev
 import hudson.Extension;
 import hudson.model.Item;
 import hudson.scm.SCM;
+import hudson.scm.SCMDescriptor;
 import jenkins.scm.api.SCMFileSystem;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.SCMSource;
+import jenkins.scm.api.SCMSourceDescriptor;
 import org.kohsuke.github.GHRepository;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
@@ -24,6 +26,16 @@ public class GitHubSCMFileSystemBuilder extends SCMFileSystem.Builder {
     @Override
     public boolean supports(SCMSource source) {
         return source instanceof GitHubSCMSource;
+    }
+
+    @Override
+    protected boolean supportsDescriptor(SCMDescriptor descriptor) {
+        return false;
+    }
+
+    @Override
+    protected boolean supportsDescriptor(SCMSourceDescriptor descriptor) {
+        return descriptor instanceof GitHubSCMSource.DescriptorImpl;
     }
 
     @Override

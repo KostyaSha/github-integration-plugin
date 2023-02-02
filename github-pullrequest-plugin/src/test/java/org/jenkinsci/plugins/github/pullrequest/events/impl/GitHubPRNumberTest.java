@@ -15,7 +15,7 @@ import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHUser;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -26,7 +26,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,9 +37,9 @@ import static org.mockito.Mockito.when;
 public class GitHubPRNumberTest {
     @Mock
     private GHPullRequest remotePr;
-    @Mock
+    @Mock(lenient = true)
     private GitHubPRPullRequest localPR;
-    @Mock
+    @Mock(lenient = true)
     private TaskListener listener;
     @Mock
     private GHUser mockUser;

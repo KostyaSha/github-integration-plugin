@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Callable;
 
-import static com.jayway.awaitility.Awaitility.await;
+import static org.awaitility.Awaitility.await;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;

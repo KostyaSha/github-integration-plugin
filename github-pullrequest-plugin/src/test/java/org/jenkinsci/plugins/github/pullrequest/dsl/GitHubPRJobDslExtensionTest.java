@@ -46,19 +46,13 @@ public class GitHubPRJobDslExtensionTest {
     @Test
     public void shouldCreateJobWithExtendedDsl() throws Exception {
         FreeStyleProject job = jenkins.createFreeStyleProject();
-        job.getBuildersList().add(
-                new ExecuteDslScripts(
-                        new ExecuteDslScripts.ScriptLocation(
-                                null, null,
-                                IOUtils.toString(this
-                                        .getClass().getClassLoader().getResourceAsStream(JOB_DSL_GROOVY))
-                        ),
-                        false,
-                        RemovedJobAction.DELETE,
-                        RemovedViewAction.DELETE,
-                        LookupStrategy.JENKINS_ROOT
-                )
-        );
+        ExecuteDslScripts executeDslScripts = new ExecuteDslScripts();
+        executeDslScripts.setScriptText(IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream(JOB_DSL_GROOVY)));
+        executeDslScripts.setIgnoreExisting(false);
+        executeDslScripts.setRemovedJobAction(RemovedJobAction.DELETE);
+        executeDslScripts.setRemovedViewAction(RemovedViewAction.DELETE);
+        executeDslScripts.setLookupStrategy(LookupStrategy.JENKINS_ROOT);
+        job.getBuildersList().add(executeDslScripts);
 
         jenkins.buildAndAssertSuccess(job);
 

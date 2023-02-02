@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.github.pullrequest.util;
 
-import org.apache.commons.codec.Charsets;
+import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;
@@ -26,7 +26,7 @@ public final class TestUtil {
         try {
             return IOUtils.toString(clazz.getClassLoader().getResourceAsStream(
                     clazz.getName().replace(PACKAGE_SEPARATOR, File.separator) + File.separator + path
-            ), Charsets.UTF_8);
+            ), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(format("Can't load %s for class %s", path, clazz), e);
         }
