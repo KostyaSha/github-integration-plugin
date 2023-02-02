@@ -2,7 +2,6 @@ package org.jenkinsci.plugins.github.pullrequest.trigger.check;
 
 import org.jenkinsci.plugins.github.pullrequest.restrictions.GitHubPRUserRestriction;
 import org.jenkinsci.plugins.github.pullrequest.util.TaskListenerWrapperRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +25,12 @@ public class UserRestrictionFilterTest {
     @Mock
     private GitHubPRUserRestriction uRestr;
 
+    @Mock
+    private GHUser ghUser;
+
+    @Mock
+    private GHPullRequest ghPullRequest;
+
     @Rule
     public TaskListenerWrapperRule tlRule = new TaskListenerWrapperRule();
 
@@ -35,21 +40,21 @@ public class UserRestrictionFilterTest {
                 withUserRestriction(tlRule.getListener(), null).apply(new GHPullRequest()), is(true));
     }
 
-    @Ignore("TODO needs triage")
     @Test
     public void shouldNotFilterWithNotRestrictedBranchRestriction() throws Exception {
         when(uRestr.isWhitelisted(any(GHUser.class))).thenReturn(true);
+        when(ghPullRequest.getUser()).thenReturn(ghUser);
 
         assertThat("when allowed", 
-                withUserRestriction(tlRule.getListener(), uRestr).apply(new GHPullRequest()), is(true));
+                withUserRestriction(tlRule.getListener(), uRestr).apply(ghPullRequest), is(true));
     }
 
-    @Ignore("TODO needs triage")
     @Test
     public void shouldFilterWithRestrictedBranchRestriction() throws Exception {
         when(uRestr.isWhitelisted(any(GHUser.class))).thenReturn(false);
+        when(ghPullRequest.getUser()).thenReturn(ghUser);
 
         assertThat("when not allowed",
-                withUserRestriction(tlRule.getListener(), uRestr).apply(new GHPullRequest()), is(false));
+                withUserRestriction(tlRule.getListener(), uRestr).apply(ghPullRequest), is(false));
     }
 }
