@@ -2,6 +2,9 @@
 
 ## Next 
 
+## 0.5.0
+- #376 Updated dependencies
+
 ## 0.4.0
 - #347 Add two properties for comment author name and email 
 
