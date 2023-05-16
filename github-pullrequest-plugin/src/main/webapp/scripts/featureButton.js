@@ -1,10 +1,12 @@
 function callFeature(button, answerPlaceId, parameters) {
-    new Ajax.Request(button.action, {
+    fetch(button.action, {
         method: "post",
-        parameters: parameters,
-        onComplete: function (rsp) {
-            answerPlaceId.innerHTML = rsp.responseText;
-        }
+        headers: crumb.wrap({}),
+        body: new URLSearchParams(parameters),
+    }).then(rsp => {
+        rsp.text().then((responseText) => {
+            answerPlaceId.innerHTML = responseText;
+        });
     });
     return false;
 }
