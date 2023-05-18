@@ -1,7 +1,7 @@
 package org.jenkinsci.plugins.github.pullrequest.events.impl;
 
 import hudson.model.FreeStyleProject;
-import hudson.model.Job;
+import hudson.model.ItemGroup;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRTrigger;
@@ -14,12 +14,10 @@ import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHUser;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Date;
 
 import static com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext.newGitHubPRDecisionContext;
 import static org.hamcrest.Matchers.nullValue;
@@ -33,16 +31,15 @@ import static org.mockito.Mockito.when;
 /**
  * @author Kanstantsin Shautsou
  */
-@PrepareForTest(Job.class)
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class GitHubPRDescriptionEventTest {
     @Mock
-    private FreeStyleProject job;
+    private ItemGroup parent;
 
     @Mock
     private GHPullRequest remotePr;
 
-    @Mock
+    @Mock(lenient = true)
     private GHRepository repository;
     @Mock
     private GHIssue issue;
@@ -62,7 +59,6 @@ public class GitHubPRDescriptionEventTest {
 
         when(listener.getLogger()).thenReturn(logger);
 
-        when(issue.getCreatedAt()).thenReturn(new Date());
         when(remotePr.getBody()).thenReturn("must skip ci body");
 
         GitHubPRCause cause = new GitHubPRDescriptionEvent(".*[skip ci].*")
@@ -84,7 +80,6 @@ public class GitHubPRDescriptionEventTest {
 
         when(listener.getLogger()).thenReturn(logger);
 
-        when(issue.getCreatedAt()).thenReturn(new Date());
         when(remotePr.getBody()).thenReturn("unmatched comment");
 
         GitHubPRCause cause = new GitHubPRDescriptionEvent(".*skip ci.*")
@@ -99,9 +94,10 @@ public class GitHubPRDescriptionEventTest {
     }
 
     private void commonExpectations() throws IOException {
-        when(job.getFullName()).thenReturn("Full job name");
+        when(parent.getFullName()).thenReturn("Full job name");
 
-        when(trigger.getJob()).thenReturn((Job) job);
+        FreeStyleProject p = new FreeStyleProject(parent, "p");
+        when(trigger.getJob()).thenReturn(p);
 
         when(remotePr.getState()).thenReturn(GHIssueState.OPEN);
         when(remotePr.getRepository()).thenReturn(repository);

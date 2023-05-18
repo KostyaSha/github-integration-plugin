@@ -4,7 +4,6 @@ import com.cloudbees.jenkins.GitHubRepositoryName;
 import com.coravy.hudson.plugins.github.GithubProjectProperty;
 import com.coravy.hudson.plugins.github.GithubUrl;
 import hudson.XmlFile;
-import hudson.model.AbstractItem;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.ItemGroup;
@@ -15,9 +14,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kohsuke.github.GHRepository;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockedStatic;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.io.File;
@@ -28,29 +26,26 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.ghPRTriggerFromJob;
 import static org.junit.Assert.assertThat;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Alina_Karpovich
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({GithubProjectProperty.class, GithubUrl.class, JobHelper.class, AbstractItem.class,
-        GitHubPRTrigger.DescriptorImpl.class})
+@RunWith(MockitoJUnitRunner.class)
 public class GitHubPRRepositoryFactoryTest {
     public static final String CONFIG_PATH = "src/test/resources";
 
     @Mock
     private GHRepository ghRepository;
 
-    @Mock
+    @Mock(lenient = true)
     private ItemGroup parent;
     @Mock
     private Job job;
-    @Mock
+    @Mock(lenient = true)
     private GitHubPRTrigger trigger;
 
     @Mock
@@ -74,36 +69,37 @@ public class GitHubPRRepositoryFactoryTest {
     @Test
     public void createForNullTrigger() {
 //        when(job.getTrigger(GitHubPRTrigger.class)).thenReturn(null);
-        PowerMockito.mockStatic(JobHelper.class);
-        given(ghPRTriggerFromJob(job))
-                .willReturn(null);
+      try (MockedStatic<JobHelper> mockedStatic = mockStatic(JobHelper.class)) {
+        mockedStatic.when(() -> JobHelper.ghPRTriggerFromJob(job)).thenReturn(null);
 
         Collection<? extends Action> repoCollection = new GitHubPRRepositoryFactory().createFor(job);
         Assert.assertTrue(repoCollection instanceof List);
         Assert.assertTrue(repoCollection.isEmpty());
+      }
     }
 
     @Test
     public void shouldNotCreateRepoForTriggerWithExc() throws Exception {
 //        when(job.getTrigger(GitHubPRTrigger.class)).thenReturn(trigger);
-        PowerMockito.mockStatic(JobHelper.class);
-        given(ghPRTriggerFromJob(job))
-                .willReturn(trigger);
+      try (MockedStatic<JobHelper> mockedStatic = mockStatic(JobHelper.class)) {
+        mockedStatic.when(() -> JobHelper.ghPRTriggerFromJob(job)).thenReturn(trigger);
 
         when(parent.getFullName()).thenReturn("mocked job");
 //        when(job.getParent()).thenReturn(parent);
         when(trigger.getRepoFullName(job)).thenThrow(new RuntimeException());
 
         assertThat(new GitHubPRRepositoryFactory().createFor(job), hasSize(0));
+      }
     }
 
     private void createForCommonTest(String filePath) throws IOException, NoSuchFieldException, IllegalAccessException {
-        PowerMockito.mockStatic(GitHubPRTrigger.DescriptorImpl.class);
-        given(GitHubPRTrigger.DescriptorImpl.get())
-                .willReturn(descriptor);
+      try (MockedStatic<GitHubPRTrigger.DescriptorImpl> staticGitHubPRTriggerDescriptor = mockStatic(GitHubPRTrigger.DescriptorImpl.class);
+             MockedStatic<JobHelper> staticJobHelper = mockStatic(JobHelper.class)) {
+        staticGitHubPRTriggerDescriptor.when(GitHubPRTrigger.DescriptorImpl::get).thenReturn(descriptor);
+
         when(descriptor.isActualiseOnFactory()).thenReturn(false);
 
-        createForCommonExpectations(filePath, job, trigger);
+        createForCommonExpectations(filePath, job, trigger, staticJobHelper);
 
         when(trigger.getRemoteRepository()).thenReturn(ghRepository);
 
@@ -113,6 +109,7 @@ public class GitHubPRRepositoryFactoryTest {
 
         Assert.assertEquals(job, trigger.getJob());
         Assert.assertEquals(new File(filePath), configFile.getFile().getParentFile());
+      }
     }
 
     @CheckForNull
@@ -130,8 +127,8 @@ public class GitHubPRRepositoryFactoryTest {
      * @param job     mock job.
      * @param trigger mock trigger that is expected to be returned via job.getTrigger(GitHubPRTrigger.class).
      */
-    public static void createForCommonExpectations(AbstractProject<?, ?> job, GitHubPRTrigger trigger) {
-        createForCommonExpectations(CONFIG_PATH, job, trigger);
+    public static void createForCommonExpectations(Job job, GitHubPRTrigger trigger, MockedStatic<JobHelper> staticJobHelper) {
+        createForCommonExpectations(CONFIG_PATH, job, trigger, staticJobHelper);
     }
 
     /**
@@ -143,18 +140,17 @@ public class GitHubPRRepositoryFactoryTest {
      */
     public static void createForCommonExpectations(String filePath,
                                                    Job job,
-                                                   GitHubPRTrigger trigger) {
-        GithubUrl githubUrl = PowerMockito.mock(GithubUrl.class);
+                                                   GitHubPRTrigger trigger,
+                                                   MockedStatic<JobHelper> staticJobHelper) {
+        GithubUrl githubUrl = mock(GithubUrl.class);
         when(githubUrl.toString()).thenReturn("http://blaur");
-        GithubProjectProperty projectProperty = PowerMockito.mock(GithubProjectProperty.class);
+        GithubProjectProperty projectProperty = mock(GithubProjectProperty.class);
 
         File file = new File(filePath);
         when(job.getRootDir()).thenReturn(file);
         when(job.getFullName()).thenReturn("jobFullName");
 
-        PowerMockito.mockStatic(JobHelper.class);
-        given(ghPRTriggerFromJob(job))
-                .willReturn(trigger);
+        staticJobHelper.when(() -> JobHelper.ghPRTriggerFromJob(job)).thenReturn(trigger);
         when(trigger.getJob()).thenReturn(job);
 
         when(trigger.getRepoFullName(job)).thenReturn(mock(GitHubRepositoryName.class));

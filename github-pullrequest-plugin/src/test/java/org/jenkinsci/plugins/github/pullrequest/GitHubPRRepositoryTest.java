@@ -1,12 +1,10 @@
 package org.jenkinsci.plugins.github.pullrequest;
 
-import com.coravy.hudson.plugins.github.GithubProjectProperty;
-import com.coravy.hudson.plugins.github.GithubUrl;
 import hudson.BulkChange;
 import hudson.Functions;
-import hudson.model.AbstractProject;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
+import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.User;
@@ -14,6 +12,7 @@ import hudson.security.Permission;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
 import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.github.pullrequest.utils.JobHelper;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -21,13 +20,11 @@ import org.junit.runner.RunWith;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.StaplerRequest;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.OngoingStubbing;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
@@ -38,9 +35,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isNotNull;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,9 +45,7 @@ import static org.mockito.Mockito.when;
  * Unit tests for GitHubPRRepository.
  */
 @Ignore(value = "Mock issues")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({GithubProjectProperty.class, GithubUrl.class, BulkChange.class,
-        Functions.class, Jenkins.class, User.class, GHRepository.class})
+@RunWith(MockitoJUnitRunner.class)
 public class GitHubPRRepositoryTest {
     private static final int PR_REBUILD_ID = 1;
 
@@ -61,7 +55,7 @@ public class GitHubPRRepositoryTest {
     @Mock
     private ItemGroup<Item> itemGroup;
     @Mock
-    private AbstractProject job;
+    private Job job;
     @Mock
     private GitHubPRTrigger trigger;
     @Mock
@@ -87,7 +81,8 @@ public class GitHubPRRepositoryTest {
 
     @Test
     public void getAllPrBuildsWithCause() {
-        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
+      try (MockedStatic<JobHelper> staticJobHelper = mockStatic(JobHelper.class)) {
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger, staticJobHelper);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
 
         GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
@@ -97,11 +92,13 @@ public class GitHubPRRepositoryTest {
         verify(iterator, times(BUILD_MAP_SIZE)).next();
 
         Assert.assertEquals(0, prBuilds.size());
+      }
     }
 
     @Test
     public void getAllPrBuildsNullCause() {
-        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
+      try (MockedStatic<JobHelper> staticJobHelper = mockStatic(JobHelper.class)) {
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger, staticJobHelper);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
 
         when(run.getCause(GitHubPRCause.class)).thenReturn(null);
@@ -110,63 +107,83 @@ public class GitHubPRRepositoryTest {
         Map<Integer, List<Run<?, ?>>> prBuilds = repo.getAllPrBuilds();
 
         Assert.assertEquals(0, prBuilds.size());
+      }
     }
 
     @Test
     public void doClearRepoPullsDeleted() throws IOException {
-        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
-        hasPermissionExpectation(Item.DELETE, true);
+      try (MockedStatic<JobHelper> staticJobHelper = mockStatic(JobHelper.class);
+           MockedStatic<Jenkins> mockedJenkins = mockStatic(Jenkins.class);
+           MockedStatic<User> mockedUser = mockStatic(User.class);
+           MockedStatic<BulkChange> staticBulkChange = mockStatic(BulkChange.class)) {
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger, staticJobHelper);
+        hasPermissionExpectation(Item.DELETE, true, mockedJenkins, mockedUser);
 
         GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
 
-        PowerMockito.mockStatic(BulkChange.class);
-        when(BulkChange.contains(repo)).thenReturn(true);
+        staticBulkChange.when(() -> BulkChange.contains(repo)).thenReturn(true);
 
         assertThat(repo.doClearRepo().kind, equalTo(FormValidation.Kind.OK));
         assertThat(repo.getPulls().keySet(), hasSize(0));
+      }
     }
 
     @Test
     public void doClearRepoWithException() throws IOException {
-        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
-        hasPermissionExpectation(Item.DELETE, true);
+      try (MockedStatic<JobHelper> staticJobHelper = mockStatic(JobHelper.class);
+           MockedStatic<Jenkins> mockedJenkins = mockStatic(Jenkins.class);
+           MockedStatic<User> mockedUser = mockStatic(User.class);
+           MockedStatic<BulkChange> staticBulkChange = mockStatic(BulkChange.class)) {
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger, staticJobHelper);
+        hasPermissionExpectation(Item.DELETE, true, mockedJenkins, mockedUser);
 
         GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
 
-        PowerMockito.mockStatic(BulkChange.class);
-        when(BulkChange.contains(repo)).thenThrow(new RuntimeException("bad save() for test"));
+        staticBulkChange.when(() -> BulkChange.contains(repo)).thenThrow(new RuntimeException("bad save() for test"));
 
         assertThat(repo.doClearRepo().kind, equalTo(FormValidation.Kind.ERROR));
         assertThat(repo.getPulls().keySet(), hasSize(0));
+      }
     }
 
     @Test
     public void doClearRepoForbidden() throws IOException {
-        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
-        hasPermissionExpectation(Item.DELETE, false);
+      try (MockedStatic<JobHelper> staticJobHelper = mockStatic(JobHelper.class);
+           MockedStatic<Jenkins> mockedJenkins = mockStatic(Jenkins.class);
+           MockedStatic<User> mockedUser = mockStatic(User.class)) {
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger, staticJobHelper);
+        hasPermissionExpectation(Item.DELETE, false, mockedJenkins, mockedUser);
 
         GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
 
         assertThat(repo.doClearRepo().kind, equalTo(FormValidation.Kind.ERROR));
         assertThat(repo.getPulls().keySet(), hasSize(greaterThan(0)));
+      }
     }
 
     @Test
     public void doRebuildFailedNoRebuildNeeded() throws IOException {
-        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
-        hasPermissionExpectation(Item.BUILD, true);
+      try (MockedStatic<JobHelper> staticJobHelper = mockStatic(JobHelper.class);
+           MockedStatic<Jenkins> mockedJenkins = mockStatic(Jenkins.class);
+           MockedStatic<User> mockedUser = mockStatic(User.class)) {
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger, staticJobHelper);
+        hasPermissionExpectation(Item.BUILD, true, mockedJenkins, mockedUser);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
 
         GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
         FormValidation formValidation = repo.doRebuildAllFailed();
 
         Assert.assertEquals(FormValidation.Kind.OK, formValidation.kind);
+      }
     }
 
     @Test
     public void doRebuildFailedWithRebuildPerformed() throws IOException {
-        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
-        hasPermissionExpectation(Item.BUILD, true);
+      try (MockedStatic<JobHelper> staticJobHelper = mockStatic(JobHelper.class);
+           MockedStatic<Jenkins> mockedJenkins = mockStatic(Jenkins.class);
+           MockedStatic<User> mockedUser = mockStatic(User.class)) {
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger, staticJobHelper);
+        hasPermissionExpectation(Item.BUILD, true, mockedJenkins, mockedUser);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
         getAllPrBuildsNonNullCauseExpectations(BUILD_MAP_SIZE);
 
@@ -178,12 +195,16 @@ public class GitHubPRRepositoryTest {
         FormValidation formValidation = repo.doRebuildAllFailed();
 
         Assert.assertEquals(FormValidation.Kind.OK, formValidation.kind);
+      }
     }
 
     @Test
     public void doRebuildFailedWithException() throws IOException {
-        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
-        hasPermissionExpectation(Item.BUILD, true);
+      try (MockedStatic<JobHelper> staticJobHelper = mockStatic(JobHelper.class);
+           MockedStatic<Jenkins> mockedJenkins = mockStatic(Jenkins.class);
+           MockedStatic<User> mockedUser = mockStatic(User.class)) {
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger, staticJobHelper);
+        hasPermissionExpectation(Item.BUILD, true, mockedJenkins, mockedUser);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
         getAllPrBuildsNonNullCauseExpectations(BUILD_MAP_SIZE);
 
@@ -193,25 +214,33 @@ public class GitHubPRRepositoryTest {
         FormValidation formValidation = repo.doRebuildAllFailed();
 
         Assert.assertEquals(FormValidation.Kind.ERROR, formValidation.kind);
+      }
     }
 
     @Test
     public void doRebuildFailedForbidden() throws IOException {
-        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
-        hasPermissionExpectation(Item.BUILD, false);
+      try (MockedStatic<JobHelper> staticJobHelper = mockStatic(JobHelper.class);
+           MockedStatic<Jenkins> mockedJenkins = mockStatic(Jenkins.class);
+           MockedStatic<User> mockedUser = mockStatic(User.class)) {
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger, staticJobHelper);
+        hasPermissionExpectation(Item.BUILD, false, mockedJenkins, mockedUser);
 
         GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
         FormValidation formValidation = repo.doRebuildAllFailed();
 
         Assert.assertEquals(FormValidation.Kind.ERROR, formValidation.kind);
+      }
     }
 
     // FIXME: 1/7/16
     @Ignore
     @Test
     public void doRebuildWithRebuildPerformed() throws IOException {
-        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
-        doRebuildCommonExpectations(true, true);
+      try (MockedStatic<JobHelper> staticJobHelper = mockStatic(JobHelper.class);
+           MockedStatic<Jenkins> mockedJenkins = mockStatic(Jenkins.class);
+           MockedStatic<User> mockedUser = mockStatic(User.class)) {
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger, staticJobHelper);
+        doRebuildCommonExpectations(true, true, mockedJenkins, mockedUser);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
         getAllPrBuildsNonNullCauseExpectations(BUILD_MAP_SIZE);
 
@@ -223,12 +252,16 @@ public class GitHubPRRepositoryTest {
         FormValidation formValidation = repo.doRebuild(request);
 
         Assert.assertEquals(FormValidation.Kind.OK, formValidation.kind);
+      }
     }
 
     @Test
     public void doRebuildWarnNotScheduled() throws IOException {
-        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
-        doRebuildCommonExpectations(false, true);
+      try (MockedStatic<JobHelper> staticJobHelper = mockStatic(JobHelper.class);
+           MockedStatic<Jenkins> mockedJenkins = mockStatic(Jenkins.class);
+           MockedStatic<User> mockedUser = mockStatic(User.class)) {
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger, staticJobHelper);
+        doRebuildCommonExpectations(false, true, mockedJenkins, mockedUser);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
         getAllPrBuildsNonNullCauseExpectations(BUILD_MAP_SIZE);
 
@@ -238,12 +271,16 @@ public class GitHubPRRepositoryTest {
         FormValidation formValidation = repo.doRebuild(request);
 
         Assert.assertEquals(FormValidation.Kind.WARNING, formValidation.kind);
+      }
     }
 
     @Test
     public void doRebuildWarnNotFound() throws IOException {
-        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
-        doRebuildCommonExpectations(true, true);
+      try (MockedStatic<JobHelper> staticJobHelper = mockStatic(JobHelper.class);
+           MockedStatic<Jenkins> mockedJenkins = mockStatic(Jenkins.class);
+           MockedStatic<User> mockedUser = mockStatic(User.class)) {
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger, staticJobHelper);
+        doRebuildCommonExpectations(true, true, mockedJenkins, mockedUser);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
         getAllPrBuildsNonNullCauseExpectations(0);
 
@@ -253,12 +290,16 @@ public class GitHubPRRepositoryTest {
         FormValidation formValidation = repo.doRebuild(request);
 
         Assert.assertEquals(FormValidation.Kind.WARNING, formValidation.kind);
+      }
     }
 
     @Test
     public void doRebuildWithException() throws IOException {
-        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
-        doRebuildCommonExpectations(true, true);
+      try (MockedStatic<JobHelper> staticJobHelper = mockStatic(JobHelper.class);
+           MockedStatic<Jenkins> mockedJenkins = mockStatic(Jenkins.class);
+           MockedStatic<User> mockedUser = mockStatic(User.class)) {
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger, staticJobHelper);
+        doRebuildCommonExpectations(true, true, mockedJenkins, mockedUser);
         getAllPrBuildsCommonExpectations(BUILD_MAP_SIZE);
         getAllPrBuildsNonNullCauseExpectations(BUILD_MAP_SIZE);
 
@@ -268,28 +309,33 @@ public class GitHubPRRepositoryTest {
         FormValidation formValidation = repo.doRebuild(request);
 
         Assert.assertEquals(FormValidation.Kind.ERROR, formValidation.kind);
+      }
     }
 
     @Test
     public void doRebuildForbidden() throws IOException {
-        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger);
-        doRebuildCommonExpectations(true, false);
+      try (MockedStatic<JobHelper> staticJobHelper = mockStatic(JobHelper.class);
+           MockedStatic<Jenkins> mockedJenkins = mockStatic(Jenkins.class);
+           MockedStatic<User> mockedUser = mockStatic(User.class)) {
+        GitHubPRRepositoryFactoryTest.createForCommonExpectations(job, trigger, staticJobHelper);
+        doRebuildCommonExpectations(true, false, mockedJenkins, mockedUser);
 
         GitHubPRRepository repo = GitHubPRRepositoryFactoryTest.getRepo(factory.createFor(job));
         FormValidation formValidation = repo.doRebuild(request);
 
         Assert.assertEquals(FormValidation.Kind.ERROR, formValidation.kind);
+      }
     }
 
     //to increase method coverage rate
     @Test
     public void checkGetters() throws IOException {
+      try (MockedStatic<Functions> mockedFunctions = mockStatic(Functions.class)) {
         String fullName = "fullName";
         URL url = new URL("https://github.com/user/repo/");
         String prefix = "prefix";
 
-        PowerMockito.mockStatic(Functions.class);
-        when(Functions.getResourcePath()).thenReturn(prefix);
+        mockedFunctions.when(Functions::getResourcePath).thenReturn(prefix);
         when(ghRepository.getFullName()).thenReturn("user/repo");
         when(ghRepository.getHtmlUrl()).thenReturn(url);
 
@@ -299,22 +345,21 @@ public class GitHubPRRepositoryTest {
         Assert.assertEquals(url, repo.getGithubUrl());
         Assert.assertEquals("github-pullrequest", repo.getUrlName());
         Assert.assertEquals(prefix + "/plugin/github-pullrequest/git-pull-request.svg", repo.getIconFileName());
+      }
     }
 
-    private void doRebuildCommonExpectations(boolean hasParameter, boolean isAllowed) {
-        hasPermissionExpectation(Item.BUILD, isAllowed);
+    private void doRebuildCommonExpectations(boolean hasParameter, boolean isAllowed, MockedStatic<Jenkins> mockedJenkins, MockedStatic<User> mockedUser) {
+        hasPermissionExpectation(Item.BUILD, isAllowed, mockedJenkins, mockedUser);
         when(request.hasParameter(anyString())).thenReturn(hasParameter);
         if (hasParameter) {
             when(request.getParameter(anyString())).thenReturn(Integer.toString(PR_REBUILD_ID));
         }
     }
 
-    private void hasPermissionExpectation(Permission permission, boolean isAllowed) {
-        PowerMockito.mockStatic(Jenkins.class);
-        when(Jenkins.getInstance()).thenReturn(instance);
+    private void hasPermissionExpectation(Permission permission, boolean isAllowed, MockedStatic<Jenkins> mockedJenkins, MockedStatic<User> mockedUser) {
+        mockedJenkins.when(Jenkins::getInstance).thenReturn(instance);
         when(instance.hasPermission(permission)).thenReturn(isAllowed);
-        PowerMockito.mockStatic(User.class);
-        when(User.current()).thenReturn(user);
+        mockedUser.when(User::current).thenReturn(user);
     }
 
     private void getAllPrBuildsCommonExpectations(int size) {
