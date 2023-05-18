@@ -32,7 +32,7 @@
     </modules>
 
     <properties>
-        <revision>0.5.1</revision>
+        <revision>0.6.1</revision>
         <changelist>-SNAPSHOT</changelist>
         <jenkins.version>2.361.4</jenkins.version>
     </properties>
