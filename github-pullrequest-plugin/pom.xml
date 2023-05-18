@@ -40,8 +40,6 @@
     </scm>
 
     <properties>
-        <mockito.version>3.12.4</mockito.version>
-        <powermock.version>2.0.9</powermock.version>
         <excluded.tests>**/its/*.java</excluded.tests>
         <access-modifier-checker.skip>true</access-modifier-checker.skip>
         <spotbugs.skip>true</spotbugs.skip>
@@ -65,8 +63,8 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.346.x</artifactId>
-                <version>1763.v092b_8980a_f5e</version>
+                <artifactId>bom-2.361.x</artifactId>
+                <version>2081.v85885a_d2e5c5</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -238,27 +236,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-core</artifactId>
-            <version>${powermock.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-            <version>${powermock.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito2</artifactId>
-            <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
 
