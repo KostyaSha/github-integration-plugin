@@ -13,6 +13,10 @@ Provides `GitHub Pull Request` and `GitHub Branch` triggers
 
 link:/docs[docs subdirectory]
 
+== Version history
+
+Please refer to link:/CHANGELOG.md[the changelog].
+
 == Disclaimer
 
 * Backward compatibility may be broken in any time. (But wasn't in the last year and kept when it possible)
