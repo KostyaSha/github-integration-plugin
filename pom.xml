@@ -15,7 +15,7 @@
 
     <name>GitHub Integration Parent</name>
     <description>GitHub Integration Parent Module</description>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/GitHub+Integration+Plugin</url>
+    <url>https://github.com/jenkinsci/github-integration-plugin</url>
 
     <developers>
         <developer>
