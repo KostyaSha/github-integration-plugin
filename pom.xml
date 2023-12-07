@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>github-integration-parent</artifactId>
-    <version>0.6.1</version>
+    <version>${revision}${changelist}</version>
     <packaging>pom</packaging>
 
     <name>GitHub Integration Parent</name>
@@ -32,7 +32,7 @@
     </modules>
 
     <properties>
-        <revision>0.6.1</revision>
+        <revision>0.6.2</revision>
         <changelist>-SNAPSHOT</changelist>
         <jenkins.version>2.361.4</jenkins.version>
     </properties>
