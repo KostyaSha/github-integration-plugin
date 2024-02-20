@@ -2,6 +2,15 @@
 
 ## Next 
 
+## 0.7.0
+- Forward compatibility with Guice 7
+
+## 0.6.2
+- Update plugin-pom to 4.75
+- Add missing `application/x-www-form-urlencoded` header
+- Use GitHub readme as documentation entry point
+- Replace Prototype.js with native JavaScript
+
 ## 0.5.0
 - #376 Updated dependencies
 
