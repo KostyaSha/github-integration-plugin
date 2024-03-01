@@ -15,7 +15,7 @@
 
     <name>GitHub Integration Plugin</name>
     <description>GitHub Integration Plugin for Jenkins</description>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/GitHub+Integration+Plugin</url>
+    <url>https://github.com/jenkinsci/github-integration-plugin</url>
     <licenses>
         <license>
             <name>MIT License</name>
