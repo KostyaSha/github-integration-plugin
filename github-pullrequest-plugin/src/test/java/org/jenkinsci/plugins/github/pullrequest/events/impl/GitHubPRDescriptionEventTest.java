@@ -110,7 +110,6 @@ public class GitHubPRDescriptionEventTest {
                         .build()
                 );
 
-        assertNotNull(cause);
         assertThat(cause, nullValue());
     }
 
