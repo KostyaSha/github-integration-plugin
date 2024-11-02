@@ -74,7 +74,7 @@ public class GitHubPRDescriptionEventTest {
     }
 
     @Test
-    public void skipDescriptionNotExist() throws IOException {
+    public void skipDescriptionExistNotMatch() throws IOException {
         commonExpectations();
         causeCreationExpectations();
 
@@ -83,6 +83,26 @@ public class GitHubPRDescriptionEventTest {
         when(remotePr.getBody()).thenReturn("unmatched comment");
 
         GitHubPRCause cause = new GitHubPRDescriptionEvent(".*skip ci.*")
+                .check(newGitHubPRDecisionContext()
+                        .withPrTrigger(trigger)
+                        .withRemotePR(remotePr)
+                        .withListener(listener)
+                        .build()
+                );
+
+        assertThat(cause, nullValue());
+    }
+
+    @Test
+    public void skipDescriptionNotExist() throws IOException {
+        commonExpectations();
+        causeCreationExpectations();
+
+        when(listener.getLogger()).thenReturn(logger);
+
+        when(remotePr.getBody()).thenReturn(null);
+
+        GitHubPRCause cause = new GitHubPRDescriptionEvent(".*[skip ci].*")
                 .check(newGitHubPRDecisionContext()
                         .withPrTrigger(trigger)
                         .withRemotePR(remotePr)

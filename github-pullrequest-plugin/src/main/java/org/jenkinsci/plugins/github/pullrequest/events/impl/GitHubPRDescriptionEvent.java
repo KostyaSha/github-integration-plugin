@@ -55,7 +55,7 @@ public class GitHubPRDescriptionEvent extends GitHubPREvent {
 
         GitHubPRCause cause = null;
 
-        String pullRequestBody = remotePR.getBody().trim();
+        String pullRequestBody = remotePR.getBody() != null ? remotePR.getBody().trim() : "";
         LOG.debug("Job: '{}', trigger event: '{}', body for test: '{}'",
                 fullName,
                 DISPLAY_NAME,
