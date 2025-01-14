@@ -73,7 +73,7 @@ public class GitHubPRPullRequest {
         GHCommitPointer prHead = pr.getHead();
         headSha = prHead.getSha();
         headRef = prHead.getRef();
-        sourceRepoOwner = prHead.getRepository().getOwnerName();
+        sourceRepoOwner = prHead.getRepository() == null ? null : prHead.getRepository().getOwnerName();
 
         title = pr.getTitle();
         baseRef = pr.getBase().getRef();
