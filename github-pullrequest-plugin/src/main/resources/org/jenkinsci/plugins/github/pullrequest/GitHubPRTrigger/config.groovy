@@ -22,7 +22,8 @@ f.block {
 
         f.entry(title: _("Crontab line"), field: "spec", help: "/descriptor/${TimerTrigger.getClass().getName()}/help/spec") {
             f.textbox(default: "H/5 * * * *",
-                    checkUrl: "'descriptorByName/hudson.triggers.TimerTrigger/checkSpec?value=' + encodeURIComponent(this.value)")
+                    checkUrl: "descriptorByName/hudson.triggers.TimerTrigger/checkSpec",
+                    checkDependsOn: "")
         }
 
         f.entry(title: "Set status before build", field: "preStatus") {
