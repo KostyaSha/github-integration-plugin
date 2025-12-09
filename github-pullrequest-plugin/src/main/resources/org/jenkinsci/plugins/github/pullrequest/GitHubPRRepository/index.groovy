@@ -38,8 +38,10 @@ l.layout(title: "GitHub Pull Request Status") {
         div(style: "display: inline-block") {
             if (h.hasPermission(my.job, Item.BUILD)) {
                 def runTrigger = "runTrigger";
-                form(method: "post", action: "runTrigger", onsubmit: "return callFeature(this, ${runTrigger})",
-                        style: "float: right; margin-right: 100px") {
+                form(method: "post", action: "runTrigger", style: "float: right; margin-right: 100px",
+                        class: "callFeature no-json",
+                        'data-answerPlaceId': runTrigger,
+                        'data-parameters': "{}") {
                     f.submit(value: _("Run GH PR Trigger"))
                     div(id: runTrigger)
                 }
@@ -68,8 +70,10 @@ l.layout(title: "GitHub Pull Request Status") {
                                 // build local PR button
                                 def buildResultId = "buildResult" + pr.number;
                                 form(method: "post", action: "build",
-                                        onsubmit: "return callFeature(this, ${buildResultId}, {'prNumber' : '${pr.number}' })",
-                                        style: "float: left; ") {
+                                        style: "float: left; ",
+                                        class: "callFeature no-json",
+                                        'data-answerPlaceId': buildResultId,
+                                        'data-parameters': """{"prNumber" : "${pr.number}" }""") {
                                     f.submit(value: _("Build"))
                                     div(id: buildResultId) // some text from responce
                                 }
@@ -78,8 +82,10 @@ l.layout(title: "GitHub Pull Request Status") {
                                 if (builds != null && !builds.isEmpty()) {
                                     def rebuildId = "rebuildResult" + pr.number;
                                     form(method: "post", action: "rebuild",
-                                            onsubmit: "return callFeature(this, ${rebuildId}, {'prNumber' : ${pr.number} })",
-                                            style: "float: right; margin-right: 100px") {
+                                            style: "float: right; margin-right: 100px",
+                                            class: "callFeature no-json",
+                                            'data-answerPlaceId': rebuildId,
+                                            'data-parameters': """{"prNumber" : "${pr.number}" }""") {
                                         f.submit(value: _("Rebuild last build"))
                                         div(id: rebuildId)
                                     }
@@ -97,8 +103,10 @@ l.layout(title: "GitHub Pull Request Status") {
                 form(method: "post",
                         name: "rebuildAllFailed",
                         action: "rebuildAllFailed",
-                        onsubmit: "return callFeature(this, ${rebuildAllFailedId})",
-                        style: "float: right; margin-right: 100px") {
+                        style: "float: right; margin-right: 100px",
+                        class: "callFeature no-json",
+                        'data-answerPlaceId': rebuildAllFailedId,
+                        'data-parameters': "{}") {
                     f.submit(value: _("Rebuild all failed builds"))
                     div(id: rebuildAllFailedId)
                 }
@@ -106,8 +114,9 @@ l.layout(title: "GitHub Pull Request Status") {
 
             if (h.hasPermission(my.job, Item.DELETE)) {
                 def clearRepoId = "clearRepoResult";
-                form(method: "post", action: "clearRepo", onsubmit: "return callFeature(this, ${clearRepoId})",
-                        style: "float: left") {
+                form(method: "post", action: "clearRepo",
+                        style: "float: left", class: "callFeature no-json",
+                        'data-answerPlaceId': clearRepoId, 'data-parameters': "{}") {
                     f.submit(value: _("Remove all repo data"))
                     div(id: clearRepoId)
                 }
