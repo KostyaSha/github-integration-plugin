@@ -10,6 +10,17 @@ function callFeature(button, answerPlaceId, parameters) {
             answerPlaceId.innerHTML = responseText;
         });
     });
-    return false;
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('form.callFeature').forEach(function (form) {
+        form.onsubmit = (evt) => {
+            evt.preventDefault();
+            let parameters = JSON.parse(form.dataset.parameters);
+            let answerPlaceId = form.dataset.answerPlaceId;
+            let self = form;
+
+            callFeature(self, answerPlaceId, parameters);
+        };
+    });
+});

@@ -48,8 +48,11 @@ l.layout(title: "GitHub Branch Status") {
         div(style: "display: inline-block") {
             if (h.hasPermission(my.job, Item.BUILD)) {
                 def runTrigger = "runTrigger";
-                form(method: "post", action: "runTrigger", onsubmit: "return callFeature(this, ${runTrigger})",
-                        style: "float: right; margin-right: 100px") {
+                form(method: "post", action: "runTrigger",
+                        style: "float: right; margin-right: 100px",
+                        class: "callFeature no-json",
+                        'data-answerPlaceId': runTrigger,
+                        'data-parameters': "{}") {
                     f.submit(value: _("Run Branch Trigger"))
                     div(id: runTrigger)
                 }
@@ -78,8 +81,10 @@ l.layout(title: "GitHub Branch Status") {
                             // escape anything that isn't alphanumeric
                             def escapedBuild = escapeEcmaScript(branch.name);
                             form(method: "post", action: "build",
-                                    onsubmit: "return callFeature(this, ${buildResultId}, {'branchName' : '${escapedBuild}' })",
-                                    style: "float:left") {
+                                    style: "float:left",
+                                    class: "callFeature no-json",
+                                    'data-answerPlaceId': buildResultId,
+                                    'data-parameters': """{"branchName": "${escapedBuild}" }""") {
                                 f.submit(value: _("Build"))
                                 div(id: buildResultId) // some text from response
                             }
@@ -91,8 +96,10 @@ l.layout(title: "GitHub Branch Status") {
                                 def escapedRebuild = escapeEcmaScript(branch.name);
                                 form(method: "post",
                                         action: "rebuild",
-                                        onsubmit: "return callFeature(this, ${rebuildResultId}, {'branchName' : '${escapedRebuild}' })",
-                                        style: "float: left; margin-right: 100px") {
+                                        style: "float: left; margin-right: 100px",
+                                        class: "callFeature no-json",
+                                        'data-answerPlaceId': rebuildResultId,
+                                        'data-parameters': """{"branchName": "${escapedRebuild}" }""") {
                                     f.submit(value: _("Rebuild last branch build"))
                                     div(id: rebuildResultId) // some text from response
                                 }
@@ -109,8 +116,10 @@ l.layout(title: "GitHub Branch Status") {
                 form(method: "post",
                         name: "rebuildAllFailed",
                         action: "rebuildAllFailed",
-                        onsubmit: "return callFeature(this, ${rebuildAllFailedId})",
-                        style: "float: right; margin-right: 100px") {
+                        style: "float: right; margin-right: 100px",
+                        class: "callFeature no-json",
+                        'data-answerPlaceId': rebuildAllFailedId,
+                        'data-parameters': "{}") {
                     f.submit(value: _("Rebuild all failed builds"))
                     div(id: rebuildAllFailedId)
                 }
@@ -118,8 +127,11 @@ l.layout(title: "GitHub Branch Status") {
 
             if (h.hasPermission(my.job, Item.DELETE)) {
                 def clearRepoId = "clearRepoResult";
-                form(method: "post", action: "clearRepo", onsubmit: "return  callFeature(this, ${clearRepoId})",
-                        style: "float: left") {
+                form(method: "post", action: "clearRepo",
+                        style: "float: left",
+                        class: "callFeature no-json",
+                        'data-answerPlaceId': clearRepoId,
+                        'data-parameters': "{}") {
                     f.submit(value: _("Remove all repo data"))
                     div(id: clearRepoId)
                 }
