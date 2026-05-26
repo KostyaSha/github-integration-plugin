@@ -115,7 +115,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
 
 
     @Override
-    public void actualiseOnChange(@NonNull GHRepository ghRepository, @NonNull TaskListener listener) {
+    protected void actualiseOnChange(@NonNull GHRepository ghRepository, @NonNull TaskListener listener) {
         if (changed) {
             listener.getLogger().println("Local settings changed, removing PRs in repository!");
             getPulls().clear();
@@ -123,6 +123,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
     }
 
     @RequirePOST
+    @Override
     public FormValidation doClearRepo() throws IOException {
         FormValidation result;
         try {
@@ -145,6 +146,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
      * Run trigger from web.
      */
     @RequirePOST
+    @Override
     public FormValidation doRunTrigger() {
         FormValidation result;
         try {
@@ -170,6 +172,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
     }
 
     @RequirePOST
+    @Override
     public FormValidation doRebuildAllFailed() throws IOException {
         FormValidation result;
         try {
@@ -192,6 +195,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
         return result;
     }
 
+    @RequirePOST
     @Override
     public FormValidation doBuild(StaplerRequest req) throws IOException {
         FormValidation result;
@@ -231,6 +235,7 @@ public class GitHubPRRepository extends GitHubRepository<GitHubPRRepository> {
     }
 
     @RequirePOST
+    @Override
     public FormValidation doRebuild(StaplerRequest req) throws IOException {
         FormValidation result;
 

@@ -7,6 +7,8 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.StaplerRequest;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.kohsuke.stapler.interceptor.RequirePOST;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
@@ -61,7 +63,7 @@ public class GitHubTagRepository extends GitHubRepository<GitHubTagRepository> {
     }
 
     @Override
-    public void actualiseOnChange(@NonNull GHRepository ghRepository, @NonNull TaskListener listener) {
+    protected void actualiseOnChange(@NonNull GHRepository ghRepository, @NonNull TaskListener listener) {
         if (changed) {
             listener.getLogger().println("Local settings changed, removing tags in repository state!");
             getTags().clear();
@@ -69,26 +71,31 @@ public class GitHubTagRepository extends GitHubRepository<GitHubTagRepository> {
     }
 
     @Override
+    @RequirePOST
     public FormValidation doClearRepo() throws IOException {
         return FormValidation.ok();
     }
 
     @Override
+    @RequirePOST
     public FormValidation doRunTrigger() throws IOException {
         return FormValidation.ok();
     }
 
     @Override
+    @RequirePOST
     public FormValidation doRebuildAllFailed() throws IOException {
         return FormValidation.ok();
     }
 
     @Override
+    @RequirePOST
     public FormValidation doBuild(StaplerRequest req) throws IOException {
         return FormValidation.ok();
     }
 
     @Override
+    @RequirePOST
     public FormValidation doRebuild(StaplerRequest req) throws IOException {
         return FormValidation.ok();
     }
