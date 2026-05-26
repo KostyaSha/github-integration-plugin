@@ -64,7 +64,7 @@ public class GitHubBranchRepository extends GitHubRepository<GitHubBranchReposit
     }
 
     @Override
-    public void actualiseOnChange(@NonNull GHRepository ghRepository, @NonNull TaskListener listener) {
+    protected void actualiseOnChange(@NonNull GHRepository ghRepository, @NonNull TaskListener listener) {
         if (changed) {
             listener.getLogger().println("Local settings changed, removing branches in repository!");
             getBranches().clear();
