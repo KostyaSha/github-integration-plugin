@@ -20,7 +20,7 @@ import java.net.URI;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.jenkinsci.plugins.github.config.GitHubServerConfig.withHost;
 import static org.jenkinsci.plugins.github.util.FluentIterableWrapper.from;
 

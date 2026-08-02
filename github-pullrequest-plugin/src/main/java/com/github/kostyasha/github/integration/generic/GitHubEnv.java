@@ -6,8 +6,8 @@ import hudson.model.StringParameterValue;
 
 import java.util.List;
 
-import static org.apache.commons.lang.StringEscapeUtils.escapeJava;
-import static org.apache.commons.lang.StringUtils.trimToEmpty;
+import static org.apache.commons.text.StringEscapeUtils.escapeJava;
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
 public interface GitHubEnv<T extends GitHubCause<?>> {
 

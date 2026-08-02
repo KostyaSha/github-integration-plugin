@@ -3,7 +3,7 @@ package org.jenkinsci.plugins.github.pullrequest.events.impl;
 import com.github.kostyasha.github.integration.generic.GitHubPRDecisionContext;
 import hudson.Extension;
 import hudson.model.TaskListener;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRCause;
 import org.jenkinsci.plugins.github.pullrequest.GitHubPRPullRequest;
