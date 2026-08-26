@@ -31,7 +31,7 @@ import java.io.PrintStream;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.addComment;
 import static org.jenkinsci.plugins.github.pullrequest.utils.JobHelper.getCommitState;

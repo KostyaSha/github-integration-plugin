@@ -17,7 +17,7 @@ import java.util.List;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.io.FileUtils.readFileToString;
-import static org.apache.commons.lang.StringUtils.abbreviate;
+import static org.apache.commons.lang3.StringUtils.abbreviate;
 
 /**
  * @author Kanstantsin Shautsou
