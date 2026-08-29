@@ -1,4 +1,6 @@
 <div>
     Triggers when a comment matching the pattern is posted in a pull request.<br/>
+    For closed or merged pull requests without local state, only comments updated within the polling interval
+    (or 0 for hook-only triggers) plus 10 seconds are evaluated to avoid reprocessing historic comments.<br/>
     For example <b>Test ([A-Za-z0-9 ,!]+) tags please.</b>
 </div>
