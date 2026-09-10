@@ -101,7 +101,17 @@ public class JobRunnerForCause implements Predicate<GitHubPRCause> {
 
             QueueTaskFuture<?> queueTaskFuture = startJob(cause);
             if (isNull(queueTaskFuture)) {
-                LOGGER.error("{} job didn't start", job.getFullName());
+                // ParameterizedJobMixIn.scheduleBuild2() returned null, which means the job is
+                // not buildable (disabled) or a Queue.QueueDecisionHandler vetoed the schedule.
+                // This is NOT the "identical item already queued" case: Queue.schedule2() returns
+                // the existing item there, so the future is non null and a run does happen.
+                // Here no run will ever exist to publish a final commit status, so the PENDING
+                // pre-status below must not be published. GitHub keeps only the newest status per
+                // context, so an orphan PENDING pins a required check to "pending" forever and
+                // permanently blocks the pull request.
+                LOGGER.error("{} job didn't start, skipping pending status for {}",
+                        job.getFullName(), cause.getHeadSha());
+                return false;
             }
 
             LOGGER.info(sb.toString());

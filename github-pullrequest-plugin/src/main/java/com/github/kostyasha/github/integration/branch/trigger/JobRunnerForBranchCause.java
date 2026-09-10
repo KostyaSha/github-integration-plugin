@@ -65,7 +65,12 @@ public class JobRunnerForBranchCause implements Predicate<GitHubBranchCause> {
 
             QueueTaskFuture<?> queueTaskFuture = startJob(cause);
             if (isNull(queueTaskFuture)) {
-                LOGGER.error("{} job didn't start", job.getFullName());
+                // See JobRunnerForCause: the schedule was refused (job not buildable, or vetoed
+                // by a Queue.QueueDecisionHandler), so no run will ever publish a final commit
+                // status and the PENDING pre-status below would stick on the commit forever.
+                LOGGER.error("{} job didn't start, skipping pending status for {}",
+                        job.getFullName(), cause.getCommitSha());
+                return false;
             }
 
             LOGGER.info(sb.toString());
